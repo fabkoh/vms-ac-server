@@ -1,4 +1,4 @@
-package com.vmsac.vmsacbackend;
+package com.vmsac.vmsacserver;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
