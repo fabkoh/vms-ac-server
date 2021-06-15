@@ -1,5 +1,5 @@
 CREATE TABLE Person (
-    personId   BIGINT      NOT NULL AUTO_INCREMENT,
+    personId BIGINT NOT NULL AUTO_INCREMENT,
     firstName VARCHAR(128) NOT NULL,
     lastName VARCHAR(128) NOT NULL,
     lastFourDigitsOfId VARCHAR(128) NOT NULL,
