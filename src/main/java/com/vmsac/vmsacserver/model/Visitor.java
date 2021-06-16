@@ -9,13 +9,13 @@ import javax.persistence.*;
 @AllArgsConstructor
 @Entity
 @Data
-@Table(name="Person")
-public class Person {
+@Table(name="Visitor")
+public class Visitor {
 
     @Id
     @GeneratedValue
-    @Column(name="personid")
-    private Long personId;
+    @Column(name="visitorid")
+    private Long visitorId;
     @Column(name="firstname")
     private String firstName;
     @Column(name="lastname")

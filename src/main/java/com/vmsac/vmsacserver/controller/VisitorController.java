@@ -1,7 +1,7 @@
 package com.vmsac.vmsacserver.controller;
 
-import com.vmsac.vmsacserver.model.Person;
-import com.vmsac.vmsacserver.repository.PersonRepository;
+import com.vmsac.vmsacserver.model.Visitor;
+import com.vmsac.vmsacserver.repository.VisitorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -11,13 +11,13 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api")
-public class PersonController {
+public class VisitorController {
 
     @Autowired
-    private PersonRepository personRepository;
+    private VisitorRepository visitorRepository;
 
-    @GetMapping("/persons")
-    List<Person> getPersons(){
-        return personRepository.findAll();
+    @GetMapping("/visitors")
+    List<Visitor> getPersons(){
+        return visitorRepository.findAll();
     }
 }
