@@ -1,0 +1,9 @@
+{
+  "visitorId" : "1",
+  "startDateOfVisit" : "10-Jan-2021",
+  "endDateOfVisit" : "12-Jan-2021",
+  "qrCodeId" : "",
+  "isValid" : true,
+  "isOneTimeUse" : false,
+  "raisedBy" : "123456"
+}
