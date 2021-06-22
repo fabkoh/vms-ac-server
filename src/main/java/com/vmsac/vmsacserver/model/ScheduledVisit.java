@@ -10,25 +10,32 @@ import javax.persistence.*;
 @AllArgsConstructor
 @Entity
 @Data
-@Table(name="ScheduledVisit")
+@Table(name="scheduledvisit")
 public class ScheduledVisit {
 
     @Id
     @GeneratedValue (strategy = GenerationType.IDENTITY)
     @Column(name="scheduledvisitid")
     private Long scheduledVisitId;
-    @Column(name="visitorId")
-    private String visitorId;
+
+    @Column(name="visitorid")
+    private Long visitorId;
+
     @Column(name="startdateofvisit")
-    private String startDateofVisit;
+    private String startDateOfVisit;
+
     @Column(name="enddateofvisit")
-    private String endDateofVisit;
-    @Column(name="qrCodeId")
-    private String qrCodeId;
-    @Column(name="isvalid")
-    private boolean isValid;
-    @Column(name="isonetimeuse")
-    private boolean isOneTimeUse;
-    @Column(name="raisedBy")
-    private String raisedBy;
+    private String endDateOfVisit;
+
+    @Column(name="qrcodeid")
+    private Long qrCodeId;
+
+    @Column(name="valid")
+    private boolean valid;
+
+    @Column(name="onetimeuse")
+    private boolean oneTimeUse;
+
+    @Column(name="raisedby")
+    private Long raisedBy;
 }

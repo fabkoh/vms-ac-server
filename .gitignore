@@ -4,6 +4,9 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+### QR Codes ###
+*.png
+
 ### STS ###
 .apt_generated
 .classpath

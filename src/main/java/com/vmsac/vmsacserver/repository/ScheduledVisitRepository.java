@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface ScheduledVisitRepository extends JpaRepository<ScheduledVisit, Long> {
 
-    List<ScheduledVisit> findByScheduledVisitId(String scheduledVisitId);
+    List<ScheduledVisit> findByScheduledVisitId(Long scheduledVisitId);
 }

@@ -15,28 +15,31 @@ import java.util.Hashtable;
 
 import javax.imageio.ImageIO;
 
-import org.json.simple.JSONObject;
-
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @NoArgsConstructor
-@AllArgsConstructor
 @Data
 @Service
 public class QrCodeGenerator {
-    private ScheduledVisitRepository repository;
-    private String scheduledVisitId = "Test";
-    private String filePath = "Test.png";
-    private int qrSize = 125;
-    private String fileType = "png";
-    private File qrFile = new File(filePath);
 
+    public static void setUpQrParams(ScheduledVisit scheduledVisit) throws IOException, WriterException {
+        String qrCodeText = Long.toString(scheduledVisit.getQrCodeId());
+        String filePath = qrCodeText + ".png";
+        int size = 125;
+        String fileType = "png";
+        File qrFile = new File(filePath);
+        String absFilePath = new File(".").getAbsolutePath();
+        System.out.println(absFilePath);
+        createQRImage(qrFile, qrCodeText, size, fileType);
+
+    }
     private static void createQRImage(File qrFile, String qrCodeText, int size, String fileType) throws WriterException, IOException {
         // Create the ByteMatrix for the QR-Code that encodes the given String
         Hashtable<EncodeHintType, ErrorCorrectionLevel> hintMap = new Hashtable<>();

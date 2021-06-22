@@ -3,7 +3,16 @@
   "startDateOfVisit" : "10-Jan-2021",
   "endDateOfVisit" : "12-Jan-2021",
   "qrCodeId" : "",
-  "isValid" : true,
-  "isOneTimeUse" : false,
-  "raisedBy" : "123456"
+  "valid" : true,
+  "oneTimeUse" : false,
+  "raisedBy" : "123456",
+
+  "visitorId" : "1",
+  "firstName" : "Larry",
+  "lastName" : "Smith",
+  "lastFourDigitsOfId" : "4567A",
+  "mobileNumber" : "58971563",
+  "emailAdd" : "larry.smith@hotmail.com"
 }
+
+

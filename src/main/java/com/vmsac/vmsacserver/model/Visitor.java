@@ -9,7 +9,7 @@ import javax.persistence.*;
 @AllArgsConstructor
 @Entity
 @Data
-@Table(name="Visitor")
+@Table(name="visitor")
 public class Visitor {
 
     @Id
@@ -17,7 +17,7 @@ public class Visitor {
     @Column(name="visitorid")
     private Long visitorId;
     @Column(name="firstname")
-    private String firstName;
+    private boolean firstName;
     @Column(name="lastname")
     private String lastName;
     @Column(name="lastfourdigitsofid")
