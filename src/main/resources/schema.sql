@@ -12,7 +12,7 @@ CREATE TABLE ScheduledVisit (
   visitorId BIGINT,
   startDateOfVisit VARCHAR(128),
   endDateOfVisit VARCHAR(128),
-  qrCodeId BIGINT,
+  qrCodeId VARCHAR(128),
   valid BOOLEAN,
   oneTimeUse BOOLEAN,
   raisedBy BIGINT,

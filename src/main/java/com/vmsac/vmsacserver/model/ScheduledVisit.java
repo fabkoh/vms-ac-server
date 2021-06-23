@@ -28,7 +28,7 @@ public class ScheduledVisit {
     private String endDateOfVisit;
 
     @Column(name="qrcodeid")
-    private Long qrCodeId;
+    private String qrCodeId;
 
     @Column(name="valid")
     private boolean valid;
@@ -38,4 +38,8 @@ public class ScheduledVisit {
 
     @Column(name="raisedby")
     private Long raisedBy;
+
+    @ManyToOne()
+    @JoinColumn(name="visitorid", insertable=false, updatable=false)
+    private Visitor visitor;
 }

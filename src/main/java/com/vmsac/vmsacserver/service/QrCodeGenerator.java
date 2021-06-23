@@ -30,10 +30,10 @@ import org.springframework.stereotype.Service;
 public class QrCodeGenerator {
 
     public static void setUpQrParams(ScheduledVisit scheduledVisit) throws IOException, WriterException {
-        String qrCodeText = Long.toString(scheduledVisit.getQrCodeId());
-        String filePath = "./qrCodes/" + qrCodeText + ".png";
+        String qrCodeText = scheduledVisit.getQrCodeId();
+        String filePath = "./qrCodes/" + qrCodeText + ".jpg";
         int size = 125;
-        String fileType = "png";
+        String fileType = "jpeg";
         File qrFile = new File(filePath);
         String absFilePath = new File(".").getAbsolutePath();
         System.out.println(absFilePath);
