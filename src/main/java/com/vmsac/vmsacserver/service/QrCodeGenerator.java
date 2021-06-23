@@ -31,7 +31,7 @@ public class QrCodeGenerator {
 
     public static void setUpQrParams(ScheduledVisit scheduledVisit) throws IOException, WriterException {
         String qrCodeText = Long.toString(scheduledVisit.getQrCodeId());
-        String filePath = qrCodeText + ".png";
+        String filePath = "./qrCodes/" + qrCodeText + ".png";
         int size = 125;
         String fileType = "png";
         File qrFile = new File(filePath);
