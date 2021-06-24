@@ -4,6 +4,7 @@ import com.google.zxing.WriterException;
 import com.vmsac.vmsacserver.model.ScheduledVisit;
 import com.vmsac.vmsacserver.repository.ScheduledVisitRepository;
 import com.vmsac.vmsacserver.service.QrCodeGenerator;
+import com.vmsac.vmsacserver.service.RetrieveQrId;
 import com.vmsac.vmsacserver.util.HashQRId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,6 +25,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.Path;
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -45,8 +47,7 @@ public class ScheduledVisitController{
     @GetMapping(path = "/qr-code/{id}", produces = MediaType.IMAGE_JPEG_VALUE)
     private ResponseEntity<Resource> getQrImageFromId(@PathVariable("id") String qrCodeId) throws IOException {
         Path absFilePath = Paths.get("./qrCodes/"+ qrCodeId + ".jpg");
-        System.out.println("Ab file path:" + absFilePath);
-        System.out.println("Ab file path:" + absFilePath.toAbsolutePath());
+        //System.out.println("Ab file path:" + absFilePath.toAbsolutePath());
         final ByteArrayResource inputStream = new ByteArrayResource(Files.readAllBytes(absFilePath.toAbsolutePath()));
 
         return ResponseEntity
@@ -56,11 +57,14 @@ public class ScheduledVisitController{
 
     }
 
-    @GetMapping(path = "/qr-code/{lastfourdigit}/{startdateofvisit}", produces = MediaType.IMAGE_JPEG_VALUE)
-    private ResponseEntity<Resource> getQrImageFromOther(@PathVariable("id") String qrCodeId) throws IOException {
+
+    /*@GetMapping(path = "/qr-code/{lastfourdigit}/{startdateofvisit}", produces = MediaType.IMAGE_JPEG_VALUE)
+    private ResponseEntity<Resource> getQrImageFromOther(
+            @PathVariable("lastfourdigit") String lastFourDigitOfId,
+            @PathVariable("startdateofvisit") Date startDateOfVisit) throws IOException {
+        String qrCodeId = (RetrieveQrId.getQrIdFromOther(lastFourDigitOfId, startDateOfVisit));
         Path absFilePath = Paths.get("./qrCodes/"+ qrCodeId + ".jpg");
-        System.out.println("Ab file path:" + absFilePath);
-        System.out.println("Ab file path:" + absFilePath.toAbsolutePath());
+        //System.out.println("Ab file path:" + absFilePath.toAbsolutePath());
         final ByteArrayResource inputStream = new ByteArrayResource(Files.readAllBytes(absFilePath.toAbsolutePath()));
 
         return ResponseEntity
@@ -68,7 +72,7 @@ public class ScheduledVisitController{
                 .contentLength(inputStream.contentLength())
                 .body(inputStream);
 
-    }
+    }*/
 
     @PostMapping(path = "/register-scheduled-visit", consumes = "application/json")
     private ResponseEntity<ScheduledVisit> createScheduledVisit(@Valid @RequestBody ScheduledVisit scheduledVisit) throws URISyntaxException, IOException, WriterException {

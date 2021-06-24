@@ -1,5 +1,6 @@
 package com.vmsac.vmsacserver.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,7 +20,7 @@ public class Visitor {
     private Long visitorId;
 
     @Column(name="firstname")
-    private boolean firstName;
+    private String firstName;
 
     @Column(name="lastname")
     private String lastName;
@@ -33,6 +34,7 @@ public class Visitor {
     @Column(name="emailadd")
     private String emailAdd;
 
-    @OneToMany(mappedBy = "visitor")
+    @OneToMany(mappedBy = "visitor", fetch = FetchType.LAZY)
+    @JsonManagedReference
     private List<ScheduledVisit> visitorScheduledVisits;
 }

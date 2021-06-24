@@ -1,10 +1,12 @@
 package com.vmsac.vmsacserver.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.Date;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,10 +24,10 @@ public class ScheduledVisit {
     private Long visitorId;
 
     @Column(name="startdateofvisit")
-    private String startDateOfVisit;
+    private Date startDateOfVisit;
 
     @Column(name="enddateofvisit")
-    private String endDateOfVisit;
+    private Date endDateOfVisit;
 
     @Column(name="qrcodeid")
     private String qrCodeId;
@@ -41,5 +43,6 @@ public class ScheduledVisit {
 
     @ManyToOne()
     @JoinColumn(name="visitorid", insertable=false, updatable=false)
+    @JsonBackReference
     private Visitor visitor;
 }

@@ -36,7 +36,7 @@ public class QrCodeGenerator {
         String fileType = "jpeg";
         File qrFile = new File(filePath);
         String absFilePath = new File(".").getAbsolutePath();
-        System.out.println(absFilePath);
+        //System.out.println(absFilePath);
         createQRImage(qrFile, qrCodeText, size, fileType);
 
     }
