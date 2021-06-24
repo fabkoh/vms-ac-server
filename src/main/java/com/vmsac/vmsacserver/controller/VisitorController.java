@@ -27,15 +27,19 @@ public class VisitorController {
         return visitorRepository.findAll();
     }
 
-    @GetMapping(path = "/qr-code/{lastfourdigit}")
+    @GetMapping(path = "/visits-by/{lastfourdigit}")
     private ResponseEntity<List> getScheduledVisitByOther(
             @PathVariable("lastfourdigit") String lastFourDigitOfId){
 
-        List<Visitor> scheduledVisits = visitorRepository.findByLastFourDigitsOfId(lastFourDigitOfId);
+        Visitor scheduledVisits;
+        scheduledVisits = visitorRepository.findByLastFourDigitsOfId(lastFourDigitOfId);
+        List<ScheduledVisit> visitsByVisitor;
+        visitsByVisitor = scheduledVisits.getVisitorScheduledVisits();
+
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(scheduledVisits);
+                .body(visitsByVisitor);
     }
 
     @PostMapping(path = "/register-new-visitor", consumes = "application/json")

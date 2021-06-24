@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.Date;
 
 @NoArgsConstructor
@@ -24,10 +25,10 @@ public class ScheduledVisit {
     private Long visitorId;
 
     @Column(name="startdateofvisit")
-    private Date startDateOfVisit;
+    private LocalDate startDateOfVisit;
 
     @Column(name="enddateofvisit")
-    private Date endDateOfVisit;
+    private LocalDate endDateOfVisit;
 
     @Column(name="qrcodeid")
     private String qrCodeId;

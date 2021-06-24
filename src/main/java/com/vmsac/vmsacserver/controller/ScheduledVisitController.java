@@ -25,6 +25,8 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.Path;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 
@@ -35,8 +37,20 @@ public class ScheduledVisitController{
     @Autowired
     private ScheduledVisitRepository scheduledVisitRepository;
 
+    @Autowired
+    private RetrieveQrId retrieveQrId;
+
+    @Autowired
+    private QrCodeGenerator qrCodeGenerator;
+
+    @Autowired
+    private HashQRId hashQRId;
+
     @Value("${dev.qrcode.image.path}")
     String qrFilePath;
+
+    public ScheduledVisitController() {
+    }
 
     @GetMapping(path = "/scheduled-visits")
     List<ScheduledVisit> getScheduledVisits(){
@@ -58,13 +72,20 @@ public class ScheduledVisitController{
     }
 
 
-    /*@GetMapping(path = "/qr-code/{lastfourdigit}/{startdateofvisit}", produces = MediaType.IMAGE_JPEG_VALUE)
+    @GetMapping(path = "/qr-code/user-request/{lastfourdigit}/{startdateofvisit}", produces = MediaType.IMAGE_JPEG_VALUE)
     private ResponseEntity<Resource> getQrImageFromOther(
             @PathVariable("lastfourdigit") String lastFourDigitOfId,
-            @PathVariable("startdateofvisit") Date startDateOfVisit) throws IOException {
-        String qrCodeId = (RetrieveQrId.getQrIdFromOther(lastFourDigitOfId, startDateOfVisit));
+            @PathVariable("startdateofvisit") String startDateOfVisit) throws IOException {
+
+        DateTimeFormatter inputDateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        LocalDate convertStringDateToDate = LocalDate.parse(startDateOfVisit, inputDateFormat);
+
+        String qrCodeId = retrieveQrId.getQrIdFromOther(lastFourDigitOfId, convertStringDateToDate);
+
         Path absFilePath = Paths.get("./qrCodes/"+ qrCodeId + ".jpg");
         //System.out.println("Ab file path:" + absFilePath.toAbsolutePath());
+
         final ByteArrayResource inputStream = new ByteArrayResource(Files.readAllBytes(absFilePath.toAbsolutePath()));
 
         return ResponseEntity
@@ -72,15 +93,15 @@ public class ScheduledVisitController{
                 .contentLength(inputStream.contentLength())
                 .body(inputStream);
 
-    }*/
+    }
 
     @PostMapping(path = "/register-scheduled-visit", consumes = "application/json")
     private ResponseEntity<ScheduledVisit> createScheduledVisit(@Valid @RequestBody ScheduledVisit scheduledVisit) throws URISyntaxException, IOException, WriterException {
         ScheduledVisit registeredVisit = scheduledVisitRepository.save(scheduledVisit);
         String qrCodeId = Long.toString(registeredVisit.getScheduledVisitId());
-        registeredVisit.setQrCodeId(HashQRId.getMd5(qrCodeId));
+        registeredVisit.setQrCodeId(hashQRId.getMd5(qrCodeId));
         scheduledVisitRepository.save(registeredVisit);
-        QrCodeGenerator.setUpQrParams(registeredVisit);
+        qrCodeGenerator.setUpQrParams(registeredVisit);
         return ResponseEntity.created(new URI("/api/register-scheduled-visit" + registeredVisit.getScheduledVisitId())).body(registeredVisit);
     }
 

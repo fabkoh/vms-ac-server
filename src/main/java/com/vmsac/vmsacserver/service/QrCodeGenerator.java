@@ -29,7 +29,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class QrCodeGenerator {
 
-    public static void setUpQrParams(ScheduledVisit scheduledVisit) throws IOException, WriterException {
+    public void setUpQrParams(ScheduledVisit scheduledVisit) throws IOException, WriterException {
         String qrCodeText = scheduledVisit.getQrCodeId();
         String filePath = "./qrCodes/" + qrCodeText + ".jpg";
         int size = 125;
@@ -40,7 +40,7 @@ public class QrCodeGenerator {
         createQRImage(qrFile, qrCodeText, size, fileType);
 
     }
-    private static void createQRImage(File qrFile, String qrCodeText, int size, String fileType) throws WriterException, IOException {
+    private void createQRImage(File qrFile, String qrCodeText, int size, String fileType) throws WriterException, IOException {
         // Create the ByteMatrix for the QR-Code that encodes the given String
         Hashtable<EncodeHintType, ErrorCorrectionLevel> hintMap = new Hashtable<>();
         hintMap.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);

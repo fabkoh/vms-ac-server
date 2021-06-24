@@ -1,11 +1,19 @@
 package com.vmsac.vmsacserver.util;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.stereotype.Service;
+
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+@NoArgsConstructor
+@Data
+@Service
 public class HashQRId {
-    public static String getMd5(String input)
+    public String getMd5(String input)
     {
         try {
 
