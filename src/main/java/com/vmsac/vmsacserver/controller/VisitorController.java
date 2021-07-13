@@ -15,6 +15,7 @@ import java.net.URISyntaxException;
 import java.util.Date;
 import java.util.List;
 
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api")
 public class VisitorController {
@@ -27,12 +28,12 @@ public class VisitorController {
         return visitorRepository.findAll();
     }
 
-    @GetMapping(path = "/visits-by/{lastfourdigit}")
+    @GetMapping(path = "/visits-by/{idnumber}")
     private ResponseEntity<List> getScheduledVisitByOther(
-            @PathVariable("lastfourdigit") String lastFourDigitOfId){
+            @PathVariable("idnumber") String idNumber){
 
         Visitor scheduledVisits;
-        scheduledVisits = visitorRepository.findByLastFourDigitsOfId(lastFourDigitOfId);
+        scheduledVisits = visitorRepository.findByIdNumber(idNumber);
         List<ScheduledVisit> visitsByVisitor;
         visitsByVisitor = scheduledVisits.getVisitorScheduledVisits();
 

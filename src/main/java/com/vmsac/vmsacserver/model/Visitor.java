@@ -25,8 +25,8 @@ public class Visitor {
     @Column(name="lastname")
     private String lastName;
 
-    @Column(name="lastfourdigitsofid")
-    private String lastFourDigitsOfId;
+    @Column(name="idnumber")
+    private String idNumber;
 
     @Column(name="mobilenumber")
     private String mobileNumber;

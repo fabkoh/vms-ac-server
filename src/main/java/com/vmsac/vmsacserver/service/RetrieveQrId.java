@@ -23,7 +23,7 @@ public class RetrieveQrId {
     @Autowired
     private VisitorRepository visitorRepository;
 
-    public String getQrIdFromOther(String lastFourDigitsOfId, LocalDate startDateOfVisit){
+    public String getQrIdFromOther(String idNumber, LocalDate startDateOfVisit){
 
         String qrCodeId;
         Visitor visitorScheduledVisits;
@@ -31,7 +31,7 @@ public class RetrieveQrId {
 
         DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-        visitorScheduledVisits = visitorRepository.findByLastFourDigitsOfId(lastFourDigitsOfId);
+        visitorScheduledVisits = visitorRepository.findByIdNumber(idNumber);
         visitsByVisitor = visitorScheduledVisits.getVisitorScheduledVisits();
         System.out.println("Date retrieved after conversion:" + startDateOfVisit.format(dateFormat));
 

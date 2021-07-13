@@ -32,7 +32,7 @@ public class QrCodeGenerator {
     public void setUpQrParams(ScheduledVisit scheduledVisit) throws IOException, WriterException {
         String qrCodeText = scheduledVisit.getQrCodeId();
         String filePath = "./qrCodes/" + qrCodeText + ".jpg";
-        int size = 125;
+        int size = 200;
         String fileType = "jpeg";
         File qrFile = new File(filePath);
         String absFilePath = new File(".").getAbsolutePath();
