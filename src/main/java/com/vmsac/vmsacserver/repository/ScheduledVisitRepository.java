@@ -10,4 +10,7 @@ public interface ScheduledVisitRepository extends JpaRepository<ScheduledVisit, 
 
     List<ScheduledVisit> findByScheduledVisitId(Long scheduledVisitId);
 
+
+    List<ScheduledVisit> findByQrCodeId(String qrCodeId);
+
 }

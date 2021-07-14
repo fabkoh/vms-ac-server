@@ -69,6 +69,12 @@ public class ScheduledVisitController{
         return scheduledVisitRepository.findAll();
     }
 
+    @GetMapping(path = "/visit-by-qrcodeid/{qrid}")
+    List<ScheduledVisit> getVisitByQrCodeId(@PathVariable("qrid") String qrCodeId){
+
+        return scheduledVisitRepository.findByQrCodeId(qrCodeId);
+    }
+
     @GetMapping(path = "/qr-code/{id}", produces = MediaType.IMAGE_JPEG_VALUE)
     private ResponseEntity<Resource> getQrImageFromId(@PathVariable("id") String qrCodeId) throws IOException {
         Path absFilePath = Paths.get("./qrCodes/"+ qrCodeId + ".jpg");
