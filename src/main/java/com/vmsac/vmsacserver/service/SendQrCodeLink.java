@@ -23,7 +23,7 @@ public class SendQrCodeLink {
     public void sendQrCodeLink(ScheduledVisit scheduledVisit, Visitor registeredVisitor) throws IOException, HttpClientErrorException {
         String qrCodeId = scheduledVisit.getQrCodeId();
         String visitorNumber = registeredVisitor.getMobileNumber();
-        String message = "Thanks for registering, you may click on the link below to access your QR code entry pass."+qrCodeId;
+        String message = "Thanks for registering, you may click on the link below to access your QR code entry pass. "+qrCodeId;
         String uri = "http://inthenetworld.com/sms/web_sms.php?apikey=isssecurity&mobileNumber="+visitorNumber+"&smsMessage="+message;
 
         URL url = new URL(uri);
