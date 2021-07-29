@@ -21,8 +21,8 @@ public class ScheduledVisit {
     @Column(name="scheduledvisitid")
     private Long scheduledVisitId;
 
-    @Column(name="visitorid")
-    private Long visitorId;
+    @Column(name="idnumber")
+    private String idNumber;
 
     @Column(name="startdateofvisit")
     private LocalDate startDateOfVisit;
@@ -43,7 +43,7 @@ public class ScheduledVisit {
     private Long raisedBy;
 
     @ManyToOne()
-    @JoinColumn(name="visitorid", insertable=false, updatable=false)
+    @JoinColumn(name="idnumber", insertable=false, updatable=false)
     @JsonBackReference
     private Visitor visitor;
 }

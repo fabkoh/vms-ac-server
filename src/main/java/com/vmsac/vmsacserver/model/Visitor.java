@@ -14,19 +14,16 @@ import java.util.List;
 @Table(name="visitor")
 public class Visitor {
 
+
     @Id
-    @GeneratedValue (strategy = GenerationType.IDENTITY)
-    @Column(name="visitorid")
-    private Long visitorId;
+    @Column(name="idnumber")
+    private String idNumber;
 
     @Column(name="firstname")
     private String firstName;
 
     @Column(name="lastname")
     private String lastName;
-
-    @Column(name="idnumber")
-    private String idNumber;
 
     @Column(name="mobilenumber")
     private String mobileNumber;

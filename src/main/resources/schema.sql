@@ -1,15 +1,14 @@
 CREATE TABLE Visitor (
-    visitorId BIGINT NOT NULL AUTO_INCREMENT,
+    idNumber VARCHAR(128) NOT NULL,
     firstName VARCHAR(128),
     lastName VARCHAR(128),
-    idNumber VARCHAR(128),
     mobileNumber VARCHAR(128),
     emailAdd VARCHAR(128),
-    PRIMARY KEY (visitorId)
+    PRIMARY KEY (idNumber)
 );
 CREATE TABLE ScheduledVisit (
     scheduledVisitId BIGINT NOT NULL AUTO_INCREMENT,
-    visitorId BIGINT,
+    idNumber VARCHAR(128),
     startDateOfVisit DATE,
     endDateOfVisit DATE,
     qrCodeId VARCHAR(128),
@@ -17,5 +16,5 @@ CREATE TABLE ScheduledVisit (
     oneTimeUse BOOLEAN,
     raisedBy BIGINT,
     PRIMARY KEY (scheduledVisitId),
-    FOREIGN KEY (visitorId) REFERENCES Visitor (visitorId)
+    FOREIGN KEY (idNumber) REFERENCES Visitor (idNumber)
 );

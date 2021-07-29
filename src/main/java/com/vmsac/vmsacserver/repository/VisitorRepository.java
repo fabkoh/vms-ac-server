@@ -10,7 +10,4 @@ import java.util.List;
 
 public interface VisitorRepository extends JpaRepository<Visitor, Long>{
     Visitor findByIdNumber(String idNumber);
-
-    Visitor findByVisitorId(Long id);
-
 }

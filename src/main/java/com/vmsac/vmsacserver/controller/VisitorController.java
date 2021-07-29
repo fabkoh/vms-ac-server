@@ -46,6 +46,6 @@ public class VisitorController {
     @PostMapping(path = "/register-new-visitor", consumes = "application/json")
     ResponseEntity<Visitor> createVisitor(@Valid @RequestBody Visitor newVisitor) throws URISyntaxException {
         Visitor visitor = visitorRepository.save(newVisitor);
-        return ResponseEntity.created(new URI("/api/register-new-visitor" + visitor.getVisitorId())).body(visitor);
+        return ResponseEntity.created(new URI("/api/register-new-visitor" + visitor.getIdNumber())).body(visitor);
     }
 }

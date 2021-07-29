@@ -11,6 +11,7 @@ import com.vmsac.vmsacserver.service.SendQrCodeLink;
 import com.vmsac.vmsacserver.util.HashQRId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +38,7 @@ import java.util.Optional;
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api")
+@PropertySource("classpath:application.properties")
 public class ScheduledVisitController{
 
     @Autowired
@@ -57,10 +59,12 @@ public class ScheduledVisitController{
     @Autowired
     private HashQRId hashQRId;
 
+    @Autowired
     @Value("${dev.qrcode.image.path}")
     String qrFilePath;
 
     public ScheduledVisitController() {
+
     }
 
     @GetMapping(path = "/scheduled-visits")
@@ -119,7 +123,7 @@ public class ScheduledVisitController{
         registeredVisit.setQrCodeId(hashQRId.getMd5(qrCodeId));
         scheduledVisitRepository.save(registeredVisit);
         qrCodeGenerator.setUpQrParams(registeredVisit);
-        Visitor registeredVisitor = visitorRepository.findByVisitorId(registeredVisit.getVisitorId());
+        Visitor registeredVisitor = visitorRepository.findByIdNumber(registeredVisit.getIdNumber());
         sendQrCodeLink.sendQrCodeLink(registeredVisit, registeredVisitor);
         return ResponseEntity.created(new URI("/api/register-scheduled-visit" + registeredVisit.getScheduledVisitId())).body(registeredVisit);
     }
