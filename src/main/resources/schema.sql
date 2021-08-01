@@ -7,7 +7,7 @@ CREATE TABLE Visitor (
     PRIMARY KEY (idNumber)
 );
 CREATE TABLE ScheduledVisit (
-    scheduledVisitId BIGINT NOT NULL AUTO_INCREMENT,
+    scheduledVisitId SERIAL NOT NULL,
     idNumber VARCHAR(128),
     startDateOfVisit DATE,
     endDateOfVisit DATE,
