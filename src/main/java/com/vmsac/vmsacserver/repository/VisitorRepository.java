@@ -9,5 +9,5 @@ import java.util.List;
 
 
 public interface VisitorRepository extends JpaRepository<Visitor, Long>{
-    Visitor findByLastFourDigitsOfId(String lastFourDigitsOfId);
+    Visitor findByIdNumber(String idNumber);
 }

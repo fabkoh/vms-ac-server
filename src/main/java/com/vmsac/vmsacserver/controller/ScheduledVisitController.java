@@ -1,13 +1,17 @@
 package com.vmsac.vmsacserver.controller;
 
 import com.google.zxing.WriterException;
+import com.vmsac.vmsacserver.model.Visitor;
 import com.vmsac.vmsacserver.model.ScheduledVisit;
 import com.vmsac.vmsacserver.repository.ScheduledVisitRepository;
+import com.vmsac.vmsacserver.repository.VisitorRepository;
 import com.vmsac.vmsacserver.service.QrCodeGenerator;
 import com.vmsac.vmsacserver.service.RetrieveQrId;
+import com.vmsac.vmsacserver.service.SendQrCodeLink;
 import com.vmsac.vmsacserver.util.HashQRId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +33,9 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api")
 public class ScheduledVisitController{
@@ -38,24 +44,38 @@ public class ScheduledVisitController{
     private ScheduledVisitRepository scheduledVisitRepository;
 
     @Autowired
+    private VisitorRepository visitorRepository;
+
+    @Autowired
     private RetrieveQrId retrieveQrId;
 
     @Autowired
     private QrCodeGenerator qrCodeGenerator;
 
     @Autowired
+    private SendQrCodeLink sendQrCodeLink;
+
+    @Autowired
     private HashQRId hashQRId;
 
+    @Autowired
     @Value("${dev.qrcode.image.path}")
     String qrFilePath;
 
     public ScheduledVisitController() {
+
     }
 
     @GetMapping(path = "/scheduled-visits")
     List<ScheduledVisit> getScheduledVisits(){
 
         return scheduledVisitRepository.findAll();
+    }
+
+    @GetMapping(path = "/visit-by-qrcodeid/{qrid}")
+    List<ScheduledVisit> getVisitByQrCodeId(@PathVariable("qrid") String qrCodeId){
+
+        return scheduledVisitRepository.findByQrCodeId(qrCodeId);
     }
 
     @GetMapping(path = "/qr-code/{id}", produces = MediaType.IMAGE_JPEG_VALUE)
@@ -102,6 +122,8 @@ public class ScheduledVisitController{
         registeredVisit.setQrCodeId(hashQRId.getMd5(qrCodeId));
         scheduledVisitRepository.save(registeredVisit);
         qrCodeGenerator.setUpQrParams(registeredVisit);
+        Visitor registeredVisitor = visitorRepository.findByIdNumber(registeredVisit.getIdNumber());
+        sendQrCodeLink.sendQrCodeLink(registeredVisit, registeredVisitor);
         return ResponseEntity.created(new URI("/api/register-scheduled-visit" + registeredVisit.getScheduledVisitId())).body(registeredVisit);
     }
 
