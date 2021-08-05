@@ -5,7 +5,8 @@ target/
 !**/src/test/**/target/
 
 ## Prod Properties ##
-## !**/src/main/resources/application-production.properties
+/src/main/resources/application-production.properties
+/src/main/resources/application-dev.properties
 
 ### QR Codes ###
 *.png
