@@ -15,6 +15,5 @@ CREATE TABLE ScheduledVisit (
     valid BOOLEAN,
     oneTimeUse BOOLEAN,
     raisedBy BIGINT,
-    PRIMARY KEY (scheduledVisitId),
-    FOREIGN KEY (idNumber) REFERENCES Visitor (idNumber)
+    PRIMARY KEY (scheduledVisitId)
 );
