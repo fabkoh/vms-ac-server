@@ -10,7 +10,7 @@ target/
 
 ### QR Codes ###
 *.png
-/qrCodes/*
+/qrCodes
 
 ### STS ###
 .apt_generated
