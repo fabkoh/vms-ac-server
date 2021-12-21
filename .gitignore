@@ -10,7 +10,8 @@ target/
 
 ### QR Codes ###
 *.png
-/qrCodes
+/qrCodes/*
+!/qrCodes/gitkeep
 
 ### STS ###
 .apt_generated
