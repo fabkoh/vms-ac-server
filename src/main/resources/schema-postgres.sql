@@ -67,7 +67,7 @@ CREATE TABLE IF NOT EXISTS Credentials (
   credTTL TIMESTAMP NOT NULL,
   isValid BOOLEAN NOT NULL,
   isPrem BOOLEAN NOT NULL,
-  credTypeId INT REFERENCES CredentialType (credTypeId),
+  credTypeId INT REFERENCES CredentialType (credTypeId) NOT NULL,
   personId INT REFERENCES Persons (personId),
   scheduledVisitId INT References ScheduledVisit (scheduledVisitId),
   deleted BOOLEAN,
