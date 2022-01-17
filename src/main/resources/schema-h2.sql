@@ -61,3 +61,15 @@ CREATE TABLE IF NOT EXISTS CredentialType(
   PRIMARY KEY (credTypeId)
 );
 
+CREATE TABLE IF NOT EXISTS Credentials (
+  credId SERIAL NOT NULL UNIQUE,
+  credUID VARCHAR(255) NOT NULL,
+  credTTL TIMESTAMP NOT NULL,
+  isValid BOOLEAN NOT NULL,
+  isPrem BOOLEAN NOT NULL,
+  credTypeId INT REFERENCES CredentialType (credTypeId),
+  personId INT REFERENCES Persons (personId),
+  scheduledVisitId INT References ScheduledVisit (scheduledVisitId),
+  deleted BOOLEAN,
+  PRIMARY KEY (credId)
+);
