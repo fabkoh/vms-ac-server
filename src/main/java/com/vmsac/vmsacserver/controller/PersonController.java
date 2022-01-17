@@ -73,6 +73,17 @@ public class PersonController {
         return ResponseEntity.ok(personService.save(newPerson, false));
     }
 
+    @DeleteMapping(path = "/person/{personId}")
+    public ResponseEntity<?> deletePerson(@PathVariable("personId") Long personId) {
+        if(!personService.exists(personId, false)) {
+            Map<String, String> errors = new HashMap<>();
+            errors.put("personId", "Person with ID " + personId + " does not exist");
+            return new ResponseEntity(errors, HttpStatus.BAD_REQUEST);
+        }
+        personService.delete(personId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public Map<String, String> handleValidationExceptions(

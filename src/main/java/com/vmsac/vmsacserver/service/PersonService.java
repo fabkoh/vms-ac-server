@@ -42,4 +42,10 @@ public class PersonService {
     public Boolean exists(Long personId, Boolean deleted) {
         return personRepository.findByPersonIdAndDeleted(personId, deleted).isPresent();
     }
+
+    public void delete(Long personId) {
+        Person person = personRepository.findByPersonId(personId).orElseThrow();
+        person.setDeleted(true);
+        personRepository.save(person);
+    }
 }

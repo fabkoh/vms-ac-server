@@ -15,4 +15,5 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
 
     Optional<Person> findByPersonIdAndDeleted(Long personId, Boolean deleted);
 
+    Optional<Person> findByPersonId(Long personId);
 }
