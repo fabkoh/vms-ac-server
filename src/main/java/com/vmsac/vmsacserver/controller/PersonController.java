@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @CrossOrigin(origins = "*")
@@ -20,6 +21,11 @@ public class PersonController {
 
     @Autowired
     PersonService personService;
+
+    @GetMapping("/persons")
+    public List<PersonDto> getPersons() {
+        return personService.findAll();
+    }
 
     @PostMapping(path = "/person")
     public ResponseEntity<?> createPerson(
