@@ -78,7 +78,7 @@ public class PersonController {
         if(!personService.exists(personId, false)) {
             Map<String, String> errors = new HashMap<>();
             errors.put("personId", "Person with ID " + personId + " does not exist");
-            return new ResponseEntity(errors, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
         }
         personService.delete(personId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
