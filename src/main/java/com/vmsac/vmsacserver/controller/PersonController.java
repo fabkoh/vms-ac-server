@@ -1,5 +1,6 @@
 package com.vmsac.vmsacserver.controller;
 
+import com.vmsac.vmsacserver.model.Person;
 import com.vmsac.vmsacserver.model.PersonDto;
 import com.vmsac.vmsacserver.service.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,10 +11,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -75,12 +73,14 @@ public class PersonController {
 
     @DeleteMapping(path = "/person/{personId}")
     public ResponseEntity<?> deletePerson(@PathVariable("personId") Long personId) {
-        if(!personService.exists(personId, false)) {
+        Optional<Person> optionalPerson = personService.findByIdAndDeleted(personId, false);
+
+        if(optionalPerson.isEmpty()) {
             Map<String, String> errors = new HashMap<>();
             errors.put("personId", "Person with ID " + personId + " does not exist");
             return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
         }
-        personService.delete(personId);
+        personService.delete(optionalPerson.get());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
