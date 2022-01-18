@@ -43,8 +43,11 @@ public class PersonService {
         return personRepository.findByPersonIdAndDeleted(personId, deleted).isPresent();
     }
 
-    public void delete(Long personId) {
-        Person person = personRepository.findByPersonId(personId).orElseThrow();
+    public Optional<Person> findByIdAndDeleted(Long personId, Boolean deleted) {
+        return personRepository.findByPersonIdAndDeleted(personId, deleted);
+    }
+
+    public void delete(Person person) {
         person.setDeleted(true);
         personRepository.save(person);
     }
