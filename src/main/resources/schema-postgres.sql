@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS ScheduledVisit (
 
 CREATE TABLE IF NOT EXISTS AccessGroups (
   accessGroupId SERIAL NOT NULL UNIQUE,
-  accessGroupName VARCHAR(255) NOT NULL UNIQUE,
+  accessGroupName VARCHAR(255) NOT NULL,
   accessGroupDesc TEXT,
   deleted BOOLEAN,
   PRIMARY KEY (accessGroupId)
@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS Persons (
   personId SERIAL NOT NULL UNIQUE,
   personFirstName VARCHAR(128) NOT NULL,
   personLastName VARCHAR(128) NOT NULL,
-  personUID VARCHAR(128) NOT NULL UNIQUE,
+  personUID VARCHAR(128) NOT NULL,
   personMobileNumber VARCHAR(128),
   personEmail VARCHAR(128),
   accessGroupId INT REFERENCES AccessGroups (accessGroupId),
@@ -41,16 +41,18 @@ CREATE TABLE IF NOT EXISTS Persons (
 
 CREATE TABLE IF NOT EXISTS OrgGroups (
   orgGroupId SERIAL NOT NULL UNIQUE,
-  orgGroupName VARCHAR(255) NOT NULL UNIQUE,
+  orgGroupName VARCHAR(255) NOT NULL,
   orgGroupDesc TEXT,
   deleted BOOLEAN NOT NULL,
   PRIMARY KEY (orgGroupId)
 );
 
 CREATE TABLE IF NOT EXISTS PersonOrgGroupNtoN (
+  personOrgGroupId SERIAL NOT NULL UNIQUE,
   personId INT REFERENCES Persons (personId),
   orgGroupId INT REFERENCES OrgGroups (orgGroupId),
-  deleted BOOLEAN NOT NULL
+  deleted BOOLEAN NOT NULL,
+  PRIMARY KEY (personOrgGroupId)
 );
 
 CREATE TABLE IF NOT EXISTS CredentialType(
