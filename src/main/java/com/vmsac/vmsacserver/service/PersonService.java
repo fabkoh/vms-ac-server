@@ -4,7 +4,6 @@ import com.vmsac.vmsacserver.model.CreatePersonDto;
 import com.vmsac.vmsacserver.model.Person;
 import com.vmsac.vmsacserver.model.PersonDto;
 import com.vmsac.vmsacserver.repository.PersonRepository;
-import net.bytebuddy.utility.RandomString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -77,15 +76,6 @@ public class PersonService {
         return randomString;
     }
 
-<<<<<<< Updated upstream
-    public Optional<Person> findByIdAndDeleted(Long personId, Boolean deleted) {
-        return personRepository.findByPersonIdAndDeleted(personId, deleted);
-    }
-
-    public void delete(Person person) {
-        person.setDeleted(true);
-        personRepository.save(person);
-=======
     private String generateRandomString(int length) {
         int leftLimit = 48; // "0"
         int rightLimit = 122; // "z"
@@ -97,6 +87,6 @@ public class PersonService {
                 .limit(length)
                 .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
                 .toString();
->>>>>>> Stashed changes
+
     }
 }

@@ -1,9 +1,7 @@
 package com.vmsac.vmsacserver.controller;
 
-<<<<<<< Updated upstream
-=======
 import com.vmsac.vmsacserver.model.CreatePersonDto;
->>>>>>> Stashed changes
+
 import com.vmsac.vmsacserver.model.Person;
 import com.vmsac.vmsacserver.model.PersonDto;
 import com.vmsac.vmsacserver.service.PersonService;
@@ -15,14 +13,11 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-<<<<<<< Updated upstream
-import java.util.*;
-=======
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
->>>>>>> Stashed changes
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -81,16 +76,11 @@ public class PersonController {
     }
 
     @DeleteMapping(path = "/person/{personId}")
-<<<<<<< Updated upstream
-    public ResponseEntity<?> deletePerson(@PathVariable("personId") Long personId) {
-        Optional<Person> optionalPerson = personService.findByIdAndDeleted(personId, false);
-=======
     public ResponseEntity<?> deletePerson(
             @PathVariable("personId") Long personId) {
 
         Optional<Person> optionalPerson =
                 personService.findByIdInUse(personId);
->>>>>>> Stashed changes
 
         if(optionalPerson.isEmpty()) {
             Map<String, String> errors = new HashMap<>();
@@ -98,14 +88,11 @@ public class PersonController {
                     "Person with ID " + personId + " does not exist");
             return new ResponseEntity<>(errors, HttpStatus.NOT_FOUND);
         }
-<<<<<<< Updated upstream
-        personService.delete(optionalPerson.get());
-=======
 
         Person deletePerson = optionalPerson.get();
         deletePerson.setDeleted(true);
         personService.save(deletePerson);
->>>>>>> Stashed changes
+
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
