@@ -48,9 +48,11 @@ CREATE TABLE IF NOT EXISTS OrgGroups (
 );
 
 CREATE TABLE IF NOT EXISTS PersonOrgGroupNtoN (
+  personOrgGroupId SERIAL NOT NULL UNIQUE,
   personId INT REFERENCES Persons (personId),
   orgGroupId INT REFERENCES OrgGroups (orgGroupId),
-  deleted BOOLEAN NOT NULL
+  deleted BOOLEAN NOT NULL,
+  PRIMARY KEY (personOrgGroupId)
 );
 
 CREATE TABLE IF NOT EXISTS CredentialType(
