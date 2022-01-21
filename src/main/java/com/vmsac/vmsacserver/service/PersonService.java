@@ -33,7 +33,6 @@ public class PersonService {
         return personRepository.findByPersonIdAndDeleted(personId, false);
     }
 
-
     // checkers
     public Boolean uidInUse(String uid) {
         return personRepository.findByPersonUidAndDeleted(uid, false)

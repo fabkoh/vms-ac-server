@@ -7,6 +7,7 @@ import com.vmsac.vmsacserver.model.PersonDto;
 import com.vmsac.vmsacserver.service.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -30,6 +31,21 @@ public class PersonController {
     @GetMapping("/persons")
     public List<PersonDto> getPersons() {
         return personService.findAllNotDeleted();
+    }
+
+    @GetMapping("/person/{personId}")
+    public ResponseEntity<?> getPerson(@PathVariable Long personId) {
+        Optional<Person> optionalPerson = personService.findByIdInUse(personId);
+
+        if(optionalPerson.isPresent()) {
+            return ResponseEntity.ok(optionalPerson.get().toDto());
+        }
+
+        Map<String, String> errors = new HashMap<>();
+        errors.put("personId", "Person with Id " +
+                personId + " does not exist");
+
+        return new ResponseEntity<>(errors, HttpStatus.NOT_FOUND);
     }
 
     // checks if uid is in use
