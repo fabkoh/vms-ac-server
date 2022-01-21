@@ -32,6 +32,21 @@ public class PersonController {
         return personService.findAllNotDeleted();
     }
 
+    @GetMapping("/person/{personId}")
+    public ResponseEntity<?> getPerson(@PathVariable Long personId) {
+        Optional<Person> optionalPerson = personService.findByIdInUse(personId);
+
+        if(optionalPerson.isPresent()) {
+            return ResponseEntity.ok(optionalPerson.get().toDto());
+        }
+
+        Map<String, String> errors = new HashMap<>();
+        errors.put("personId", "Person with Id " +
+                personId + " does not exist");
+
+        return new ResponseEntity<>(errors, HttpStatus.NOT_FOUND);
+    }
+
     // checks if uid is in use
     @PostMapping(path = "/person")
     public ResponseEntity<?> createPerson(
