@@ -47,6 +47,11 @@ public class PersonController {
         return new ResponseEntity<>(errors, HttpStatus.NOT_FOUND);
     }
 
+    @GetMapping("/person/uid/{uid}")
+    public Boolean uidExists(@PathVariable("uid") String uid) {
+        return personService.uidInUse(uid);
+    }
+
     // checks if uid is in use
     @PostMapping(path = "/person")
     public ResponseEntity<?> createPerson(
