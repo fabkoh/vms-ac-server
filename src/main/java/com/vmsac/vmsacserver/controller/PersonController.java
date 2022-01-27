@@ -52,6 +52,11 @@ public class PersonController {
         return personService.uidInUse(uid);
     }
 
+    @GetMapping("/person/uid/{id}/{uid}")
+    public Boolean uidInUse(@PathVariable("uid") String uid,
+    @PathVariable("id") Long id) {
+        return personService.uidInUse(uid, id);
+    }
     // checks if uid is in use
     @PostMapping(path = "/person")
     public ResponseEntity<?> createPerson(
