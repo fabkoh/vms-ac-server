@@ -22,8 +22,7 @@ public class CreatePersonDto{
     private String personUid;
 
     // allow empty string or "+{code} {number}" where code is 1 to 3 digits
-    @Pattern(regexp= "|^\\+[0-9]{1,3} [0-9]+$",
-            message = "Person number is not a mobile number")
+    //@Pattern(message = "Person number is not a mobile number")
     private String personMobileNumber;
 
     @Email(message = "Person email is not an email")

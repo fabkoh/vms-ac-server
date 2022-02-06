@@ -40,11 +40,21 @@ public class PersonService {
                 .isPresent();
     }
 
+    //edit: check if personid is the same as personname
     public Boolean uidInUse(String uid, Long personId) {
         Optional<Person> personOptional = personRepository
                 .findByPersonUidAndDeleted(uid, false);
         return personOptional.isPresent() &&
                 !Objects.equals(personOptional.get().getPersonId(), personId);
+    }
+
+    public Boolean mobileNumberInUse(String personMobileNumber) {
+        return personRepository.findByPersonMobileNumberAndDeleted(personMobileNumber, false)
+                .isPresent();
+    }
+
+    public Boolean emailInUse(String email) {
+        return personRepository.findByPersonEmail(email).size() > 0;
     }
 
     public Boolean idInUse(Long id) {
@@ -57,10 +67,13 @@ public class PersonService {
         return personRepository.save(personDto.toPerson(false)).toDto();
     }
 
+
+    //for deletion
     public PersonDto save(PersonDto personDto, Boolean deleted) {
         return personRepository.save(personDto.toPerson(deleted)).toDto();
     }
 
+    //normal save
     public Person save(Person person) {
         return personRepository.save(person);
     }
