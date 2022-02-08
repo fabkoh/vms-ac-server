@@ -121,6 +121,16 @@ public class PersonController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    @GetMapping("/person/mobileNumber/{mobileNumber}")
+    public Boolean mobileNumberExists(@PathVariable("mobileNumber") String mobileNumber) {
+        return personService.mobileNumberInUse(mobileNumber);
+    }
+
+    @GetMapping("/person/email/{email}")
+    public Boolean emailExists(@PathVariable("email") String email) {
+        return personService.emailInUse(email);
+    }
+
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public Map<String, String> handleValidationExceptions(
