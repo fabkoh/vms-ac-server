@@ -14,4 +14,12 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
     List<Person> findByDeleted(Boolean deleted);
 
     Optional<Person> findByPersonIdAndDeleted(Long personId, Boolean deleted);
+
+    List<Person> findByPersonMobileNumber(String personMobileNumber);
+
+    List<Person> findByPersonEmail(String personEmail);
+
+    Optional<Person> findByPersonMobileNumberAndDeleted(String personMobileNumber, Boolean deleted);
+
+    Optional<Person> findByPersonEmailAndDeleted(String personEmail, Boolean deleted);
 }
