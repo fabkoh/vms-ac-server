@@ -1,11 +1,12 @@
 package com.vmsac.vmsacserver.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -37,7 +38,7 @@ public class Person {
     @Column(name="deleted")
     private Boolean deleted;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "accessgroupid")
     private AccessGroup accessGroup;
 

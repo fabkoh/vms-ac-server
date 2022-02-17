@@ -1,9 +1,9 @@
 package com.vmsac.vmsacserver.controller;
 
-import com.vmsac.vmsacserver.model.CreatePersonDto;
 
-import com.vmsac.vmsacserver.model.Person;
-import com.vmsac.vmsacserver.model.PersonDto;
+import com.vmsac.vmsacserver.model.*;
+
+import com.vmsac.vmsacserver.service.AccessGroupService;
 import com.vmsac.vmsacserver.service.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -26,6 +26,8 @@ public class PersonController {
 
     @Autowired
     PersonService personService;
+    @Autowired
+    AccessGroupService AccessGroupService;
 
     @GetMapping("/persons")
     public List<PersonDto> getPersons() {
@@ -70,7 +72,11 @@ public class PersonController {
                     newPersonDto.getPersonUid() + " in use");
             return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
         }
-
+//        else if (newPersonDto.getAccessGroup()!= null){
+//            AccessGroupDto temp = newPersonDto.getAccessGroup().toDto();
+//            AccessGroupService.save(temp);
+//            return new ResponseEntity<>(personService.createNotDeleted(newPersonDto) ,HttpStatus.OK);
+//        }
         return new ResponseEntity<>(personService.createNotDeleted(newPersonDto),
                 HttpStatus.CREATED);
     }

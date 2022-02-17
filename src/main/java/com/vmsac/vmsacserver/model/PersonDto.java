@@ -36,9 +36,12 @@ public class PersonDto {
     @Email(message = "Person email is not a valid email")
     private String personEmail;
 
-    @ManyToOne(cascade = {CascadeType.ALL, CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH, CascadeType.DETACH})
-    @JoinColumn(name = "access_group_accessgroupid")
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "accessgroupid")
     private AccessGroup accessGroup;
+//    @ManyToOne(cascade = {CascadeType.ALL, CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH, CascadeType.DETACH})
+//    @JoinColumn(name = "access_group_accessgroupid")
+//    private AccessGroup accessGroup;
 
 //    public AccessGroup getAccessGroup() {
 //        return accessGroup;

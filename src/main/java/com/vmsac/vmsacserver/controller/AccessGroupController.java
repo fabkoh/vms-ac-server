@@ -4,6 +4,7 @@ import com.vmsac.vmsacserver.model.AccessGroup;
 import com.vmsac.vmsacserver.model.AccessGroupDto;
 import com.vmsac.vmsacserver.model.CreateAccessGroupDto;
 import com.vmsac.vmsacserver.service.AccessGroupService;
+import com.vmsac.vmsacserver.service.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,8 @@ public class AccessGroupController {
 
     @Autowired
     AccessGroupService AccessGroupService;
+    @Autowired
+    PersonService PersonService;
 
     //returns all accessgroups
     @GetMapping("/accessgroups")
