@@ -38,7 +38,7 @@ public class Person {
     private Boolean deleted;
 
     @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "access_group_accessgroupid")
+    @JoinColumn(name = "accessgroupid")
     private AccessGroup accessGroup;
 
 
