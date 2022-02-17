@@ -32,8 +32,8 @@ public class AccessGroup {
     @Column(name = "deleted")
     private Boolean deleted;
 
-//    @OneToMany(mappedBy = "accessGroup", cascade = {CascadeType.ALL, CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH, CascadeType.DETACH})
-//    private List<Person> persons = new ArrayList<>();
+    @OneToMany(mappedBy = "accessGroup", cascade = {CascadeType.ALL, CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH, CascadeType.DETACH})
+    private List<Person> persons = new ArrayList<>();
 
     public AccessGroupDto toDto(){
         return new AccessGroupDto(this.accessGroupId, this.accessGroupName,

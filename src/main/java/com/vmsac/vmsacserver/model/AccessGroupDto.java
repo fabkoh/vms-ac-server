@@ -36,6 +36,6 @@ public class AccessGroupDto {
 //        this.persons = persons;
 //    }
     public AccessGroup toAccessGroup(Boolean deleted){
-        return new AccessGroup(accessGroupId,accessGroupName,accessGroupDesc, deleted);
+        return new AccessGroup(accessGroupId,accessGroupName,accessGroupDesc, deleted,null);
     }
 }
