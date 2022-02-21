@@ -35,6 +35,8 @@ public class AccessGroupService {
     public Optional<AccessGroup> findById(Long Id){
         return AccessGroupRepository.findByAccessGroupIdAndDeleted(Id,false);
     }
+//    //check if queried access group exists
+//    public Boolean exists(Long Id){return AccessGroupRepository.findByAccessGroupIdAndDeleted(Id,false).isPresent();}
 
     //create access group
     public AccessGroupDto createAccessGroup(CreateAccessGroupDto AccessGroupDto){
@@ -46,9 +48,9 @@ public class AccessGroupService {
         return AccessGroupRepository.save(accessGroupDto.toAccessGroup(false));
     }
 //    //delete access group
-//    public AccessGroup delete(AccessGroupDto accessGroupDto){
-//        return AccessGroupRepository.save(accessGroupDto.toAccessGroup(true))
-//    }
+    public AccessGroup delete(AccessGroup accessGroup){
+        return AccessGroupRepository.save(accessGroup);
+    }
 
     //helpers
 }

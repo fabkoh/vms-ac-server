@@ -72,11 +72,15 @@ public class PersonController {
                     newPersonDto.getPersonUid() + " in use");
             return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
         }
-//        else if (newPersonDto.getAccessGroup()!= null){
-//            AccessGroupDto temp = newPersonDto.getAccessGroup().toDto();
-//            AccessGroupService.save(temp);
-//            return new ResponseEntity<>(personService.createNotDeleted(newPersonDto) ,HttpStatus.OK);
-//        }
+        else if (newPersonDto.getAccessGroup() != null){
+            Long accessGroupId = newPersonDto.getAccessGroup().getAccessGroupId();
+            if(!AccessGroupService.findById(accessGroupId).isPresent()){
+                Map<Long, String> errors = new HashMap<>();
+                errors.put(accessGroupId, "accessGroupId " +
+                        accessGroupId + " does not exist");
+                return new ResponseEntity<>(errors,HttpStatus.NOT_FOUND);
+            }
+        }
         return new ResponseEntity<>(personService.createNotDeleted(newPersonDto),
                 HttpStatus.CREATED);
     }

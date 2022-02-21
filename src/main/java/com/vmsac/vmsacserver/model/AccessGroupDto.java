@@ -1,5 +1,6 @@
 package com.vmsac.vmsacserver.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -27,6 +28,10 @@ public class AccessGroupDto {
 
     private String accessGroupDesc;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "accessGroup")
+//    private List<Person> persons = new ArrayList<>();
+    private List<Person> persons;
 //    @OneToMany(mappedBy = "accessGroup", cascade = {CascadeType.ALL, CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH, CascadeType.DETACH})
 //    private List<Person> persons = new ArrayList<>();
 //    public List<Person> getPersons() {
@@ -36,6 +41,6 @@ public class AccessGroupDto {
 //        this.persons = persons;
 //    }
     public AccessGroup toAccessGroup(Boolean deleted){
-        return new AccessGroup(accessGroupId,accessGroupName,accessGroupDesc, deleted,null);
+        return new AccessGroup(accessGroupId,accessGroupName,accessGroupDesc, deleted,persons);
     }
 }

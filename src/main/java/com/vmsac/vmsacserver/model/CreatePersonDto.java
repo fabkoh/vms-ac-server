@@ -3,13 +3,14 @@ package com.vmsac.vmsacserver.model;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import reactor.util.annotation.Nullable;
+import org.springframework.lang.Nullable;
 
 import javax.persistence.CascadeType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Null;
 import javax.validation.constraints.Pattern;
 
 @Data
@@ -31,6 +32,7 @@ public class CreatePersonDto{
 
     @Email(message = "Person email is not an email")
     private String personEmail;
+
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "accessgroupid")

@@ -62,4 +62,8 @@ public class Person {
                 this.personLastName, this.personUid, this.personMobileNumber,
                 this.personEmail,this.accessGroup);
     }
+//    public personAccDto accDto(){
+//        return new personAccDto(this.personId,this.personFirstName,this.personLastName,this.personUid
+//        this.personMobileNumber,this.personEmail);
+//    }
 }

@@ -1,14 +1,12 @@
 package com.vmsac.vmsacserver.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.List;
 
 @NoArgsConstructor
@@ -20,7 +18,7 @@ public class AccessGroup {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "accessgroupid")
+    @Column(name = "accessgroupid", columnDefinition = "serial")
     private Long accessGroupId;
 
     @Column(name = "accessgroupname")
@@ -39,6 +37,6 @@ public class AccessGroup {
 
     public AccessGroupDto toDto(){
         return new AccessGroupDto(this.accessGroupId, this.accessGroupName,
-                this.accessGroupDesc);
+                this.accessGroupDesc,this.persons);
     }
 }

@@ -31,6 +31,7 @@ public class AccessGroupController {
         return AccessGroupService.findAllAccessGroups();
     }
 
+    //returns details of an accessgroup
     @GetMapping("/accessgroup/{id}")
     public ResponseEntity<?> getAccessGroup(@PathVariable("id") Long accessGroupId){
         Optional<AccessGroup> optionalAccessGroup = AccessGroupService.findById(accessGroupId);
@@ -74,11 +75,18 @@ public class AccessGroupController {
 
     //delete access group. need to remove persons first.
 //    @DeleteMapping("/accessgroup/{id}")
-//    public ResponseEntity<?> deleteAccessGroup(@PathVariable("id")AccessGroup accessGroup){
-//        if (AccessGroupService.findById(accessGroup.getAccessGroupId()).isPresent()){
-//            return new ResponseEntity<>(AccessGroupService.delete(accessGroup),HttpStatus.OK);
+//    public ResponseEntity<?> deleteAccessGroup(@PathVariable("id")Long id){
+//        Optional<AccessGroup> delete = AccessGroupService.findById(id);
+//        if (delete.isEmpty()){
+//            Map<Long, String> errors = new HashMap<>();
+//            errors.put(id, "Access Group id " +
+//                    id + " does not exist");
+//            return new ResponseEntity<>(errors,HttpStatus.NOT_FOUND);
 //        }
 //
+//        AccessGroup deleteGroup = delete.get();
+//        deleteGroup.setDeleted(true);
+//        return new ResponseEntity<>(AccessGroupService.delete((deleteGroup)),HttpStatus.OK);
 //    }
 
 }
