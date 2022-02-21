@@ -83,7 +83,8 @@ public class AccessGroupController {
 //                    id + " does not exist");
 //            return new ResponseEntity<>(errors,HttpStatus.NOT_FOUND);
 //        }
-//
+//        //some statement to search all persons with accessgrpid IF delete is present
+//        //then replace all persons with null. then set accessgrp = deleted.
 //        AccessGroup deleteGroup = delete.get();
 //        deleteGroup.setDeleted(true);
 //        return new ResponseEntity<>(AccessGroupService.delete((deleteGroup)),HttpStatus.OK);

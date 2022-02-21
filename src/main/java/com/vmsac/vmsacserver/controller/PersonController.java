@@ -34,6 +34,12 @@ public class PersonController {
         return personService.findAllNotDeleted();
     }
 
+    //returns ONLY persons without their access groups
+    @GetMapping("/persons/only")
+    public List<PersonOnlyDto> getPersonsOnly(){
+        return personService.findpersononly();
+    }
+
     @GetMapping("/person/{personId}")
     public ResponseEntity<?> getPerson(@PathVariable Long personId) {
         Optional<Person> optionalPerson = personService.findByIdInUse(personId);

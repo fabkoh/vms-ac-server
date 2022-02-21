@@ -39,7 +39,7 @@ public class Person {
     private Boolean deleted;
 
     @ManyToOne(cascade = CascadeType.MERGE)
-    @JoinColumn(name = "accessgroupid")
+    @JoinColumn(name = "accessgroupid",referencedColumnName = "accessgroupid")
     private AccessGroup accessGroup;
 
 
@@ -62,8 +62,8 @@ public class Person {
                 this.personLastName, this.personUid, this.personMobileNumber,
                 this.personEmail,this.accessGroup);
     }
-//    public personAccDto accDto(){
-//        return new personAccDto(this.personId,this.personFirstName,this.personLastName,this.personUid
-//        this.personMobileNumber,this.personEmail);
-//    }
+    public PersonOnlyDto accDto(){
+        return new PersonOnlyDto(this.personId,this.personFirstName,this.personLastName,this.personUid,
+        this.personMobileNumber,this.personEmail);
+    }
 }

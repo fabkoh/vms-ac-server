@@ -2,6 +2,7 @@ package com.vmsac.vmsacserver.service;
 
 import com.vmsac.vmsacserver.model.CreatePersonDto;
 import com.vmsac.vmsacserver.model.Person;
+import com.vmsac.vmsacserver.model.PersonOnlyDto;
 import com.vmsac.vmsacserver.model.PersonDto;
 import com.vmsac.vmsacserver.repository.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,13 @@ public class PersonService {
         return personRepository.findByDeleted(false).stream()
                 .filter(p -> !p.getDeleted())
                 .map(Person::toDto)
+                .collect(Collectors.toList());
+    }
+    //returns ONLY person
+    public List<PersonOnlyDto> findpersononly() {
+        return personRepository.findByDeleted(false).stream()
+                .filter(p -> !p.getDeleted())
+                .map(Person::accDto)
                 .collect(Collectors.toList());
     }
 
