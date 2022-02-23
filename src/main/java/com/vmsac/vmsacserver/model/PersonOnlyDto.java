@@ -3,14 +3,16 @@ package com.vmsac.vmsacserver.model;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import reactor.util.annotation.Nullable;
 
-import javax.validation.constraints.*;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PersonDto {
+public class PersonOnlyDto {
 
     @Positive(message = "Person Id must be 1 or greater")
     @NotNull(message = "Person Id must not be empty")
@@ -33,15 +35,7 @@ public class PersonDto {
     @Email(message = "Person email is not a valid email")
     private String personEmail;
 
- 
-    private AccessGroupOnlyDto accessGroup;
-
-    public Person toPerson(Boolean deleted) {
-        if(accessGroup == null){
-            return new Person(personId, personFirstName, personLastName, personUid,
-                    personMobileNumber, personEmail, deleted,null);
-        }
-        return new Person(personId, personFirstName, personLastName, personUid,
-                personMobileNumber, personEmail, deleted,accessGroup.toAccessGroup(deleted));
+    public Person toPerson(boolean deleted,AccessGroup accessGroup){
+        return new Person(personId,personFirstName,personLastName,personUid,personMobileNumber,personEmail,deleted,accessGroup );
     }
 }
