@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -31,6 +32,7 @@ public class AccessGroupService {
     public Boolean nameInUse(String name ){
         return AccessGroupRepository.findByAccessGroupNameAndDeleted(name ,false).isPresent();
     }
+
     //returns queried access group
     public Optional<AccessGroup> findById(Long Id){
         return AccessGroupRepository.findByAccessGroupIdAndDeleted(Id,false);

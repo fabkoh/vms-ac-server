@@ -1,5 +1,7 @@
 package com.vmsac.vmsacserver.model;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -33,21 +35,9 @@ public class CreatePersonDto{
     @Email(message = "Person email is not an email")
     private String personEmail;
 
-
-    @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "accessgroupid")
+//    @ManyToOne(cascade = CascadeType.ALL)
+//    @JoinColumn(name = "accessgroupid")
     private AccessGroup accessGroup;
-//    @ManyToOne(cascade = {CascadeType.ALL, CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH, CascadeType.DETACH})
-//    @JoinColumn(name = "access_group_accessgroupid")
-//    private AccessGroup accessGroup;
-
-//    public AccessGroup getAccessGroup() {
-//        return accessGroup;
-//    }
-//
-//    public void setAccessGroup(AccessGroup accessGroup) {
-//        this.accessGroup = accessGroup;
-//    }
 
     public Person toPerson(Boolean deleted) {
         return new Person(null, personFirstName, personLastName, personUid,

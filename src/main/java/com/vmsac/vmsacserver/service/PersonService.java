@@ -29,18 +29,14 @@ public class PersonService {
                 .map(Person::toDto)
                 .collect(Collectors.toList());
     }
-    //returns ONLY person
-    public List<PersonOnlyDto> findpersononly() {
-        return personRepository.findByDeleted(false).stream()
-                .filter(p -> !p.getDeleted())
-                .map(Person::accDto)
-                .collect(Collectors.toList());
-    }
 
     public Optional<Person> findByIdInUse(Long personId) {
         return personRepository.findByPersonIdAndDeleted(personId, false);
     }
 
+    public List<Person> findByAccGrpId(Long id, Boolean deleted){
+        return personRepository.findByAccessGroupAccessGroupIdAndDeleted(id,deleted);
+    }
 
     // checkers
     public Boolean uidInUse(String uid) {
@@ -110,4 +106,10 @@ public class PersonService {
                 .toString();
 
     }
+
+    //converts list of persononlydto to list of person
+    public List<Person> personsList(List<PersonOnlyDto> stagedPersons){
+        return  personRepository.findByPersonIdInAndDeleted(stagedPersons.stream().map(PersonOnlyDto::getPersonId).collect(Collectors.toList()),false);
+    }
+
 }

@@ -34,12 +34,6 @@ public class PersonController {
         return personService.findAllNotDeleted();
     }
 
-    //returns ONLY persons without their access groups
-    @GetMapping("/persons/only")
-    public List<PersonOnlyDto> getPersonsOnly(){
-        return personService.findpersononly();
-    }
-
     @GetMapping("/person/{personId}")
     public ResponseEntity<?> getPerson(@PathVariable Long personId) {
         Optional<Person> optionalPerson = personService.findByIdInUse(personId);
@@ -78,14 +72,18 @@ public class PersonController {
                     newPersonDto.getPersonUid() + " in use");
             return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
         }
-        else if (newPersonDto.getAccessGroup() != null){
+        if (newPersonDto.getAccessGroup() != null){
             Long accessGroupId = newPersonDto.getAccessGroup().getAccessGroupId();
-            if(!AccessGroupService.findById(accessGroupId).isPresent()){
+            if(AccessGroupService.findById(accessGroupId).isEmpty()){
                 Map<Long, String> errors = new HashMap<>();
                 errors.put(accessGroupId, "accessGroupId " +
                         accessGroupId + " does not exist");
                 return new ResponseEntity<>(errors,HttpStatus.NOT_FOUND);
             }
+            AccessGroup accessGroup = AccessGroupService.findById(accessGroupId).get();
+            newPersonDto.setAccessGroup(accessGroup);
+            return new ResponseEntity<>(personService.createNotDeleted(newPersonDto),
+                    HttpStatus.CREATED);
         }
         return new ResponseEntity<>(personService.createNotDeleted(newPersonDto),
                 HttpStatus.CREATED);
@@ -112,6 +110,19 @@ public class PersonController {
                     updatePersonDto.getPersonUid() + " is already in use");
             return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
         }
+        else if (updatePersonDto.getAccessGroup() != null){
+            Long accessGroupId = updatePersonDto.getAccessGroup().getAccessGroupId();
+            if(!AccessGroupService.findById(accessGroupId).isPresent()){
+                Map<Long, String> errors = new HashMap<>();
+                errors.put(accessGroupId, "accessGroupId " +
+                        accessGroupId + " does not exist");
+                return new ResponseEntity<>(errors,HttpStatus.NOT_FOUND);
+            }
+            AccessGroup accessGroup = AccessGroupService.findById(accessGroupId).get();
+            updatePersonDto.setAccessGroup(accessGroup.toAccessGroupOnlyDto());
+            return new ResponseEntity<>(personService.save(updatePersonDto,false),
+                    HttpStatus.CREATED);
+        }
 
         return ResponseEntity.ok(personService.save(updatePersonDto, false));
     }
@@ -132,6 +143,7 @@ public class PersonController {
 
         Person deletePerson = optionalPerson.get();
         deletePerson.setDeleted(true);
+        deletePerson.setAccessGroup(null);
         personService.save(deletePerson);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

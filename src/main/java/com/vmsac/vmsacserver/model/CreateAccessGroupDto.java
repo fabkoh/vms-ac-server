@@ -3,6 +3,9 @@ package com.vmsac.vmsacserver.model;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Data
@@ -23,6 +26,7 @@ public class CreateAccessGroupDto {
 //    public void setPersons(List<Person> persons) {
 //        this.persons = persons;
 //    }
+    private List<PersonOnlyDto> persons;
     public AccessGroup toAccessGroup(Boolean deleted){
         return new AccessGroup(null,accessGroupName,accessGroupDesc,deleted,null);
     }

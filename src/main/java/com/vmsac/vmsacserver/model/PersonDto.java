@@ -37,7 +37,7 @@ public class PersonDto {
     private String personEmail;
 
  
-    private AccessGroup accessGroup;
+    private AccessGroupOnlyDto accessGroup;
 //    @ManyToOne(cascade = {CascadeType.ALL, CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH, CascadeType.DETACH})
 //    @JoinColumn(name = "access_group_accessgroupid")
 //    private AccessGroup accessGroup;
@@ -51,7 +51,11 @@ public class PersonDto {
 //    }
 
     public Person toPerson(Boolean deleted) {
+        if(accessGroup == null){
+            return new Person(personId, personFirstName, personLastName, personUid,
+                    personMobileNumber, personEmail, deleted,null);
+        }
         return new Person(personId, personFirstName, personLastName, personUid,
-                personMobileNumber, personEmail, deleted,accessGroup);
+                personMobileNumber, personEmail, deleted,accessGroup.toAccessGroup(deleted));
     }
 }
