@@ -5,11 +5,7 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.lang.Nullable;
 
-import javax.persistence.CascadeType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Null;
@@ -35,8 +31,6 @@ public class CreatePersonDto{
     @Email(message = "Person email is not an email")
     private String personEmail;
 
-//    @ManyToOne(cascade = CascadeType.ALL)
-//    @JoinColumn(name = "accessgroupid")
     private AccessGroup accessGroup;
 
     public Person toPerson(Boolean deleted) {

@@ -1,8 +1,6 @@
 package com.vmsac.vmsacserver.controller;
 
 import com.vmsac.vmsacserver.model.*;
-import com.vmsac.vmsacserver.repository.AccessGroupRepository;
-import com.vmsac.vmsacserver.repository.PersonRepository;
 import com.vmsac.vmsacserver.service.AccessGroupService;
 import com.vmsac.vmsacserver.service.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,10 +19,6 @@ public class AccessGroupController {
     AccessGroupService accessGroupService;
     @Autowired
     PersonService personService;
-    @Autowired
-    PersonRepository PersonRepository;
-    @Autowired
-    AccessGroupRepository accessGroupRepository;
 
     //returns all accessgroups
     @GetMapping("/accessgroups")
@@ -37,10 +31,6 @@ public class AccessGroupController {
     public ResponseEntity<?> getAccessGroup(@PathVariable("id") Long accessGroupId){
         Optional<AccessGroup> optionalAccessGroup = accessGroupService.findById(accessGroupId);
         if(optionalAccessGroup.isPresent()){
-//            List<Person> persons = PersonRepository.findByAccessGroupAccessGroupId(accessGroupId);
-//            optionalAccessGroup.get().setPersons(persons);
-//            return new ResponseEntity(persons,HttpStatus.OK);
-
             AccessGroupDto accessGroupDto = optionalAccessGroup.get().toDto();
             return ResponseEntity.ok(accessGroupDto);
         }
@@ -81,13 +71,6 @@ public class AccessGroupController {
     //Update name or description of access group
     @PutMapping("/accessgroup")
     public ResponseEntity<?> updateAccessGroup(@RequestBody AccessGroupDto accessGroupDto){
-//        if(AccessGroupService.nameException(accessGroupDto.getAccessGroupName()).isPresent()){
-//            Map<String, String> errors = new HashMap<>();
-//              errors.put("accessGroupName", "Access Group Name " +
-//                      accessGroupDto.getAccessGroupName() + " in use");
-//              return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
-//        }
-//        return new ResponseEntity<>(AccessGroupService.save(accessGroupDto),HttpStatus.OK);
        Long tempid = accessGroupDto.getAccessGroupId();
        Optional<AccessGroup> checkDto = accessGroupService.findById(tempid);
        if(checkDto.isEmpty()){
@@ -125,11 +108,6 @@ public class AccessGroupController {
             if (stagedPersons.size() != persons.size()) { // deleted / not found persons
                 return new ResponseEntity<>("", HttpStatus.NOT_FOUND);
             }
-//            AccessGroup newAccessGroup = accessGroupService.save(accessGroupDto.toAccessGroup(false).toDto());
-//            persons.forEach(person -> person.setAccessGroup(newAccessGroup));
-//            newAccessGroup.setPersons(persons);
-//            persons.forEach(person -> personService.save(person.toDto(),false));
-//            return new ResponseEntity<>(newAccessGroup, HttpStatus.CREATED);
             //remove all existing people first
             personService.findByAccGrpId(checkDto.get().getAccessGroupId(), false).forEach(person -> person.setAccessGroup(null));
             AccessGroup newAccessGroup = accessGroupService.save(checkDto.get().toDto());
@@ -153,8 +131,6 @@ public class AccessGroupController {
                     id + " does not exist");
             return new ResponseEntity<>(errors,HttpStatus.NOT_FOUND);
         }
-//        PersonRepository.findByAccessGroupAccessGroupId(id)
-//                .forEach(person -> person.setAccessGroup(null) );
         personService.findByAccGrpId(id,false).forEach(person -> person.setAccessGroup(null));
         AccessGroup deleteGroup = accessGroupService.findById(id).get();
         deleteGroup.setDeleted(true);

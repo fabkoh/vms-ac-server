@@ -4,12 +4,10 @@ import com.vmsac.vmsacserver.model.AccessGroup;
 import com.vmsac.vmsacserver.model.AccessGroupDto;
 import com.vmsac.vmsacserver.model.CreateAccessGroupDto;
 import com.vmsac.vmsacserver.repository.AccessGroupRepository;
-import com.vmsac.vmsacserver.repository.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -18,9 +16,6 @@ public class AccessGroupService {
 
     @Autowired
     AccessGroupRepository AccessGroupRepository;
-
-    @Autowired
-    PersonRepository PersonRepository;
 
     //read methods
     //returns all undeleted access groups
@@ -37,8 +32,6 @@ public class AccessGroupService {
     public Optional<AccessGroup> findById(Long Id){
         return AccessGroupRepository.findByAccessGroupIdAndDeleted(Id,false);
     }
-//    //check if queried access group exists
-//    public Boolean exists(Long Id){return AccessGroupRepository.findByAccessGroupIdAndDeleted(Id,false).isPresent();}
 
     //create access group
     public AccessGroupDto createAccessGroup(CreateAccessGroupDto AccessGroupDto){
@@ -54,5 +47,4 @@ public class AccessGroupService {
         return AccessGroupRepository.save(accessGroup);
     }
 
-    //helpers
 }

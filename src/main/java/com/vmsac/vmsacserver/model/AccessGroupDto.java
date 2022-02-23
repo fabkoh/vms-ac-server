@@ -1,16 +1,13 @@
 package com.vmsac.vmsacserver.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 
-import javax.persistence.CascadeType;
-import javax.persistence.OneToMany;
+
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -28,16 +25,8 @@ public class AccessGroupDto {
 
     private String accessGroupDesc;
 
-//    private List<Person> persons = new ArrayList<>();
     private List<PersonOnlyDto> persons;
-//    @OneToMany(mappedBy = "accessGroup", cascade = {CascadeType.ALL, CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH, CascadeType.DETACH})
-//    private List<Person> persons = new ArrayList<>();
-//    public List<Person> getPersons() {
-//        return persons;
-//    }
-//    public void setPersons(List<Person> persons) {
-//        this.persons = persons;
-//    }
+
     public AccessGroup toAccessGroup(Boolean deleted){
         return new AccessGroup(accessGroupId,accessGroupName,accessGroupDesc, deleted, null);
     }

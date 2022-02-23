@@ -5,9 +5,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import reactor.util.annotation.Nullable;
 
-import javax.persistence.CascadeType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.validation.constraints.*;
 
 @Data
@@ -38,17 +35,6 @@ public class PersonDto {
 
  
     private AccessGroupOnlyDto accessGroup;
-//    @ManyToOne(cascade = {CascadeType.ALL, CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH, CascadeType.DETACH})
-//    @JoinColumn(name = "access_group_accessgroupid")
-//    private AccessGroup accessGroup;
-
-//    public AccessGroup getAccessGroup() {
-//        return accessGroup;
-//    }
-//
-//    public void setAccessGroup(AccessGroup accessGroup) {
-//        this.accessGroup = accessGroup;
-//    }
 
     public Person toPerson(Boolean deleted) {
         if(accessGroup == null){
