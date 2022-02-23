@@ -1,9 +1,9 @@
 package com.vmsac.vmsacserver.controller;
 
-import com.vmsac.vmsacserver.model.CreatePersonDto;
 
-import com.vmsac.vmsacserver.model.Person;
-import com.vmsac.vmsacserver.model.PersonDto;
+import com.vmsac.vmsacserver.model.*;
+
+import com.vmsac.vmsacserver.service.AccessGroupService;
 import com.vmsac.vmsacserver.service.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -26,6 +26,8 @@ public class PersonController {
 
     @Autowired
     PersonService personService;
+    @Autowired
+    AccessGroupService AccessGroupService;
 
     @GetMapping("/persons")
     public List<PersonDto> getPersons() {
@@ -70,7 +72,19 @@ public class PersonController {
                     newPersonDto.getPersonUid() + " in use");
             return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
         }
-
+        if (newPersonDto.getAccessGroup() != null){
+            Long accessGroupId = newPersonDto.getAccessGroup().getAccessGroupId();
+            if(AccessGroupService.findById(accessGroupId).isEmpty()){
+                Map<Long, String> errors = new HashMap<>();
+                errors.put(accessGroupId, "accessGroupId " +
+                        accessGroupId + " does not exist");
+                return new ResponseEntity<>(errors,HttpStatus.NOT_FOUND);
+            }
+            AccessGroup accessGroup = AccessGroupService.findById(accessGroupId).get();
+            newPersonDto.setAccessGroup(accessGroup);
+            return new ResponseEntity<>(personService.createNotDeleted(newPersonDto),
+                    HttpStatus.CREATED);
+        }
         return new ResponseEntity<>(personService.createNotDeleted(newPersonDto),
                 HttpStatus.CREATED);
     }
@@ -96,6 +110,19 @@ public class PersonController {
                     updatePersonDto.getPersonUid() + " is already in use");
             return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
         }
+        else if (updatePersonDto.getAccessGroup() != null){
+            Long accessGroupId = updatePersonDto.getAccessGroup().getAccessGroupId();
+            if(!AccessGroupService.findById(accessGroupId).isPresent()){
+                Map<Long, String> errors = new HashMap<>();
+                errors.put(accessGroupId, "accessGroupId " +
+                        accessGroupId + " does not exist");
+                return new ResponseEntity<>(errors,HttpStatus.NOT_FOUND);
+            }
+            AccessGroup accessGroup = AccessGroupService.findById(accessGroupId).get();
+            updatePersonDto.setAccessGroup(accessGroup.toAccessGroupOnlyDto());
+            return new ResponseEntity<>(personService.save(updatePersonDto,false),
+                    HttpStatus.CREATED);
+        }
 
         return ResponseEntity.ok(personService.save(updatePersonDto, false));
     }
@@ -116,6 +143,7 @@ public class PersonController {
 
         Person deletePerson = optionalPerson.get();
         deletePerson.setDeleted(true);
+        deletePerson.setAccessGroup(null);
         personService.save(deletePerson);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

@@ -2,6 +2,7 @@ package com.vmsac.vmsacserver.service;
 
 import com.vmsac.vmsacserver.model.CreatePersonDto;
 import com.vmsac.vmsacserver.model.Person;
+import com.vmsac.vmsacserver.model.PersonOnlyDto;
 import com.vmsac.vmsacserver.model.PersonDto;
 import com.vmsac.vmsacserver.repository.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,9 @@ public class PersonService {
         return personRepository.findByPersonIdAndDeleted(personId, false);
     }
 
+    public List<Person> findByAccGrpId(Long id, Boolean deleted){
+        return personRepository.findByAccessGroupAccessGroupIdAndDeleted(id,deleted);
+    }
 
     // checkers
     public Boolean uidInUse(String uid) {
@@ -102,4 +106,10 @@ public class PersonService {
                 .toString();
 
     }
+
+    //converts list of persononlydto to list of person
+    public List<Person> personsList(List<PersonOnlyDto> stagedPersons){
+        return  personRepository.findByPersonIdInAndDeleted(stagedPersons.stream().map(PersonOnlyDto::getPersonId).collect(Collectors.toList()),false);
+    }
+
 }

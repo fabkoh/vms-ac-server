@@ -1,10 +1,15 @@
 package com.vmsac.vmsacserver.model;
 
+
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -36,9 +41,25 @@ public class Person {
     @Column(name="deleted")
     private Boolean deleted;
 
+    @ManyToOne(cascade = CascadeType.MERGE)
+    @JoinColumn(name = "accessgroupid",referencedColumnName = "accessgroupid")
+    private AccessGroup accessGroup;
+
+
+
+
     public PersonDto toDto() {
+        if(accessGroup == null){
+            return new PersonDto(this.personId, this.personFirstName,
+                    this.personLastName, this.personUid, this.personMobileNumber,
+                    this.personEmail,null);
+        }
         return new PersonDto(this.personId, this.personFirstName,
                 this.personLastName, this.personUid, this.personMobileNumber,
-                this.personEmail);
+                this.personEmail,this.accessGroup.toAccessGroupOnlyDto());
+    }
+    public PersonOnlyDto accDto(){
+        return new PersonOnlyDto(this.personId,this.personFirstName,this.personLastName,this.personUid,
+        this.personMobileNumber,this.personEmail);
     }
 }
