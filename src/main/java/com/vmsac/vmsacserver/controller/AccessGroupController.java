@@ -135,7 +135,7 @@ public class AccessGroupController {
         AccessGroup deleteGroup = accessGroupService.findById(id).get();
         deleteGroup.setDeleted(true);
         accessGroupService.delete((deleteGroup));
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
 }
