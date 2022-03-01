@@ -110,7 +110,7 @@ public class AccessGroupController {
             }
             //remove all existing people first
             personService.findByAccGrpId(checkDto.get().getAccessGroupId(), false).forEach(person -> person.setAccessGroup(null));
-            AccessGroup newAccessGroup = accessGroupService.save(checkDto.get().toDto());
+            AccessGroup newAccessGroup = accessGroupService.save(accessGroupDto);
             newAccessGroup.setPersons(persons);
             persons.forEach(person -> person.setAccessGroup(newAccessGroup));
             persons.forEach(person -> personService.save(person.toDto(),false));
