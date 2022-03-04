@@ -75,3 +75,19 @@ CREATE TABLE IF NOT EXISTS Credentials (
   deleted BOOLEAN,
   PRIMARY KEY (credId)
 );
+
+CREATE TABLE IF NOT EXISTS Entrances(
+  entranceId VARCHAR(255) NOT NULL,
+  entranceName VARCHAR(255),
+  entranceDesc VARCHAR(255),
+  normallyCloseOpen BOOLEAN,
+  isEnabled BOOLEAN,
+  controllerId VARCHAR(255) NOT NULL,
+  PRIMARY KEY (entranceId)
+);
+
+CREATE TABLE IF NOT EXISTS AccessGroupsEntrance(
+  groupToEntName VARCHAR(255) NOT NULL,
+  accessGroupId VARCHAR(255) REFERENCES AccessGroups (accessGroupId) NOT NULL UNIQUE,
+  entranceId VARCHAR(255) REFERENCES Entrances (entranceId) NOT NULL
+);
