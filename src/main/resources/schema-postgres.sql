@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS AccessGroups (
   accessGroupId SERIAL NOT NULL UNIQUE,
   accessGroupName VARCHAR(255) NOT NULL,
   accessGroupDesc TEXT,
-  deleted BOOLEAN,
+  deleted BOOLEAN NOT NULL,
   PRIMARY KEY (accessGroupId)
 );
 
@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS CredentialType(
   credTypeId SERIAL NOT NULL UNIQUE,
   credTypeName VARCHAR(255) NOT NULL UNIQUE,
   credTypeDesc VARCHAR(255),
-  deleted BOOLEAN,
+  deleted BOOLEAN NOT NULL,
   PRIMARY KEY (credTypeId)
 );
 
@@ -72,22 +72,24 @@ CREATE TABLE IF NOT EXISTS Credentials (
   credTypeId INT REFERENCES CredentialType (credTypeId) NOT NULL,
   personId INT REFERENCES Persons (personId),
   scheduledVisitId INT References ScheduledVisit (scheduledVisitId),
-  deleted BOOLEAN,
+  deleted BOOLEAN NOT NULL,
   PRIMARY KEY (credId)
 );
 
 CREATE TABLE IF NOT EXISTS Entrances(
-  entranceId VARCHAR(255) NOT NULL,
-  entranceName VARCHAR(255),
+  entranceId SERIAL NOT NULL UNIQUE,
+  entranceName VARCHAR(255) NOT NULL,
   entranceDesc VARCHAR(255),
-  normallyCloseOpen BOOLEAN,
-  isEnabled BOOLEAN,
-  controllerId VARCHAR(255) NOT NULL,
+  isActive BOOLEAN NOT NULL,
+  controllerId VARCHAR(255),
+  deleted BOOLEAN NOT NULL,
   PRIMARY KEY (entranceId)
 );
 
 CREATE TABLE IF NOT EXISTS AccessGroupsEntrance(
-  groupToEntName VARCHAR(255) NOT NULL,
-  accessGroupId VARCHAR(255) REFERENCES AccessGroups (accessGroupId) NOT NULL UNIQUE,
-  entranceId VARCHAR(255) REFERENCES Entrances (entranceId) NOT NULL
+  groupToEntranceId SERIAL NOT NULL UNIQUE,
+  accessGroupId INT REFERENCES AccessGroups (accessGroupId) NOT NULL,
+  entranceId INT REFERENCES Entrances (entranceId) NOT NULL,
+  deleted BOOLEAN NOT NULL,
+  PRIMARY KEY (groupToEntranceId)
 );
