@@ -121,7 +121,7 @@ public class PersonController {
             AccessGroup accessGroup = AccessGroupService.findById(accessGroupId).get();
             updatePersonDto.setAccessGroup(accessGroup.toAccessGroupOnlyDto());
             return new ResponseEntity<>(personService.save(updatePersonDto,false),
-                    HttpStatus.CREATED);
+                    HttpStatus.OK);
         }
 
         return ResponseEntity.ok(personService.save(updatePersonDto, false));
