@@ -86,7 +86,7 @@ CREATE TABLE IF NOT EXISTS Entrances(
   PRIMARY KEY (entranceId)
 );
 
-CREATE TABLE IF NOT EXISTS AccessGroupsEntrance(
+CREATE TABLE IF NOT EXISTS AccessGroupsEntranceNtoN(
   groupToEntranceId SERIAL NOT NULL UNIQUE,
   accessGroupId INT REFERENCES AccessGroups (accessGroupId) NOT NULL,
   entranceId INT REFERENCES Entrances (entranceId) NOT NULL,
