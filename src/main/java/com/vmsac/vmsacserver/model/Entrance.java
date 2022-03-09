@@ -2,6 +2,7 @@ package com.vmsac.vmsacserver.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -14,6 +15,7 @@ import java.util.stream.Collectors;
 @Entity
 @Data
 @Table(name = "entrances")
+@Builder
 public class Entrance {
 
     @Id
@@ -27,8 +29,8 @@ public class Entrance {
     @Column(name = "entrancedesc")
     private String entranceDesc;
 
-    @Column(name = "isenabled")
-    private Boolean isEnabled;
+    @Column(name = "isactive")
+    private Boolean isActive;
 
     @Column(name = "deleted")
     private Boolean deleted;
@@ -40,9 +42,9 @@ public class Entrance {
 
     public EntranceDto toDto(){
         return new EntranceDto(this.entranceId, this.entranceName,
-                this.entranceDesc,isEnabled);
+                this.entranceDesc,isActive);
     }
     public EntranceOnlyDto toEntranceOnlyDto(){
-        return new EntranceOnlyDto(this.entranceId,this.entranceName,this.entranceDesc, this.isEnabled);
+        return new EntranceOnlyDto(this.entranceId,this.entranceName,this.entranceDesc, this.isActive);
     }
 }
