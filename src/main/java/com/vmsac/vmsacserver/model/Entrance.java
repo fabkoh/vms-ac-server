@@ -1,6 +1,8 @@
 package com.vmsac.vmsacserver.model;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -27,22 +29,26 @@ public class Entrance {
     @Column(name = "entrancedesc")
     private String entranceDesc;
 
-    @Column(name = "isenabled")
-    private Boolean isEnabled;
+    @Column(name = "isactive")
+    private Boolean isActive;
 
     @Column(name = "deleted")
     private Boolean deleted;
 
-//    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class , property = "personId")
-//    @JsonIgnore
-//    @OneToMany(mappedBy = "accessGroup")
-//    private List<Person> persons;
+    //@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class , property = "accessGroupId")
+    //@JsonIgnore
+   // @OneToMany(mappedBy = "accessGroup")
+    //private List<AccessGroup> accessGroups;
 
     public EntranceDto toDto(){
+        /*if (this.accessGroups == null) {
+            return new EntranceDto(this.entranceId, this.entranceName,
+                    this.entranceDesc, this.isActive, null);
+        } */
         return new EntranceDto(this.entranceId, this.entranceName,
-                this.entranceDesc,isEnabled);
+                this.entranceDesc, this.isActive,this.accessGroups.stream().map(AccessGroup::toAccessGroupOnlyDto).collect(Collectors.toList()));
     }
     public EntranceOnlyDto toEntranceOnlyDto(){
-        return new EntranceOnlyDto(this.entranceId,this.entranceName,this.entranceDesc, this.isEnabled);
+        return new EntranceOnlyDto(this.entranceId,this.entranceName,this.entranceDesc, this.isActive);
     }
 }
