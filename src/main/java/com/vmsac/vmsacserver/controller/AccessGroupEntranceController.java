@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @CrossOrigin(origins="*")
 @RestController
@@ -19,8 +21,8 @@ public class AccessGroupEntranceController {
 
     // return access group entrance objects
     @GetMapping("/access-group-entrance")
-    public List<AccessGroupEntranceNtoNDto> getAccessGroupEntrance(@RequestParam(required = false) Long accessGroupId,
-                                                                   @RequestParam(required = false) Long entranceId) {
+    public List<AccessGroupEntranceNtoNDto> getAccessGroupEntrance(@RequestParam(name="accessgroupid", required = false) Long accessGroupId,
+                                                                   @RequestParam(name="entranceid", required = false) Long entranceId) {
         if (accessGroupId == null && entranceId == null) {
             return accessGroupEntranceService.findAll();
         }
@@ -33,12 +35,24 @@ public class AccessGroupEntranceController {
         return accessGroupEntranceService.findAllWhereAccessGroupIdAndEntranceId(accessGroupId, entranceId);
     }
 
-    // associates entrance with all access group in access group list
+    // associates entrance with all access groups in accessGroupIds
     @PostMapping("/access-group-entrance/entrance/{entranceId}")
     public ResponseEntity<?> assignEntranceIdToAccessGroupIds(@PathVariable Long entranceId,
-                                                          @RequestParam List<Long> accessGroupIds) {
+                                                              @RequestParam(name = "accessgroupids", required = false) List<Long> accessGroupIds) {
         try {
-            accessGroupEntranceService.assignEntranceToAccessGroups(entranceId, accessGroupIds);
+            accessGroupEntranceService.assignEntranceToAccessGroups(entranceId, Objects.requireNonNullElseGet(accessGroupIds, ArrayList::new));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.noContent().build();
+    }
+
+    // associates the access group with all entrances in entranceIds
+    @PostMapping("/access-group-entrance/access-group/{accessGroupId}")
+    public ResponseEntity<?> assignAccessGroupIdToEntranceIds(@PathVariable Long accessGroupId,
+                                                              @RequestParam(name = "entranceids", required = false) List<Long> entranceIds) {
+        try {
+            accessGroupEntranceService.assignAccessGroupToEntrances(accessGroupId, Objects.requireNonNullElseGet(entranceIds, ArrayList::new));
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }

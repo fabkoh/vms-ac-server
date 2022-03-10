@@ -7,13 +7,13 @@ import java.util.List;
 
 public interface AccessGroupEntranceNtoNRepository extends JpaRepository<AccessGroupEntranceNtoN, Long> {
 
-    List<AccessGroupEntranceNtoN> findAllByDeleted(Boolean deleted);
+    List<AccessGroupEntranceNtoN> findAllByDeletedFalse();
 
-    List<AccessGroupEntranceNtoN> findAllByEntranceEntranceIdAndDeleted(Long entranceId, Boolean deleted);
+    List<AccessGroupEntranceNtoN> findAllByEntranceEntranceIdAndDeletedFalse(Long entranceId);
 
-    List<AccessGroupEntranceNtoN> findAllByAccessGroupAccessGroupIdAndDeleted(Long accessGroupId, Boolean deleted);
+    List<AccessGroupEntranceNtoN> findAllByAccessGroupAccessGroupIdAndDeletedFalse(Long accessGroupId);
 
-    List<AccessGroupEntranceNtoN> findAllByAccessGroupAccessGroupIdAndEntranceEntranceIdAndDeleted(Long accessGroupId, Long entranceId, Boolean deleted);
+    List<AccessGroupEntranceNtoN> findAllByAccessGroupAccessGroupIdAndEntranceEntranceIdAndDeletedFalse(Long accessGroupId, Long entranceId);
 
-    List<AccessGroupEntranceNtoN> findAllByEntranceEntranceIdAndAccessGroupAccessGroupIdInAndDeleted(Long entranceId, List<Long> accessGroupIds, Boolean deleted);
+    List<AccessGroupEntranceNtoN> findAllByEntranceEntranceIdAndAccessGroupAccessGroupIdInAndDeletedFalse(Long entranceId, List<Long> accessGroupIds);
 }

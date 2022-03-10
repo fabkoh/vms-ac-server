@@ -34,7 +34,7 @@ public class AccessGroupEntranceNtoN {
     private Boolean deleted;
 
     public AccessGroupEntranceNtoNDto toDto() {
-        return new AccessGroupEntranceNtoNDto(groupToEntranceId, entrance, accessGroup.toAccessGroupOnlyDto());
+        return new AccessGroupEntranceNtoNDto(groupToEntranceId, entrance.toEntranceOnlyDto(), accessGroup.toAccessGroupOnlyDto());
     }
 
 }
