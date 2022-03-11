@@ -22,7 +22,7 @@ public class EntranceService {
     //read methods
     //returns all undeleted entrances
     public List<EntranceDto> findAllEntrances(){
-        return EntranceRepository.findByDeleted(false).stream()
+        return EntranceRepository.findBByEntranceIdInAndDeletedFalse(false).stream()
                 .map(Entrance::toDto)
                 .collect(Collectors.toList());
     }

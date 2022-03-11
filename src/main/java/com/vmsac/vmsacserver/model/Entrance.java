@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
 @Entity
 @Data
 @Table(name = "entrances")
+@Builder
 public class Entrance {
 
     @Id
@@ -46,7 +48,7 @@ public class Entrance {
                     this.entranceDesc, this.isActive, null);
         } */
         return new EntranceDto(this.entranceId, this.entranceName,
-                this.entranceDesc, this.isActive,this.accessGroups.stream().map(AccessGroup::toAccessGroupOnlyDto).collect(Collectors.toList()));
+                this.entranceDesc, this.isActive, null);
     }
     public EntranceOnlyDto toEntranceOnlyDto(){
         return new EntranceOnlyDto(this.entranceId,this.entranceName,this.entranceDesc, this.isActive);
