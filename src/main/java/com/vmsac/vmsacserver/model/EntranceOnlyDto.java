@@ -22,9 +22,9 @@ public class EntranceOnlyDto {
 
     private String entranceDesc;
 
-    private Boolean isEnabled;
+    private Boolean isActive;
 
     public Entrance toEntrance(Boolean deleted){
-        return new Entrance(entranceId,entranceName,entranceDesc, isEnabled, deleted);
+        return new Entrance(entranceId,entranceName,entranceDesc, isActive, deleted, null);
     }
 }

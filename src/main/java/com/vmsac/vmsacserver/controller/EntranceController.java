@@ -1,31 +1,33 @@
 package com.vmsac.vmsacserver.controller;
 
 import com.vmsac.vmsacserver.model.*;
+import com.vmsac.vmsacserver.service.EntranceService;
 import com.vmsac.vmsacserver.service.AccessGroupService;
-import com.vmsac.vmsacserver.service.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.persistence.Access;
 import java.util.*;
 
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api")
-public class AccessGroupController {
+public class EntranceController {
 
     @Autowired
     AccessGroupService accessGroupService;
     @Autowired
-    PersonService personService;
+    EntranceService entranceService;
 
-    //returns all accessgroups
-    @GetMapping("/accessgroups")
-    public List<AccessGroupDto> getAccessGroups(){
-        return accessGroupService.findAllAccessGroups();
+
+    //returns all entrances
+    @GetMapping("/entrances")
+    public List<EntranceDto> getEntrances(){
+        return entranceService.findAllEntrances();
     }
-
+/*
     //returns details of an accessgroup
     @GetMapping("/accessgroup/{id}")
     public ResponseEntity<?> getAccessGroup(@PathVariable("id") Long accessGroupId){
@@ -39,22 +41,22 @@ public class AccessGroupController {
                 accessGroupId + " does not exist");
 
         return new ResponseEntity<>(errors, HttpStatus.NOT_FOUND);
-    }
+    } */
 
-    //create an access group
-    @PostMapping("/accessgroup")
-    public ResponseEntity<?> createAccessGroup(@RequestBody CreateAccessGroupDto accessGroupDto) {
-        if (accessGroupDto.getAccessGroupName() == null) {
-            return new ResponseEntity<>(accessGroupDto, HttpStatus.BAD_REQUEST);
-        } else if (accessGroupService.nameInUse(accessGroupDto.getAccessGroupName())) {
+    //create an entrance
+    @PostMapping("/entrance")
+    public ResponseEntity<?> createEntrance(@RequestBody CreateEntranceDto entranceDto) {
+        if (entranceDto.getEntranceName() == null) {
+            return new ResponseEntity<>(entranceDto, HttpStatus.BAD_REQUEST);
+        } else if (entranceService.nameInUse(entranceDto.getEntranceName())) {
             Map<String, String> errors = new HashMap<>();
-            errors.put("accessGroupName", "Access Group Name " +
-                    accessGroupDto.getAccessGroupName() + " in use");
+            errors.put("entranceName", "Entrance Name " +
+                    entranceDto.getEntranceName() + " in use");
             return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
         }
-        if(accessGroupDto.getPersons() != null){
-            List<PersonOnlyDto> stagedPersons = accessGroupDto.getPersons();
-            List<Person> persons = personService.personsList(stagedPersons);
+      /*  if(entranceDto.getAccessGroups() != null){
+            List<AccessGroupOnlyDto> stagedAccessGroups = entranceDto.getAccessGroups();
+            List<AccessGroup> accessGroups = entranceService.accessGroupList(stagedAccessGroups);
             if (stagedPersons.size() != persons.size()) { // deleted / not found persons
                 return new ResponseEntity<>("", HttpStatus.NOT_FOUND);
             }
@@ -64,10 +66,11 @@ public class AccessGroupController {
             persons.forEach(person -> personService.save(person.toDto(),false));
             return new ResponseEntity<>(createdAccessGroup.toAccessGroupOnlyDto(), HttpStatus.CREATED);
 
-        }
-        return new ResponseEntity<>(accessGroupService.createAccessGroup(accessGroupDto), HttpStatus.CREATED);
+        } */
+        return new ResponseEntity<>(entranceService.createEntrance(entranceDto), HttpStatus.CREATED);
     }
 
+    /*
     //Update name or description of access group
     @PutMapping("/accessgroup")
     public ResponseEntity<?> updateAccessGroup(@RequestBody AccessGroupDto accessGroupDto){
@@ -110,7 +113,7 @@ public class AccessGroupController {
             }
             //remove all existing people first
             personService.findByAccGrpId(checkDto.get().getAccessGroupId(), false).forEach(person -> person.setAccessGroup(null));
-            AccessGroup newAccessGroup = accessGroupService.save(accessGroupDto);
+            AccessGroup newAccessGroup = accessGroupService.save(checkDto.get().toDto());
             newAccessGroup.setPersons(persons);
             persons.forEach(person -> person.setAccessGroup(newAccessGroup));
             persons.forEach(person -> personService.save(person.toDto(),false));
@@ -135,7 +138,7 @@ public class AccessGroupController {
         AccessGroup deleteGroup = accessGroupService.findById(id).get();
         deleteGroup.setDeleted(true);
         accessGroupService.delete((deleteGroup));
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
-
+*/
 }
