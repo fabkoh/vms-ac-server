@@ -19,6 +19,6 @@ public class CreateEntranceDto {
     private List<AccessGroupOnlyDto> accessGroups;
 
     public Entrance toEntrance(Boolean deleted){
-        return new Entrance(null,entranceName,entranceDesc,isActive,deleted, null);
+        return new Entrance(null,entranceName,entranceDesc,isActive,deleted);
     }
 }

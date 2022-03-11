@@ -48,7 +48,7 @@ public class Entrance {
                     this.entranceDesc, this.isActive, null);
         } */
         return new EntranceDto(this.entranceId, this.entranceName,
-                this.entranceDesc, this.isActive);
+                this.entranceDesc, this.isActive, null);
     }
     public EntranceOnlyDto toEntranceOnlyDto(){
         return new EntranceOnlyDto(this.entranceId,this.entranceName,this.entranceDesc, this.isActive);
