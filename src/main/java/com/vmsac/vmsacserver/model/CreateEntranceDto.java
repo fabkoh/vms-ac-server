@@ -1,5 +1,6 @@
 package com.vmsac.vmsacserver.model;
 
+import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoNDto;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
@@ -16,9 +17,12 @@ public class CreateEntranceDto {
 
     private Boolean isActive;
 
-    private List<AccessGroupOnlyDto> accessGroups;
+    private List<AccessGroupEntranceNtoNDto> accessGroupsEntrance;
 
     public Entrance toEntrance(Boolean deleted){
-        return new Entrance(null,entranceName,entranceDesc,isActive,deleted);
+        if(this.isActive == null) {
+            return new Entrance(null,entranceName,entranceDesc,false,deleted, null);
+        }
+        return new Entrance(null,entranceName,entranceDesc,isActive,deleted, null);
     }
 }

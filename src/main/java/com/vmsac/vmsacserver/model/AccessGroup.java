@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import com.fasterxml.jackson.annotation.ObjectIdGenerator;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoN;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -40,6 +41,10 @@ public class AccessGroup {
     @JsonIgnore
     @OneToMany(mappedBy = "accessGroup")
     private List<Person> persons;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "accessGroup")
+    private List<AccessGroupEntranceNtoN> accessGroupEntrance;
 
     public AccessGroupDto toDto(){
         if (this.persons == null) {

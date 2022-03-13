@@ -13,4 +13,5 @@ public class AccessGroupEntranceNtoNDto {
     private Long groupToEntranceId;
     private EntranceOnlyDto entrance;
     private AccessGroupOnlyDto accessGroup;
+
 }

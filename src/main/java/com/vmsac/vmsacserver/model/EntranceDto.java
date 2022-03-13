@@ -1,5 +1,6 @@
 package com.vmsac.vmsacserver.model;
 
+import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoNDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,9 +26,9 @@ public class EntranceDto {
 
     private Boolean isActive;
 
-    private List<AccessGroupOnlyDto> accessGroups;
+    private List<AccessGroupEntranceNtoNDto> accessGroups;
 
     public Entrance toEntrance(Boolean deleted){
-        return new Entrance(entranceId,entranceName,entranceDesc, isActive, deleted);
+        return new Entrance(entranceId,entranceName,entranceDesc, isActive, deleted, null);
     }
 }

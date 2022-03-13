@@ -25,6 +25,6 @@ public class EntranceOnlyDto {
     private Boolean isActive;
 
     public Entrance toEntrance(Boolean deleted){
-        return new Entrance(entranceId,entranceName,entranceDesc, isActive, deleted);
+        return new Entrance(entranceId,entranceName,entranceDesc, isActive, deleted, null);
     }
 }

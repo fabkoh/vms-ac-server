@@ -16,6 +16,6 @@ public class CreateAccessGroupDto {
 
     private List<PersonOnlyDto> persons;
     public AccessGroup toAccessGroup(Boolean deleted){
-        return new AccessGroup(null,accessGroupName,accessGroupDesc,deleted,null);
+        return new AccessGroup(null,accessGroupName,accessGroupDesc,deleted,null,null);
     }
 }
