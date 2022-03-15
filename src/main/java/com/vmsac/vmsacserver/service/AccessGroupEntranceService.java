@@ -105,7 +105,7 @@ public class AccessGroupEntranceService {
         }
 
         AccessGroup accessGroup = accessGroupRepository.findByAccessGroupIdAndDeletedFalse(accessGroupId).orElseThrow(() -> new RuntimeException("Access group does not exist"));
-        List<Entrance> entrancesToBeAdded = entranceRepository.findBByEntranceIdInAndDeletedFalse(entranceIdsSet);
+        List<Entrance> entrancesToBeAdded = entranceRepository.findByEntranceIdInAndDeletedFalse(entranceIdsSet);
         if (entrancesToBeAdded.size() != entranceIdsSet.size()) {
             throw new RuntimeException("Entrance(s) does not exist");
         }

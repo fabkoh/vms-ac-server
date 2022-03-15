@@ -17,36 +17,42 @@ public class EntranceService {
     AccessGroupRepository AccessGroupRepository;
 
     @Autowired
-    EntranceRepository EntranceRepository;
+    EntranceRepository entranceRepository;
 
     //read methods
     //returns all undeleted entrances
     public List<EntranceDto> findAllEntrances(){
-        return EntranceRepository.findByDeleted(false).stream()
+        return entranceRepository.findByDeleted(false).stream()
                 .map(Entrance::toDto)
                 .collect(Collectors.toList());
     }
     public Boolean nameInUse(String name){
-        return EntranceRepository.findByEntranceNameAndDeletedFalse(name).isPresent();
+        return entranceRepository.findByEntranceNameAndDeletedFalse(name).isPresent();
     }
 
     //returns queried entrance
     public Optional<Entrance> findById(Long Id){
-        return EntranceRepository.findByEntranceIdAndDeletedFalse(Id);
+        return entranceRepository.findByEntranceIdAndDeletedFalse(Id);
     }
 
     //create entrance
     public EntranceDto createEntrance(CreateEntranceDto EntranceDto){
-        return EntranceRepository.save(EntranceDto.toEntrance(false)).toDto();
+        return entranceRepository.save(EntranceDto.toEntrance(false)).toDto();
     }
 
     //update entrance
     public Entrance save(EntranceDto entranceDto){
-        return EntranceRepository.save(entranceDto.toEntrance(false));
+        return entranceRepository.save(entranceDto.toEntrance(false));
     }
 //    //delete access group
     //public AccessGroup delete(AccessGroup accessGroup){
     //    return AccessGroupRepository.save(accessGroup);
     //}
 
+    // set isActive to true for the given entrance ids
+    public EntranceDto updateEntranceIsActiveWithId(Boolean isActive, Long entranceId) throws Exception {
+        Entrance entrance = entranceRepository.findByEntranceIdAndDeletedFalse(entranceId).orElseThrow();
+        entrance.setIsActive(isActive);
+        return entranceRepository.save(entrance).toDto();
+    }
 }
