@@ -1,8 +1,7 @@
 package com.vmsac.vmsacserver.model;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoN;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -37,18 +36,17 @@ public class Entrance {
     @Column(name = "deleted")
     private Boolean deleted;
 
-    //@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class , property = "accessGroupId")
-    //@JsonIgnore
-   // @OneToMany(mappedBy = "accessGroup")
-    //private List<AccessGroup> accessGroups;
+    @JsonIgnore
+    @OneToMany(mappedBy = "entrance")
+    private List<AccessGroupEntranceNtoN> accessGroupEntrance;
 
     public EntranceDto toDto(){
-        /*if (this.accessGroups == null) {
+        if (this.accessGroupEntrance == null) {
             return new EntranceDto(this.entranceId, this.entranceName,
                     this.entranceDesc, this.isActive, null);
-        } */
+        }
         return new EntranceDto(this.entranceId, this.entranceName,
-                this.entranceDesc, this.isActive, null);
+                this.entranceDesc, this.isActive, this.accessGroupEntrance.stream().map(AccessGroupEntranceNtoN::toDto).collect(Collectors.toList()));
     }
     public EntranceOnlyDto toEntranceOnlyDto(){
         return new EntranceOnlyDto(this.entranceId,this.entranceName,this.entranceDesc, this.isActive);

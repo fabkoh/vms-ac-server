@@ -1,6 +1,9 @@
 package com.vmsac.vmsacserver.controller;
 
 import com.vmsac.vmsacserver.model.*;
+import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoN;
+import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoNDto;
+import com.vmsac.vmsacserver.service.AccessGroupEntranceService;
 import com.vmsac.vmsacserver.service.EntranceService;
 import com.vmsac.vmsacserver.service.AccessGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +23,8 @@ public class EntranceController {
     AccessGroupService accessGroupService;
     @Autowired
     EntranceService entranceService;
+    @Autowired
+    AccessGroupEntranceService accessGroupEntranceService;
 
 
     //returns all entrances
@@ -27,21 +32,21 @@ public class EntranceController {
     public List<EntranceDto> getEntrances(){
         return entranceService.findAllEntrances();
     }
-/*
-    //returns details of an accessgroup
-    @GetMapping("/accessgroup/{id}")
-    public ResponseEntity<?> getAccessGroup(@PathVariable("id") Long accessGroupId){
-        Optional<AccessGroup> optionalAccessGroup = accessGroupService.findById(accessGroupId);
-        if(optionalAccessGroup.isPresent()){
-            AccessGroupDto accessGroupDto = optionalAccessGroup.get().toDto();
-            return ResponseEntity.ok(accessGroupDto);
+
+    //returns details of an entrance
+    @GetMapping("/entrance/{id}")
+    public ResponseEntity<?> getEntrance(@PathVariable("id") Long entranceId){
+        Optional<Entrance> optionalEntrance = entranceService.findById(entranceId);
+        if(optionalEntrance.isPresent()){
+            EntranceDto entranceDto = optionalEntrance.get().toDto();
+            return ResponseEntity.ok(entranceDto);
         }
         Map<String, String> errors = new HashMap<>();
-        errors.put("accessGroupId", "Access Group with Id " +
-                accessGroupId + " does not exist");
+        errors.put("entranceId", "Entrance with Id " +
+                entranceId + " does not exist");
 
         return new ResponseEntity<>(errors, HttpStatus.NOT_FOUND);
-    } */
+    }
 
     //create an entrance
     @PostMapping("/entrance")
@@ -54,19 +59,19 @@ public class EntranceController {
                     entranceDto.getEntranceName() + " in use");
             return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
         }
-      /*  if(entranceDto.getAccessGroups() != null){
-            List<AccessGroupOnlyDto> stagedAccessGroups = entranceDto.getAccessGroups();
-            List<AccessGroup> accessGroups = entranceService.accessGroupList(stagedAccessGroups);
-            if (stagedPersons.size() != persons.size()) { // deleted / not found persons
+        if(entranceDto.getAccessGroupsEntrance() != null){
+            List<AccessGroupEntranceNtoNDto> stagedAccessGroups = entranceDto.getAccessGroupsEntrance();
+            List<AccessGroupEntranceNtoNDto> accessGroupsEntrances = accessGroupEntranceService.findAll();
+            if (stagedAccessGroups.size() != accessGroupsEntrances.size()) { // deleted / not found accessgrpEntrance
                 return new ResponseEntity<>("", HttpStatus.NOT_FOUND);
             }
-            AccessGroup createdAccessGroup = accessGroupService.save(accessGroupDto.toAccessGroup(false).toDto());
-            persons.forEach(person -> person.setAccessGroup(createdAccessGroup));
-            createdAccessGroup.setPersons(persons);
+         /*   Entrance createdEntrance = entranceService.save(entranceDto.toEntrance(false).toDto());
+            accessGroupsEntrances.forEach(accessGroupEntrance -> accessGroupEntrance.setAccessGroup(createdEntrance));
+            createdEntrance.setAccessGroupEntranceNtoN(persons);
             persons.forEach(person -> personService.save(person.toDto(),false));
-            return new ResponseEntity<>(createdAccessGroup.toAccessGroupOnlyDto(), HttpStatus.CREATED);
+            return new ResponseEntity<>(createdEntrance.toEntranceOnlyDto(), HttpStatus.CREATED); */
 
-        } */
+        }
         return new ResponseEntity<>(entranceService.createEntrance(entranceDto), HttpStatus.CREATED);
     }
 

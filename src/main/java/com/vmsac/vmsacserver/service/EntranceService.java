@@ -22,17 +22,17 @@ public class EntranceService {
     //read methods
     //returns all undeleted entrances
     public List<EntranceDto> findAllEntrances(){
-        return EntranceRepository.findBByEntranceIdInAndDeletedFalse(false).stream()
+        return EntranceRepository.findByDeleted(false).stream()
                 .map(Entrance::toDto)
                 .collect(Collectors.toList());
     }
     public Boolean nameInUse(String name){
-        return EntranceRepository.findByEntranceNameAndDeleted(name ,false).isPresent();
+        return EntranceRepository.findByEntranceNameAndDeletedFalse(name).isPresent();
     }
 
     //returns queried entrance
     public Optional<Entrance> findById(Long Id){
-        return EntranceRepository.findByEntranceIdAndDeleted(Id,false);
+        return EntranceRepository.findByEntranceIdAndDeletedFalse(Id);
     }
 
     //create entrance
@@ -40,7 +40,7 @@ public class EntranceService {
         return EntranceRepository.save(EntranceDto.toEntrance(false)).toDto();
     }
 
-    //update access group
+    //update entrance
     public Entrance save(EntranceDto entranceDto){
         return EntranceRepository.save(entranceDto.toEntrance(false));
     }
