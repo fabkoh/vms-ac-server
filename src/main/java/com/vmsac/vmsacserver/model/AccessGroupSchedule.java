@@ -1,5 +1,6 @@
 package com.vmsac.vmsacserver.model;
 
+import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoN;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -32,7 +33,12 @@ public class AccessGroupSchedule {
     @Column(name = "timeend")
     private String timeEnd;
 
-    //link to accgrpentrance NtoN
+//    @Column(name = "grouptoentranceid")
+//    private Long groupToEntranceId;
+//
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "grouptoentranceid", insertable = false, updatable = false)
+//    private AccessGroupEntranceNtoN accessGroupEntranceNtoN; // left here in case require in the future
 
     @Column(name = "deleted")
     private Boolean deleted;
