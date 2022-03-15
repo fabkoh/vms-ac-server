@@ -75,6 +75,24 @@ public class EntranceController {
         return new ResponseEntity<>(entranceService.createEntrance(entranceDto), HttpStatus.CREATED);
     }
 
+    @PutMapping("/entrance/enable/{entranceId}")
+    public ResponseEntity<?> enableEntrance(@PathVariable("entranceId") Long entranceId) {
+        try {
+            return ResponseEntity.ok(entranceService.updateEntranceIsActiveWithId(true, entranceId));
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PutMapping("/entrance/unlock/{entranceId}")
+    public ResponseEntity<?> disableEntrance(@PathVariable(name = "entranceId") Long entranceId) {
+        try {
+            return ResponseEntity.ok(entranceService.updateEntranceIsActiveWithId(false, entranceId));
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     /*
     //Update name or description of access group
     @PutMapping("/accessgroup")
