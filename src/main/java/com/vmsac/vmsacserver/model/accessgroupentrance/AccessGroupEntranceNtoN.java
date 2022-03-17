@@ -22,11 +22,11 @@ public class AccessGroupEntranceNtoN {
     @Column(name = "grouptoentranceid", columnDefinition = "serial")
     private Long groupToEntranceId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name="accessgroupid")
     private AccessGroup accessGroup;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name="entranceid")
     private Entrance entrance;
 

@@ -1,14 +1,10 @@
-package com.vmsac.vmsacserver.model;
+package com.vmsac.vmsacserver.model.accessgroupschedule;
 
-import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoN;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.sql.Time;
-import java.util.Date;
-import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -33,9 +29,9 @@ public class AccessGroupSchedule {
     @Column(name = "timeend")
     private String timeEnd;
 
-//    @Column(name = "grouptoentranceid")
-//    private Long groupToEntranceId;
-//
+    @Column(name = "grouptoentranceid")
+    private Long groupToEntranceId;
+
 //    @ManyToOne(fetch = FetchType.LAZY)
 //    @JoinColumn(name = "grouptoentranceid", insertable = false, updatable = false)
 //    private AccessGroupEntranceNtoN accessGroupEntranceNtoN; // left here in case require in the future
@@ -44,6 +40,6 @@ public class AccessGroupSchedule {
     private Boolean deleted;
 
     public AccessGroupScheduleDto toDto(){
-        return new AccessGroupScheduleDto(this.accessGroupScheduleId,this.accessGroupScheduleName,this.rrule,this.timeStart,this.timeEnd);
+        return new AccessGroupScheduleDto(this.accessGroupScheduleId,this.accessGroupScheduleName,this.rrule,this.timeStart,this.timeEnd, this.groupToEntranceId);
     }
 }
