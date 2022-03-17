@@ -2,17 +2,16 @@ package com.vmsac.vmsacserver.service;
 
 import com.vmsac.vmsacserver.model.AccessGroup;
 import com.vmsac.vmsacserver.model.Entrance;
-import com.vmsac.vmsacserver.model.Person;
-import com.vmsac.vmsacserver.model.PersonOnlyDto;
 import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoN;
 import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoNDto;
+import com.vmsac.vmsacserver.model.accessgroupschedule.AccessGroupSchedule;
 import com.vmsac.vmsacserver.repository.AccessGroupEntranceNtoNRepository;
 import com.vmsac.vmsacserver.repository.AccessGroupRepository;
+import com.vmsac.vmsacserver.repository.AccessGroupScheduleRepository;
 import com.vmsac.vmsacserver.repository.EntranceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -29,6 +28,9 @@ public class AccessGroupEntranceService {
 
     @Autowired
     EntranceRepository entranceRepository;
+
+    @Autowired
+    AccessGroupScheduleRepository accessGroupScheduleRepository;
 
     public List<AccessGroupEntranceNtoNDto> findAll() {
         return accessGroupEntranceRepository.findAllByDeletedFalse()
@@ -58,63 +60,121 @@ public class AccessGroupEntranceService {
                 .collect(Collectors.toList());
     }
 
-    public void assignEntranceToAccessGroups(Long entranceId, List<Long> accessGroupIds) throws Exception {
+    // at end of transaction, only access group ids would be tied to entrance id
+    // remove all schedules with deleted groupToEntranceId
+    // add default schedules to new groupToEntranceId
+    public void assignAccessGroupsToEntrance(List<Long> accessGroupIds, Long entranceId) throws Exception {
         Set<Long> accessGroupIdsSet = new HashSet<>(accessGroupIds);
 
-        // first, remove all accessGroupEntrance not in accessGroupIds
+        // first, find nton to delete
         List<AccessGroupEntranceNtoN> accessGroupEntranceListInDB = accessGroupEntranceRepository.findAllByEntranceEntranceIdAndDeletedFalse(entranceId);
-        List<AccessGroupEntranceNtoN> changes = new ArrayList<>();
-        for (AccessGroupEntranceNtoN accessGroupEntrance : accessGroupEntranceListInDB) {
-            Long accessGroupId = accessGroupEntrance.getAccessGroup().getAccessGroupId();
-            if (!accessGroupIdsSet.contains(accessGroupId)) { // remove this access group from entrance
-                accessGroupEntrance.setDeleted(true);
-                changes.add(accessGroupEntrance);
-            } else {
-                accessGroupIdsSet.remove(accessGroupId); // ids left in access group ids are to be created
-            }
-        }
+        List<AccessGroupEntranceNtoN> toDelete = accessGroupEntranceListInDB.stream()
+                .filter(groupEntrance -> {
+                    Long accessGroupId = groupEntrance.getAccessGroup().getAccessGroupId();
+                    if (accessGroupIdsSet.contains(accessGroupId)) {
+                        accessGroupIdsSet.remove(accessGroupId); // ids left in set are for add
+                        return false; // do not keep this group for toDelete
+                    }
+                    groupEntrance.setDeleted(true);
+                    return true; // keep this group for toDelete
+                })
+                .collect(Collectors.toList());
 
+        // ensure all parameters are valid (all entrance / access group exists)
         Entrance entrance = entranceRepository.findByEntranceIdAndDeletedFalse(entranceId).orElseThrow(() -> new RuntimeException("Entrance does not exist"));
         List<AccessGroup> accessGroupsToBeAdded = accessGroupRepository.findByAccessGroupIdInAndDeletedFalse(accessGroupIdsSet);
         if(accessGroupsToBeAdded.size() != accessGroupIdsSet.size()) {
             throw new RuntimeException("Access group(s) does not exist");
         }
-        accessGroupsToBeAdded.forEach(
-                accessGroup -> changes.add(
-                        new AccessGroupEntranceNtoN(null, accessGroup, entrance, false)
-                )
-        );
 
-        accessGroupEntranceRepository.saveAll(changes);
+        // delete all relationships and their schedules
+        deleteAccessGroupEntranceNtoN(toDelete);
+
+        // add new relationships and add new schedules
+        addNewAccessGroupEntranceNtoN(
+                accessGroupsToBeAdded.stream()
+                        .map(group -> new AccessGroupEntranceNtoN(
+                                null,
+                                group,
+                                entrance,
+                                false
+                        ))
+                        .collect(Collectors.toList())
+        );
     }
 
-    public void assignAccessGroupToEntrances(Long accessGroupId, List<Long> entranceIds) {
+    public void assignEntrancesToAccessGroup(List<Long> entranceIds, Long accessGroupId) {
         Set<Long> entranceIdsSet = new HashSet<>(entranceIds);
 
-        // first, remove all accessGroupEntrance not in entranceIds
+        // first, find nton to delete
         List<AccessGroupEntranceNtoN> accessGroupEntranceListInDB = accessGroupEntranceRepository.findAllByAccessGroupAccessGroupIdAndDeletedFalse(accessGroupId);
-        List<AccessGroupEntranceNtoN> changes = new ArrayList<>();
-        for(AccessGroupEntranceNtoN accessGroupEntrance : accessGroupEntranceListInDB) {
-            Long entranceId = accessGroupEntrance.getEntrance().getEntranceId();
-            if (entranceIdsSet.contains(entranceId)) {
-                entranceIdsSet.remove(entranceId); // ids left in entrance ids are to be created
-            } else { // remove this entrance from access group
-                accessGroupEntrance.setDeleted(true);
-                changes.add(accessGroupEntrance);
-            }
-        }
+        List<AccessGroupEntranceNtoN> toDelete = accessGroupEntranceListInDB.stream()
+                .filter(groupEntrance -> {
+                    Long entranceId = groupEntrance.getEntrance().getEntranceId();
+                    if(entranceIdsSet.contains(entranceId)) { // keep it (do not add in toDelete)
+                        entranceIdsSet.remove(entranceId); // ids left in set are for add
+                        return false;
+                    }
+                    groupEntrance.setDeleted(true);
+                    return true; // delete this
+                })
+                .collect(Collectors.toList());
 
+        // ensure all parameters are valid (all entrance / access group exists)
         AccessGroup accessGroup = accessGroupRepository.findByAccessGroupIdAndDeletedFalse(accessGroupId).orElseThrow(() -> new RuntimeException("Access group does not exist"));
         List<Entrance> entrancesToBeAdded = entranceRepository.findByEntranceIdInAndDeletedFalse(entranceIdsSet);
         if (entrancesToBeAdded.size() != entranceIdsSet.size()) {
             throw new RuntimeException("Entrance(s) does not exist");
         }
-        entrancesToBeAdded.forEach(
-                entrance -> changes.add(
-                        new AccessGroupEntranceNtoN(null, accessGroup, entrance, false)
-                )
-        );
 
-        accessGroupEntranceRepository.saveAll(changes);
+        // delete all relationships and their schedules
+        deleteAccessGroupEntranceNtoN(toDelete);
+
+        // add new relationships and add default schedules
+        addNewAccessGroupEntranceNtoN(
+                entrancesToBeAdded.stream()
+                        .map(entrance -> new AccessGroupEntranceNtoN(
+                                null,
+                                accessGroup,
+                                entrance,
+                                false
+                        ))
+                        .collect(Collectors.toList())
+        );
     }
+
+    // adds all access group entrances
+    // get their new ids and adds default schedule for all of them
+    // WARNING: does not check if there's already an existing relationship ie can lead to duplicate relationships
+    private void addNewAccessGroupEntranceNtoN(List<AccessGroupEntranceNtoN> accessGroupEntrances) {
+        List<AccessGroupEntranceNtoN> added = accessGroupEntranceRepository.saveAll(accessGroupEntrances);
+        accessGroupScheduleRepository.saveAll( // save default schedule for each relationship
+                added.stream()
+                        .map(nton -> new AccessGroupSchedule(
+                            null,
+                            "Default Schedule",
+                            "FREQ=DAILY;INTERVAL=1;WKST=MO",
+                            "00:00",
+                            "23:59",
+                            nton.getGroupToEntranceId(),
+                            false
+                        ))
+                        .collect(Collectors.toList())
+        );
+    }
+
+    // delete all given access group entrances
+    // gets their ids and remove their schedules also
+    // WARNING: does not check if access group entrances still exists
+    //          assumes deleted in given list is true already
+    private void deleteAccessGroupEntranceNtoN(List<AccessGroupEntranceNtoN> accessGroupEntrances) {
+        accessGroupEntranceRepository.saveAll(accessGroupEntrances);
+        List<AccessGroupSchedule> toDelete = accessGroupScheduleRepository.findAllByGroupToEntranceIdInAndDeletedFalse(
+                accessGroupEntrances.stream().map(AccessGroupEntranceNtoN::getGroupToEntranceId).collect(Collectors.toList())
+        );
+        toDelete.forEach(schedule -> schedule.setDeleted(true));
+        accessGroupScheduleRepository.saveAll(toDelete);
+    }
+
+
 }

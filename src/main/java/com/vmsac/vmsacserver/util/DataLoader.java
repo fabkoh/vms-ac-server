@@ -4,10 +4,8 @@ import com.vmsac.vmsacserver.model.AccessGroup;
 import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoN;
 import com.vmsac.vmsacserver.model.Entrance;
 import com.vmsac.vmsacserver.model.Person;
-import com.vmsac.vmsacserver.repository.AccessGroupEntranceNtoNRepository;
-import com.vmsac.vmsacserver.repository.AccessGroupRepository;
-import com.vmsac.vmsacserver.repository.EntranceRepository;
-import com.vmsac.vmsacserver.repository.PersonRepository;
+import com.vmsac.vmsacserver.model.accessgroupschedule.AccessGroupSchedule;
+import com.vmsac.vmsacserver.repository.*;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
@@ -19,12 +17,14 @@ public class DataLoader implements CommandLineRunner {
     private final EntranceRepository entranceRepository;
     private final PersonRepository personRepository;
     private final AccessGroupEntranceNtoNRepository accessGroupEntranceRepository;
+    private final AccessGroupScheduleRepository accessGroupScheduleRepository;
 
-    public DataLoader(AccessGroupRepository accessGroupRepository, EntranceRepository entranceRepository, PersonRepository personRepository, AccessGroupEntranceNtoNRepository accessGroupEntranceRepository) {
+    public DataLoader(AccessGroupRepository accessGroupRepository, EntranceRepository entranceRepository, PersonRepository personRepository, AccessGroupEntranceNtoNRepository accessGroupEntranceRepository, AccessGroupScheduleRepository accessGroupScheduleRepository) {
         this.accessGroupRepository = accessGroupRepository;
         this.entranceRepository = entranceRepository;
         this.personRepository = personRepository;
         this.accessGroupEntranceRepository = accessGroupEntranceRepository;
+        this.accessGroupScheduleRepository = accessGroupScheduleRepository;
     }
 
     @Override
@@ -143,6 +143,50 @@ public class DataLoader implements CommandLineRunner {
                 AccessGroupEntranceNtoN.builder()
                         .accessGroup(notDune)
                         .entrance(mainEntrance)
+                        .deleted(false)
+                        .build()
+        );
+
+        AccessGroupSchedule duneMainEntranceDefault = accessGroupScheduleRepository.save(
+                AccessGroupSchedule.builder()
+                        .accessGroupScheduleName("Default Schedule")
+                        .rrule("FREQ=DAILY;INTERVAL=1;WKST=MO")
+                        .timeStart("00:00")
+                        .timeEnd("23:59")
+                        .groupToEntranceId(duneMainEntrance.getGroupToEntranceId())
+                        .deleted(false)
+                        .build()
+        );
+
+        AccessGroupSchedule duneSideEntranceWeekdays = accessGroupScheduleRepository.save(
+                AccessGroupSchedule.builder()
+                        .accessGroupScheduleName("Weekdays 9 to 5")
+                        .rrule("FREQ=WEEKLY;INTERVAL=1;WKST=MO;BYDAY=MO,TU,WE,TH,FR")
+                        .timeStart("09:00")
+                        .timeEnd("17:00")
+                        .groupToEntranceId(duneSideEntrance.getGroupToEntranceId())
+                        .deleted(false)
+                        .build()
+        );
+
+        AccessGroupSchedule duneSideEntranceWeekends = accessGroupScheduleRepository.save(
+                AccessGroupSchedule.builder()
+                        .accessGroupScheduleName("Weekends 12 to 2")
+                        .rrule("FREQ=WEEKLY;INTERVAL=1;WKST=MO;BYDAY=SA,SU")
+                        .timeStart("12:00")
+                        .timeEnd("17:00")
+                        .groupToEntranceId(duneSideEntrance.getGroupToEntranceId())
+                        .deleted(false)
+                        .build()
+        );
+
+        AccessGroupSchedule notDuneMainEntranceDefault = accessGroupScheduleRepository.save(
+                AccessGroupSchedule.builder()
+                        .accessGroupScheduleName("Default Schedule")
+                        .rrule("FREQ=DAILY;INTERVAL=1;WKST=MO")
+                        .timeStart("00:00")
+                        .timeEnd("23:59")
+                        .groupToEntranceId(notDuneMainEntrance.getGroupToEntranceId())
                         .deleted(false)
                         .build()
         );

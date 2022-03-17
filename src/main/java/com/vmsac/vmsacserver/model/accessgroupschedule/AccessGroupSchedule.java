@@ -1,6 +1,7 @@
 package com.vmsac.vmsacserver.model.accessgroupschedule;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,6 +12,7 @@ import javax.persistence.*;
 @Entity
 @Data
 @Table(name = "accessgroupschedule")
+@Builder
 public class AccessGroupSchedule {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
