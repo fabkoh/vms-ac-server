@@ -17,12 +17,12 @@ public class CreateEntranceDto {
 
     private Boolean isActive;
 
-    private List<AccessGroupEntranceNtoNDto> accessGroupsEntrance;
+    private List<AccessGroupOnlyDto> accessGroupsEntrance;
 
     public Entrance toEntrance(Boolean deleted){
-        if(this.isActive == null) {
-            return new Entrance(null,entranceName,entranceDesc,false,deleted, null);
-        }
-        return new Entrance(null,entranceName,entranceDesc,isActive,deleted, null);
+      /*  if(this.accessGroupsEntrance != null) {
+            return new Entrance(null,entranceName,entranceDesc,false,deleted, );
+        } */
+        return new Entrance(null,entranceName,entranceDesc,false, deleted,null);
     }
 }

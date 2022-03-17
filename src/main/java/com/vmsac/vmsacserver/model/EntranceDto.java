@@ -26,9 +26,9 @@ public class EntranceDto {
 
     private Boolean isActive;
 
-    private List<AccessGroupEntranceNtoNDto> accessGroups;
+    private List<AccessGroupOnlyDto> accessGroups;
 
     public Entrance toEntrance(Boolean deleted){
-        return new Entrance(entranceId,entranceName,entranceDesc, isActive, deleted, null);
+        return new Entrance(entranceId,entranceName,entranceDesc,isActive, deleted, null);
     }
 }

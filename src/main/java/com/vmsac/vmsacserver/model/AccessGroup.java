@@ -43,7 +43,7 @@ public class AccessGroup {
     private List<Person> persons;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "accessGroup")
+    @OneToMany(mappedBy = "accessGroupEntrance")
     private List<AccessGroupEntranceNtoN> accessGroupEntrance;
 
     public AccessGroupDto toDto(){

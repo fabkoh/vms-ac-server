@@ -1,6 +1,7 @@
 package com.vmsac.vmsacserver.service;
 
 import com.vmsac.vmsacserver.model.AccessGroup;
+import com.vmsac.vmsacserver.model.AccessGroupOnlyDto;
 import com.vmsac.vmsacserver.model.Entrance;
 import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoN;
 import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoNDto;
@@ -176,5 +177,8 @@ public class AccessGroupEntranceService {
         accessGroupScheduleRepository.saveAll(toDelete);
     }
 
+    public List<AccessGroupEntranceNtoN> accessGroupList(List<AccessGroupEntranceNtoNDto> stagedAccessGroups) {
+        return accessGroupEntranceRepository.findAllByAccessGroupAccessGroupIdAndDeletedFalse(stagedAccessGroups.stream().map(AccessGroupEntranceNtoNDto::getAccessGroup).collect(Collectors.toList()));
+    }
 
 }

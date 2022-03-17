@@ -37,7 +37,8 @@ public class Entrance {
     private Boolean deleted;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "entrance")
+    @OneToMany
+    //private List<AccessGroupEntranceNtoN> accessGroupEntrance;
     private List<AccessGroupEntranceNtoN> accessGroupEntrance;
 
     public EntranceDto toDto(){

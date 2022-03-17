@@ -44,10 +44,6 @@ public class EntranceService {
     public Entrance save(EntranceDto entranceDto){
         return entranceRepository.save(entranceDto.toEntrance(false));
     }
-//    //delete access group
-    //public AccessGroup delete(AccessGroup accessGroup){
-    //    return AccessGroupRepository.save(accessGroup);
-    //}
 
     // set isActive to true for the given entrance ids
     public EntranceDto updateEntranceIsActiveWithId(Boolean isActive, Long entranceId) throws Exception {
