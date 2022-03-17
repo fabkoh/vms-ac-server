@@ -3,7 +3,13 @@ package com.vmsac.vmsacserver.service;
 import com.vmsac.vmsacserver.model.AccessGroup;
 import com.vmsac.vmsacserver.model.AccessGroupDto;
 import com.vmsac.vmsacserver.model.CreateAccessGroupDto;
+import com.vmsac.vmsacserver.model.Person;
+import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoN;
+import com.vmsac.vmsacserver.model.accessgroupschedule.AccessGroupSchedule;
+import com.vmsac.vmsacserver.repository.AccessGroupEntranceNtoNRepository;
 import com.vmsac.vmsacserver.repository.AccessGroupRepository;
+import com.vmsac.vmsacserver.repository.AccessGroupScheduleRepository;
+import com.vmsac.vmsacserver.repository.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,36 +21,77 @@ import java.util.stream.Collectors;
 public class AccessGroupService {
 
     @Autowired
-    AccessGroupRepository AccessGroupRepository;
+    AccessGroupRepository accessGroupRepository;
+
+    @Autowired
+    PersonRepository personRepository;
+
+    @Autowired
+    AccessGroupEntranceNtoNRepository accessGroupEntranceNtoNRepository;
+
+    @Autowired
+    AccessGroupScheduleRepository accessGroupScheduleRepository;
 
     //read methods
     //returns all undeleted access groups
     public List<AccessGroupDto> findAllAccessGroups(){
-        return AccessGroupRepository.findByDeleted(false).stream()
+        return accessGroupRepository.findByDeleted(false).stream()
                 .map(AccessGroup::toDto)
                 .collect(Collectors.toList());
     }
     public Boolean nameInUse(String name ){
-        return AccessGroupRepository.findByAccessGroupNameAndDeleted(name ,false).isPresent();
+        return accessGroupRepository.findByAccessGroupNameAndDeleted(name ,false).isPresent();
     }
 
     //returns queried access group
     public Optional<AccessGroup> findById(Long Id){
-        return AccessGroupRepository.findByAccessGroupIdAndDeleted(Id,false);
+        return accessGroupRepository.findByAccessGroupIdAndDeleted(Id,false);
     }
 
     //create access group
     public AccessGroupDto createAccessGroup(CreateAccessGroupDto AccessGroupDto){
-        return AccessGroupRepository.save(AccessGroupDto.toAccessGroup(false)).toDto();
+        return accessGroupRepository.save(AccessGroupDto.toAccessGroup(false)).toDto();
     }
 
     //update access group
     public AccessGroup save(AccessGroupDto accessGroupDto){
-        return AccessGroupRepository.save(accessGroupDto.toAccessGroup(false));
+        return accessGroupRepository.save(accessGroupDto.toAccessGroup(false));
     }
 //    //delete access group
     public AccessGroup delete(AccessGroup accessGroup){
-        return AccessGroupRepository.save(accessGroup);
+        return accessGroupRepository.save(accessGroup);
+    }
+
+    // delete access group
+    // delete access group id from person
+    // delete access group entrance n to n
+    // delete access group schedules
+    public void deleteAccessGroupById(Long accessGroupId) throws Exception {
+        AccessGroup groupToDelete =
+                accessGroupRepository.findByAccessGroupIdAndDeletedFalse(accessGroupId).orElseThrow(() -> new RuntimeException("Access group does not exist"));
+
+        // delete access group
+        groupToDelete.setDeleted(true);
+        accessGroupRepository.save(groupToDelete);
+
+        // remove access group id from persons
+        List<Person> personList = personRepository.findAllByAccessGroupAccessGroupIdAndDeletedFalse(accessGroupId);
+        personList.forEach(person -> person.setAccessGroup(null));
+        personRepository.saveAll(personList);
+
+        // remove n to n
+        List<AccessGroupEntranceNtoN> accessGroupEntrance = accessGroupEntranceNtoNRepository.findAllByAccessGroupAccessGroupIdAndDeletedFalse(accessGroupId);
+        accessGroupEntrance.forEach(e -> e.setDeleted(true));
+        accessGroupEntranceNtoNRepository.saveAll(accessGroupEntrance);
+
+        // remove schedules
+        List<AccessGroupSchedule> schedules = accessGroupScheduleRepository.findAllByGroupToEntranceIdInAndDeletedFalse(
+                accessGroupEntrance.stream()
+                        .map(AccessGroupEntranceNtoN::getGroupToEntranceId)
+                        .collect(Collectors.toList())
+        );
+        schedules.forEach(schedule -> schedule.setDeleted(true));
+        accessGroupScheduleRepository.saveAll(schedules);
     }
 
 }

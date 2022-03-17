@@ -124,18 +124,12 @@ public class AccessGroupController {
     //set delete = true and set accgrp = null for persons.
     @DeleteMapping("/accessgroup/{id}")
     public ResponseEntity<?> deleteAccessGroup(@PathVariable("id")Long id){
-
-        if (accessGroupService.findById(id).isEmpty()){
-            Map<Long, String> errors = new HashMap<>();
-            errors.put(id, "Access Group id " +
-                    id + " does not exist");
-            return new ResponseEntity<>(errors,HttpStatus.NOT_FOUND);
+        try {
+            accessGroupService.deleteAccessGroupById(id);
+            return ResponseEntity.noContent().build();
+        } catch(Exception e) {
+            return ResponseEntity.notFound().build();
         }
-        personService.findByAccGrpId(id,false).forEach(person -> person.setAccessGroup(null));
-        AccessGroup deleteGroup = accessGroupService.findById(id).get();
-        deleteGroup.setDeleted(true);
-        accessGroupService.delete((deleteGroup));
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
 }
