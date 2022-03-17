@@ -36,10 +36,10 @@ public class AccessGroupEntranceController {
 
     // associates entrance with all access groups in accessGroupIds
     @PostMapping("/access-group-entrance/entrance/{entranceId}")
-    public ResponseEntity<?> assignAccessGroupsToEntrance(@RequestParam(name = "accessgroupids") List<Long> accessGroupIds,
+    public ResponseEntity<?> assignAccessGroupsToEntrance(@RequestParam(name = "accessgroupids", required = false) List<Long> accessGroupIds,
                                                           @PathVariable Long entranceId) {
         try {
-            accessGroupEntranceService.assignAccessGroupsToEntrance(accessGroupIds, entranceId);
+            accessGroupEntranceService.assignAccessGroupsToEntrance(Objects.requireNonNullElse(accessGroupIds, new ArrayList<>()), entranceId);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
@@ -48,10 +48,10 @@ public class AccessGroupEntranceController {
 
     // associates the access group with all entrances in entranceIds
     @PostMapping("/access-group-entrance/access-group/{accessGroupId}")
-    public ResponseEntity<?> assignEntrancesToAccessGroup(@RequestParam(name = "entranceids") List<Long> entranceIds,
+    public ResponseEntity<?> assignEntrancesToAccessGroup(@RequestParam(name = "entranceids", required = false) List<Long> entranceIds,
                                                           @PathVariable Long accessGroupId) {
         try {
-            accessGroupEntranceService.assignEntrancesToAccessGroup(entranceIds, accessGroupId);
+            accessGroupEntranceService.assignEntrancesToAccessGroup(Objects.requireNonNullElse(entranceIds, new ArrayList<>()), accessGroupId);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
