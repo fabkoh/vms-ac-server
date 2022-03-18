@@ -42,9 +42,9 @@ public class AccessGroup {
     @OneToMany(mappedBy = "accessGroup")
     private List<Person> persons;
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "accessGroupEntrance")
-    private List<AccessGroupEntranceNtoN> accessGroupEntrance;
+    //@JsonIgnore
+    //@OneToMany(mappedBy = "accessGroupEntrance")
+    //private List<AccessGroupEntranceNtoN> accessGroupEntrance;
 
     public AccessGroupDto toDto(){
         if (this.persons == null) {

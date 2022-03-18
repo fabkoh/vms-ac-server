@@ -177,8 +177,9 @@ public class AccessGroupEntranceService {
         accessGroupScheduleRepository.saveAll(toDelete);
     }
 
-    public List<AccessGroupEntranceNtoN> accessGroupList(List<AccessGroupEntranceNtoNDto> stagedAccessGroups) {
-        return accessGroupEntranceRepository.findAllByAccessGroupAccessGroupIdAndDeletedFalse(stagedAccessGroups.stream().map(AccessGroupEntranceNtoNDto::getAccessGroup).collect(Collectors.toList()));
-    }
+    //converts list of accessgrouponlydto to list of access groups
+    /*public List<AccessGroup> accessGroupList(List<AccessGroupOnlyDto> stagedAccessGroups) {
+        return accessGroupRepository.findByEntranceAccessGroupIdInAndDeleted(stagedAccessGroups.stream().map(AccessGroupOnlyDto::getAccessGroupId).collect(Collectors.toList()));
+    }*/
 
 }

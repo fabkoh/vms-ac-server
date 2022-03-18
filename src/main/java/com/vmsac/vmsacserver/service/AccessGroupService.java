@@ -1,10 +1,6 @@
 package com.vmsac.vmsacserver.service;
 
-import com.vmsac.vmsacserver.model.AccessGroup;
-import com.vmsac.vmsacserver.model.AccessGroupDto;
-import com.vmsac.vmsacserver.model.AccessGroupOnlyDto;
-import com.vmsac.vmsacserver.model.CreateAccessGroupDto;
-import com.vmsac.vmsacserver.model.Person;
+import com.vmsac.vmsacserver.model.*;
 import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoN;
 import com.vmsac.vmsacserver.model.accessgroupschedule.AccessGroupSchedule;
 import com.vmsac.vmsacserver.repository.AccessGroupEntranceNtoNRepository;
@@ -95,9 +91,14 @@ public class AccessGroupService {
         accessGroupScheduleRepository.saveAll(schedules);
     }
 
-    /*
-    public List<AccessGroup> accessGroupList(List<AccessGroupOnlyDto> stagedAccessGroups) {
-        return accessGroupRepository.findByEntranceAccessGroupIdInAndDeleted(stagedAccessGroups.stream().map(AccessGroupOnlyDto::getAccessGroupId).collect(Collectors.toList()));
+    //converts list of accessgrouponlydto to list of access groups
+    /*public List<AccessGroup> accessGroupList(List<AccessGroupOnlyDto> stagedAccessGroups) {
+        return accessGroupRepository.findByAccessGroupIdInAndDeletedFalse(stagedAccessGroups.stream().map(AccessGroupOnlyDto::getAccessGroupId).collect(Collectors.toList()));
+    } */
+
+    //converts list of persononlydto to list of person
+    /*public List<Person> personsList(List<PersonOnlyDto> stagedPersons){
+        return  personRepository.findByPersonIdInAndDeleted(stagedPersons.stream().map(PersonOnlyDto::getPersonId).collect(Collectors.toList()),false);
     } */
 
 }

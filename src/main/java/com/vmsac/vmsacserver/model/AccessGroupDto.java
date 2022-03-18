@@ -28,6 +28,6 @@ public class AccessGroupDto {
     private List<PersonOnlyDto> persons;
 
     public AccessGroup toAccessGroup(Boolean deleted){
-        return new AccessGroup(accessGroupId,accessGroupName,accessGroupDesc, deleted, null,null);
+        return new AccessGroup(accessGroupId,accessGroupName,accessGroupDesc, deleted, null);
     }
 }

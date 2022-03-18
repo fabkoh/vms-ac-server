@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.Access;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -44,35 +45,61 @@ public class EntranceController {
         errors.put("entranceId", "Entrance with Id " +
                 entranceId + " does not exist");
 
+        List<AccessGroupEntranceNtoNDto> accessGroupEntranceNtoN = accessGroupEntranceService.findAllWhereEntranceId(entranceId);
+
+        if(accessGroupEntranceNtoN.contains(entranceId)) {
+            //AccessGroupEntranceNtoNDto accGrpDto = accessGroupEntranceNtoN.get().toDto();
+            return ResponseEntity.ok(accessGroupEntranceNtoN);
+        }
+
         return new ResponseEntity<>(errors, HttpStatus.NOT_FOUND);
     }
 
     //create an entrance
     @PostMapping("/entrance")
-    public ResponseEntity<?> createEntrance(@RequestBody CreateEntranceDto entranceDto) {
-        if (entranceDto.getEntranceName() == null) {
-            return new ResponseEntity<>(entranceDto, HttpStatus.BAD_REQUEST);
-        } else if (entranceService.nameInUse(entranceDto.getEntranceName())) {
+    public ResponseEntity<?> createEntrance(@RequestBody CreateEntranceDto newEntranceDto) {
+        if (newEntranceDto.getEntranceName() == null) {
+            return new ResponseEntity<>(newEntranceDto, HttpStatus.BAD_REQUEST);
+        } else if (entranceService.nameInUse(newEntranceDto.getEntranceName())) {
             Map<String, String> errors = new HashMap<>();
             errors.put("entranceName", "Entrance Name " +
-                    entranceDto.getEntranceName() + " in use");
+                    newEntranceDto.getEntranceName() + " in use");
             return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
         }
-        if(entranceDto.getAccessGroupsEntrance() != null){
-            List<AccessGroupEntranceNtoNDto> stagedAccessGroups = entranceDto.getAccessGroupsEntrance();
-            List<AccessGroupEntranceNtoN> accessGroupsEntrances = accessGroupEntranceService.accessGroupList(stagedAccessGroups);
-            if (stagedAccessGroups.size() != accessGroupsEntrances.size()) { // deleted / not found accessgrps in accessGrpRepo
-                return new ResponseEntity<>("", HttpStatus.NOT_FOUND);
+        if(newEntranceDto.getAccessGroupsEntrance() != null){
+            Long accessGroupId = newEntranceDto.getAccessGroupsEntrance().getAccessGroup().getAccessGroupId();
+
+            if (accessGroupService.findById(accessGroupId).isEmpty()) {
+                Map<Long, String> errors = new HashMap<>();
+                errors.put(accessGroupId, "accessGroupId " +
+                        accessGroupId + " does not exist");
+                return new ResponseEntity<>(errors,HttpStatus.NOT_FOUND);
             }
 
-            Entrance createdEntrance = entranceService.save(entranceDto.toEntrance(false).toDto());
-            accessGroupsEntrances.forEach(accessGroupNtoN -> accessGroupNtoN.setAccessGroupEntrance(createdEntrance));
-            createdEntrance.setAccessGroupEntrance(accessGroupsEntrances);
-            accessGroupsEntrances.forEach(accessGroup -> accessGroupService.save(accessGroup.toDto()));
-            return new ResponseEntity<>(createdEntrance.toEntranceOnlyDto(), HttpStatus.CREATED);
+            List<AccessGroupEntranceNtoNDto> accessGroups = accessGroupEntranceService.findAllWhereAccessGroupId(accessGroupId);
+            //List<AccessGroupEntranceNtoN> newAccessGroups =
+            //Entrance createdEntrance = entranceService.save(newEntranceDto.toEntrance(false).toDto());
+
+            //newAccessGroups.forEach(accessGroupEntranceNtoNDto -> accessGroupEntranceNtoNDto.setEntrance(createdEntrance));
+
+       //     accessGroupEntranceService.assignAccessGroupsToEntrance(accessGroupId);
+
+           // newAccessGroups.forEach(accGrp -> accGrp.setAccessGroup(newAccessGroups));
+           // newEntranceDto.setAccessGroupsEntrance(newAccessGroups);
+            return new ResponseEntity<>(entranceService.createEntrance(newEntranceDto), HttpStatus.CREATED);
+
+            //creating entrance logic
+            //Entrance createdEntrance = entranceService.save(entranceDto.toEntrance(false).toDto());
+           // accessGroupsEntrances.forEach(accessGroupNtoN -> accessGroupNtoN.setEntrance(createdEntrance));
+           // createdEntrance.setAccessGroupEntrance(accessGroupsEntrances);
+
+            //linking access group to entrance logic
+            /*AccessGroup createdAccessGroup = accessGroupService.save(accessGroupDto.toAccessGroup(false).toDto());
+            accessGroupsEntrances.forEach(accessGroupNtoN -> accessGroupNtoN.setAccessGroup(createdAccessGroup));
+            return new ResponseEntity<>(createdEntrance.toEntranceOnlyDto(), HttpStatus.CREATED);*/
 
         }
-        return new ResponseEntity<>(entranceService.createEntrance(entranceDto), HttpStatus.CREATED);
+        return new ResponseEntity<>(entranceService.createEntrance(newEntranceDto), HttpStatus.CREATED);
     }
 
     @PutMapping("/entrance/enable/{entranceId}")

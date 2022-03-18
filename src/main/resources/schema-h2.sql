@@ -98,8 +98,8 @@ CREATE TABLE IF NOT EXISTS AccessGroupSchedule(
   accessGroupScheduleId SERIAL NOT NULL UNIQUE,
   accessGroupScheduleName VARCHAR(255) NOT NULL,
   rrule VARCHAR(255) NOT NULL,
-  timeStart VARCHAR(128),
-  timeEnd VARCHAR(128),
+  timeStart VARCHAR(128) NOT NULL,
+  timeEnd VARCHAR(128) NOT NULL,
   groupToEntranceId INT REFERENCES AccessGroupsEntranceNtoN (groupToEntranceId),
   deleted BOOLEAN NOT NULL,
   PRIMARY KEY (accessGroupScheduleId)
