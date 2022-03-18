@@ -1,92 +1,194 @@
-//package com.vmsac.vmsacserver.util;
-//
-//import com.vmsac.vmsacserver.model.AccessGroup;
-//import com.vmsac.vmsacserver.model.Person;
-//import com.vmsac.vmsacserver.repository.AccessGroupRepository;
-//import com.vmsac.vmsacserver.repository.PersonRepository;
-//import com.vmsac.vmsacserver.repository.PlainPersonRepository;
-//import org.springframework.boot.CommandLineRunner;
-//import org.springframework.context.annotation.Profile;
-//import org.springframework.stereotype.Component;
-//
-//@Profile("dev")
-//@Component
-//public class DataLoader implements CommandLineRunner {
-//    private final PersonRepository personRepository;
-//    private final AccessGroupRepository accessGroupRepository;
-//    private final PlainPersonRepository plainPersonRepository;
-//
-//    public DataLoader(PersonRepository personRepository, AccessGroupRepository accessGroupRepository, PlainPersonRepository plainPersonRepository) {
-//        this.personRepository = personRepository;
-//        this.accessGroupRepository = accessGroupRepository;
-//        this.plainPersonRepository = plainPersonRepository;
-//    }
-//
-//    @Override
-//    public void run(String... args) throws Exception {
-//        // create person1 and accessgroup1
-//        Person person1 = new Person();
-//        person1.setPersonFirstName("firstName1");
-//        person1.setPersonLastName("lastName1");
-//        person1.setDeleted(false);
-//        person1.setPersonUid("1");
-//        personRepository.save(person1);
-//
-//        Person person2 = new Person();
-//        person2.setPersonFirstName("firstName2");
-//        person2.setPersonLastName("lastName2");
-//        person2.setDeleted(false);
-//        person2.setPersonUid("2");
-//        personRepository.save(person2);
-//
-//        AccessGroup accessGroup = new AccessGroup();
-//        accessGroup.setAccessGroupName("accessGroupName");
-//        accessGroup.setDeleted(false);
-//        accessGroupRepository.save(accessGroup);
-//
-//        // simulate updating of person access group with wrong access group info
-//
-//        // person with wrong access group info
-//        Person personToUpdate1 = new Person();
-//        personToUpdate1.setPersonId(1L);
-//        personToUpdate1.setPersonFirstName("newFirstName1");
-//        personToUpdate1.setPersonLastName("newLastName1");
-//        personToUpdate1.setDeleted(false);
-//        personToUpdate1.setPersonUid("1");
-//
-//        AccessGroup wrongAccessGroup = new AccessGroup();
-//        wrongAccessGroup.setAccessGroupId(1L);
-//        wrongAccessGroup.setAccessGroupName("wrongAccessGroupName");
-//        personToUpdate1.setAccessGroup(wrongAccessGroup);
-//
-//        // controller should update person with similar logic to below
-//        AccessGroup accessGroupToAssign = accessGroupRepository.findById(wrongAccessGroup.getAccessGroupId()).get();
-//        personToUpdate1.setAccessGroup(accessGroupToAssign);
-//        personRepository.save(personToUpdate1);
-//
-//        // notice access group name is not changed but person with id 1 info is changed
-//
-//        // person with wrong access group info
-//        Person personToUpdate2 = new Person();
-//        personToUpdate2.setPersonId(2L);
-//        personToUpdate2.setPersonFirstName("newFirstName2");
-//        personToUpdate2.setPersonLastName("newLastName2");
-//        personToUpdate2.setDeleted(false);
-//        personToUpdate2.setPersonUid("2");
-//
-//        personToUpdate2.setAccessGroup(wrongAccessGroup);
-//
-//        // controller actions
-//        PlainPerson plainPerson = new PlainPerson();
-//        plainPerson.setPersonId(personToUpdate2.getPersonId()); // DO NOT DO THIS, create a method to convert Person to PlainPerson and vice versa
-//        plainPerson.setPersonFirstName(personToUpdate2.getPersonFirstName());
-//        plainPerson.setPersonLastName(personToUpdate2.getPersonLastName());
-//        plainPerson.setDeleted(personToUpdate2.getDeleted());
-//        plainPerson.setPersonUid(personToUpdate2.getPersonUid());
-//        plainPerson.setAccessGroupId(personToUpdate2.getAccessGroup().getAccessGroupId());
-//
-//        plainPersonRepository.save(plainPerson);
-//
-//        // notice access group name is not changed but person with id 2 info is changed
-//    }
-//}
+package com.vmsac.vmsacserver.util;
+
+import com.vmsac.vmsacserver.model.AccessGroup;
+import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoN;
+import com.vmsac.vmsacserver.model.Entrance;
+import com.vmsac.vmsacserver.model.Person;
+import com.vmsac.vmsacserver.model.accessgroupschedule.AccessGroupSchedule;
+import com.vmsac.vmsacserver.repository.*;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Component;
+
+@Profile("dev")
+@Component
+public class DataLoader implements CommandLineRunner {
+    private final AccessGroupRepository accessGroupRepository;
+    private final EntranceRepository entranceRepository;
+    private final PersonRepository personRepository;
+    private final AccessGroupEntranceNtoNRepository accessGroupEntranceRepository;
+    private final AccessGroupScheduleRepository accessGroupScheduleRepository;
+
+    public DataLoader(AccessGroupRepository accessGroupRepository, EntranceRepository entranceRepository, PersonRepository personRepository, AccessGroupEntranceNtoNRepository accessGroupEntranceRepository, AccessGroupScheduleRepository accessGroupScheduleRepository) {
+        this.accessGroupRepository = accessGroupRepository;
+        this.entranceRepository = entranceRepository;
+        this.personRepository = personRepository;
+        this.accessGroupEntranceRepository = accessGroupEntranceRepository;
+        this.accessGroupScheduleRepository = accessGroupScheduleRepository;
+    }
+
+    @Override
+    public void run(String... args) throws Exception {
+        loadData(); // uncomment to load data listed in loadData() below
+    }
+
+    private void loadData() {
+        AccessGroup dune = accessGroupRepository.save(
+                AccessGroup.builder()
+                        .accessGroupName("Dune")
+                        .accessGroupDesc("the characters from dune")
+                        .deleted(false)
+                        .build()
+        );
+
+        AccessGroup notDune = accessGroupRepository.save(
+                AccessGroup.builder()
+                        .accessGroupName("Not dune")
+                        .deleted(false)
+                        .build()
+        );
+
+        AccessGroup emptyGroup = accessGroupRepository.save(
+                AccessGroup.builder()
+                        .accessGroupName("Empty group")
+                        .deleted(false)
+                        .build()
+        );
+
+        Person paulAtreides = personRepository.save(
+                Person.builder()
+                        .personFirstName("Paul")
+                        .personLastName("Atreides")
+                        .personUid("lCj7sSpU")
+                        .personMobileNumber("1 1001001000")
+                        .personEmail("paul@atreides.com")
+                        .accessGroup(dune)
+                        .deleted(false)
+                        .build()
+        );
+
+        Person letoAtreides = personRepository.save(
+                Person.builder()
+                        .personFirstName("Leto")
+                        .personLastName("Atreides")
+                        .personUid("F2VMFevJ")
+                        .personEmail("leto@atreides.com")
+                        .accessGroup(dune)
+                        .deleted(false)
+                        .build()
+        );
+
+        Person johnSmith = personRepository.save(
+                Person.builder()
+                        .personFirstName("John")
+                        .personLastName("Smith")
+                        .personUid("abc")
+                        .personMobileNumber("+65 98765432")
+                        .accessGroup(notDune)
+                        .deleted(false)
+                        .build()
+        );
+
+        Person andyTan = personRepository.save(
+                Person.builder()
+                        .personFirstName("Andy")
+                        .personLastName("Tan")
+                        .personUid("123")
+                        .deleted(false)
+                        .build()
+        );
+
+        Entrance mainEntrance = entranceRepository.save(
+                Entrance.builder()
+                        .entranceName("Main Entrance")
+                        .entranceDesc("the main entrance")
+                        .isActive(true)
+                        .deleted(false)
+                        .build()
+        );
+
+        Entrance sideEntrance = entranceRepository.save(
+                Entrance.builder()
+                        .entranceName("Side Entrance")
+                        .isActive(true)
+                        .deleted(false)
+                        .build()
+        );
+
+        Entrance abandonedEntrance = entranceRepository.save(
+                Entrance.builder()
+                        .entranceName("Abandoned Entrance")
+                        .isActive(false)
+                        .deleted(false)
+                        .build()
+        );
+
+        AccessGroupEntranceNtoN duneMainEntrance = accessGroupEntranceRepository.save(
+                AccessGroupEntranceNtoN.builder()
+                        .accessGroup(dune)
+                        .entrance(mainEntrance)
+                        .deleted(false)
+                        .build()
+        );
+
+        AccessGroupEntranceNtoN duneSideEntrance = accessGroupEntranceRepository.save(
+                AccessGroupEntranceNtoN.builder()
+                        .accessGroup(dune)
+                        .entrance(sideEntrance)
+                        .deleted(false)
+                        .build()
+        );
+
+        AccessGroupEntranceNtoN notDuneMainEntrance = accessGroupEntranceRepository.save(
+                AccessGroupEntranceNtoN.builder()
+                        .accessGroup(notDune)
+                        .entrance(mainEntrance)
+                        .deleted(false)
+                        .build()
+        );
+
+        AccessGroupSchedule duneMainEntranceDefault = accessGroupScheduleRepository.save(
+                AccessGroupSchedule.builder()
+                        .accessGroupScheduleName("Default Schedule")
+                        .rrule("FREQ=DAILY;INTERVAL=1;WKST=MO")
+                        .timeStart("00:00")
+                        .timeEnd("23:59")
+                        .groupToEntranceId(duneMainEntrance.getGroupToEntranceId())
+                        .deleted(false)
+                        .build()
+        );
+
+        AccessGroupSchedule duneSideEntranceWeekdays = accessGroupScheduleRepository.save(
+                AccessGroupSchedule.builder()
+                        .accessGroupScheduleName("Weekdays 9 to 5")
+                        .rrule("FREQ=WEEKLY;INTERVAL=1;WKST=MO;BYDAY=MO,TU,WE,TH,FR")
+                        .timeStart("09:00")
+                        .timeEnd("17:00")
+                        .groupToEntranceId(duneSideEntrance.getGroupToEntranceId())
+                        .deleted(false)
+                        .build()
+        );
+
+        AccessGroupSchedule duneSideEntranceWeekends = accessGroupScheduleRepository.save(
+                AccessGroupSchedule.builder()
+                        .accessGroupScheduleName("Weekends 12 to 2")
+                        .rrule("FREQ=WEEKLY;INTERVAL=1;WKST=MO;BYDAY=SA,SU")
+                        .timeStart("12:00")
+                        .timeEnd("17:00")
+                        .groupToEntranceId(duneSideEntrance.getGroupToEntranceId())
+                        .deleted(false)
+                        .build()
+        );
+
+        AccessGroupSchedule notDuneMainEntranceDefault = accessGroupScheduleRepository.save(
+                AccessGroupSchedule.builder()
+                        .accessGroupScheduleName("Default Schedule")
+                        .rrule("FREQ=DAILY;INTERVAL=1;WKST=MO")
+                        .timeStart("00:00")
+                        .timeEnd("23:59")
+                        .groupToEntranceId(notDuneMainEntrance.getGroupToEntranceId())
+                        .deleted(false)
+                        .build()
+        );
+    }
+}

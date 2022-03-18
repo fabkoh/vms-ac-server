@@ -29,4 +29,6 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
 
 
     List<Person> findByPersonIdInAndDeleted(Iterable<Long> personId, Boolean deleted);
+
+    List<Person> findAllByAccessGroupAccessGroupIdAndDeletedFalse(Long accessGroupId);
 }

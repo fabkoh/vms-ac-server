@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface AccessGroupRepository extends JpaRepository<AccessGroup, Long> {
 
@@ -15,7 +16,9 @@ public interface AccessGroupRepository extends JpaRepository<AccessGroup, Long> 
 
     Optional<AccessGroup> findByAccessGroupIdAndDeleted(Long accessGroupId, Boolean deleted);
 
+    List<AccessGroup> findByAccessGroupIdInAndDeletedFalse(Set<Long> accessGroupIds);
 
+    Optional<AccessGroup> findByAccessGroupIdAndDeletedFalse(Long accessGroupId);
 
-
+    //List<AccessGroup> findByEntranceAccessGroupIdInAndDeleted(Iterable<Long> personId);
 }
