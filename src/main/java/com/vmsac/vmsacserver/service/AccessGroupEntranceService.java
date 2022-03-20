@@ -176,10 +176,4 @@ public class AccessGroupEntranceService {
         toDelete.forEach(schedule -> schedule.setDeleted(true));
         accessGroupScheduleRepository.saveAll(toDelete);
     }
-
-    //converts list of accessgrouponlydto to list of access groups
-    /*public List<AccessGroup> accessGroupList(List<AccessGroupOnlyDto> stagedAccessGroups) {
-        return accessGroupRepository.findByEntranceAccessGroupIdInAndDeleted(stagedAccessGroups.stream().map(AccessGroupOnlyDto::getAccessGroupId).collect(Collectors.toList()));
-    }*/
-
 }

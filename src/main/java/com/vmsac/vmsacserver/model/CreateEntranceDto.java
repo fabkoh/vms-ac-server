@@ -21,9 +21,6 @@ public class CreateEntranceDto {
     private AccessGroupEntranceNtoN accessGroupsEntrance;
 
     public Entrance toEntrance(Boolean deleted){
-      /*  if(this.accessGroupsEntrance != null) {
-            return new Entrance(null,entranceName,entranceDesc,false,deleted, );
-        } */
         return new Entrance(null,entranceName,entranceDesc,false, deleted);
     }
 }

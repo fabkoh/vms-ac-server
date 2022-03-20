@@ -8,8 +8,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -36,18 +34,9 @@ public class Entrance {
     @Column(name = "deleted")
     private Boolean deleted;
 
-    //@JsonIgnore
-    //@OneToMany
-    //private List<AccessGroupEntranceNtoN> accessGroupEntrance;
-    //private List<AccessGroup> accessGroupEntrance;
-
     public EntranceDto toDto(){
-       // if (this.accessGroupEntrance == null) {
-            return new EntranceDto(this.entranceId, this.entranceName,
-                    this.entranceDesc, this.isActive, null);
-       // }
-        //return new EntranceDto(this.entranceId, this.entranceName,
-        //        this.entranceDesc, this.isActive, this.accessGroupEntrance.stream().map(AccessGroup::toAccessGroupOnlyDto).collect(Collectors.toList()));
+        return new EntranceDto(this.entranceId, this.entranceName,
+                this.entranceDesc, this.isActive, null);
     }
     public EntranceOnlyDto toEntranceOnlyDto(){
         return new EntranceOnlyDto(this.entranceId,this.entranceName,this.entranceDesc, this.isActive);
