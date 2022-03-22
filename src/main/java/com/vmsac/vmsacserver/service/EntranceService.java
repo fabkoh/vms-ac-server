@@ -1,6 +1,8 @@
 package com.vmsac.vmsacserver.service;
 
 import com.vmsac.vmsacserver.model.*;
+import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoN;
+import com.vmsac.vmsacserver.repository.AccessGroupEntranceNtoNRepository;
 import com.vmsac.vmsacserver.repository.AccessGroupRepository;
 import com.vmsac.vmsacserver.repository.EntranceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,12 @@ public class EntranceService {
 
     @Autowired
     EntranceRepository entranceRepository;
+
+    @Autowired
+    AccessGroupEntranceService accessGroupEntranceService;
+
+    @Autowired
+    AccessGroupEntranceNtoNRepository accessGroupEntranceNtoNRepository;
 
     //read methods
     //returns all undeleted entrances
@@ -50,5 +58,16 @@ public class EntranceService {
         Entrance entrance = entranceRepository.findByEntranceIdAndDeletedFalse(entranceId).orElseThrow();
         entrance.setIsActive(isActive);
         return entranceRepository.save(entrance).toDto();
+    }
+    //delete entrance and its groupToEntrance relationships
+    public void delete(Long Id){
+        Entrance deleted = entranceRepository.findByEntranceIdAndDeletedFalse(Id).get();
+        deleted.setDeleted(true);
+        entranceRepository.save(deleted);
+
+        List<AccessGroupEntranceNtoN> toDelete = accessGroupEntranceNtoNRepository.findAllByEntranceEntranceIdAndDeletedFalse(Id);
+        toDelete.stream()
+                .forEach(accessGroupEntranceNtoN -> accessGroupEntranceNtoN.setDeleted(true));
+        accessGroupEntranceService.deleteAccessGroupEntranceNtoN(toDelete);
     }
 }

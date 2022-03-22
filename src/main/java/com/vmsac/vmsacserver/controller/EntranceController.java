@@ -121,22 +121,23 @@ public class EntranceController {
         return new ResponseEntity<>(entranceService.save(entranceDto).toEntranceOnlyDto(),HttpStatus.OK);
     }
 
-    /*
-    //set delete = true and set accgrp = null for persons.
-    @DeleteMapping("/accessgroup/{id}")
-    public ResponseEntity<?> deleteAccessGroup(@PathVariable("id")Long id){
 
-        if (accessGroupService.findById(id).isEmpty()){
+    //set delete = true and set accgrp = null for persons.
+    @DeleteMapping("/entrance/{id}")
+    public ResponseEntity<?> deleteEntrance(@PathVariable("id")Long id){
+
+        if (entranceService.findById(id).isEmpty()){
             Map<Long, String> errors = new HashMap<>();
-            errors.put(id, "Access Group id " +
+            errors.put(id, "Entrance id " +
                     id + " does not exist");
             return new ResponseEntity<>(errors,HttpStatus.NOT_FOUND);
         }
-        personService.findByAccGrpId(id,false).forEach(person -> person.setAccessGroup(null));
-        AccessGroup deleteGroup = accessGroupService.findById(id).get();
-        deleteGroup.setDeleted(true);
-        accessGroupService.delete((deleteGroup));
-        return new ResponseEntity<>(HttpStatus.OK);
+        Entrance deleteEntrance = entranceService.findById(id).get();
+        deleteEntrance.setDeleted(true);
+        entranceService.save(deleteEntrance.toDto());
+        //get NtoN table
+        entranceService.delete(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-*/
+
 }

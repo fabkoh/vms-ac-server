@@ -168,7 +168,7 @@ public class AccessGroupEntranceService {
     // gets their ids and remove their schedules also
     // WARNING: does not check if access group entrances still exists
     //          assumes deleted in given list is true already
-    private void deleteAccessGroupEntranceNtoN(List<AccessGroupEntranceNtoN> accessGroupEntrances) {
+    public void deleteAccessGroupEntranceNtoN(List<AccessGroupEntranceNtoN> accessGroupEntrances) {
         accessGroupEntranceRepository.saveAll(accessGroupEntrances);
         List<AccessGroupSchedule> toDelete = accessGroupScheduleRepository.findAllByGroupToEntranceIdInAndDeletedFalse(
                 accessGroupEntrances.stream().map(AccessGroupEntranceNtoN::getGroupToEntranceId).collect(Collectors.toList())
