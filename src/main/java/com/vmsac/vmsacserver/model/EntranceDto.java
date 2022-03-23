@@ -29,6 +29,6 @@ public class EntranceDto {
     private List<AccessGroup> accessGroups;
 
     public Entrance toEntrance(Boolean deleted){
-        return new Entrance(entranceId,entranceName,entranceDesc,false, deleted);
+        return new Entrance(entranceId,entranceName,entranceDesc,true, deleted);
     }
 }
