@@ -29,7 +29,7 @@ public class AccessGroupScheduleController {
     }
 
     // create an AccessGroupSchedule for each id in groupToEntranceIds and saves all
-    @PostMapping("/access-group-schedule")
+    // @PostMapping("/access-group-schedule") // closed this api
     public ResponseEntity<?> createAccessGroupSchedules(@RequestBody CreateAccessGroupScheduleDto createAccessGroupScheduleDto,
                                                         @RequestParam("grouptoentranceids") List<Long> groupToEntranceIds) {
         try {

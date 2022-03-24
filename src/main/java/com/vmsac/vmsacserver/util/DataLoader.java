@@ -29,7 +29,7 @@ public class DataLoader implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        loadData(); // uncomment to load data listed in loadData() below
+       // loadData(); // uncomment to load data listed in loadData() below
     }
 
     private void loadData() {
