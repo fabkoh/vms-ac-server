@@ -75,29 +75,7 @@ public class EntranceController {
                         accessGroupId + " does not exist");
                 return new ResponseEntity<>(errors,HttpStatus.NOT_FOUND);
             }
-
-            List<AccessGroupEntranceNtoNDto> accessGroups = accessGroupEntranceService.findAllWhereAccessGroupId(accessGroupId);
-            //List<AccessGroupEntranceNtoN> newAccessGroups =
-            //Entrance createdEntrance = entranceService.save(newEntranceDto.toEntrance(false).toDto());
-
-            //newAccessGroups.forEach(accessGroupEntranceNtoNDto -> accessGroupEntranceNtoNDto.setEntrance(createdEntrance));
-
-       //     accessGroupEntranceService.assignAccessGroupsToEntrance(accessGroupId);
-
-           // newAccessGroups.forEach(accGrp -> accGrp.setAccessGroup(newAccessGroups));
-           // newEntranceDto.setAccessGroupsEntrance(newAccessGroups);
             return new ResponseEntity<>(entranceService.createEntrance(newEntranceDto), HttpStatus.CREATED);
-
-            //creating entrance logic
-            //Entrance createdEntrance = entranceService.save(entranceDto.toEntrance(false).toDto());
-           // accessGroupsEntrances.forEach(accessGroupNtoN -> accessGroupNtoN.setEntrance(createdEntrance));
-           // createdEntrance.setAccessGroupEntrance(accessGroupsEntrances);
-
-            //linking access group to entrance logic
-            /*AccessGroup createdAccessGroup = accessGroupService.save(accessGroupDto.toAccessGroup(false).toDto());
-            accessGroupsEntrances.forEach(accessGroupNtoN -> accessGroupNtoN.setAccessGroup(createdAccessGroup));
-            return new ResponseEntity<>(createdEntrance.toEntranceOnlyDto(), HttpStatus.CREATED);*/
-
         }
         return new ResponseEntity<>(entranceService.createEntrance(newEntranceDto), HttpStatus.CREATED);
     }
@@ -122,7 +100,7 @@ public class EntranceController {
 
     //Update name or description of entrance
     @PutMapping("/entrance")
-    public ResponseEntity<?> updateEntrance(@RequestBody EntranceDto entranceDto, @RequestBody AccessGroupEntranceNtoNDto accGroupEntranceDto){
+    public ResponseEntity<?> updateEntrance(@RequestBody EntranceDto entranceDto){
        Long tempid = entranceDto.getEntranceId();
        Optional<Entrance> checkDto = entranceService.findById(tempid);
        if(checkDto.isEmpty()){
@@ -133,61 +111,33 @@ public class EntranceController {
        }
         if (!Objects.equals(entranceDto.getEntranceName(), checkDto.get().getEntranceName())){
             if(entranceService.nameInUse(entranceDto.getEntranceName())){
-          Map<String, String> errors = new HashMap<>();
-          errors.put("entranceName", "Entrance Name " +
-                  entranceDto.getEntranceName() + " in use");
-          return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
-      }
-            //if this entrance id is in AccGrpEntranceNtoN table
-          /*  if(Objects.equals(accGroupEntranceDto.getEntrance().getEntranceId(), tempid)){
-                //accessGroupEntranceService.assignAccessGroupToEntrances();
-
-
-                personService.findByAccGrpId(accessGroupDto.getAccessGroupId(), false).forEach(person -> person.setAccessGroup(null));
-                AccessGroup newAccessGroup = accessGroupService.save(accessGroupDto);
-                newAccessGroup.setPersons(persons);
-                persons.forEach(person -> person.setAccessGroup(newAccessGroup));
-                persons.forEach(person -> personService.save(person.toDto(),false));
-                accessGroupService.save(newAccessGroup.toDto());
-                return new ResponseEntity<>(newAccessGroup.toAccessGroupOnlyDto(),HttpStatus.OK);
-            } */
+              Map<String, String> errors = new HashMap<>();
+              errors.put("entranceName", "Entrance Name " +
+                      entranceDto.getEntranceName() + " in use");
+              return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
+            }
             return new ResponseEntity<>(entranceService.save(entranceDto).toEntranceOnlyDto(),HttpStatus.OK);
         }
-      /*  if(accessGroupDto.getPersons()!= null){
-            List<PersonOnlyDto> stagedPersons = accessGroupDto.getPersons();
-            List<Person> persons = personService.personsList(stagedPersons);
-            if (stagedPersons.size() != persons.size()) { // deleted / not found persons
-                return new ResponseEntity<>("", HttpStatus.NOT_FOUND);
-            }
-            //remove all existing people first
-            personService.findByAccGrpId(checkDto.get().getAccessGroupId(), false).forEach(person -> person.setAccessGroup(null));
-            AccessGroup newAccessGroup = accessGroupService.save(checkDto.get().toDto());
-            newAccessGroup.setPersons(persons);
-            persons.forEach(person -> person.setAccessGroup(newAccessGroup));
-            persons.forEach(person -> personService.save(person.toDto(),false));
-            accessGroupService.save(newAccessGroup.toDto());
-            return new ResponseEntity<>(newAccessGroup.toAccessGroupOnlyDto(),HttpStatus.OK);
-        } */
-//
         return new ResponseEntity<>(entranceService.save(entranceDto).toEntranceOnlyDto(),HttpStatus.OK);
     }
 
-    /*
-    //set delete = true and set accgrp = null for persons.
-    @DeleteMapping("/accessgroup/{id}")
-    public ResponseEntity<?> deleteAccessGroup(@PathVariable("id")Long id){
 
-        if (accessGroupService.findById(id).isEmpty()){
+    //set delete = true and set accgrp = null for persons.
+    @DeleteMapping("/entrance/{id}")
+    public ResponseEntity<?> deleteEntrance(@PathVariable("id")Long id){
+
+        if (entranceService.findById(id).isEmpty()){
             Map<Long, String> errors = new HashMap<>();
-            errors.put(id, "Access Group id " +
+            errors.put(id, "Entrance id " +
                     id + " does not exist");
             return new ResponseEntity<>(errors,HttpStatus.NOT_FOUND);
         }
-        personService.findByAccGrpId(id,false).forEach(person -> person.setAccessGroup(null));
-        AccessGroup deleteGroup = accessGroupService.findById(id).get();
-        deleteGroup.setDeleted(true);
-        accessGroupService.delete((deleteGroup));
-        return new ResponseEntity<>(HttpStatus.OK);
+        Entrance deleteEntrance = entranceService.findById(id).get();
+        deleteEntrance.setDeleted(true);
+        entranceService.save(deleteEntrance.toDto());
+        //get NtoN table
+        entranceService.delete(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-*/
+
 }

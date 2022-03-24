@@ -90,15 +90,4 @@ public class AccessGroupService {
         schedules.forEach(schedule -> schedule.setDeleted(true));
         accessGroupScheduleRepository.saveAll(schedules);
     }
-
-    //converts list of accessgrouponlydto to list of access groups
-    /*public List<AccessGroup> accessGroupList(List<AccessGroupOnlyDto> stagedAccessGroups) {
-        return accessGroupRepository.findByAccessGroupIdInAndDeletedFalse(stagedAccessGroups.stream().map(AccessGroupOnlyDto::getAccessGroupId).collect(Collectors.toList()));
-    } */
-
-    //converts list of persononlydto to list of person
-    /*public List<Person> personsList(List<PersonOnlyDto> stagedPersons){
-        return  personRepository.findByPersonIdInAndDeleted(stagedPersons.stream().map(PersonOnlyDto::getPersonId).collect(Collectors.toList()),false);
-    } */
-
 }
