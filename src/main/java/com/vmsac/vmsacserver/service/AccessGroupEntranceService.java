@@ -13,6 +13,8 @@ import com.vmsac.vmsacserver.repository.EntranceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -149,12 +151,16 @@ public class AccessGroupEntranceService {
     // WARNING: does not check if there's already an existing relationship ie can lead to duplicate relationships
     private void addNewAccessGroupEntranceNtoN(List<AccessGroupEntranceNtoN> accessGroupEntrances) {
         List<AccessGroupEntranceNtoN> added = accessGroupEntranceRepository.saveAll(accessGroupEntrances);
+
+        // get default rrule
+        String defaultRrule = getDefaultRrule();
+
         accessGroupScheduleRepository.saveAll( // save default schedule for each relationship
                 added.stream()
                         .map(nton -> new AccessGroupSchedule(
                             null,
                             "Default Schedule",
-                            "FREQ=DAILY;INTERVAL=1;WKST=MO",
+                            defaultRrule,
                             "00:00",
                             "23:59",
                             nton.getGroupToEntranceId(),
@@ -175,5 +181,12 @@ public class AccessGroupEntranceService {
         );
         toDelete.forEach(schedule -> schedule.setDeleted(true));
         accessGroupScheduleRepository.saveAll(toDelete);
+    }
+
+    // returns the default string (24 / 7)
+    // format: "DTSTART:{yyyymmdd}T000000Z\nRRULE:FREQ=DAILY;INTERVAL=1;WKST=MO"
+    private String getDefaultRrule() {
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("uuuuMMdd");
+        return "DTSTART:" + dtf.format(LocalDateTime.now()) + "T000000Z\nRRULE:FREQ=DAILY;INTERVAL=1;WKST=MO";
     }
 }
