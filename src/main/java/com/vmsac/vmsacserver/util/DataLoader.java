@@ -5,6 +5,7 @@ import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoN;
 import com.vmsac.vmsacserver.model.Entrance;
 import com.vmsac.vmsacserver.model.Person;
 import com.vmsac.vmsacserver.model.accessgroupschedule.AccessGroupSchedule;
+import com.vmsac.vmsacserver.model.entranceschedule.EntranceSchedule;
 import com.vmsac.vmsacserver.repository.*;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
@@ -21,13 +22,15 @@ public class DataLoader implements CommandLineRunner {
     private final PersonRepository personRepository;
     private final AccessGroupEntranceNtoNRepository accessGroupEntranceRepository;
     private final AccessGroupScheduleRepository accessGroupScheduleRepository;
+    private final EntranceScheduleRepository entranceScheduleRepository;
 
-    public DataLoader(AccessGroupRepository accessGroupRepository, EntranceRepository entranceRepository, PersonRepository personRepository, AccessGroupEntranceNtoNRepository accessGroupEntranceRepository, AccessGroupScheduleRepository accessGroupScheduleRepository) {
+    public DataLoader(AccessGroupRepository accessGroupRepository, EntranceRepository entranceRepository, PersonRepository personRepository, AccessGroupEntranceNtoNRepository accessGroupEntranceRepository, AccessGroupScheduleRepository accessGroupScheduleRepository,EntranceScheduleRepository entranceScheduleRepository) {
         this.accessGroupRepository = accessGroupRepository;
         this.entranceRepository = entranceRepository;
         this.personRepository = personRepository;
         this.accessGroupEntranceRepository = accessGroupEntranceRepository;
         this.accessGroupScheduleRepository = accessGroupScheduleRepository;
+        this.entranceScheduleRepository = entranceScheduleRepository;
     }
 
     @Override
@@ -63,7 +66,7 @@ public class DataLoader implements CommandLineRunner {
                         .personFirstName("Paul")
                         .personLastName("Atreides")
                         .personUid("lCj7sSpU")
-                        .personMobileNumber("1 1001001000")
+                        .personMobileNumber("+1 (100) 100-1000")
                         .personEmail("paul@atreides.com")
                         .accessGroup(dune)
                         .deleted(false)
@@ -86,7 +89,7 @@ public class DataLoader implements CommandLineRunner {
                         .personFirstName("John")
                         .personLastName("Smith")
                         .personUid("abc")
-                        .personMobileNumber("+65 98765432")
+                        .personMobileNumber("+65 9876-5432")
                         .accessGroup(notDune)
                         .deleted(false)
                         .build()
@@ -193,6 +196,17 @@ public class DataLoader implements CommandLineRunner {
                         .timeStart("00:00")
                         .timeEnd("23:59")
                         .groupToEntranceId(notDuneMainEntrance.getGroupToEntranceId())
+                        .deleted(false)
+                        .build()
+        );
+
+        EntranceSchedule mainEntranceSchedule = entranceScheduleRepository.save(
+                EntranceSchedule.builder()
+                        .entranceScheduleName("Default Schedule")
+                        .rrule(rruleDtstart + "FREQ=DAILY;INTERVAL=1;WKST=MO")
+                        .timeStart("00:00")
+                        .timeEnd("23:59")
+                        .entranceId(mainEntrance.getEntranceId())
                         .deleted(false)
                         .build()
         );

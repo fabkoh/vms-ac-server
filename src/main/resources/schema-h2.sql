@@ -104,3 +104,14 @@ CREATE TABLE IF NOT EXISTS AccessGroupSchedule(
   deleted BOOLEAN NOT NULL,
   PRIMARY KEY (accessGroupScheduleId)
 );
+
+CREATE TABLE IF NOT EXISTS EntranceSchedule(
+  entranceScheduleId SERIAL NOT NULL UNIQUE,
+  entranceScheduleName VARCHAR(255) NOT NULL,
+  rrule VARCHAR(255) NOT NULL,
+  timeStart VARCHAR(128) NOT NULL,
+  timeEnd VARCHAR(128) NOT NULL,
+  entranceId INT REFERENCES Entrances (entranceId),
+  deleted BOOLEAN NOT NULL,
+  PRIMARY KEY (entranceScheduleId)
+);
