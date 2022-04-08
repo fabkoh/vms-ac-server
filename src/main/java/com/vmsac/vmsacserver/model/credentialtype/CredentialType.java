@@ -29,4 +29,7 @@ public class CredentialType {
     @Column(name = "deleted")
     private Boolean deleted;
 
+    public CredentialTypeDto toDto() {
+        return new CredentialTypeDto(credTypeId, credTypeName, credTypeDesc);
+    }
 }

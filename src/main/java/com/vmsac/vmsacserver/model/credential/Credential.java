@@ -47,6 +47,6 @@ public class Credential {
     private Boolean deleted;
 
     public CredentialDto toDto() {
-        return new CredentialDto(credId, credUid, credTTL, isValid, isPerm, credType, person);
+        return new CredentialDto(credId, credUid, credTTL, isValid, isPerm, credType.toDto(), person.toDto());
     }
 }

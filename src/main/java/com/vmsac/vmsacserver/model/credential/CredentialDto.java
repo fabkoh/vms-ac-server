@@ -1,7 +1,9 @@
 package com.vmsac.vmsacserver.model.credential;
 
 import com.vmsac.vmsacserver.model.Person;
+import com.vmsac.vmsacserver.model.PersonDto;
 import com.vmsac.vmsacserver.model.credentialtype.CredentialType;
+import com.vmsac.vmsacserver.model.credentialtype.CredentialTypeDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -23,7 +25,7 @@ public class CredentialDto {
 
     private Boolean isPerm;
 
-    private CredentialType credType;
+    private CredentialTypeDto credType;
 
-    private Person person;
+    private PersonDto person;
 }
