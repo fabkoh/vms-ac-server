@@ -5,7 +5,12 @@ import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoN;
 import com.vmsac.vmsacserver.model.Entrance;
 import com.vmsac.vmsacserver.model.Person;
 import com.vmsac.vmsacserver.model.accessgroupschedule.AccessGroupSchedule;
+
 import com.vmsac.vmsacserver.model.entranceschedule.EntranceSchedule;
+
+import com.vmsac.vmsacserver.model.credential.Credential;
+import com.vmsac.vmsacserver.model.credentialtype.CredentialType;
+
 import com.vmsac.vmsacserver.repository.*;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
@@ -23,14 +28,22 @@ public class DataLoader implements CommandLineRunner {
     private final AccessGroupEntranceNtoNRepository accessGroupEntranceRepository;
     private final AccessGroupScheduleRepository accessGroupScheduleRepository;
     private final EntranceScheduleRepository entranceScheduleRepository;
+    private final CredTypeRepository credTypeRepository;
+    private final CredentialRepository credentialRepository;
 
-    public DataLoader(AccessGroupRepository accessGroupRepository, EntranceRepository entranceRepository, PersonRepository personRepository, AccessGroupEntranceNtoNRepository accessGroupEntranceRepository, AccessGroupScheduleRepository accessGroupScheduleRepository,EntranceScheduleRepository entranceScheduleRepository) {
+
+    public DataLoader(AccessGroupRepository accessGroupRepository, EntranceRepository entranceRepository, PersonRepository personRepository, AccessGroupEntranceNtoNRepository accessGroupEntranceRepository, AccessGroupScheduleRepository accessGroupScheduleRepository, CredTypeRepository credTypeRepository, CredentialRepository credentialRepository) {
+
         this.accessGroupRepository = accessGroupRepository;
         this.entranceRepository = entranceRepository;
         this.personRepository = personRepository;
         this.accessGroupEntranceRepository = accessGroupEntranceRepository;
         this.accessGroupScheduleRepository = accessGroupScheduleRepository;
+
         this.entranceScheduleRepository = entranceScheduleRepository;
+
+        this.credTypeRepository = credTypeRepository;
+        this.credentialRepository = credentialRepository;
     }
 
     @Override
@@ -200,6 +213,7 @@ public class DataLoader implements CommandLineRunner {
                         .build()
         );
 
+
         EntranceSchedule mainEntranceSchedule = entranceScheduleRepository.save(
                 EntranceSchedule.builder()
                         .entranceScheduleName("Default Schedule")
@@ -207,6 +221,70 @@ public class DataLoader implements CommandLineRunner {
                         .timeStart("00:00")
                         .timeEnd("23:59")
                         .entranceId(mainEntrance.getEntranceId())
+                        .deleted(false)
+                        .build()
+        );
+
+        CredentialType cardType = credTypeRepository.save(
+                CredentialType.builder()
+                        .credTypeName("Card")
+                        .credTypeDesc("RFID card")
+                        .deleted(false)
+                        .build()
+        );
+
+        CredentialType pinType = credTypeRepository.save(
+                CredentialType.builder()
+                        .credTypeName("Pin")
+                        .credTypeDesc("digit pin")
+                        .deleted(false)
+                        .build()
+        );
+
+        Credential paulCard = credentialRepository.save(
+                Credential.builder()
+                        .credUid("123400")
+                        .credTTL(LocalDateTime.now())
+                        .isValid(true)
+                        .isPerm(true)
+                        .credType(cardType)
+                        .person(paulAtreides)
+                        .deleted(false)
+                        .build()
+        );
+
+        Credential paulPin = credentialRepository.save(
+                Credential.builder()
+                        .credUid("1234")
+                        .credTTL(LocalDateTime.of(2022, 12, 31, 23, 59))
+                        .isValid(true)
+                        .isPerm(false)
+                        .credType(pinType)
+                        .person(paulAtreides)
+                        .deleted(false)
+                        .build()
+        );
+
+        Credential paulExpiredCard = credentialRepository.save(
+                Credential.builder()
+                        .credUid("123401")
+                        .credTTL(LocalDateTime.now())
+                        .isValid(true)
+                        .isPerm(false)
+                        .credType(cardType)
+                        .person(paulAtreides)
+                        .deleted(false)
+                        .build()
+        );
+
+        Credential paulInvalidCard = credentialRepository.save(
+                Credential.builder()
+                        .credUid("123402")
+                        .credTTL(LocalDateTime.now())
+                        .isValid(false)
+                        .isPerm(false)
+                        .credType(cardType)
+                        .person(paulAtreides)
                         .deleted(false)
                         .build()
         );
