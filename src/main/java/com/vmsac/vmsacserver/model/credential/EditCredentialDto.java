@@ -1,9 +1,7 @@
 package com.vmsac.vmsacserver.model.credential;
 
 import com.vmsac.vmsacserver.model.Person;
-import com.vmsac.vmsacserver.model.PersonDto;
 import com.vmsac.vmsacserver.model.credentialtype.CredentialType;
-import com.vmsac.vmsacserver.model.credentialtype.CredentialTypeDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,7 +11,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class CredentialDto {
+public class EditCredentialDto {
 
     private Long credId;
 
@@ -25,7 +23,11 @@ public class CredentialDto {
 
     private Boolean isPerm;
 
-    private CredentialTypeDto credType;
+    private Long credTypeId;
 
-    private PersonDto person;
+    private Long personId;
+
+    public Credential toCredential() {
+        return new Credential(credId, credUid, credTTL, isValid, isPerm, null, null, false);
+    }
 }
