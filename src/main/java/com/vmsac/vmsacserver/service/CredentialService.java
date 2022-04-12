@@ -109,7 +109,7 @@ public class CredentialService {
     public void deleteCredentialWithId(Long credentialId) throws Exception {
         Credential toDeleted = credentialRepository.findByCredIdAndDeletedFalse(credentialId)
                 .orElseThrow(() -> new RuntimeException("Credential does not exist"));
-        toDeleted.setDeleted(false);
+        toDeleted.setDeleted(true);
         credentialRepository.save(toDeleted);
     }
 }

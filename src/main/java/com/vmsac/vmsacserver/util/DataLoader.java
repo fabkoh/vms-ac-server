@@ -266,5 +266,17 @@ public class DataLoader implements CommandLineRunner {
                         .deleted(false)
                         .build()
         );
+
+        Credential letoCard = credentialRepository.save(
+                Credential.builder()
+                        .credUid("4321")
+                        .credTTL(LocalDateTime.now())
+                        .isValid(true)
+                        .isPerm(true)
+                        .credType(cardType)
+                        .person(letoAtreides)
+                        .deleted(false)
+                        .build()
+        );
     }
 }
