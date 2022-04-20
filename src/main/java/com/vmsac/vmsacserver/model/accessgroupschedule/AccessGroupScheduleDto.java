@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 @NoArgsConstructor
@@ -15,10 +16,10 @@ public class AccessGroupScheduleDto {
     @NotNull(message = "accessGroupScheduleId must not blank")
     private Long accessGroupScheduleId;
 
-    @NotNull(message = "accessGroupScheduleName must not be blank")
+    @NotBlank(message = "accessGroupScheduleName must not be blank")
     private String accessGroupScheduleName;
 
-    @NotNull(message = "rrule must not be blank")
+    @NotBlank(message = "rrule must not be blank")
     private String rrule;
 
     private String timeStart;

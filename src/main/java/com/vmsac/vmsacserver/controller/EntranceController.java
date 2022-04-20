@@ -103,6 +103,10 @@ public class EntranceController {
     public ResponseEntity<?> updateEntrance(@RequestBody EntranceDto entranceDto){
        Long tempid = entranceDto.getEntranceId();
        Optional<Entrance> checkDto = entranceService.findById(tempid);
+
+       Boolean isActive = entranceService.findById(tempid).get().getIsActive();
+       entranceDto.setIsActive(isActive);
+
        if(checkDto.isEmpty()){
            Map<String, String> errors = new HashMap<>();
            errors.put("entranceId", "entranceId " +
