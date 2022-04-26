@@ -6,7 +6,7 @@ import com.vmsac.vmsacserver.model.Entrance;
 import com.vmsac.vmsacserver.model.Person;
 import com.vmsac.vmsacserver.model.accessgroupschedule.AccessGroupSchedule;
 
-import com.vmsac.vmsacserver.model.entranceschedule.EntranceSchedule;
+import com.vmsac.vmsacserver.model.credentialtype.entranceschedule.EntranceSchedule;
 
 import com.vmsac.vmsacserver.model.credential.Credential;
 import com.vmsac.vmsacserver.model.credentialtype.CredentialType;
@@ -123,6 +123,7 @@ public class DataLoader implements CommandLineRunner {
                         .entranceDesc("the main entrance")
                         .isActive(true)
                         .deleted(false)
+                        .used(false)
                         .build()
         );
 
@@ -131,6 +132,7 @@ public class DataLoader implements CommandLineRunner {
                         .entranceName("Side Entrance")
                         .isActive(true)
                         .deleted(false)
+                        .used(false)
                         .build()
         );
 
@@ -139,6 +141,7 @@ public class DataLoader implements CommandLineRunner {
                         .entranceName("Abandoned Entrance")
                         .isActive(false)
                         .deleted(false)
+                        .used(false)
                         .build()
         );
 

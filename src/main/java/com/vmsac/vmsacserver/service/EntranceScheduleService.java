@@ -1,8 +1,8 @@
 package com.vmsac.vmsacserver.service;
 
-import com.vmsac.vmsacserver.model.entranceschedule.CreateEntranceScheduleDto;
-import com.vmsac.vmsacserver.model.entranceschedule.EntranceSchedule;
-import com.vmsac.vmsacserver.model.entranceschedule.EntranceScheduleDto;
+import com.vmsac.vmsacserver.model.credentialtype.entranceschedule.CreateEntranceScheduleDto;
+import com.vmsac.vmsacserver.model.credentialtype.entranceschedule.EntranceSchedule;
+import com.vmsac.vmsacserver.model.credentialtype.entranceschedule.EntranceScheduleDto;
 import com.vmsac.vmsacserver.repository.EntranceRepository;
 import com.vmsac.vmsacserver.repository.EntranceScheduleRepository;
 import org.springframework.beans.factory.annotation.Autowired;

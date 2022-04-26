@@ -1,6 +1,8 @@
 package com.vmsac.vmsacserver.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoN;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -34,11 +37,19 @@ public class Entrance {
     @Column(name = "deleted")
     private Boolean deleted;
 
+    @Column(name = "used")
+    private Boolean used;
+
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "entrance", fetch = FetchType.LAZY)
+    private List<AuthDevice> entranceAuthDevices;
+
     public EntranceDto toDto(){
         return new EntranceDto(this.entranceId, this.entranceName,
-                this.entranceDesc, this.isActive, null);
+                this.entranceDesc, this.isActive, this.used, null,this.entranceAuthDevices);
     }
     public EntranceOnlyDto toEntranceOnlyDto(){
-        return new EntranceOnlyDto(this.entranceId,this.entranceName,this.entranceDesc, this.isActive);
+        return new EntranceOnlyDto(this.entranceId,this.entranceName,this.entranceDesc, this.isActive,this.used,this.entranceAuthDevices);
     }
 }

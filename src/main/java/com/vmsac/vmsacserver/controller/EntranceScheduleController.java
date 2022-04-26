@@ -1,7 +1,7 @@
 package com.vmsac.vmsacserver.controller;
 
-import com.vmsac.vmsacserver.model.entranceschedule.CreateEntranceScheduleDto;
-import com.vmsac.vmsacserver.model.entranceschedule.EntranceScheduleDto;
+import com.vmsac.vmsacserver.model.credentialtype.entranceschedule.CreateEntranceScheduleDto;
+import com.vmsac.vmsacserver.model.credentialtype.entranceschedule.EntranceScheduleDto;
 import com.vmsac.vmsacserver.service.EntranceScheduleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

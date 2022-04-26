@@ -129,19 +129,24 @@ public class EntranceController {
     //set delete = true and set accgrp = null for persons.
     @DeleteMapping("/entrance/{id}")
     public ResponseEntity<?> deleteEntrance(@PathVariable("id")Long id){
-
         if (entranceService.findById(id).isEmpty()){
             Map<Long, String> errors = new HashMap<>();
             errors.put(id, "Entrance id " +
                     id + " does not exist");
             return new ResponseEntity<>(errors,HttpStatus.NOT_FOUND);
         }
-        Entrance deleteEntrance = entranceService.findById(id).get();
-        deleteEntrance.setDeleted(true);
-        entranceService.save(deleteEntrance.toDto());
-        //get NtoN table
-        entranceService.delete(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        try{
+            Entrance deleteEntrance = entranceService.findById(id).get();
+            deleteEntrance.setDeleted(true);
+            entranceService.save(deleteEntrance.toDto());
+            //get NtoN table
+            entranceService.delete(id);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        catch (Exception e){
+            return new ResponseEntity<>(e.toString(),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
     }
 
 }
