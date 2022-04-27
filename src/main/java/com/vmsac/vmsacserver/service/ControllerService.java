@@ -126,37 +126,43 @@ public class ControllerService {
         controllerRepository.save(toDeleted);
     }
 
-    public void shutdownunicon(Long controllerId) throws Exception {
+    public void shutdownunicon(String IPaddress) throws Exception {
         RestTemplate restTemplate = new RestTemplate();
-        String resourceUrl = "http://localhost:5000/shutdown";
+        String resourceUrl = "http://"+IPaddress+":5000/controller/shutdown";
         HttpEntity<String> request = new HttpEntity<String>("");
 
         ResponseEntity<String> productCreateResponse =
                 restTemplate.exchange(resourceUrl, HttpMethod.GET, request, String.class);
 
-        System.out.println(productCreateResponse);
+        return;
     }
 
-    public void rebootunicon(Long controllerId) throws Exception {
+    public void rebootunicon(String IPaddress) throws Exception {
         RestTemplate restTemplate = new RestTemplate();
-        String resourceUrl = "http://localhost:5000/reboot";
+        String resourceUrl = "http://"+IPaddress+":5000/controller/reboot";
         HttpEntity<String> request = new HttpEntity<String>("");
 
         ResponseEntity<String> productCreateResponse =
                 restTemplate.exchange(resourceUrl, HttpMethod.GET, request, String.class);
 
-        System.out.println(productCreateResponse);
+        return;
     }
 
-    public void backToDefault(Long controllerId) throws Exception {
+    public Boolean backToDefault(String IPaddress) throws Exception {
         RestTemplate restTemplate = new RestTemplate();
-        String resourceUrl = "http://localhost:5000/controller";
 
-        HttpEntity<String> request = new HttpEntity<String>(findById(controllerId).get().toString());
+        String resourceUrl = "http://"+IPaddress+":5000/controller/backtodefault";
+        HttpEntity<String> request = new HttpEntity<String>("");
 
         ResponseEntity<String> productCreateResponse =
-                restTemplate.exchange(resourceUrl, HttpMethod.POST, request, String.class);
+                restTemplate.exchange(resourceUrl, HttpMethod.GET, request, String.class);
 
+        if (productCreateResponse.getStatusCodeValue() == 200){
+            return true;
+        }
+        else{
+            return false;
+        }
 //        System.out.println(productCreateResponse.getStatusCodeValue());
 //        System.out.println(productCreateResponse.getBody());
 //
@@ -164,21 +170,53 @@ public class ControllerService {
     }
 
     public ControllerConnection getControllerConnectionUnicon(String IPaddress) throws Exception {
-        RestTemplate restTemplate = new RestTemplate();
-        String resourceUrl = "http://192.168.1.135:5000/controller/status";
+            RestTemplate restTemplate = new RestTemplate();
 
-        HttpEntity<String> request = new HttpEntity<String>("");
+            String resourceUrl = "http://"+IPaddress+":5000/controller/status";
+            HttpEntity<String> request = new HttpEntity<String>("");
 
-        ResponseEntity<String> productCreateResponse =
-                restTemplate.exchange(resourceUrl, HttpMethod.GET, request, String.class);
+            ResponseEntity<String> productCreateResponse =
+                    restTemplate.exchange(resourceUrl, HttpMethod.GET, request, String.class);
 
-        System.out.println(productCreateResponse);
-        System.out.println(productCreateResponse.getBody());
-
-        ObjectMapper mapper = new ObjectMapper();
-        ControllerConnection connection = mapper.readValue(productCreateResponse.getBody(), ControllerConnection.class);
+            if (productCreateResponse.getStatusCodeValue() == 200){
+                ObjectMapper mapper = new ObjectMapper();
+                ControllerConnection connection = mapper.readValue(productCreateResponse.getBody(), ControllerConnection.class);
 
 
-        return connection;
+                return connection;
+            }
+            else{
+                return null;
+            }
+
+    }
+
+
+    public HttpStatus generate(){
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            String resourceUrl = "http://192.168.1.135:5000/credOccur";
+            HttpEntity<String> request = new HttpEntity<String>
+                    ("{'country abbreviation': 'US', 'places':" +
+                            " [{'place name': 'Belmont', 'longitude': '-71.4594'," +
+                            " 'post code': '02178', 'latitude': '42.4464'}, " +
+                            "{'place name': 'Belmont', 'longitude': '-71.2044', " +
+                            "'post code': '02478', 'latitude': '42.4128'}]," +
+                            " 'country': 'United States', 'place name': 'Belmont', " +
+                            "'state': 'Massachusetts', 'state abbreviation': 'MA'}");
+
+            ResponseEntity<String> productCreateResponse =
+                    restTemplate.exchange(resourceUrl, HttpMethod.POST, request, String.class);
+
+            System.out.println(productCreateResponse);
+            System.out.println(productCreateResponse.getBody());
+            return HttpStatus.OK;
+        }
+        catch(Exception e){
+            System.out.println(e);
+            return HttpStatus.BAD_REQUEST;
+        }
+
+
     }
 }

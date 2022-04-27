@@ -116,6 +116,58 @@ public class ControllerController {
         return new ResponseEntity<>(errors, HttpStatus.NOT_FOUND);
     }
 
+    @PutMapping(path = "authdevice/masterpinToTrue/{authdeviceId}")
+    public ResponseEntity<?> UpdateAuthDeviceMasterpinToTrue( @PathVariable Long authdeviceId) {
+        Optional<AuthDevice> optionalAuthDevice = authDeviceService.findbyId(authdeviceId);
+
+        if (optionalAuthDevice.isPresent()){
+            try {
+                if (!optionalAuthDevice.get().getMasterpin()){
+                    authDeviceService.UpdateAuthDeviceMasterpin(authdeviceId,true);
+                    return new ResponseEntity<>(HttpStatus.OK);
+                }
+                else{
+                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+                }
+            }//update
+            catch(Exception e){
+                return new ResponseEntity<>(e.toString(), HttpStatus.BAD_REQUEST);
+            }
+            //return Response 200
+        }
+        Map<String, String> errors = new HashMap<>();
+        errors.put("authdeviceId", "Auth Device with Id " +
+                authdeviceId +" does not exist");
+
+        return new ResponseEntity<>(errors, HttpStatus.NOT_FOUND);
+    }
+
+    @PutMapping(path = "authdevice/masterpinToFalse/{authdeviceId}")
+    public ResponseEntity<?> UpdateAuthDeviceMasterpinToFalse( @PathVariable Long authdeviceId) {
+        Optional<AuthDevice> optionalAuthDevice = authDeviceService.findbyId(authdeviceId);
+
+        if (optionalAuthDevice.isPresent()){
+            try {
+                if (optionalAuthDevice.get().getMasterpin()){
+                    authDeviceService.UpdateAuthDeviceMasterpin(authdeviceId,false);
+                    return new ResponseEntity<>(HttpStatus.OK);
+                }
+                else{
+                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+                }
+            }//update
+            catch(Exception e){
+                return new ResponseEntity<>(e.toString(), HttpStatus.BAD_REQUEST);
+            }
+            //return Response 200
+        }
+        Map<String, String> errors = new HashMap<>();
+        errors.put("authdeviceId", "Auth Device with Id " +
+                authdeviceId +" does not exist");
+
+        return new ResponseEntity<>(errors, HttpStatus.NOT_FOUND);
+    }
+
     @PutMapping(path = "authdevice/{authdeviceId}")
     public ResponseEntity<?> UpdateAuthDevice( @PathVariable Long authdeviceId,
                                                @Valid @RequestBody AuthDevice newAuthDevice) {
@@ -223,34 +275,57 @@ public class ControllerController {
 
     @DeleteMapping("/controller/delete/{controllerId}")
     public ResponseEntity<?> deleteControllerWithId(@PathVariable Long controllerId){
+        Optional<Controller> optionalController = controllerService.findById(controllerId);
+
+        if (optionalController.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        Controller existingcontroller = optionalController.get();
+        String IPaddress = existingcontroller.getControllerIP();
+        //api call to get status
         try {
-            controllerService.backToDefault(controllerId);
-            controllerService.shutdownunicon(controllerId);
+            if (!controllerService.backToDefault(IPaddress)){
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+            controllerService.shutdownunicon(IPaddress);
             authDeviceService.deleteRelatedAuthDevices(controllerId);
-            //System.out.println(controllerService.findById(controllerId).get());
             controllerService.deleteControllerWithId(controllerId);
 
-            return ResponseEntity.noContent().build();
-        } catch (Exception e) {
-            return ResponseEntity.notFound().build();
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+
+        }
+        catch(Exception e){
+            return new ResponseEntity<>(HttpStatus.REQUEST_TIMEOUT);
         }
     }
 
     @DeleteMapping("/controller/reset/{controllerId}")
     public ResponseEntity<?> resetControllerWithId(@PathVariable Long controllerId){
+
+        Optional<Controller> optionalController = controllerService.findById(controllerId);
+
+        if (optionalController.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        Controller existingcontroller = optionalController.get();
+        String IPaddress = existingcontroller.getControllerIP();
+        //api call to get status
         try {
-            controllerService.backToDefault(controllerId);
-            controllerService.rebootunicon(controllerId);
+            if (!controllerService.backToDefault(IPaddress)){
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+            controllerService.rebootunicon(IPaddress);
             authDeviceService.deleteRelatedAuthDevices(controllerId);
             controllerService.deleteControllerWithId(controllerId);
 
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
-            return ResponseEntity.noContent().build();
-        } catch (Exception e) {
-
-            return ResponseEntity.notFound().build();
+        }
+        catch(Exception e){
+            return new ResponseEntity<>(HttpStatus.REQUEST_TIMEOUT);
         }
     }
+
 
     @GetMapping("/availableEntrances")
     public List<Entrance> getAvailableEntrances() {
@@ -261,11 +336,32 @@ public class ControllerController {
     @GetMapping("/controllerConnection/{controllerId}")
     public ResponseEntity<?> getControllerConnection(@PathVariable Long controllerId) throws Exception {
 
-        String url = "http://192.168.1.135:5000/controller/status";
-        //api call to get status
-        ControllerConnection connection = controllerService.getControllerConnectionUnicon("");
+        Optional<Controller> optionalController = controllerService.findById(controllerId);
 
-        return new ResponseEntity<>(connection, HttpStatus.OK);
+        if (optionalController.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        Controller existingcontroller = optionalController.get();
+        String IPaddress = existingcontroller.getControllerIP();
+        //api call to get status
+        try {
+            ControllerConnection connection = controllerService.getControllerConnectionUnicon(IPaddress);
+            if (connection == null) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+            else {
+                return new ResponseEntity<>(connection, HttpStatus.OK);
+            }
+        }
+        catch(Exception e){
+            return new ResponseEntity<>(HttpStatus.REQUEST_TIMEOUT);
+        }
     }
+
+    @GetMapping("/testing")
+    public ResponseEntity<?> testing(){
+        return new ResponseEntity<>(controllerService.generate());
+    }
+
 }
 

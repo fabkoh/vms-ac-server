@@ -88,4 +88,12 @@ public class AuthDeviceService {
         return authDeviceRepository.findByEntrance_EntranceIdEquals(entranceid);
     }
 
+    public void UpdateAuthDeviceMasterpin(Long authdeviceId, Boolean state)throws Exception{
+        AuthDevice exisitingAuthDevice = authDeviceRepository.findById(authdeviceId)
+                .orElseThrow(()-> new RuntimeException("Auth Device does not exist"));
+
+        exisitingAuthDevice.setMasterpin(state);
+        authDeviceRepository.save(exisitingAuthDevice);
+
+    }
 }
