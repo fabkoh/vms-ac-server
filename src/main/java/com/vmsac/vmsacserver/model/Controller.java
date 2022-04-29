@@ -32,6 +32,9 @@ public class Controller {
     @Column( name = "controllerip")
     private String controllerIP;
 
+    @Column( name = "pendingip")
+    private String pendingIP;
+
     @Column( name = "controllermac")
     private String controllerMAC;
 
@@ -41,6 +44,12 @@ public class Controller {
 
     @Column( name = "lastonline")
     private LocalDateTime lastOnline;
+
+    @Column( name = "created")
+    private LocalDateTime created;
+
+    @Column( name = "mastercontroller")
+    private Boolean masterController;
 
     @Column( name = "pinassignmentconfig")
     private String pinAssignmentConfig;
@@ -58,31 +67,16 @@ public class Controller {
     public UniconControllerDto touniconDto(){
         return new UniconControllerDto(this.controllerId,this.controllerIP,
                 this.controllerIPStatic,this.controllerMAC,
-                this.controllerSerialNo,this.deleted);
+                this.controllerSerialNo);
     }
 
     public FrontendControllerDto toFrontendDto(){
         return new FrontendControllerDto(this.controllerId,this.controllerName,
                 this.controllerIP,
                 this.controllerIPStatic,this.controllerMAC,
-                this.controllerSerialNo,this.pinAssignmentConfig,
+                this.controllerSerialNo,this.pendingIP,this.masterController, this.pinAssignmentConfig,
                 this.settingsConfig);
     }
 
-    @Override
-    public String toString() {
-        return "Controller : {" +
-                "controllerId=" + controllerId +
-                ", controllerIPStatic=" + controllerIPStatic +
-                ", controllerName='" + controllerName + '\'' +
-                ", controllerIP='" + controllerIP + '\'' +
-                ", controllerMAC='" + controllerMAC + '\'' +
-                ", controllerSerialNo='" + controllerSerialNo + '\'' +
-                ", lastOnline=" + lastOnline +
-                ", pinAssignmentConfig='" + pinAssignmentConfig + '\'' +
-                ", settingsConfig='" + settingsConfig + '\'' +
-                ", deleted=" + deleted +
-                ", controllerAuthDevices=" + AuthDevices +
-                '}';
-    }
+
 }

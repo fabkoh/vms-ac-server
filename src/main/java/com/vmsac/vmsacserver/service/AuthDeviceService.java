@@ -25,19 +25,19 @@ public class AuthDeviceService {
 
     public void createAuthDevices(Controller controller) throws Exception{
         AuthDevice authdevice1 = new AuthDevice();
-        authDeviceRepository.save(authdevice1.toCreateAuthDevice("Auth Device 1", "E1 IN",
+        authDeviceRepository.save(authdevice1.toCreateAuthDevice("Auth Device 1", "E1_IN",
                 defaultAuthMethod,controller));
 
         AuthDevice authdevice2 = new AuthDevice();
-        authDeviceRepository.save(authdevice2.toCreateAuthDevice("Auth Device 2", "E1 OUT",
+        authDeviceRepository.save(authdevice2.toCreateAuthDevice("Auth Device 2", "E1_OUT",
                 defaultAuthMethod,controller));
 
         AuthDevice authdevice3 = new AuthDevice();
-        authDeviceRepository.save(authdevice3.toCreateAuthDevice("Auth Device 3", "E2 IN",
+        authDeviceRepository.save(authdevice3.toCreateAuthDevice("Auth Device 3", "E2_IN",
                 defaultAuthMethod,controller));
 
         AuthDevice authdevice4 = new AuthDevice();
-        authDeviceRepository.save(authdevice4.toCreateAuthDevice("Auth Device 4", "E2 OUT",
+        authDeviceRepository.save(authdevice4.toCreateAuthDevice("Auth Device 4", "E2_OUT",
                 defaultAuthMethod,controller));
     }
 
@@ -73,6 +73,7 @@ public class AuthDeviceService {
         exisitingAuthDevice.setAuthDeviceName(newAuthDevice.getAuthDeviceName());
         exisitingAuthDevice.setMasterpin(newAuthDevice.getMasterpin());
         exisitingAuthDevice.setDefaultAuthMethod(newAuthDevice.getDefaultAuthMethod());
+        exisitingAuthDevice.setEntrance(newAuthDevice.getEntrance());
         return authDeviceRepository.save(exisitingAuthDevice);
     }
 
@@ -95,5 +96,9 @@ public class AuthDeviceService {
         exisitingAuthDevice.setMasterpin(state);
         authDeviceRepository.save(exisitingAuthDevice);
 
+    }
+
+    public void save(AuthDevice existingauthDevice) {
+        authDeviceRepository.save(existingauthDevice);
     }
 }

@@ -22,4 +22,6 @@ public interface EntranceRepository extends JpaRepository<Entrance, Long> {
     List<Entrance> findByDeletedIsFalseAndUsedIsFalse();
 
 
+
+
 }

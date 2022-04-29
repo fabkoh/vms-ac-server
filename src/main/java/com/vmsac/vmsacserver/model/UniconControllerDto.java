@@ -30,18 +30,16 @@ public class UniconControllerDto {
 
 
 
-    private Boolean deleted;
-
-    public Controller toCreateController(String controllerName, LocalDateTime lastOnline, String pinAssignmentConfig, String settingsConfig, Boolean deleted){
-        return new Controller(null,controllerIPStatic,controllerName,controllerIP,
-                controllerMAC,controllerSerialNo,lastOnline,pinAssignmentConfig,
+    public Controller toCreateController(String controllerName, LocalDateTime lastOnline,Boolean mastercontroller, LocalDateTime created, String pinAssignmentConfig, String settingsConfig, Boolean deleted){
+        return new Controller(null,controllerIPStatic,controllerName,controllerIP,null,
+                controllerMAC,controllerSerialNo,lastOnline,created,mastercontroller,pinAssignmentConfig,
                 settingsConfig,deleted,null);
     }
 
     public Controller toController(){
-        return new Controller(controllerId,controllerIPStatic,null,controllerIP,
-                controllerMAC,controllerSerialNo,null,
-                null,null,deleted,null);
+        return new Controller(controllerId,controllerIPStatic,null,controllerIP,null,
+                controllerMAC,controllerSerialNo,null,null,null,
+                null,null,false,null);
     }
 //    include auth device to update status ( online/ offline )
 

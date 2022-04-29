@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
+import javax.persistence.Column;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -32,7 +33,9 @@ public class FrontendControllerDto {
     @NonNull
     private String controllerSerialNo;
 
+    private String pendingIP;
 
+    private Boolean masterController;
 
     private String pinAssignmentConfig;
 
@@ -40,8 +43,8 @@ public class FrontendControllerDto {
 
 
     public Controller toController(){
-        return new Controller(controllerId,controllerIPStatic,controllerName,controllerIP,
-                controllerMAC,controllerSerialNo,null,
+        return new Controller(controllerId,controllerIPStatic,controllerName,controllerIP,pendingIP,
+                controllerMAC,controllerSerialNo,null,null,masterController,
                 pinAssignmentConfig,settingsConfig,false,null);
     }
 }

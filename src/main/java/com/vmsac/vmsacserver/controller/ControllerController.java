@@ -5,6 +5,7 @@ import com.vmsac.vmsacserver.repository.AuthDeviceRepository;
 import com.vmsac.vmsacserver.service.AuthDeviceService;
 import com.vmsac.vmsacserver.service.ControllerService;
 import com.vmsac.vmsacserver.service.EntranceService;
+
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,6 +14,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Null;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 
 @CrossOrigin(origins = "*")
@@ -55,16 +58,66 @@ public class ControllerController {
 
     @PutMapping(path = "controller/{controllerId}")
     public ResponseEntity<?> UpdateController( @PathVariable Long controllerId,
-            @Valid @RequestBody FrontendControllerDto newFrontendControllerDto) {
+            @Valid @RequestBody FrontendControllerDto newFrontendControllerDto) throws Exception {
         Optional<Controller> optionalController = controllerService.findBySerialNo(newFrontendControllerDto.getControllerSerialNo());
 
         if (optionalController.isPresent() && optionalController.get().getControllerId() == controllerId) {
-            try {
-                return new ResponseEntity<>(controllerService.FrondEndControllerUpdate(newFrontendControllerDto), HttpStatus.OK);
-            }//update
-            catch(Exception e){
-                return ResponseEntity.badRequest().build();
+            if (optionalController.get().getMasterController() == true){
+                Map<String, String> errors = new HashMap<>();
+                errors.put("controllerId", "Controller with Id " +
+                        controllerId + " with Serial No " + newFrontendControllerDto.getControllerSerialNo()+" is a Master Controller and cannot be edited.");
+                return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
             }
+
+            if (optionalController.get().getPendingIP() != optionalController.get().getControllerIP() && optionalController.get().getPendingIP() != null ){
+                Map<String, String> errors = new HashMap<>();
+                errors.put("controllerId", "Controller with Id " +
+                        controllerId + " with Serial No " + newFrontendControllerDto.getControllerSerialNo()+" has clashing pending and current IP ");
+                return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+            }
+
+            if (controllerService.isNotValidInet4Address(newFrontendControllerDto.getControllerIP())){
+                Map<String, String> errors = new HashMap<>();
+                errors.put("Error", newFrontendControllerDto.getControllerIP() +" is not a valid IPv4 address");
+                return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+            }
+
+            // check if mastercontroller, return error if true
+            // check if pendingIP != actualIP && pendingIP != null, return error
+            try{
+                if (controllerService.IsIPavailable(newFrontendControllerDto.getControllerIP())){
+                    // ping ip to see if taken ( return error if taken )
+                    // update pending ip in db
+                    Controller toSave = optionalController.get();
+                    toSave.setPendingIP(newFrontendControllerDto.getControllerIP());
+                    controllerService.save(toSave);
+
+                    if (controllerService.UpdateUniconIP(newFrontendControllerDto)){
+                        return new ResponseEntity<>(controllerService.FrondEndControllerUpdate(newFrontendControllerDto), HttpStatus.OK);
+                    }
+
+                    Map<String, String> errors = new HashMap<>();
+                    errors.put("Error", "CONTROLLER MIGHT BE LOST ! Fail to update Controller with ID "+ newFrontendControllerDto.getControllerId() );
+                    return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+
+                }
+
+                Map<String, String> errors = new HashMap<>();
+                errors.put("Error", newFrontendControllerDto.getControllerIP() +" is taken");
+                return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+            }
+            catch (Exception e){
+                return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
+            }
+            //////////////////// check if ip address is in same subnet
+
+            // send req to pi and wait for response
+            // time out, start sending POST req for healthcheck to pi new address
+                // ( after a {certain time}, return error )
+                // replies within a {certain time},
+                    // update name and actual ip in db and return success
+            // if pi replies, return error
+
             //return Response 200
         }
         Map<String, String> errors = new HashMap<>();
@@ -350,6 +403,13 @@ public class ControllerController {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
             else {
+                existingcontroller.setLastOnline(LocalDateTime.now(ZoneId.of("GMT+08:00")));
+                existingcontroller.getAuthDevices().forEach((existingauthDevice -> {
+                    existingauthDevice.setLastOnline(LocalDateTime.now(ZoneId.of("GMT+08:00")));
+                    authDeviceService.save(existingauthDevice);
+                }));
+                controllerService.save(existingcontroller);
+
                 return new ResponseEntity<>(connection, HttpStatus.OK);
             }
         }

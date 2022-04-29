@@ -2,9 +2,3 @@ insert into visitor values ('96653993','Fabian','Koh','470A','koh.fabian@gmail.c
 insert into visitor values ('78945621','Dan','Tham','456A','daniel.tham@gmail.com')
 insert into visitor values ('12345678', 'John','Smith','321Z','john.smith@gmail.com')
 insert into visitor values ('48997562','Jane','Tan','586G','jane.tan@gmail.com')
-
-insert into controller values ('1','False','1','1,','1,','2rf2r','2021-03-08T01:00:01.000000800Z','1','1','False')
-insert into controller values ('2','False','2','2,','2,','2eger','2021-03-08T01:00:01.000000800Z','2','2','False')
-insert into controller values ('3','False','3','3,','3,','2rf2r','2021-03-08T01:00:01.000000800Z','3','3','False')
-insert into controller values ('4','False','4','4,','4','2rf2r','2021-03-08T01:00:01.000000800Z','4','4','True')
-insert into controller values ('5','False','5','5,','5,','2eger','2021-03-08T01:00:01.000000800Z','5','5','True')

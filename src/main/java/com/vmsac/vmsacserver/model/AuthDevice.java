@@ -56,7 +56,7 @@ public class AuthDevice {
 //    private AuthSchedule authSchedule;
     public AuthDevice toCreateAuthDevice(String authDeviceName, String authDeviceDirection,
                                          String defaultAuthMethod, Controller controller) {
-        return new AuthDevice(null,authDeviceName,authDeviceDirection,null, true,
+        return new AuthDevice(null,authDeviceName,authDeviceDirection,null, false,
                 defaultAuthMethod,controller,null);
     }
 
