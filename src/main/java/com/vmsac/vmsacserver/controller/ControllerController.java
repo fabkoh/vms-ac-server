@@ -98,7 +98,7 @@ public class ControllerController {
 
                     Map<String, String> errors = new HashMap<>();
                     errors.put("Error", "CONTROLLER MIGHT BE LOST ! Fail to update Controller with ID "+ newFrontendControllerDto.getControllerId() );
-                    return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+                    return new ResponseEntity<>(errors, HttpStatus.GONE);
 
                 }
 
