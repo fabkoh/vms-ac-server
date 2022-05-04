@@ -1,9 +1,8 @@
 package com.vmsac.vmsacserver.util;
 
-import com.vmsac.vmsacserver.model.AccessGroup;
+import com.vmsac.vmsacserver.controller.ControllerController;
+import com.vmsac.vmsacserver.model.*;
 import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoN;
-import com.vmsac.vmsacserver.model.Entrance;
-import com.vmsac.vmsacserver.model.Person;
 import com.vmsac.vmsacserver.model.accessgroupschedule.AccessGroupSchedule;
 
 import com.vmsac.vmsacserver.model.credentialtype.entranceschedule.EntranceSchedule;
@@ -30,9 +29,13 @@ public class DataLoader implements CommandLineRunner {
     private final EntranceScheduleRepository entranceScheduleRepository;
     private final CredTypeRepository credTypeRepository;
     private final CredentialRepository credentialRepository;
+    private final ControllerRepository controllerRepository;
+    private final AuthDeviceRepository authDeviceRepository;
+    private final ControllerController controllerController;
 
 
-    public DataLoader(AccessGroupRepository accessGroupRepository, EntranceRepository entranceRepository, PersonRepository personRepository, AccessGroupEntranceNtoNRepository accessGroupEntranceRepository, AccessGroupScheduleRepository accessGroupScheduleRepository, CredTypeRepository credTypeRepository, CredentialRepository credentialRepository, EntranceScheduleRepository entranceScheduleRepository) {
+
+    public DataLoader(AccessGroupRepository accessGroupRepository, EntranceRepository entranceRepository, PersonRepository personRepository, AccessGroupEntranceNtoNRepository accessGroupEntranceRepository, AccessGroupScheduleRepository accessGroupScheduleRepository, CredTypeRepository credTypeRepository, CredentialRepository credentialRepository, EntranceScheduleRepository entranceScheduleRepository,ControllerRepository controllerRepository,AuthDeviceRepository authDeviceRepository,ControllerController controllerController) {
 
         this.accessGroupRepository = accessGroupRepository;
         this.entranceRepository = entranceRepository;
@@ -44,6 +47,9 @@ public class DataLoader implements CommandLineRunner {
 
         this.credTypeRepository = credTypeRepository;
         this.credentialRepository = credentialRepository;
+        this.controllerRepository = controllerRepository;
+        this.authDeviceRepository = authDeviceRepository;
+        this.controllerController = controllerController;
     }
 
     @Override
@@ -302,6 +308,10 @@ public class DataLoader implements CommandLineRunner {
                         .person(letoAtreides)
                         .deleted(false)
                         .build()
+        );
+
+        controllerController.createOrUpdateController(
+                new UniconControllerDto(null,"192.168.1.64",true,"495162159654","5e86805e2bafd54f66cc95c3")
         );
     }
 }
