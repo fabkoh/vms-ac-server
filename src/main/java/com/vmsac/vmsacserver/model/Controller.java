@@ -71,8 +71,8 @@ public class Controller {
     }
 
     public FrontendControllerDto toFrontendDto(){
-        return new FrontendControllerDto(this.controllerId,this.controllerName,
-                this.controllerIP,
+        return new FrontendControllerDto(this.controllerId,this.controllerIP,this.controllerName,
+
                 this.controllerIPStatic,this.controllerMAC,
                 this.controllerSerialNo,this.pendingIP,this.masterController, this.pinAssignmentConfig,
                 this.settingsConfig);

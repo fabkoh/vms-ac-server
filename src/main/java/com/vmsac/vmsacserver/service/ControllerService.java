@@ -1,8 +1,14 @@
 package com.vmsac.vmsacserver.service;
 
+import java.util.HashMap;
+import java.util.Map;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmsac.vmsacserver.model.*;
+import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoN;
+import com.vmsac.vmsacserver.model.accessgroupschedule.AccessGroupSchedule;
+import com.vmsac.vmsacserver.model.accessgroupschedule.AccessGroupScheduleDto;
+import com.vmsac.vmsacserver.model.credential.CredentialDto;
 import com.vmsac.vmsacserver.model.credentialtype.entranceschedule.EntranceSchedule;
 import com.vmsac.vmsacserver.model.credential.Credential;
 import com.vmsac.vmsacserver.repository.AuthDeviceRepository;
@@ -11,13 +17,18 @@ import com.vmsac.vmsacserver.repository.EntranceRepository;
 import com.vmsac.vmsacserver.repository.EntranceScheduleRepository;
 import com.vmsac.vmsacserver.repository.AccessGroupEntranceNtoNRepository;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import org.dmfs.rfc5545.DateTime;
+import org.dmfs.rfc5545.recur.RecurrenceRule;
+import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.client.RestTemplate;
 
@@ -45,6 +56,15 @@ public class ControllerService {
 
     @Autowired
     private AuthDeviceRepository authDeviceRepository;
+
+    @Autowired
+    private CredentialService credentialService;
+
+    @Autowired
+    private AccessGroupScheduleService accessGroupScheduleService;
+
+    @Autowired
+    private PersonService personService;
 
     @Autowired
     private AccessGroupEntranceNtoNRepository accessGroupEntranceNtoNRepository;
@@ -166,20 +186,38 @@ public class ControllerService {
         return;
     }
 
-    public Boolean backToDefault(String IPaddress) throws Exception {
-        RestTemplate restTemplate = new RestTemplate();
+    public Boolean backToDefault(Controller existingController) throws Exception {
+        HttpComponentsClientHttpRequestFactory httpRequestFactory = new HttpComponentsClientHttpRequestFactory();
+        httpRequestFactory.setConnectionRequestTimeout(3000);
+        httpRequestFactory.setConnectTimeout(3000);
+        httpRequestFactory.setReadTimeout(3000);
 
+        RestTemplate restTemplate = new RestTemplate(httpRequestFactory);
+
+        String IPaddress = existingController.getControllerIP();
         String resourceUrl = "http://"+IPaddress+":5000/api/reset";
         HttpEntity<String> request = new HttpEntity<String>("");
 
-        ResponseEntity<String> productCreateResponse =
-                restTemplate.exchange(resourceUrl, HttpMethod.POST, request, String.class);
+        try{
 
-        if (productCreateResponse.getStatusCodeValue() == 200){
-            return true;
-        }
-        else{
+            ResponseEntity<String> productCreateResponse =
+                    restTemplate.exchange(resourceUrl, HttpMethod.POST, request, String.class);
             return false;
+        }
+        catch(Exception e){
+            {
+                Thread.sleep(2000);
+                LocalDateTime lastonlinedatetime = controllerRepository.findByControllerSerialNoEqualsAndDeletedIsFalse(existingController
+                        .getControllerSerialNo()).get().getLastOnline();
+
+                LocalDateTime currentdatetime = LocalDateTime.now(ZoneId.of("GMT+08:00"));
+
+                if (lastonlinedatetime.isAfter(currentdatetime.minusSeconds(30))) {
+                    return true;
+                }
+                return false;
+            }
+
         }
     }
 
@@ -204,6 +242,47 @@ public class ControllerService {
 
     }
 
+    public HttpStatus sendEntranceNameRelationship(Long controllerId) throws Exception {
+
+        Controller existingcontroller = controllerRepository.getById(1L);
+        String IPaddress = existingcontroller.getControllerIP();
+
+        RestTemplate restTemplate = new RestTemplate();
+        String resourceUrl = "http://"+IPaddress+":5000/api/entrance-name";
+
+        Map <String,Object> jsonbody = new HashMap();
+        jsonbody.put("controllerSerialNo",existingcontroller.getControllerSerialNo());
+
+
+        try{
+            jsonbody.put("E1",existingcontroller.getAuthDevices().get(0).getEntrance().getEntranceName());
+        }
+        catch(Exception e){
+            jsonbody.put("E1","");
+        }
+
+        try{
+            jsonbody.put("E2",existingcontroller.getAuthDevices().get(2).getEntrance().getEntranceName());
+        }
+        catch(Exception e){
+            jsonbody.put("E2","");
+        }
+
+        HttpEntity<Map> request = new HttpEntity<>
+                (jsonbody);
+
+        ResponseEntity<String> productCreateResponse =
+                restTemplate.exchange(resourceUrl, HttpMethod.POST, request, String.class);
+
+        if (productCreateResponse.getStatusCodeValue() == 200){
+            ObjectMapper mapper = new ObjectMapper();
+            ControllerConnection connection = mapper.readValue(productCreateResponse.getBody(), ControllerConnection.class);
+            return HttpStatus.OK;
+        }
+        else{
+            return HttpStatus.BAD_REQUEST;
+        }
+    }
 
     public HttpStatus generate(){
         try {
@@ -212,69 +291,158 @@ public class ControllerService {
 
             String test ="";
 
-            for ( int i=0; i<2;i++){
-                Entrance existingentrance = existingcontroller.getAuthDevices().get(i*2).getEntrance();
-                EntranceSchedule exisitngEntranceSchedule = entranceScheduleRepository.findByEntranceIdEqualsAndDeletedIsFalse(existingentrance.getEntranceId());
+            String MASTERPASSWORD = "666666";
+
+            List<Map> RulesSet = new ArrayList<Map>(1);
+
+            for ( int i=0; i<2;i++) {
+                try {
+                    Entrance existingentrance = existingcontroller.getAuthDevices().get(i * 2).getEntrance();
+                    EntranceSchedule exisitngEntranceSchedule = entranceScheduleRepository.findByEntranceIdEqualsAndDeletedIsFalse(existingentrance.getEntranceId());
+
+                    Map<String, Object> entrance = new HashMap();
+                    entrance.put("Entrance", existingentrance.getEntranceName());
 
 
+                    String rawrrule = exisitngEntranceSchedule.getRrule();
+                    String startdatetime = rawrrule.split("\n")[0].split(":")[1].split("T")[0];
+                    String rrule = rawrrule.split("\n")[1].split(":")[1];
+                    Integer year = Integer.parseInt(startdatetime.substring(0,4));
+                    Integer month = Integer.parseInt(startdatetime.substring(4,6));
+                    Integer day = Integer.parseInt(startdatetime.substring(6,8));
 
-                Map<String,Object> entrance1 = new LinkedHashMap<>();
-                entrance1.put("Entrance",existingentrance.getEntranceName());
-                entrance1.put("EntranceSchedule",exisitngEntranceSchedule);
+                    RecurrenceRule rule = new RecurrenceRule(rrule);
+                    DateTime start = new DateTime(year, month /* 0-based month numbers! */,day);
+                    RecurrenceRuleIterator it = rule.iterator(start);
+                    int maxInstances = 100; // limit instances for rules that recur forever
+                    // think about how to generate one year worth
+                    while (it.hasNext() && (!rule.isInfinite() || maxInstances-- > 0))
+                    {
+                        DateTime nextInstance = it.nextDateTime();
+                        // do something with nextInstance
+                        System.out.println(nextInstance);
+                    }
 
-                Map<String,Object> existingentrancedetails = new LinkedHashMap<>();
-                existingentrancedetails.put("Antipassback","No");
-                existingentrancedetails.put("Zone","ZoneId");
+                    entrance.put("EntranceSchedule", exisitngEntranceSchedule);
 
-                Map<String,Object> authdevices = new LinkedHashMap<>();
-                authdevices.put("Device1",authDeviceRepository.findByEntrance_EntranceIdIsAndAuthDeviceDirectionContains(existingentrance.getEntranceId(),"IN"));
-                authdevices.put("Device2",authDeviceRepository.findByEntrance_EntranceIdIsAndAuthDeviceDirectionContains(existingentrance.getEntranceId(),"OUT"));
-                existingentrancedetails.put("AuthenticationDevices",authdevices);
+                    Map<String, Object> existingentrancedetails = new HashMap();
+                    existingentrancedetails.put("Antipassback", "No");
+                    existingentrancedetails.put("Zone", "ZoneId");
 
-                Map<String,Object> accessgroups = new LinkedHashMap<>();
-                // for all access group in entrances
+                    Map<String, Object> authdevices = new HashMap();
+
+                    AuthDevice exisitngDevice1 = authDeviceRepository.findByEntrance_EntranceIdIsAndAuthDeviceDirectionContains(existingentrance.getEntranceId(), "IN");
+                    AuthDevice exisitngDevice2 = authDeviceRepository.findByEntrance_EntranceIdIsAndAuthDeviceDirectionContains(existingentrance.getEntranceId(), "OUT");
+
+                    Map<String, Object> Device1 = new HashMap();
+
+                    if (exisitngDevice1.getMasterpin() == true) {
+                        Device1.put("Masterpassword", MASTERPASSWORD);
+                    } else {
+                        Device1.put("Masterpassword", "");
+                    }
+
+                    Device1.put("Direction", exisitngDevice1.getAuthDeviceDirection().substring(3));
+
+                    List<AuthDevice> AuthMethod1 = new ArrayList<AuthDevice>(1);
+                    Device1.put("AuthMethod", AuthMethod1);
+
+                    Map<String, Object> Device2 = new HashMap();
+
+                    if (exisitngDevice2.getMasterpin() == true) {
+                        Device2.put("Masterpassword", MASTERPASSWORD);
+                    } else {
+                        Device2.put("Masterpassword", "");
+                    }
+
+                    Device2.put("Direction", exisitngDevice1.getAuthDeviceDirection().substring(3));
+
+                    List<AuthDevice> AuthMethod2 = new ArrayList<AuthDevice>(1);
+                    Device2.put("AuthMethod", AuthMethod2);
+
+                    authdevices.put("Device1", Device1);
+                    authdevices.put("Device2", Device2);
+
+                    existingentrancedetails.put("AuthenticationDevices", authdevices);
+
+                    // for all access group in entrances
 //                accessgroups.put()
-                existingentrancedetails.put("AccessGroups",accessgroups);
+                    List<Map> accessGroups = new ArrayList<Map>(1);
 
 
-                entrance1.put("EntranceDetails",existingentrancedetails);
+                    List<AccessGroupEntranceNtoN> listOfAccessGroupsNtoN = accessGroupEntranceNtoNRepository.findAllByEntranceEntranceIdAndDeletedFalse(existingentrance.getEntranceId());
 
-                System.out.println(entrance1);
+                    for (AccessGroupEntranceNtoN accessGroupEntranceNtoN : listOfAccessGroupsNtoN) {
+
+                        List<Person> ListofPersons = personService.findByAccGrpId((accessGroupEntranceNtoN.getAccessGroup().getAccessGroupId()), false);
+                        List<AccessGroupScheduleDto> ListofSchedule = accessGroupScheduleService.findAllByGroupToEntranceIdIn(Collections.singletonList(accessGroupEntranceNtoN.getGroupToEntranceId()));
+
+                        Map<String, Object> oneAccessGroup = new HashMap();
+
+                        Map<String, Object> personsAndSchedule = new HashMap();
+
+                        List<Map> EditedListofPersons = new ArrayList<Map>(1);
+
+                        for (Person person : ListofPersons) {
+                            Map<String, Object> eachPerson = new HashMap();
+                            eachPerson.put("Name", person.getPersonFirstName() + " " + person.getPersonLastName());
+
+                            List<CredentialDto> ListofCred = credentialService.findByPersonId(person.getPersonId());
+                            Map<String, Object> personcredentials = new HashMap();
+                            for (CredentialDto credentialDto : ListofCred) {
+                                personcredentials.put(credentialDto.getCredType().getCredTypeName(), credentialDto.getCredUid());
+                            }
+                            eachPerson.put("Credentials", personcredentials);
+                            EditedListofPersons.add(eachPerson);
+                        }
+
+                        personsAndSchedule.put("Persons", EditedListofPersons);
+                        personsAndSchedule.put("Schedule", ListofSchedule);
+
+                        oneAccessGroup.put(accessGroupEntranceNtoN.getAccessGroup().getAccessGroupName(), personsAndSchedule);
+
+                        accessGroups.add(oneAccessGroup);
+                    }
+
+
+//                for(User user : listOfUsers) {
+//                    List<User> users = new ArrayList<User>(1);
+//                    users.add(user);
+//                    usersByCountry.put(user.getCountry(), users);
+//                }
+
+
+                    existingentrancedetails.put("AccessGroups", accessGroups);
+                    entrance.put("EntranceDetails", existingentrancedetails);
+
+                    System.out.println(entrance);
+
+                    RulesSet.add(entrance);
+                } catch (Exception e) {
+
+                }
+
+//                String json = new ObjectMapper().writeValueAsString(RulesSet);
+//
+//                System.out.println(json);
+
+                String resourceUrl = "http://192.168.1.185:5000/credOccur";
+                RestTemplate restTemplate = new RestTemplate();
+                HttpEntity<List> request = new HttpEntity<>
+                        (RulesSet);
+
+                ResponseEntity<String> productCreateResponse =
+                        restTemplate.exchange(resourceUrl, HttpMethod.POST, request, String.class);
+
+                //call entrancename function
+                return HttpStatus.OK;
 
             }
-
-
-            RestTemplate restTemplate = new RestTemplate();
-            String resourceUrl = "http://192.168.1.135:5000/credOccur";
-
-            String temp = "[{'Entrance': 'SideDoor', 'EntranceSchedule': {'2022-04-04': [{'starttime': '08:00', 'endtime': '19:00'}]}, 'EntranceDetails': {'Antipassback': 'No', 'Zone': 'ZoneId', 'AuthenticationDevices': {'Device1': {'Masterpassword': '666666', 'Direction': 'IN', 'AuthMethod': [{'Method': 'Card,Pin', 'Schedule': {'2022-03-14': [{'starttime': '18:00', 'endtime': '23:00'}], '2022-04-04': [{'starttime': '18:00', 'endtime': '23:00'}]}}, {'Method': 'Card,Pin', 'Schedule': {'2022-03-14': [{'starttime': '09:00', 'endtime': '18:00'}], '2022-04-04': [{'starttime': '09:00', 'endtime': '23:59'}]}}]}, 'Device2': {'Masterpassword': '111111', 'Direction': 'OUT', 'AuthMethod': [{'Method': 'Card', 'Schedule': {'2022-03-14': [{'starttime': '18:00', 'endtime': '23:00'}], '2022-04-04': [{'starttime': '09:00', 'endtime': '23:59'}]}}, {'Method': 'Card', 'Schedule': {'2022-03-14': {'starttime': '18:00', 'endtime': '23:00'}, '2022-04-04': {'starttime': '09:00', 'endtime': '18:00'}}}]}}, 'AccessGroups': [{'AccessGroup1': {'Persons': [{'Name': 'John', 'Credentials': {'Card': '36443438', 'PIN':'123456', 'Fingerprint': 's1e97ncksiu'}}, {'Name': 'Kerry', 'Credentials': {'Card': '36443419', 'PIN': '123456', 'Fingerprint': 'ege56g4er'}}, {'Name': 'Steven', 'Credentials': {'Card': '47567858679', 'PIN': '85757', 'Fingerprint': 'gd15hry51r'}}], 'Schedule': {'2022-03-14': [{'starttime': '18:00', 'endtime': '23:00'}], '2022-04-04': [{'starttime': '09:00', 'endtime': '23:59'}]}}}, {'AccessGroup2': {'Persons': [{'Name': 'Mike', 'Credentials': {'Card': '6451234653', 'PIN': '123132', 'Fingerprint': 'ui233211sd'}}, {'Name': 'Keith', 'Credentials': {'Card': '12345983', 'PIN': '456456', 'Fingerprint': '654tyjyt5j132'}}, {'Name': 'Ron', 'Credentials': {'Card': '98794621', 'PIN': '654321', 'Fingerprint': '46ytj546r5th'}}], 'Schedule': {'2022-03-17': {'starttime': '18:00', 'endtime': '23:00'}, '2022-04-04': {'starttime': '09:00', 'endtime': '18:00'}}}}, {'AccessGroup3': {'Persons': [{'Name': 'Kim', 'Credentials': {'Card': '8657345345', 'PIN': '987654', 'Fingerprint': 'tyh56r4h5r4'}}, {'Name': 'Tan', 'Credentials': {'Card': '78654353245', 'PIN': '456789', 'Fingerprint': '84we56rh'}}, {'Name': 'Lee', 'Credentials': {'Card': '74563452354', 'PIN': '123456', 'Fingerprint': 'errg456e4ty'}}], 'Schedule': {'2022-03-14': {'starttime': '18:00', 'endtime': '23:00'}, '2022-04-04': {'starttime': '09:00', 'endtime': '18:00'}}}}], 'EventActionTriggers': [{'Trigger1': {'inputEventActions': {'magContactOpenNoTimer': '', 'magContactOpenWithTimer': '5secs'}, 'outputEventActions': {'cardReaderBuzzer': ''}, 'Schedule': {'2022-03-14': {'starttime': '18:00', 'endtime': '23:00'}, '2022-04-04': {'starttime': '09:00', 'endtime': '18:00'}}}}, {'Trigger2': {'inputEventActions': {'cardReaderBuzzerWithTimer': '60secs'}, 'outputEventActions': {'emailNotification': ''}, 'Schedule': {'2022-03-14': {'starttime': '18:00', 'endtime': '23:00'}, '2022-03-18': {'starttime': '09:00', 'endtime': '18:00'}}}}]}}, {'Entrance': 'MainDoor', 'EntranceSchedule': {'2022-03-18': {'starttime': '08:00', 'endtime': '09:00'}}, 'EntranceDetails': {'Zone': 'ZoneId', 'AuthenticationDevices': {'Device1': {'Direction': 'IN', 'AuthMethod': [{'Method': 'Fingerprint,Card', 'Schedule': {'2022-03-14': {'starttime': '18:00', 'endtime': '23:00'}, '2022-03-16': {'starttime': '18:00', 'endtime': '23:00'}}}, {'Method': 'Card,Pin', 'Schedule': {'2022-03-14': {'starttime': '09:00', 'endtime': '18:00'}, '2022-03-18': {'starttime': '09:00', 'endtime': '18:00'}}}]}, 'Device2': {'Direction': 'OUT', 'AuthMethod': [{'Method': 'Fingerprint', 'Schedule': {'2022-03-14': {'starttime': '18:00', 'endtime': '23:00'}, '2022-03-18': {'starttime': '18:00', 'endtime': '23:00'}}}, {'Method': 'Fingerprint,Pin', 'Schedule': {'2022-03-14': {'starttime': '18:00', 'endtime': '23:00'}, '2022-03-18': {'starttime': '09:00', 'endtime': '18:00'}}}]}}, 'AccessGroups': [{'AccessGroup1': {'Persons': [{'Name': 'John', 'Credentials': {'Card': '696955874', 'PIN': '225588', 'Fingerprint': 's1e97ncksiu'}}, {'Name': 'Kerry', 'Credentials': {'Card': '696955874', 'PIN': '225588', 'Fingerprint': 's1e97ncksiu'}}, {'Name': 'Steven', 'Credentials': {'Card': '696955874', 'PIN': '225588', 'Fingerprint': 's1e97ncksiu'}}], 'Schedule': {'2022-03-14': {'starttime': '18:00', 'endtime': '23:00'}, '2022-03-18': {'starttime': '09:00', 'endtime': '18:00'}}}}, {'AccessGroup2': {'Persons': [{'Name': 'Mike', 'Credentials': {'Card': '6451234653', 'PIN': '123132', 'Fingerprint': 'ui233211sd'}}, {'Name': 'Keith', 'Credentials': {'Card': '12345983', 'PIN': '456456', 'Fingerprint': '654tyjyt5j132'}}, {'Name': 'Ron', 'Credentials': {'Card': '98794621', 'PIN': '654321', 'Fingerprint': '46ytj546r5th'}}], 'Schedule': {'2022-03-17': {'starttime': '18:00', 'endtime': '23:00'}, '2022-03-18': {'starttime': '09:00', 'endtime': '18:00'}}}}, {'AccessGroup3': {'Persons': [{'Name': 'Kim', 'Credentials': {'Card': '8657345345', 'PIN': '987654', 'Fingerprint': 'tyh56r4h5r4'}}, {'Name': 'Tan', 'Credentials': {'Card': '78654353245', 'PIN': '456789', 'Fingerprint': '84we56rh'}}, {'Name': 'Lee', 'Credentials': {'Card': '74563452354', 'PIN': '123456', 'Fingerprint': 'errg456e4ty'}}], 'Schedule': {'2022-03-14': {'starttime': '18:00', 'endtime': '23:00'}, '2022-03-18': {'starttime': '09:00', 'endtime': '18:00'}}}}], 'EventActionTriggers': [{'Trigger1': {'inputEventActions': {'magContactOpenNoTimer': '', 'magContactOpenWithTimer': '5secs'}, 'outputEventActions': {'cardReaderBuzzer': ''}, 'Schedule': {'2022-03-14': {'starttime': '18:00', 'endtime': '23:00'}, '2022-03-18': {'starttime': '09:00', 'endtime': '18:00'}}}}, {'Trigger2': {'inputEventActions': {'cardReaderBuzzerWithTimer': '60secs'}, 'outputEventActions': {'emailNotification': ''}, 'Schedule': {'2022-03-14': {'starttime': '18:00', 'endtime': '23:00'}, '2022-03-18': {'starttime': '09:00', 'endtime': '18:00'}}}}]}}]";
-
-
-
-
-
-
-
-
-            String Entrance1 ="'Entrance':";
-            String Entrance2 = "";
-            String credSchedule = "[]";
-
-            HttpEntity<String> request = new HttpEntity<String>
-                    (credSchedule);
-
-            ResponseEntity<String> productCreateResponse =
-                    restTemplate.exchange(resourceUrl, HttpMethod.POST, request, String.class);
-
-            System.out.println(productCreateResponse);
-            System.out.println(productCreateResponse.getBody());
-            return HttpStatus.OK;
         }
         catch(Exception e){
             System.out.println(e);
-            return HttpStatus.BAD_REQUEST;
         }
-
+        return HttpStatus.BAD_REQUEST;
     }
 
     public void save(Controller existingcontroller) {
@@ -314,7 +482,13 @@ public class ControllerService {
     }
 
     public Boolean UpdateUniconIP(FrontendControllerDto newFrontendControllerDto) throws Exception {
-        RestTemplate restTemplate = new RestTemplate();
+
+        HttpComponentsClientHttpRequestFactory httpRequestFactory = new HttpComponentsClientHttpRequestFactory();
+        httpRequestFactory.setConnectionRequestTimeout(3000);
+        httpRequestFactory.setConnectTimeout(3000);
+        httpRequestFactory.setReadTimeout(3000);
+
+        RestTemplate restTemplate = new RestTemplate(httpRequestFactory);
 
         Controller existingController = controllerRepository.findById(newFrontendControllerDto.getControllerId()).get();
         existingController.setPendingIP(newFrontendControllerDto.getControllerIP());
@@ -323,22 +497,31 @@ public class ControllerService {
         String resourceUrl = "http://"+ existingController.getControllerIP()+":5000/api/config";
 
         Map<String,Object> requestBody = new LinkedHashMap<>();
-        requestBody.put("controllerIPStatic",existingController.getControllerIPStatic());
+        requestBody.put("controllerIPStatic",newFrontendControllerDto.getControllerIPStatic());
         requestBody.put("controllerIP",newFrontendControllerDto.getControllerIP());
         requestBody.put("controllerSerialNo",newFrontendControllerDto.getControllerSerialNo());
 
-        ObjectMapper mapper = new ObjectMapper();
-        String json = mapper.writeValueAsString(requestBody);
-
-        HttpEntity<String> request = new HttpEntity<String>(json);
+        HttpEntity<Map> request = new HttpEntity<Map>(requestBody);
 
         try{
+
             ResponseEntity<String> productCreateResponse =
                     restTemplate.exchange(resourceUrl, HttpMethod.POST, request, String.class);
             return false;
         }
         catch(Exception e){
+            if (newFrontendControllerDto.getControllerIPStatic() == false){
+                Thread.sleep(2000);
+                LocalDateTime lastonlinedatetime = controllerRepository.findByControllerSerialNoEqualsAndDeletedIsFalse(newFrontendControllerDto
+                        .getControllerSerialNo()).get().getLastOnline();
 
+                LocalDateTime currentdatetime = LocalDateTime.now(ZoneId.of("GMT+08:00"));
+
+                if (lastonlinedatetime.isAfter(currentdatetime.minusSeconds(30))) {
+                    return true;
+                }
+                return false;
+            }
             long startTime = System.currentTimeMillis(); //fetch starting time
             // get response
             while((System.currentTimeMillis()-startTime)<10000){

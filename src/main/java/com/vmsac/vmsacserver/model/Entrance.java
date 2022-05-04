@@ -4,10 +4,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoN;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.List;
@@ -51,5 +48,18 @@ public class Entrance {
     }
     public EntranceOnlyDto toEntranceOnlyDto(){
         return new EntranceOnlyDto(this.entranceId,this.entranceName,this.entranceDesc, this.isActive,this.used,this.entranceAuthDevices);
+    }
+
+    @Override
+    public String toString() {
+        return "Entrance{" +
+                "entranceId=" + entranceId +
+                ", entranceName='" + entranceName + '\'' +
+                ", entranceDesc='" + entranceDesc + '\'' +
+                ", isActive=" + isActive +
+                ", deleted=" + deleted +
+                ", used=" + used +
+                ", entranceAuthDevices=" + entranceAuthDevices +
+                '}';
     }
 }

@@ -69,6 +69,25 @@ public class ControllerController {
                 return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
             }
 
+            if (newFrontendControllerDto.getControllerIPStatic() ==false){
+
+                Controller toSave = optionalController.get();
+                toSave.setPendingIP(null);
+                controllerService.save(toSave);
+
+                try{
+                    controllerService.UpdateUniconIP(newFrontendControllerDto);
+                    return new ResponseEntity<>(controllerService.FrondEndControllerUpdate(newFrontendControllerDto), HttpStatus.OK);
+                }
+                catch(Exception e){
+                    Map<String, String> errors = new HashMap<>();
+                    errors.put("Error", "CONTROLLER MIGHT BE LOST ! Fail to update Controller with ID "+ newFrontendControllerDto.getControllerId() );
+                    return new ResponseEntity<>(errors, HttpStatus.GONE);
+                }
+
+
+            }
+
             if (optionalController.get().getPendingIP() != optionalController.get().getControllerIP() && optionalController.get().getPendingIP() != null ){
                 Map<String, String> errors = new HashMap<>();
                 errors.put("controllerId", "Controller with Id " +
@@ -247,6 +266,12 @@ public class ControllerController {
             @RequestParam(name = "entranceid", required = false)
                     Long entranceid,@Valid @RequestBody List<AuthDevice> newAuthDevices) {
 
+        if (entranceService.findById(entranceid).get().getUsed() == true){
+            Map<String, String> errors = new HashMap<>();
+            errors.put("Error", "EntranceId "+entranceid+" is being used" );
+            return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+        }
+
         if (newAuthDevices.size() != 2){
             Map<String, String> errors = new HashMap<>();
             errors.put("Error", "Requires a pair of auth device ids" );
@@ -333,12 +358,23 @@ public class ControllerController {
         if (optionalController.isEmpty()){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+
+        if (optionalController.get().getMasterController() == true){
+            Map<String, String> errors = new HashMap<>();
+            errors.put("controllerId", "Controller with Id " +
+                    controllerId + " with Serial No " + optionalController.get().getControllerSerialNo()+" is a Master Controller and cannot be edited.");
+            return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+        }
+
         Controller existingcontroller = optionalController.get();
         String IPaddress = existingcontroller.getControllerIP();
         //api call to get status
         try {
-            if (!controllerService.backToDefault(IPaddress)){
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            if (!controllerService.backToDefault(existingcontroller)){
+                Map<String, String> errors = new HashMap<>();
+                errors.put("controllerId", "Controller with Id " +
+                        controllerId + " with Serial No " + optionalController.get().getControllerSerialNo()+" unable to reset.");
+                return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
             }
             controllerService.shutdownunicon(IPaddress);
             authDeviceService.deleteRelatedAuthDevices(controllerId);
@@ -360,12 +396,23 @@ public class ControllerController {
         if (optionalController.isEmpty()){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+
+        if (optionalController.get().getMasterController() == true){
+            Map<String, String> errors = new HashMap<>();
+            errors.put("controllerId", "Controller with Id " +
+                    controllerId + " with Serial No " + optionalController.get().getControllerSerialNo()+" is a Master Controller and cannot be edited.");
+            return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+        }
+
         Controller existingcontroller = optionalController.get();
         String IPaddress = existingcontroller.getControllerIP();
         //api call to get status
         try {
-            if (!controllerService.backToDefault(IPaddress)){
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            if (!controllerService.backToDefault(existingcontroller)){
+                Map<String, String> errors = new HashMap<>();
+                errors.put("controllerId", "Controller with Id " +
+                        controllerId + " with Serial No " + optionalController.get().getControllerSerialNo()+" unable to reset.");
+                return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
             }
             controllerService.rebootunicon(IPaddress);
             authDeviceService.deleteRelatedAuthDevices(controllerId);
@@ -420,8 +467,15 @@ public class ControllerController {
 
     @GetMapping("/testing")
     public ResponseEntity<?> testing(){
+
+        try {
+            HttpStatus asd = controllerService.sendEntranceNameRelationship(1L);
+        } catch (Exception e) {
+
+        }
         return new ResponseEntity<>(controllerService.generate());
     }
+
 
 }
 

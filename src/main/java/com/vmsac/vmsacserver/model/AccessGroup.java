@@ -57,4 +57,15 @@ public class AccessGroup {
     public AccessGroupOnlyDto toAccessGroupOnlyDto(){
         return new AccessGroupOnlyDto(this.accessGroupId,this.accessGroupName,this.accessGroupDesc);
     }
+
+    @Override
+    public String toString() {
+        return "AccessGroup{" +
+                "accessGroupId=" + accessGroupId +
+                ", accessGroupName='" + accessGroupName + '\'' +
+                ", accessGroupDesc='" + accessGroupDesc + '\'' +
+                ", deleted=" + deleted +
+                ", persons=" + persons +
+                '}';
+    }
 }

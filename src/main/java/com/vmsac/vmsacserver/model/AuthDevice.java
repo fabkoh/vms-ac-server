@@ -69,7 +69,6 @@ public class AuthDevice {
                 ", lastOnline=" + lastOnline +
                 ", masterpin=" + masterpin +
                 ", defaultAuthMethod='" + defaultAuthMethod + '\'' +
-                ", entrance=" + entrance +
                 '}';
     }
 }

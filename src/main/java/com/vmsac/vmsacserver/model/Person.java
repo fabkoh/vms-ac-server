@@ -64,4 +64,17 @@ public class Person {
         return new PersonOnlyDto(this.personId,this.personFirstName,this.personLastName,this.personUid,
         this.personMobileNumber,this.personEmail);
     }
+
+    @Override
+    public String toString() {
+        return "Person{" +
+                "personId=" + personId +
+                ", personFirstName='" + personFirstName + '\'' +
+                ", personLastName='" + personLastName + '\'' +
+                ", personUid='" + personUid + '\'' +
+                ", personMobileNumber='" + personMobileNumber + '\'' +
+                ", personEmail='" + personEmail + '\'' +
+                ", deleted=" + deleted +
+                '}';
+    }
 }
