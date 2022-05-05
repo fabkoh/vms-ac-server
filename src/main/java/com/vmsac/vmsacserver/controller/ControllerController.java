@@ -61,7 +61,17 @@ public class ControllerController {
             @Valid @RequestBody FrontendControllerDto newFrontendControllerDto) throws Exception {
         Optional<Controller> optionalController = controllerService.findBySerialNo(newFrontendControllerDto.getControllerSerialNo());
 
+
+
+
+
         if (optionalController.isPresent() && optionalController.get().getControllerId() == controllerId) {
+
+            if (optionalController.get().getControllerIP() == newFrontendControllerDto.getControllerIP() &&
+                    optionalController.get().getControllerIPStatic() == newFrontendControllerDto.getControllerIPStatic()){
+                return new ResponseEntity<>(controllerService.FrondEndControllerUpdate(newFrontendControllerDto), HttpStatus.OK);
+            }
+
             if (optionalController.get().getMasterController() == true){
                 Map<String, String> errors = new HashMap<>();
                 errors.put("controllerId", "Controller with Id " +
@@ -370,12 +380,6 @@ public class ControllerController {
         String IPaddress = existingcontroller.getControllerIP();
         //api call to get status
         try {
-            if (!controllerService.backToDefault(existingcontroller)){
-                Map<String, String> errors = new HashMap<>();
-                errors.put("controllerId", "Controller with Id " +
-                        controllerId + " with Serial No " + optionalController.get().getControllerSerialNo()+" unable to reset.");
-                return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
-            }
             controllerService.shutdownunicon(IPaddress);
             authDeviceService.deleteRelatedAuthDevices(controllerId);
             controllerService.deleteControllerWithId(controllerId);
@@ -465,15 +469,15 @@ public class ControllerController {
         }
     }
 
-    @GetMapping("/testing")
-    public ResponseEntity<?> testing(){
+    @GetMapping("/testing/{controllerId}")
+    public ResponseEntity<?> testing(@PathVariable Long controllerId){
 
         try {
-            HttpStatus asd = controllerService.sendEntranceNameRelationship(1L);
+            HttpStatus asd = controllerService.sendEntranceNameRelationship(controllerId);
         } catch (Exception e) {
 
         }
-        return new ResponseEntity<>(controllerService.generate());
+        return new ResponseEntity<>(controllerService.generate(controllerId));
     }
 
 

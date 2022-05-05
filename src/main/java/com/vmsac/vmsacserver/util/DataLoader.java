@@ -181,7 +181,7 @@ public class DataLoader implements CommandLineRunner {
         AccessGroupSchedule duneMainEntranceDefault = accessGroupScheduleRepository.save(
                 AccessGroupSchedule.builder()
                         .accessGroupScheduleName("Default Schedule")
-                        .rrule(rruleDtstart + "FREQ=DAILY;INTERVAL=1;WKST=MO")
+                        .rrule(rruleDtstart + "FREQ=WEEKLY;UNTIL=20240905T091600Z;INTERVAL=1;WKST=MO")
                         .timeStart("00:00")
                         .timeEnd("23:59")
                         .groupToEntranceId(duneMainEntrance.getGroupToEntranceId())
@@ -189,10 +189,12 @@ public class DataLoader implements CommandLineRunner {
                         .build()
         );
 
+
+
         AccessGroupSchedule duneSideEntranceWeekdays = accessGroupScheduleRepository.save(
                 AccessGroupSchedule.builder()
                         .accessGroupScheduleName("Weekdays 9 to 5")
-                        .rrule(rruleDtstart + "FREQ=WEEKLY;INTERVAL=1;WKST=MO;BYDAY=MO,TU,WE,TH,FR")
+                        .rrule(rruleDtstart + "FREQ=WEEKLY;COUNT=200;INTERVAL=1;WKST=MO")
                         .timeStart("09:00")
                         .timeEnd("17:00")
                         .groupToEntranceId(duneSideEntrance.getGroupToEntranceId())
@@ -233,6 +235,18 @@ public class DataLoader implements CommandLineRunner {
                         .deleted(false)
                         .build()
         );
+
+        EntranceSchedule mainEntranceAddedSchedule = entranceScheduleRepository.save(
+                EntranceSchedule.builder()
+                        .entranceScheduleName("Added Schedule")
+                        .rrule(rruleDtstart + "FREQ=DAILY;INTERVAL=1;WKST=MO")
+                        .timeStart("00:00")
+                        .timeEnd("12:00")
+                        .entranceId(mainEntrance.getEntranceId())
+                        .deleted(false)
+                        .build()
+        );
+
 
         CredentialType cardType = credTypeRepository.save(
                 CredentialType.builder()

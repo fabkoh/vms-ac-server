@@ -1,5 +1,6 @@
 package com.vmsac.vmsacserver.service;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -18,6 +19,7 @@ import com.vmsac.vmsacserver.repository.EntranceScheduleRepository;
 import com.vmsac.vmsacserver.repository.AccessGroupEntranceNtoNRepository;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.dmfs.rfc5545.DateTime;
+import org.dmfs.rfc5545.recur.InvalidRecurrenceRuleException;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
 import org.json.simple.JSONObject;
@@ -43,6 +45,9 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.lang.Math.abs;
+import static java.util.Collections.list;
+import static jdk.nashorn.internal.objects.NativeString.length;
 
 
 @Service
@@ -244,7 +249,7 @@ public class ControllerService {
 
     public HttpStatus sendEntranceNameRelationship(Long controllerId) throws Exception {
 
-        Controller existingcontroller = controllerRepository.getById(1L);
+        Controller existingcontroller = controllerRepository.getById(2L);
         String IPaddress = existingcontroller.getControllerIP();
 
         RestTemplate restTemplate = new RestTemplate();
@@ -284,13 +289,10 @@ public class ControllerService {
         }
     }
 
-    public HttpStatus generate(){
+    public HttpStatus generate(Long controllerId){
         try {
 
-            Controller existingcontroller = controllerRepository.getById(1L);
-
-            String test ="";
-
+            Controller existingcontroller = controllerRepository.getById(controllerId);
             String MASTERPASSWORD = "666666";
 
             List<Map> RulesSet = new ArrayList<Map>(1);
@@ -298,32 +300,14 @@ public class ControllerService {
             for ( int i=0; i<2;i++) {
                 try {
                     Entrance existingentrance = existingcontroller.getAuthDevices().get(i * 2).getEntrance();
-                    EntranceSchedule exisitngEntranceSchedule = entranceScheduleRepository.findByEntranceIdEqualsAndDeletedIsFalse(existingentrance.getEntranceId());
+
+                    List<EntranceSchedule> exisitngEntranceSchedules = entranceScheduleRepository.findAllByEntranceIdAndDeletedFalse(existingentrance.getEntranceId());
 
                     Map<String, Object> entrance = new HashMap();
                     entrance.put("Entrance", existingentrance.getEntranceName());
 
 
-                    String rawrrule = exisitngEntranceSchedule.getRrule();
-                    String startdatetime = rawrrule.split("\n")[0].split(":")[1].split("T")[0];
-                    String rrule = rawrrule.split("\n")[1].split(":")[1];
-                    Integer year = Integer.parseInt(startdatetime.substring(0,4));
-                    Integer month = Integer.parseInt(startdatetime.substring(4,6));
-                    Integer day = Integer.parseInt(startdatetime.substring(6,8));
-
-                    RecurrenceRule rule = new RecurrenceRule(rrule);
-                    DateTime start = new DateTime(year, month /* 0-based month numbers! */,day);
-                    RecurrenceRuleIterator it = rule.iterator(start);
-                    int maxInstances = 100; // limit instances for rules that recur forever
-                    // think about how to generate one year worth
-                    while (it.hasNext() && (!rule.isInfinite() || maxInstances-- > 0))
-                    {
-                        DateTime nextInstance = it.nextDateTime();
-                        // do something with nextInstance
-                        System.out.println(nextInstance);
-                    }
-
-                    entrance.put("EntranceSchedule", exisitngEntranceSchedule);
+                    entrance.put("EntranceSchedule", GetEntranceScheduleObjectWithTime(exisitngEntranceSchedules));
 
                     Map<String, Object> existingentrancedetails = new HashMap();
                     existingentrancedetails.put("Antipassback", "No");
@@ -397,7 +381,7 @@ public class ControllerService {
                         }
 
                         personsAndSchedule.put("Persons", EditedListofPersons);
-                        personsAndSchedule.put("Schedule", ListofSchedule);
+                        personsAndSchedule.put("Schedule", GetAccessGroupScheduleObjectWithTime(ListofSchedule));
 
                         oneAccessGroup.put(accessGroupEntranceNtoN.getAccessGroup().getAccessGroupName(), personsAndSchedule);
 
@@ -415,12 +399,12 @@ public class ControllerService {
                     existingentrancedetails.put("AccessGroups", accessGroups);
                     entrance.put("EntranceDetails", existingentrancedetails);
 
-                    System.out.println(entrance);
 
                     RulesSet.add(entrance);
                 } catch (Exception e) {
-
+                    System.out.println(e.toString());
                 }
+            }
 
 //                String json = new ObjectMapper().writeValueAsString(RulesSet);
 //
@@ -437,7 +421,6 @@ public class ControllerService {
                 //call entrancename function
                 return HttpStatus.OK;
 
-            }
         }
         catch(Exception e){
             System.out.println(e);
@@ -450,7 +433,7 @@ public class ControllerService {
     }
 
     public Boolean IsIPavailable(String ipAddress)
-            throws UnknownHostException, IOException
+            throws Exception
     {
         InetAddress geek = InetAddress.getByName(ipAddress);
         System.out.println("Sending Ping Request to " + ipAddress);
@@ -535,4 +518,140 @@ public class ControllerService {
             return false;
             }
         }
+
+    public Map GetEntranceScheduleObjectWithTime(List <EntranceSchedule> exisitngEntranceSchedules) throws Exception {
+
+        Map<String,Object> combinedSchedule = new HashMap<>();
+
+        for ( EntranceSchedule singleEntranceSchedule : exisitngEntranceSchedules)
+        {
+            String rawrrule = singleEntranceSchedule.getRrule();
+            String starttime = singleEntranceSchedule.getTimeStart();
+            String endtime = singleEntranceSchedule.getTimeEnd();
+            combinedSchedule = GetScheduleMap(rawrrule,starttime,endtime,combinedSchedule);
+        }
+//        System.out.println(combinedSchedule);
+        return combinedSchedule;
+    }
+
+    public Map GetAccessGroupScheduleObjectWithTime(List <AccessGroupScheduleDto> exisitngAccessGroupSchedules) throws Exception {
+
+        Map<String,Object> combinedSchedule = new HashMap<>();
+
+        for ( AccessGroupScheduleDto singleAccessGroupSchedule : exisitngAccessGroupSchedules) {
+            String rawrrule = singleAccessGroupSchedule.getRrule();
+            String starttime = singleAccessGroupSchedule.getTimeStart();
+            String endtime = singleAccessGroupSchedule.getTimeEnd();
+            combinedSchedule = GetScheduleMap(rawrrule,starttime,endtime,combinedSchedule);
+        }
+//        System.out.println(combinedSchedule);
+        return combinedSchedule;
+    }
+
+    public Map GetScheduleMap(String rawrrule, String starttime, String endtime, Map combinedSchedule) throws Exception {
+
+        String startdatetime = rawrrule.split("\n")[0].split(":")[1].split("T")[0];
+        String rrule = rawrrule.split("\n")[1].split(":")[1];
+
+        Integer year = Integer.parseInt(startdatetime.substring(0,4));
+        Integer month = Integer.parseInt(startdatetime.substring(4,6));
+        Integer day = Integer.parseInt(startdatetime.substring(6,8));
+
+        if (LocalDate.now().getYear() > year){
+            year = LocalDate.now().getYear();
+        }
+
+        if (LocalDate.now().getMonthValue() > month){
+            month = LocalDate.now().getMonthValue();
+        }
+
+        if (LocalDate.now().getDayOfMonth() > day){
+            day = LocalDate.now().getDayOfMonth();
+        }
+
+        //count, dont exceed one year
+        //count, exceed one year
+        //end date, dont exceed one year
+        //count, exceed one year
+
+        if ( rrule.contains("UNTIL=")){
+            // contains UNTIL
+            int indexOfUntil = rrule.lastIndexOf("UNTIL=");
+
+            try{
+                rrule = rrule.substring(0,indexOfUntil+9) + rrule.substring(indexOfUntil+17);
+            }
+            catch (Exception e){
+                rrule = rrule.substring(0,indexOfUntil+9);
+            }
+
+        }
+
+        RecurrenceRule rule = new RecurrenceRule(rrule);
+        DateTime start = new DateTime(year, month /* 0-based month numbers! */,day);
+        RecurrenceRuleIterator it = rule.iterator(start);
+
+        int maxInstances = 100; // limit instances for rules that recur forever
+
+        if ( rrule.contains("FREQ=DAILY")) {
+            maxInstances = 365;
+        }
+
+        if ( rrule.contains("FREQ=WEEKLY")) {
+            maxInstances = 52;
+        }
+
+        if ( rrule.contains("FREQ=MONTHLY")) {
+            maxInstances = 12 ;
+        }
+
+        if ( rrule.contains("FREQ=YEARLY")) {
+            maxInstances = 10;
+        }
+
+        // daily 365, weekly 52, monthly 12,
+        // set start date to today
+
+        // think about how to generate one year worth
+        while (it.hasNext() && (!rule.isInfinite() || maxInstances-- > 0))
+        {
+            DateTime nextInstance = it.nextDateTime();
+            // do something with nextInstance
+            String formattedDate = Integer.toString(nextInstance.getYear());
+
+            if ((length(Integer.toString(nextInstance.getMonth()))).equals(2)){
+                formattedDate += "-"+nextInstance.getMonth();
+            }
+            else{
+                formattedDate += "-0"+nextInstance.getMonth();
+            }
+
+            if ((length(Integer.toString(nextInstance.getDayOfMonth()))).equals(2)){
+                formattedDate += "-"+nextInstance.getDayOfMonth();
+            }
+            else{
+                formattedDate += "-0"+nextInstance.getDayOfMonth();
+            }
+
+            if (combinedSchedule.containsKey(formattedDate)){
+                List <Map> listoStartEndTime = (List<Map>) combinedSchedule.get(formattedDate);
+
+                Map<String,Object> singleStartEndTime = new HashMap<>();
+                singleStartEndTime.put("starttime",starttime);
+                singleStartEndTime.put("endtime",endtime);
+
+                listoStartEndTime.add(singleStartEndTime);
+
+            }
+            else{
+                List<Map> listoStartEndTime = new ArrayList<Map>(1);
+                Map<String,Object> singleStartEndTime = new HashMap<>();
+                singleStartEndTime.put("starttime",starttime);
+                singleStartEndTime.put("endtime",endtime);
+                listoStartEndTime.add(singleStartEndTime);
+                combinedSchedule.put(formattedDate,listoStartEndTime);
+            }
+        }
+        return combinedSchedule;
+    }
 }
