@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public interface ControllerRepository extends JpaRepository<Controller, Long>{
 
-    List<Controller> findByDeleted(Boolean deleted);
+    List<Controller> findByDeletedIsFalseOrderByCreatedDesc();
 
     Optional<Controller> findByControllerSerialNoEqualsAndDeletedIsFalse(String controllerSerialNo);
 

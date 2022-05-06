@@ -34,6 +34,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.client.RestTemplate;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.validation.constraints.Null;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -77,11 +79,14 @@ public class ControllerService {
     @Autowired
     private ControllerRepository controllerRepository;
 
+    @PersistenceContext
+    EntityManager entityManager;
+
     @Autowired
     EntranceScheduleRepository entranceScheduleRepository;
 
     public List<Controller> findAllNotDeleted() {
-        return controllerRepository.findByDeleted(false).stream()
+        return controllerRepository.findByDeletedIsFalseOrderByCreatedDesc().stream()
                 .collect(Collectors.toList());
     }
 
@@ -138,6 +143,8 @@ public class ControllerService {
     }
 
     public FrontendControllerDto FrondEndControllerUpdate(FrontendControllerDto newFrontendControllerDto) throws Exception{
+
+//        entityManager.getEntityManagerFactory().getCache().evictAll();
         controllerRepository.findByControllerSerialNoEqualsAndDeletedIsFalse(newFrontendControllerDto.getControllerSerialNo())
                 .orElseThrow(() -> new RuntimeException("Controller does not exist"));
 
@@ -146,10 +153,12 @@ public class ControllerService {
         if ( (existingcontroller.getControllerId() == newFrontendControllerDto.getControllerId()) ||
                 Objects.isNull(newFrontendControllerDto.getControllerId()) ){
 
+            if (newFrontendControllerDto.getControllerIPStatic() == true){
+                existingcontroller.setControllerIP(newFrontendControllerDto.getControllerIP());
+                existingcontroller.setControllerIPStatic(newFrontendControllerDto.getControllerIPStatic());
+            }
 
             existingcontroller.setControllerName(newFrontendControllerDto.getControllerName());
-            existingcontroller.setControllerIP(newFrontendControllerDto.getControllerIP());
-            existingcontroller.setControllerIPStatic(newFrontendControllerDto.getControllerIPStatic());
 
             return controllerRepository.save(existingcontroller).toFrontendDto();
 
@@ -164,34 +173,44 @@ public class ControllerService {
         Controller toDeleted = controllerRepository.findByControllerIdEqualsAndDeletedFalse(controllerId)
                 .orElseThrow(() -> new RuntimeException("Controller does not exist"));
 
+        toDeleted.setControllerName(toDeleted.getControllerSerialNo());
         toDeleted.setDeleted(true);
+        toDeleted.setPendingIP(null);
         toDeleted.setAuthDevices(Collections.emptyList());
         controllerRepository.save(toDeleted);
     }
 
-    public void shutdownunicon(String IPaddress) throws Exception {
+    public void shutdownunicon(String IPaddress) {
         RestTemplate restTemplate = new RestTemplate();
         String resourceUrl = "http://"+IPaddress+":5000/api/shutdown";
         HttpEntity<String> request = new HttpEntity<String>("");
 
-        ResponseEntity<String> productCreateResponse =
-                restTemplate.exchange(resourceUrl, HttpMethod.POST, request, String.class);
-
+        try{
+            ResponseEntity<String> productCreateResponse =
+                    restTemplate.exchange(resourceUrl, HttpMethod.POST, request, String.class);
+        }
+        catch(Exception e){
+            return;
+        }
         return;
     }
 
-    public void rebootunicon(String IPaddress) throws Exception {
+    public void rebootunicon(String IPaddress) {
         RestTemplate restTemplate = new RestTemplate();
         String resourceUrl = "http://"+IPaddress+":5000/api/reboot";
         HttpEntity<String> request = new HttpEntity<String>("");
 
-        ResponseEntity<String> productCreateResponse =
-                restTemplate.exchange(resourceUrl, HttpMethod.POST, request, String.class);
-
+        try{
+            ResponseEntity<String> productCreateResponse =
+                    restTemplate.exchange(resourceUrl, HttpMethod.POST, request, String.class);
+        }
+        catch(Exception e){
+            return;
+        }
         return;
     }
 
-    public Boolean backToDefault(Controller existingController) throws Exception {
+    public Boolean backToDefault(String IPaddress) throws Exception {
         HttpComponentsClientHttpRequestFactory httpRequestFactory = new HttpComponentsClientHttpRequestFactory();
         httpRequestFactory.setConnectionRequestTimeout(3000);
         httpRequestFactory.setConnectTimeout(3000);
@@ -199,7 +218,6 @@ public class ControllerService {
 
         RestTemplate restTemplate = new RestTemplate(httpRequestFactory);
 
-        String IPaddress = existingController.getControllerIP();
         String resourceUrl = "http://"+IPaddress+":5000/api/reset";
         HttpEntity<String> request = new HttpEntity<String>("");
 
@@ -211,27 +229,66 @@ public class ControllerService {
         }
         catch(Exception e){
             {
-                Thread.sleep(2000);
-                LocalDateTime lastonlinedatetime = controllerRepository.findByControllerSerialNoEqualsAndDeletedIsFalse(existingController
-                        .getControllerSerialNo()).get().getLastOnline();
-
-                LocalDateTime currentdatetime = LocalDateTime.now(ZoneId.of("GMT+08:00"));
-
-                if (lastonlinedatetime.isAfter(currentdatetime.minusSeconds(30))) {
-                    return true;
-                }
-                return false;
+                Thread.sleep(8000);
+//                LocalDateTime lastonlinedatetime = controllerRepository.findByControllerSerialNoEqualsAndDeletedIsFalse(existingController
+//                        .getControllerSerialNo()).get().getLastOnline();
+//
+//                LocalDateTime currentdatetime = LocalDateTime.now(ZoneId.of("GMT+08:00"));
+//
+//                if (lastonlinedatetime.isAfter(currentdatetime.minusSeconds(30))) {
+//                    return true;
+//                }
+                return true;
             }
 
         }
     }
 
     public ControllerConnection getControllerConnectionUnicon(String IPaddress) throws Exception {
-            RestTemplate restTemplate = new RestTemplate();
+
+            HttpComponentsClientHttpRequestFactory httpRequestFactory = new HttpComponentsClientHttpRequestFactory();
+            httpRequestFactory.setConnectionRequestTimeout(3000);
+            httpRequestFactory.setConnectTimeout(3000);
+            httpRequestFactory.setReadTimeout(3000);
+
+            RestTemplate restTemplate = new RestTemplate(httpRequestFactory);
 
             String resourceUrl = "http://"+IPaddress+":5000/api/status";
             HttpEntity<String> request = new HttpEntity<String>("");
 
+            try{
+                ResponseEntity<String> productCreateResponse =
+                        restTemplate.exchange(resourceUrl, HttpMethod.GET, request, String.class);
+
+                if (productCreateResponse.getStatusCodeValue() == 200){
+                    ObjectMapper mapper = new ObjectMapper();
+                    ControllerConnection connection = mapper.readValue(productCreateResponse.getBody(), ControllerConnection.class);
+
+                    return connection;
+                }
+                else{
+                    return null;
+                }
+            }
+            catch (Exception e){
+                return null;
+            }
+
+    }
+
+    public ControllerConnection triggerHealthcheck(String IPaddress) throws Exception {
+
+        HttpComponentsClientHttpRequestFactory httpRequestFactory = new HttpComponentsClientHttpRequestFactory();
+        httpRequestFactory.setConnectionRequestTimeout(3000);
+        httpRequestFactory.setConnectTimeout(3000);
+        httpRequestFactory.setReadTimeout(3000);
+
+        RestTemplate restTemplate = new RestTemplate(httpRequestFactory);
+
+        String resourceUrl = "http://"+IPaddress+":5000/api/healthcheck";
+        HttpEntity<String> request = new HttpEntity<String>("");
+
+        try{
             ResponseEntity<String> productCreateResponse =
                     restTemplate.exchange(resourceUrl, HttpMethod.GET, request, String.class);
 
@@ -244,6 +301,10 @@ public class ControllerService {
             else{
                 return null;
             }
+        }
+        catch (Exception e){
+            return null;
+        }
 
     }
 
@@ -474,8 +535,14 @@ public class ControllerService {
         RestTemplate restTemplate = new RestTemplate(httpRequestFactory);
 
         Controller existingController = controllerRepository.findById(newFrontendControllerDto.getControllerId()).get();
-        existingController.setPendingIP(newFrontendControllerDto.getControllerIP());
-        controllerRepository.save(existingController);
+        if (newFrontendControllerDto.getControllerIPStatic() == true){
+            existingController.setPendingIP(newFrontendControllerDto.getControllerIP());
+        }
+        else{
+            existingController.setPendingIP(null);
+        }
+
+        save(existingController);
 
         String resourceUrl = "http://"+ existingController.getControllerIP()+":5000/api/config";
 
@@ -494,16 +561,23 @@ public class ControllerService {
         }
         catch(Exception e){
             if (newFrontendControllerDto.getControllerIPStatic() == false){
-                Thread.sleep(2000);
-                LocalDateTime lastonlinedatetime = controllerRepository.findByControllerSerialNoEqualsAndDeletedIsFalse(newFrontendControllerDto
-                        .getControllerSerialNo()).get().getLastOnline();
 
-                LocalDateTime currentdatetime = LocalDateTime.now(ZoneId.of("GMT+08:00"));
-
-                if (lastonlinedatetime.isAfter(currentdatetime.minusSeconds(30))) {
-                    return true;
-                }
-                return false;
+                Thread.sleep(8000);
+//                entityManager.getEntityManagerFactory().getCache().evictAll();
+//                LocalDateTime lastonlinedatetime = controllerRepository.findByControllerSerialNoEqualsAndDeletedIsFalse(newFrontendControllerDto
+//                        .getControllerSerialNo()).get().getLastOnline();
+//
+//                LocalDateTime currentdatetime = LocalDateTime.now(ZoneId.of("GMT+08:00"));
+//                //unable to cehck if changes to dhcp is successful
+//                System.out.println(lastonlinedatetime);
+//                System.out.println(currentdatetime);
+//                System.out.println(currentdatetime.minusSeconds(5));
+//                System.out.println(lastonlinedatetime.isAfter(currentdatetime.minusSeconds(5)));
+//
+//                if (lastonlinedatetime.isAfter(currentdatetime.minusSeconds(5))) {
+//                    return true;
+//                }
+                return true;
             }
             long startTime = System.currentTimeMillis(); //fetch starting time
             // get response

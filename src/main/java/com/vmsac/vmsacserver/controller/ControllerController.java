@@ -2,6 +2,7 @@ package com.vmsac.vmsacserver.controller;
 
 import com.vmsac.vmsacserver.model.*;
 import com.vmsac.vmsacserver.repository.AuthDeviceRepository;
+import com.vmsac.vmsacserver.repository.ControllerRepository;
 import com.vmsac.vmsacserver.service.AuthDeviceService;
 import com.vmsac.vmsacserver.service.ControllerService;
 import com.vmsac.vmsacserver.service.EntranceService;
@@ -10,8 +11,11 @@ import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.validation.Valid;
 import javax.validation.constraints.Null;
 import java.time.LocalDateTime;
@@ -31,6 +35,12 @@ public class ControllerController {
 
     @Autowired
     private EntranceService entranceService;
+
+    @PersistenceContext
+    EntityManager entityManager;
+
+    @Autowired
+    private ControllerRepository controllerRepository;
 
 
 
@@ -61,14 +71,9 @@ public class ControllerController {
             @Valid @RequestBody FrontendControllerDto newFrontendControllerDto) throws Exception {
         Optional<Controller> optionalController = controllerService.findBySerialNo(newFrontendControllerDto.getControllerSerialNo());
 
-
-
-
-
         if (optionalController.isPresent() && optionalController.get().getControllerId() == controllerId) {
 
-            if (optionalController.get().getControllerIP() == newFrontendControllerDto.getControllerIP() &&
-                    optionalController.get().getControllerIPStatic() == newFrontendControllerDto.getControllerIPStatic()){
+            if (optionalController.get().getControllerIP().equals(newFrontendControllerDto.getControllerIP())){
                 return new ResponseEntity<>(controllerService.FrondEndControllerUpdate(newFrontendControllerDto), HttpStatus.OK);
             }
 
@@ -79,15 +84,23 @@ public class ControllerController {
                 return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
             }
 
-            if (newFrontendControllerDto.getControllerIPStatic() ==false){
-
-                Controller toSave = optionalController.get();
-                toSave.setPendingIP(null);
-                controllerService.save(toSave);
+            if (newFrontendControllerDto.getControllerIPStatic() == false){
 
                 try{
-                    controllerService.UpdateUniconIP(newFrontendControllerDto);
-                    return new ResponseEntity<>(controllerService.FrondEndControllerUpdate(newFrontendControllerDto), HttpStatus.OK);
+                    if (optionalController.get().getControllerIPStatic() == true){
+                        controllerService.FrondEndControllerUpdate(newFrontendControllerDto);
+                        if (controllerService.UpdateUniconIP(newFrontendControllerDto)) {
+                            return new ResponseEntity<>(HttpStatus.OK);
+                        }
+
+                        Map<String, String> errors = new HashMap<>();
+                        errors.put("Error", "Unexpected error in updateunicon" );
+                        return new ResponseEntity<>(errors, HttpStatus.GONE);
+                    }
+                    else{
+                        return new ResponseEntity<>(controllerService.FrondEndControllerUpdate(newFrontendControllerDto), HttpStatus.OK);
+                    }
+
                 }
                 catch(Exception e){
                     Map<String, String> errors = new HashMap<>();
@@ -114,12 +127,9 @@ public class ControllerController {
             // check if mastercontroller, return error if true
             // check if pendingIP != actualIP && pendingIP != null, return error
             try{
-                if (controllerService.IsIPavailable(newFrontendControllerDto.getControllerIP())){
+                if (!(newFrontendControllerDto.getControllerIP().equals(optionalController.get().getControllerIP())) && controllerService.IsIPavailable(newFrontendControllerDto.getControllerIP())){
                     // ping ip to see if taken ( return error if taken )
                     // update pending ip in db
-                    Controller toSave = optionalController.get();
-                    toSave.setPendingIP(newFrontendControllerDto.getControllerIP());
-                    controllerService.save(toSave);
 
                     if (controllerService.UpdateUniconIP(newFrontendControllerDto)){
                         return new ResponseEntity<>(controllerService.FrondEndControllerUpdate(newFrontendControllerDto), HttpStatus.OK);
@@ -175,6 +185,7 @@ public class ControllerController {
             UniconControllerDto created = controllerService.uniconControllerCreate(newUniconControllerDto);
             try {
                 authDeviceService.createAuthDevices(created.toController());
+                getControllerConnection(created.getControllerId());
             }
             catch(Exception e)
             {
@@ -412,15 +423,18 @@ public class ControllerController {
         String IPaddress = existingcontroller.getControllerIP();
         //api call to get status
         try {
-            if (!controllerService.backToDefault(existingcontroller)){
+            authDeviceService.deleteRelatedAuthDevices(controllerId);
+            controllerService.deleteControllerWithId(controllerId);
+
+            if (!controllerService.backToDefault(IPaddress)){
                 Map<String, String> errors = new HashMap<>();
                 errors.put("controllerId", "Controller with Id " +
                         controllerId + " with Serial No " + optionalController.get().getControllerSerialNo()+" unable to reset.");
                 return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
             }
-            controllerService.rebootunicon(IPaddress);
-            authDeviceService.deleteRelatedAuthDevices(controllerId);
-            controllerService.deleteControllerWithId(controllerId);
+
+//            controllerService.triggerHealthcheck(IPaddress);
+
 
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
@@ -456,8 +470,32 @@ public class ControllerController {
             else {
                 existingcontroller.setLastOnline(LocalDateTime.now(ZoneId.of("GMT+08:00")));
                 existingcontroller.getAuthDevices().forEach((existingauthDevice -> {
-                    existingauthDevice.setLastOnline(LocalDateTime.now(ZoneId.of("GMT+08:00")));
-                    authDeviceService.save(existingauthDevice);
+
+                    String direction = existingauthDevice.getAuthDeviceDirection();
+                    if ( existingauthDevice.getAuthDeviceDirection().equals("E1_IN") && connection.getE1_IN())
+                    {
+                        existingauthDevice.setLastOnline(LocalDateTime.now(ZoneId.of("GMT+08:00")));
+                        authDeviceService.save(existingauthDevice);
+                    }
+
+                    if ( existingauthDevice.getAuthDeviceDirection().equals("E1_OUT") && connection.getE1_OUT())
+                    {
+                        existingauthDevice.setLastOnline(LocalDateTime.now(ZoneId.of("GMT+08:00")));
+                        authDeviceService.save(existingauthDevice);
+                    }
+
+                    if ( existingauthDevice.getAuthDeviceDirection().equals("E2_IN") && connection.getE2_IN())
+                    {
+                        existingauthDevice.setLastOnline(LocalDateTime.now(ZoneId.of("GMT+08:00")));
+                        authDeviceService.save(existingauthDevice);
+                    }
+
+                    if ( existingauthDevice.getAuthDeviceDirection().equals("E2_OUT") && connection.getE2_OUT())
+                    {
+                        existingauthDevice.setLastOnline(LocalDateTime.now(ZoneId.of("GMT+08:00")));
+                        authDeviceService.save(existingauthDevice);
+                    }
+
                 }));
                 controllerService.save(existingcontroller);
 
@@ -479,7 +517,5 @@ public class ControllerController {
         }
         return new ResponseEntity<>(controllerService.generate(controllerId));
     }
-
-
 }
 

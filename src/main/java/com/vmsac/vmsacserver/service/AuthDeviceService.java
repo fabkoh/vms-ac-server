@@ -25,28 +25,27 @@ public class AuthDeviceService {
 
     public void createAuthDevices(Controller controller) throws Exception{
         AuthDevice authdevice1 = new AuthDevice();
-        authDeviceRepository.save(authdevice1.toCreateAuthDevice("Auth Device 1", "E1_IN",
+        authDeviceRepository.save(authdevice1.toCreateAuthDevice("Auth Device E1_IN", "E1_IN",
                 defaultAuthMethod,controller));
 
         AuthDevice authdevice2 = new AuthDevice();
-        authDeviceRepository.save(authdevice2.toCreateAuthDevice("Auth Device 2", "E1_OUT",
+        authDeviceRepository.save(authdevice2.toCreateAuthDevice("Auth Device E1_OUT", "E1_OUT",
                 defaultAuthMethod,controller));
 
         AuthDevice authdevice3 = new AuthDevice();
-        authDeviceRepository.save(authdevice3.toCreateAuthDevice("Auth Device 3", "E2_IN",
+        authDeviceRepository.save(authdevice3.toCreateAuthDevice("Auth Device E2_IN", "E2_IN",
                 defaultAuthMethod,controller));
 
         AuthDevice authdevice4 = new AuthDevice();
-        authDeviceRepository.save(authdevice4.toCreateAuthDevice("Auth Device 4", "E2_OUT",
+        authDeviceRepository.save(authdevice4.toCreateAuthDevice("Auth Device E2_OUT", "E2_OUT",
                 defaultAuthMethod,controller));
     }
 
     public AuthDevice resetAuthDevice(Long authdeviceid) throws Exception{
-        AuthDevice authdevice1 = new AuthDevice();
         AuthDevice existingAuthDevice = authDeviceRepository.findById(authdeviceid)
                 .orElseThrow(() -> new RuntimeException("Auth Device with id "+ authdeviceid+ " does not exist"));
 
-        existingAuthDevice.setAuthDeviceName(existingAuthDevice.getAuthDeviceDirection());
+        existingAuthDevice.setAuthDeviceName("Auth Device "+existingAuthDevice.getAuthDeviceDirection());
         existingAuthDevice.setLastOnline(null);
         existingAuthDevice.setMasterpin(Boolean.TRUE);
         existingAuthDevice.setDefaultAuthMethod("CardAndPin");
