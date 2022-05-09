@@ -111,8 +111,6 @@ public class ControllerService {
                 LocalDateTime.now(ZoneId.of("GMT+08:00")),status,LocalDateTime.now(ZoneId.of("GMT+08:00")),pinAssignment,settingsConfig,false)).touniconDto();
     }
 
-
-
     public UniconControllerDto uniconControllerUpdate(UniconControllerDto uniconControllerDto) throws Exception{
         controllerRepository.findByControllerSerialNoEqualsAndDeletedIsFalse(uniconControllerDto.getControllerSerialNo())
                 .orElseThrow(() -> new RuntimeException("Controller does not exist"));
@@ -134,12 +132,8 @@ public class ControllerService {
             toSave.setCreated(existingcontroller.getCreated());
 
             return controllerRepository.save(toSave).touniconDto();
-
-
         }
         throw new RuntimeException("Controller Id clashes");
-
-
     }
 
     public FrontendControllerDto FrondEndControllerUpdate(FrontendControllerDto newFrontendControllerDto) throws Exception{
@@ -400,7 +394,7 @@ public class ControllerService {
                         Device2.put("Masterpassword", "");
                     }
 
-                    Device2.put("Direction", exisitngDevice1.getAuthDeviceDirection().substring(3));
+                    Device2.put("Direction", exisitngDevice2.getAuthDeviceDirection().substring(3));
 
                     List<AuthDevice> AuthMethod2 = new ArrayList<AuthDevice>(1);
                     Device2.put("AuthMethod", AuthMethod2);
@@ -423,9 +417,7 @@ public class ControllerService {
                         List<AccessGroupScheduleDto> ListofSchedule = accessGroupScheduleService.findAllByGroupToEntranceIdIn(Collections.singletonList(accessGroupEntranceNtoN.getGroupToEntranceId()));
 
                         Map<String, Object> oneAccessGroup = new HashMap();
-
                         Map<String, Object> personsAndSchedule = new HashMap();
-
                         List<Map> EditedListofPersons = new ArrayList<Map>(1);
 
                         for (Person person : ListofPersons) {

@@ -287,11 +287,7 @@ public class ControllerController {
             @RequestParam(name = "entranceid", required = false)
                     Long entranceid,@Valid @RequestBody List<AuthDevice> newAuthDevices) {
 
-        if (entranceService.findById(entranceid).get().getUsed() == true){
-            Map<String, String> errors = new HashMap<>();
-            errors.put("Error", "EntranceId "+entranceid+" is being used" );
-            return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
-        }
+
 
         if (newAuthDevices.size() != 2){
             Map<String, String> errors = new HashMap<>();
@@ -303,6 +299,23 @@ public class ControllerController {
         try {
             AuthDevice authDevice1 = authDeviceService.findbyId(newAuthDevices.get(0).getAuthDeviceId()).get();
             AuthDevice authDevice2 = authDeviceService.findbyId(newAuthDevices.get(1).getAuthDeviceId()).get();
+
+            if (entranceid!=null){
+                if (entranceService.findById(entranceid).isEmpty() && entranceid != null){
+                    Map<String, String> errors = new HashMap<>();
+                    errors.put("Error", "EntranceId "+entranceid+" does not exist" );
+                    return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+                }
+
+                // compare database entrance id
+                if (entranceService.findById(entranceid).get().getUsed() == true){
+                    if (!(authDevice1.getEntrance().getEntranceId().equals(entranceid))){
+                        Map<String, String> errors = new HashMap<>();
+                        errors.put("Error", "EntranceId "+entranceid+" is being used" );
+                        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+                    }
+                }
+            }
 
             if (authDevice1.getController().getControllerId() !=
                     authDevice2.getController().getControllerId()){
@@ -322,12 +335,6 @@ public class ControllerController {
         catch (Exception e){
             Map<String, String> errors = new HashMap<>();
             errors.put("Error", "Auth Devices do not exist" );
-            return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
-        }
-
-        if (entranceService.findById(entranceid).isEmpty() && entranceid != null){
-            Map<String, String> errors = new HashMap<>();
-            errors.put("Error", "EntranceId "+entranceid+" does not exist" );
             return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
         }
 
