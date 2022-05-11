@@ -19,9 +19,7 @@ public interface EntranceRepository extends JpaRepository<Entrance, Long> {
 
     List<Entrance> findByEntranceIdInAndDeletedFalse(List<Long> entranceIds);
 
-    List<Entrance> findByDeletedIsFalseAndUsedIsFalse();
-
-
+    List<Entrance> findByUsedIsFalseAndDeletedIsFalseOrderByEntranceNameAsc();
 
 
 }

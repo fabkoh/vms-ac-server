@@ -12,6 +12,8 @@ public interface AuthDeviceRepository extends JpaRepository<AuthDevice,Long> {
 
     List<AuthDevice> findByEntrance_EntranceIdEquals(Long entranceId);
 
+    List<AuthDevice> findByController_ControllerIdEquals(Long controllerId);
+
     AuthDevice findByEntrance_EntranceIdIsAndAuthDeviceDirectionContains(Long entranceId, String authDeviceDirection);
 
 

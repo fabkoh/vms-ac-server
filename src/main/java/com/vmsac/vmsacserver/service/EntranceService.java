@@ -22,6 +22,9 @@ public class EntranceService {
     EntranceRepository entranceRepository;
 
     @Autowired
+    ControllerService controllerService;
+
+    @Autowired
     AccessGroupEntranceService accessGroupEntranceService;
 
     @Autowired
@@ -87,7 +90,7 @@ public class EntranceService {
     }
 
     public List <Entrance> getAvailableEntrances(){
-        return entranceRepository.findByDeletedIsFalseAndUsedIsFalse();
+        return entranceRepository.findByUsedIsFalseAndDeletedIsFalseOrderByEntranceNameAsc();
     }
 
     public void setEntranceUsed(Entrance entrance,Boolean status)throws Exception{
@@ -97,5 +100,26 @@ public class EntranceService {
             existingEntrance.setUsed(status);
             entranceRepository.save(existingEntrance);
         }
+    }
+
+    public void FreeEntrances(Long controllerId)throws Exception{
+
+        List <AuthDevice> authdevicelist = authDeviceService.findbyControllerId(controllerId);
+
+        authdevicelist.forEach(authdevice-> {
+            try {
+                if (authdevice.getEntrance() != null){
+                    Entrance existingEntrance = entranceRepository.findByEntranceIdAndDeletedFalse(authdevice.getEntrance().getEntranceId()).get();
+                    if (existingEntrance != null) {
+                        existingEntrance.setUsed(false);
+                        entranceRepository.save(existingEntrance);
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+
+
     }
 }

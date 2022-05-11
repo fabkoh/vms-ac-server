@@ -23,6 +23,9 @@ public class AuthDeviceService {
     @Autowired
     private ControllerService controllerService;
 
+    @Autowired
+    private EntranceService entranceService;
+
     public void createAuthDevices(Controller controller) throws Exception{
         AuthDevice authdevice1 = new AuthDevice();
         authDeviceRepository.save(authdevice1.toCreateAuthDevice("Auth Device E1_IN", "E1_IN",
@@ -47,7 +50,19 @@ public class AuthDeviceService {
 
         existingAuthDevice.setAuthDeviceName("Auth Device "+existingAuthDevice.getAuthDeviceDirection());
         existingAuthDevice.setLastOnline(null);
-        existingAuthDevice.setMasterpin(Boolean.TRUE);
+        existingAuthDevice.setMasterpin(Boolean.FALSE);
+        existingAuthDevice.setDefaultAuthMethod("CardAndPin");
+
+        return authDeviceRepository.save(existingAuthDevice);
+
+    }
+
+    public AuthDevice deleteAuthDevice(Long authdeviceid) throws Exception{
+        AuthDevice existingAuthDevice = authDeviceRepository.findById(authdeviceid)
+                .orElseThrow(() -> new RuntimeException("Auth Device with id "+ authdeviceid+ " does not exist"));
+
+        existingAuthDevice.setAuthDeviceName("Auth Device "+existingAuthDevice.getAuthDeviceDirection());
+        existingAuthDevice.setMasterpin(Boolean.FALSE);
         existingAuthDevice.setDefaultAuthMethod("CardAndPin");
 
         return authDeviceRepository.save(existingAuthDevice);
@@ -55,9 +70,9 @@ public class AuthDeviceService {
     }
 
     @Transactional
-    public void deleteRelatedAuthDevices(Long controllerId){
+    public void deleteRelatedAuthDevices(Long controllerId) throws Exception {
+        entranceService.FreeEntrances(controllerId);
         authDeviceRepository.deleteByController_ControllerIdEquals(controllerId);
-
     }
 
     public Optional <AuthDevice> findbyId(Long authdeviceid){
@@ -72,7 +87,6 @@ public class AuthDeviceService {
         exisitingAuthDevice.setAuthDeviceName(newAuthDevice.getAuthDeviceName());
         exisitingAuthDevice.setMasterpin(newAuthDevice.getMasterpin());
         exisitingAuthDevice.setDefaultAuthMethod(newAuthDevice.getDefaultAuthMethod());
-        exisitingAuthDevice.setEntrance(newAuthDevice.getEntrance());
         return authDeviceRepository.save(exisitingAuthDevice);
     }
 
@@ -86,6 +100,10 @@ public class AuthDeviceService {
 
     public List<AuthDevice> findbyEntranceid(Long entranceid){
         return authDeviceRepository.findByEntrance_EntranceIdEquals(entranceid);
+    }
+
+    public List<AuthDevice> findbyControllerId(Long controllerId){
+        return authDeviceRepository.findByController_ControllerIdEquals(controllerId);
     }
 
     public void UpdateAuthDeviceMasterpin(Long authdeviceId, Boolean state)throws Exception{

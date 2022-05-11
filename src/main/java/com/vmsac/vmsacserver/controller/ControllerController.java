@@ -347,9 +347,10 @@ public class ControllerController {
                 AuthDevice newSingleAuthDevice = newAuthDevices.get(i);
                 AuthDevice authdevice = authDeviceService.findbyId(newSingleAuthDevice.getAuthDeviceId()).get();
                 entranceService.setEntranceUsed(authdevice.getEntrance(),false);
-                if ( entranceid == null ){
+                if ( entranceid == null && authdevice.getEntrance() != null){
                     // set previous entrance to not used
                     // set current to used
+                    entranceService.setEntranceUsed(entranceService.findById(authdevice.getEntrance().getEntranceId()).get(),false);
                     updated.add(authDeviceService.AuthDeviceEntranceUpdate(authdevice, null));
                 }
                 else{
@@ -370,6 +371,16 @@ public class ControllerController {
     }
 
     @DeleteMapping("/authdevice/delete/{authdeviceid}")
+    public ResponseEntity<?> deleteauthdevice(@PathVariable Long authdeviceid){
+        try {
+            //System.out.println(controllerService.findById(controllerId).get());
+            return new ResponseEntity<>(authDeviceService.deleteAuthDevice(authdeviceid), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.toString(), HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @DeleteMapping("/authdevice/reset/{authdeviceid}")
     public ResponseEntity<?> resetauthdevice(@PathVariable Long authdeviceid){
         try {
             //System.out.println(controllerService.findById(controllerId).get());
