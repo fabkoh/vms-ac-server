@@ -146,3 +146,18 @@ CREATE TABLE IF NOT EXISTS AuthDevice(
   PRIMARY KEY (authDeviceId)
 );
 
+CREATE TABLE IF NOT EXISTS AuthMethod(
+  authMethodId SERIAL NOT NULL UNIQUE,
+  authMethodDesc VARCHAR(255) NOT NULL,
+  authMethodCondition VARCHAR(255) NOT NULL,
+  deleted BOOLEAN NOT NULL,
+  PRIMARY KEY (authMethodId)
+);
+
+CREATE TABLE IF NOT EXISTS AuthMethodCredentialTypeNtoN(
+  authMethodCredentialsNtoNId SERIAL NOT NULL UNIQUE,
+  authMethodId INT REFERENCES AuthMethod (authMethodId),
+  credentialTypeId INT REFERENCES CredentialType (credTypeId),
+  deleted BOOLEAN NOT NULL,
+  PRIMARY KEY (authMethodCredentialsNtoNId)
+);
