@@ -16,6 +16,8 @@ public interface ControllerRepository extends JpaRepository<Controller, Long>{
 
     Optional<Controller> findByControllerIdEqualsAndDeletedFalse(Long controllerId);
 
+    boolean existsByControllerNameEqualsAndDeletedFalse(String controllerName);
+
 
 
 

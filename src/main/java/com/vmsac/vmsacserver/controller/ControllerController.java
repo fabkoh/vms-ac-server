@@ -84,6 +84,12 @@ public class ControllerController {
                 return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
             }
 
+            if (controllerService.existsByControllerNameEquals(newFrontendControllerDto.getControllerName())){
+                Map<String, String> errors = new HashMap<>();
+                errors.put("controllerNameError", "Controller with name " + newFrontendControllerDto.getControllerName()+" already exists.");
+                return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+            }
+
             if (newFrontendControllerDto.getControllerIPStatic() == false){
 
                 try{

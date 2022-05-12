@@ -36,20 +36,11 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.validation.constraints.Null;
-import java.io.IOException;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.net.http.HttpResponse;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static java.lang.Math.abs;
-import static java.util.Collections.list;
-import static jdk.nashorn.internal.objects.NativeString.length;
 
 
 @Service
@@ -97,6 +88,11 @@ public class ControllerService {
 
     public Optional<Controller> findBySerialNo (String controllerSerialNo) {
         return controllerRepository.findByControllerSerialNoEqualsAndDeletedIsFalse(controllerSerialNo);
+
+    }
+
+    public Boolean existsByControllerNameEquals (String controllerName) {
+        return controllerRepository.existsByControllerNameEqualsAndDeletedFalse(controllerName);
 
     }
 
@@ -685,14 +681,14 @@ public class ControllerService {
             // do something with nextInstance
             String formattedDate = Integer.toString(nextInstance.getYear());
 
-            if ((length(Integer.toString(nextInstance.getMonth()))).equals(2)){
+            if (((Integer.toString(nextInstance.getMonth())).length())==2){
                 formattedDate += "-"+nextInstance.getMonth();
             }
             else{
                 formattedDate += "-0"+nextInstance.getMonth();
             }
 
-            if ((length(Integer.toString(nextInstance.getDayOfMonth()))).equals(2)){
+            if (((Integer.toString(nextInstance.getDayOfMonth())).length())==2){
                 formattedDate += "-"+nextInstance.getDayOfMonth();
             }
             else{
