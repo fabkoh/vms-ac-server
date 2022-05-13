@@ -247,82 +247,82 @@ public class DataLoader implements CommandLineRunner {
                         .build()
         );
 
-
-        CredentialType cardType = credTypeRepository.save(
-                CredentialType.builder()
-                        .credTypeName("Card")
-                        .credTypeDesc("RFID card")
-                        .deleted(false)
-                        .build()
-        );
-
-        CredentialType pinType = credTypeRepository.save(
-                CredentialType.builder()
-                        .credTypeName("Pin")
-                        .credTypeDesc("digit pin")
-                        .deleted(false)
-                        .build()
-        );
-
-        Credential paulCard = credentialRepository.save(
-                Credential.builder()
-                        .credUid("123400")
-                        .credTTL(LocalDateTime.now())
-                        .isValid(true)
-                        .isPerm(true)
-                        .credType(cardType)
-                        .person(paulAtreides)
-                        .deleted(false)
-                        .build()
-        );
-
-        Credential paulPin = credentialRepository.save(
-                Credential.builder()
-                        .credUid("1234")
-                        .credTTL(LocalDateTime.of(2022, 12, 31, 23, 59))
-                        .isValid(true)
-                        .isPerm(false)
-                        .credType(pinType)
-                        .person(paulAtreides)
-                        .deleted(false)
-                        .build()
-        );
-
-        Credential paulExpiredCard = credentialRepository.save(
-                Credential.builder()
-                        .credUid("123401")
-                        .credTTL(LocalDateTime.now())
-                        .isValid(true)
-                        .isPerm(false)
-                        .credType(cardType)
-                        .person(paulAtreides)
-                        .deleted(false)
-                        .build()
-        );
-
-        Credential paulInvalidCard = credentialRepository.save(
-                Credential.builder()
-                        .credUid("123402")
-                        .credTTL(LocalDateTime.now())
-                        .isValid(false)
-                        .isPerm(false)
-                        .credType(cardType)
-                        .person(paulAtreides)
-                        .deleted(false)
-                        .build()
-        );
-
-        Credential letoCard = credentialRepository.save(
-                Credential.builder()
-                        .credUid("4321")
-                        .credTTL(LocalDateTime.now())
-                        .isValid(true)
-                        .isPerm(true)
-                        .credType(cardType)
-                        .person(letoAtreides)
-                        .deleted(false)
-                        .build()
-        );
+//        see authmethodloader for cred type init
+//        CredentialType cardType = credTypeRepository.save(
+//                CredentialType.builder()
+//                        .credTypeName("Card")
+//                        .credTypeDesc("RFID card")
+//                        .deleted(false)
+//                        .build()
+//        );
+//
+//        CredentialType pinType = credTypeRepository.save(
+//                CredentialType.builder()
+//                        .credTypeName("Pin")
+//                        .credTypeDesc("digit pin")
+//                        .deleted(false)
+//                        .build()
+//        );
+//
+//        Credential paulCard = credentialRepository.save(
+//                Credential.builder()
+//                        .credUid("123400")
+//                        .credTTL(LocalDateTime.now())
+//                        .isValid(true)
+//                        .isPerm(true)
+//                        .credType(cardType)
+//                        .person(paulAtreides)
+//                        .deleted(false)
+//                        .build()
+//        );
+//
+//        Credential paulPin = credentialRepository.save(
+//                Credential.builder()
+//                        .credUid("1234")
+//                        .credTTL(LocalDateTime.of(2022, 12, 31, 23, 59))
+//                        .isValid(true)
+//                        .isPerm(false)
+//                        .credType(pinType)
+//                        .person(paulAtreides)
+//                        .deleted(false)
+//                        .build()
+//        );
+//
+//        Credential paulExpiredCard = credentialRepository.save(
+//                Credential.builder()
+//                        .credUid("123401")
+//                        .credTTL(LocalDateTime.now())
+//                        .isValid(true)
+//                        .isPerm(false)
+//                        .credType(cardType)
+//                        .person(paulAtreides)
+//                        .deleted(false)
+//                        .build()
+//        );
+//
+//        Credential paulInvalidCard = credentialRepository.save(
+//                Credential.builder()
+//                        .credUid("123402")
+//                        .credTTL(LocalDateTime.now())
+//                        .isValid(false)
+//                        .isPerm(false)
+//                        .credType(cardType)
+//                        .person(paulAtreides)
+//                        .deleted(false)
+//                        .build()
+//        );
+//
+//        Credential letoCard = credentialRepository.save(
+//                Credential.builder()
+//                        .credUid("4321")
+//                        .credTTL(LocalDateTime.now())
+//                        .isValid(true)
+//                        .isPerm(true)
+//                        .credType(cardType)
+//                        .person(letoAtreides)
+//                        .deleted(false)
+//                        .build()
+//        );
 
         controllerController.createOrUpdateController(
                 new UniconControllerDto(null,"192.168.1.64",true,"495162159654","5e86805e2bafd54f66cc95c3")

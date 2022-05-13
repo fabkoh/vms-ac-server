@@ -12,7 +12,7 @@ import javax.persistence.*;
 @AllArgsConstructor
 @Entity
 @Data
-@Table(name = "AuthMethodCredentialTypeNtoN")
+@Table(name = "authmethodcredentialtypenton")
 @Builder
 public class AuthMethodCredentialTypeNtoN {
     @Id
@@ -20,6 +20,7 @@ public class AuthMethodCredentialTypeNtoN {
     @Column(name = "authmethodcredentialsntonid", columnDefinition = "serial")
     private Long authMethodCredentialNtoNId;
 
+    @Column(name = "authmethodid")
     private Long authMethodId; // auth method not needed for now
 
     @ManyToOne

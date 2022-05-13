@@ -156,8 +156,8 @@ CREATE TABLE IF NOT EXISTS AuthMethod(
 
 CREATE TABLE IF NOT EXISTS AuthMethodCredentialTypeNtoN(
   authMethodCredentialsNtoNId SERIAL NOT NULL UNIQUE,
-  authMethodId INT REFERENCES AuthMethod (authMethodId),
-  credentialTypeId INT REFERENCES CredentialType (credTypeId),
+  authMethodId INT REFERENCES AuthMethod (authMethodId) NOT NULL,
+  credentialTypeId INT REFERENCES CredentialType (credTypeId) NOT NULL,
   deleted BOOLEAN NOT NULL,
   PRIMARY KEY (authMethodCredentialsNtoNId)
 );

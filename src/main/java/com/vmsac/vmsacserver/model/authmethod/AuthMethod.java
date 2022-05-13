@@ -13,18 +13,18 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @Data
-@Table(name = "authdevice")
+@Table(name = "authmethod")
 @Builder
 public class AuthMethod {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "authdeviceid", columnDefinition = "serial")
+    @Column(name = "authmethodid", columnDefinition = "serial")
     private Long authMethodId;
 
-    @Column(name = "authMethodDesc")
+    @Column(name = "authmethoddesc")
     private String authMethodDesc;
 
-    @Column(name = "authMethodCondition")
+    @Column(name = "authmethodcondition")
     private String authMethodCondition;
 
     @OneToMany(mappedBy = "authMethodId")
