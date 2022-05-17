@@ -27,9 +27,7 @@ public class AuthMethodLoader implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        if (credTypeRepository.findAll().isEmpty()) {
-            loadData();
-        }
+        if (credTypeRepository.findAll().isEmpty()) loadData();
     }
 
     // just change credTypes list, the generator should take care of auth method combinations
