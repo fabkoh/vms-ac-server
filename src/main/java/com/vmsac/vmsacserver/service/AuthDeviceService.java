@@ -15,7 +15,7 @@ import java.util.Optional;
 @Service
 public class AuthDeviceService {
 
-    String defaultAuthMethod = "CardAndPin";
+    String defaultAuthMethod = "1";
 
     @Autowired
     private AuthDeviceRepository authDeviceRepository;
