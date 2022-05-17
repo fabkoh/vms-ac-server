@@ -3,6 +3,7 @@ package com.vmsac.vmsacserver.controller;
 import com.vmsac.vmsacserver.model.*;
 import com.vmsac.vmsacserver.service.AccessGroupService;
 import com.vmsac.vmsacserver.service.PersonService;
+import com.vmsac.vmsacserver.util.UniconUpdater;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,8 @@ public class AccessGroupController {
     AccessGroupService accessGroupService;
     @Autowired
     PersonService personService;
+    @Autowired
+    UniconUpdater uniconUpdater;
 
     //returns all accessgroups
     @GetMapping("/accessgroups")
@@ -62,10 +65,13 @@ public class AccessGroupController {
             persons.forEach(person -> person.setAccessGroup(createdAccessGroup));
             createdAccessGroup.setPersons(persons);
             persons.forEach(person -> personService.save(person.toDto(),false));
+            uniconUpdater.updateUnicons();
             return new ResponseEntity<>(createdAccessGroup.toAccessGroupOnlyDto(), HttpStatus.CREATED);
 
         }
-        return new ResponseEntity<>(accessGroupService.createAccessGroup(accessGroupDto), HttpStatus.CREATED);
+        AccessGroupDto accessGroup = accessGroupService.createAccessGroup(accessGroupDto);
+        uniconUpdater.updateUnicons();
+        return new ResponseEntity<>(accessGroup, HttpStatus.CREATED);
     }
 
     //Update name or description of access group
@@ -98,9 +104,12 @@ public class AccessGroupController {
                 persons.forEach(person -> person.setAccessGroup(newAccessGroup));
                 persons.forEach(person -> personService.save(person.toDto(),false));
                 accessGroupService.save(newAccessGroup.toDto());
+                uniconUpdater.updateUnicons();
                 return new ResponseEntity<>(newAccessGroup.toAccessGroupOnlyDto(),HttpStatus.OK);
             }
-            return new ResponseEntity<>(accessGroupService.save(accessGroupDto).toAccessGroupOnlyDto(),HttpStatus.OK);
+            AccessGroupOnlyDto accessGroup = accessGroupService.save(accessGroupDto).toAccessGroupOnlyDto();
+            uniconUpdater.updateUnicons();
+            return new ResponseEntity<>(accessGroup,HttpStatus.OK);
         }
         if(accessGroupDto.getPersons()!= null){
             List<PersonOnlyDto> stagedPersons = accessGroupDto.getPersons();
@@ -115,10 +124,12 @@ public class AccessGroupController {
             persons.forEach(person -> person.setAccessGroup(newAccessGroup));
             persons.forEach(person -> personService.save(person.toDto(),false));
             accessGroupService.save(newAccessGroup.toDto());
+            uniconUpdater.updateUnicons();
             return new ResponseEntity<>(newAccessGroup.toAccessGroupOnlyDto(),HttpStatus.OK);
         }
-//
-        return new ResponseEntity<>(accessGroupService.save(accessGroupDto).toAccessGroupOnlyDto(),HttpStatus.OK);
+        AccessGroupOnlyDto accessGroup = accessGroupService.save(accessGroupDto).toAccessGroupOnlyDto();
+        uniconUpdater.updateUnicons();
+        return new ResponseEntity<>(accessGroup,HttpStatus.OK);
     }
 
     //set delete = true and set accgrp = null for persons.
@@ -126,10 +137,11 @@ public class AccessGroupController {
     public ResponseEntity<?> deleteAccessGroup(@PathVariable("id")Long id){
         try {
             accessGroupService.deleteAccessGroupById(id);
-            return ResponseEntity.noContent().build();
         } catch(Exception e) {
             return ResponseEntity.notFound().build();
         }
+        uniconUpdater.updateUnicons();
+        return ResponseEntity.noContent().build();
     }
 
 }

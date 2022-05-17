@@ -5,6 +5,7 @@ import com.vmsac.vmsacserver.model.*;
 
 import com.vmsac.vmsacserver.service.AccessGroupService;
 import com.vmsac.vmsacserver.service.PersonService;
+import com.vmsac.vmsacserver.util.UniconUpdater;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +29,8 @@ public class PersonController {
     PersonService personService;
     @Autowired
     AccessGroupService AccessGroupService;
+    @Autowired
+    UniconUpdater uniconUpdater;
 
     @GetMapping("/persons")
     public List<PersonDto> getPersons() {
@@ -82,10 +85,14 @@ public class PersonController {
             }
             AccessGroup accessGroup = AccessGroupService.findById(accessGroupId).get();
             newPersonDto.setAccessGroup(accessGroup);
-            return new ResponseEntity<>(personService.createNotDeleted(newPersonDto),
+            PersonDto personDto = personService.createNotDeleted(newPersonDto);
+            uniconUpdater.updateUnicons();
+            return new ResponseEntity<>(personDto,
                     HttpStatus.CREATED);
         }
-        return new ResponseEntity<>(personService.createNotDeleted(newPersonDto),
+        PersonDto personDto = personService.createNotDeleted(newPersonDto);
+        uniconUpdater.updateUnicons();
+        return new ResponseEntity<>(personDto,
                 HttpStatus.CREATED);
     }
 
@@ -120,11 +127,14 @@ public class PersonController {
             }
             AccessGroup accessGroup = AccessGroupService.findById(accessGroupId).get();
             updatePersonDto.setAccessGroup(accessGroup.toAccessGroupOnlyDto());
-            return new ResponseEntity<>(personService.save(updatePersonDto,false),
+            PersonDto personDto = personService.save(updatePersonDto, false);
+            uniconUpdater.updateUnicons();
+            return new ResponseEntity<>(personDto,
                     HttpStatus.OK);
         }
-
-        return ResponseEntity.ok(personService.save(updatePersonDto, false));
+        PersonDto personDto = personService.save(updatePersonDto, false);
+        uniconUpdater.updateUnicons();
+        return ResponseEntity.ok(personDto);
     }
 
     @DeleteMapping(path = "/person/{personId}")
@@ -145,6 +155,8 @@ public class PersonController {
         deletePerson.setDeleted(true);
         deletePerson.setAccessGroup(null);
         personService.save(deletePerson);
+
+        uniconUpdater.updateUnicons();
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
