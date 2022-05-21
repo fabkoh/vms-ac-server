@@ -1,12 +1,11 @@
 package com.vmsac.vmsacserver.util;
 
-import com.vmsac.vmsacserver.model.AccessGroup;
+import com.vmsac.vmsacserver.controller.ControllerController;
+import com.vmsac.vmsacserver.model.*;
 import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoN;
-import com.vmsac.vmsacserver.model.Entrance;
-import com.vmsac.vmsacserver.model.Person;
 import com.vmsac.vmsacserver.model.accessgroupschedule.AccessGroupSchedule;
 
-import com.vmsac.vmsacserver.model.entranceschedule.EntranceSchedule;
+import com.vmsac.vmsacserver.model.credentialtype.entranceschedule.EntranceSchedule;
 
 import com.vmsac.vmsacserver.model.credential.Credential;
 import com.vmsac.vmsacserver.model.credentialtype.CredentialType;
@@ -30,9 +29,13 @@ public class DataLoader implements CommandLineRunner {
     private final EntranceScheduleRepository entranceScheduleRepository;
     private final CredTypeRepository credTypeRepository;
     private final CredentialRepository credentialRepository;
+    private final ControllerRepository controllerRepository;
+    private final AuthDeviceRepository authDeviceRepository;
+    private final ControllerController controllerController;
 
 
-    public DataLoader(AccessGroupRepository accessGroupRepository, EntranceRepository entranceRepository, PersonRepository personRepository, AccessGroupEntranceNtoNRepository accessGroupEntranceRepository, AccessGroupScheduleRepository accessGroupScheduleRepository, CredTypeRepository credTypeRepository, CredentialRepository credentialRepository, EntranceScheduleRepository entranceScheduleRepository) {
+
+    public DataLoader(AccessGroupRepository accessGroupRepository, EntranceRepository entranceRepository, PersonRepository personRepository, AccessGroupEntranceNtoNRepository accessGroupEntranceRepository, AccessGroupScheduleRepository accessGroupScheduleRepository, CredTypeRepository credTypeRepository, CredentialRepository credentialRepository, EntranceScheduleRepository entranceScheduleRepository,ControllerRepository controllerRepository,AuthDeviceRepository authDeviceRepository,ControllerController controllerController) {
 
         this.accessGroupRepository = accessGroupRepository;
         this.entranceRepository = entranceRepository;
@@ -44,6 +47,9 @@ public class DataLoader implements CommandLineRunner {
 
         this.credTypeRepository = credTypeRepository;
         this.credentialRepository = credentialRepository;
+        this.controllerRepository = controllerRepository;
+        this.authDeviceRepository = authDeviceRepository;
+        this.controllerController = controllerController;
     }
 
     @Override
@@ -123,6 +129,7 @@ public class DataLoader implements CommandLineRunner {
                         .entranceDesc("the main entrance")
                         .isActive(true)
                         .deleted(false)
+                        .used(false)
                         .build()
         );
 
@@ -131,6 +138,7 @@ public class DataLoader implements CommandLineRunner {
                         .entranceName("Side Entrance")
                         .isActive(true)
                         .deleted(false)
+                        .used(false)
                         .build()
         );
 
@@ -139,6 +147,7 @@ public class DataLoader implements CommandLineRunner {
                         .entranceName("Abandoned Entrance")
                         .isActive(false)
                         .deleted(false)
+                        .used(false)
                         .build()
         );
 
@@ -172,7 +181,7 @@ public class DataLoader implements CommandLineRunner {
         AccessGroupSchedule duneMainEntranceDefault = accessGroupScheduleRepository.save(
                 AccessGroupSchedule.builder()
                         .accessGroupScheduleName("Default Schedule")
-                        .rrule(rruleDtstart + "FREQ=DAILY;INTERVAL=1;WKST=MO")
+                        .rrule(rruleDtstart + "FREQ=WEEKLY;UNTIL=20240905T091600Z;INTERVAL=1;WKST=MO")
                         .timeStart("00:00")
                         .timeEnd("23:59")
                         .groupToEntranceId(duneMainEntrance.getGroupToEntranceId())
@@ -180,10 +189,12 @@ public class DataLoader implements CommandLineRunner {
                         .build()
         );
 
+
+
         AccessGroupSchedule duneSideEntranceWeekdays = accessGroupScheduleRepository.save(
                 AccessGroupSchedule.builder()
                         .accessGroupScheduleName("Weekdays 9 to 5")
-                        .rrule(rruleDtstart + "FREQ=WEEKLY;INTERVAL=1;WKST=MO;BYDAY=MO,TU,WE,TH,FR")
+                        .rrule(rruleDtstart + "FREQ=WEEKLY;COUNT=200;INTERVAL=1;WKST=MO")
                         .timeStart("09:00")
                         .timeEnd("17:00")
                         .groupToEntranceId(duneSideEntrance.getGroupToEntranceId())
@@ -224,6 +235,18 @@ public class DataLoader implements CommandLineRunner {
                         .deleted(false)
                         .build()
         );
+
+        EntranceSchedule mainEntranceAddedSchedule = entranceScheduleRepository.save(
+                EntranceSchedule.builder()
+                        .entranceScheduleName("Added Schedule")
+                        .rrule(rruleDtstart + "FREQ=DAILY;INTERVAL=1;WKST=MO")
+                        .timeStart("00:00")
+                        .timeEnd("12:00")
+                        .entranceId(mainEntrance.getEntranceId())
+                        .deleted(false)
+                        .build()
+        );
+
 
         CredentialType cardType = credTypeRepository.save(
                 CredentialType.builder()
@@ -299,6 +322,10 @@ public class DataLoader implements CommandLineRunner {
                         .person(letoAtreides)
                         .deleted(false)
                         .build()
+        );
+
+        controllerController.createOrUpdateController(
+                new UniconControllerDto(null,"192.168.1.64",true,"495162159654","5e86805e2bafd54f66cc95c3")
         );
     }
 }

@@ -1,7 +1,6 @@
 package com.vmsac.vmsacserver.repository;
 
-import com.vmsac.vmsacserver.model.accessgroupschedule.AccessGroupSchedule;
-import com.vmsac.vmsacserver.model.entranceschedule.EntranceSchedule;
+import com.vmsac.vmsacserver.model.credentialtype.entranceschedule.EntranceSchedule;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -18,5 +17,8 @@ public interface EntranceScheduleRepository extends JpaRepository<EntranceSchedu
     List<EntranceSchedule> findAllByEntranceIdAndDeletedFalse(Long entranceIds);
 
     List<EntranceSchedule> findAllByDeletedFalse();
+
+
+
 
 }

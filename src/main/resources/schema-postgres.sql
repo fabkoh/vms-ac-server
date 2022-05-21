@@ -69,7 +69,7 @@ CREATE TABLE IF NOT EXISTS Credentials (
   credTTL TIMESTAMP NOT NULL,
   isValid BOOLEAN NOT NULL,
   isPrem BOOLEAN NOT NULL,
-  credTypeId INT REFERENCES CredentialType (credTypeId) NOT NULL,
+  credTypeId INT REFERENCES CredentialType (credTypeId),
   personId INT REFERENCES Persons (personId),
   scheduledVisitId INT References ScheduledVisit (scheduledVisitId),
   deleted BOOLEAN NOT NULL,
@@ -81,15 +81,15 @@ CREATE TABLE IF NOT EXISTS Entrances(
   entranceName VARCHAR(255) NOT NULL,
   entranceDesc VARCHAR(255),
   isActive BOOLEAN NOT NULL,
-  controllerId VARCHAR(255),
   deleted BOOLEAN NOT NULL,
+  used BOOLEAN NOT NULL,
   PRIMARY KEY (entranceId)
 );
 
 CREATE TABLE IF NOT EXISTS AccessGroupsEntranceNtoN(
   groupToEntranceId SERIAL NOT NULL UNIQUE,
-  accessGroupId INT REFERENCES AccessGroups (accessGroupId) NOT NULL,
-  entranceId INT REFERENCES Entrances (entranceId) NOT NULL,
+  accessGroupId INT REFERENCES AccessGroups (accessGroupId),
+  entranceId INT REFERENCES Entrances (entranceId),
   deleted BOOLEAN NOT NULL,
   PRIMARY KEY (groupToEntranceId)
 );
@@ -100,7 +100,7 @@ CREATE TABLE IF NOT EXISTS AccessGroupSchedule(
   rrule VARCHAR(255) NOT NULL,
   timeStart VARCHAR(128) NOT NULL,
   timeEnd VARCHAR(128) NOT NULL,
-  groupToEntranceId INT REFERENCES AccessGroupsEntranceNtoN (groupToEntranceId) NOT NULL,
+  groupToEntranceId INT REFERENCES AccessGroupsEntranceNtoN (groupToEntranceId),
   deleted BOOLEAN NOT NULL,
   PRIMARY KEY (accessGroupScheduleId)
 );
@@ -115,3 +115,34 @@ CREATE TABLE IF NOT EXISTS EntranceSchedule(
   deleted BOOLEAN NOT NULL,
   PRIMARY KEY (entranceScheduleId)
 );
+
+CREATE TABLE IF NOT EXISTS Controller(
+  controllerId SERIAL NOT NULL UNIQUE,
+  controllerName VARCHAR(255),
+  controllerIPStatic BOOLEAN NOT NULL,
+  controllerIP VARCHAR(255) NOT NULL,
+  pendingIP VARCHAR(255),
+  controllerMAC VARCHAR(255) NOT NULL,
+  controllerSerialNo VARCHAR(255) NOT NULL,
+  lastOnline TIMESTAMP,
+  created TIMESTAMP,
+  masterController Boolean,
+  pinAssignmentConfig text NOT NULL,
+  settingsConfig text NOT NULL,
+  deleted BOOLEAN NOT NULL,
+  PRIMARY KEY (controllerId)
+);
+
+CREATE TABLE IF NOT EXISTS AuthDevice(
+  authDeviceId SERIAL NOT NULL UNIQUE,
+  authDeviceName VARCHAR(255) NOT NULL,
+  authDeviceDirection VARCHAR(255) NOT NULL,
+  lastOnline TIMESTAMP,
+  masterpin Boolean NOT NULL,
+  defaultAuthMethod VARCHAR(255),
+  controllerId INT REFERENCES Controller (controllerId),
+  entranceId INT REFERENCES Entrances (entranceId),
+--  authMethodId INT REFERENCES Entrances (entranceId),
+  PRIMARY KEY (authDeviceId)
+);
+

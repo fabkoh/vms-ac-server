@@ -81,8 +81,8 @@ CREATE TABLE IF NOT EXISTS Entrances(
   entranceName VARCHAR(255) NOT NULL,
   entranceDesc VARCHAR(255),
   isActive BOOLEAN NOT NULL,
-  controllerId VARCHAR(255),
   deleted BOOLEAN NOT NULL,
+  used BOOLEAN NOT NULL,
   PRIMARY KEY (entranceId)
 );
 
@@ -115,3 +115,34 @@ CREATE TABLE IF NOT EXISTS EntranceSchedule(
   deleted BOOLEAN NOT NULL,
   PRIMARY KEY (entranceScheduleId)
 );
+
+CREATE TABLE IF NOT EXISTS Controller(
+  controllerId SERIAL NOT NULL UNIQUE,
+  controllerName VARCHAR(255),
+  controllerIPStatic BOOLEAN NOT NULL,
+  controllerIP VARCHAR(255) NOT NULL,
+  pendingIP VARCHAR(255),
+  controllerMAC VARCHAR(255) NOT NULL,
+  controllerSerialNo VARCHAR(255) NOT NULL,
+  lastOnline TIMESTAMP,
+  created TIMESTAMP,
+  masterController Boolean,
+  pinAssignmentConfig VARCHAR(MAX) NOT NULL,
+  settingsConfig VARCHAR(MAX) NOT NULL,
+  deleted BOOLEAN NOT NULL,
+  PRIMARY KEY (controllerId)
+);
+
+CREATE TABLE IF NOT EXISTS AuthDevice(
+  authDeviceId SERIAL NOT NULL UNIQUE,
+  authDeviceName VARCHAR(255) NOT NULL,
+  authDeviceDirection VARCHAR(255) NOT NULL,
+  lastOnline TIMESTAMP,
+  masterpin Boolean NOT NULL,
+  defaultAuthMethod VARCHAR(255),
+  controllerId INT REFERENCES Controller (controllerId),
+  entranceId INT REFERENCES Entrances (entranceId),
+--  authMethodId INT REFERENCES Entrances (entranceId),
+  PRIMARY KEY (authDeviceId)
+);
+

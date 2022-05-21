@@ -26,9 +26,13 @@ public class EntranceDto {
 
     private Boolean isActive;
 
+    private Boolean used;
+
     private List<AccessGroup> accessGroups;
 
+    private List<AuthDevice> entranceAuthDevices;
+
     public Entrance toEntrance(Boolean deleted){
-        return new Entrance(entranceId,entranceName,entranceDesc,isActive,deleted);
+        return new Entrance(entranceId,entranceName,entranceDesc,isActive,deleted,used,entranceAuthDevices);
     }
 }

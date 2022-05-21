@@ -37,4 +37,6 @@ public class AccessGroupEntranceNtoN {
         return new AccessGroupEntranceNtoNDto(groupToEntranceId, entrance.toEntranceOnlyDto(), accessGroup.toAccessGroupOnlyDto());
     }
 
+
+
 }

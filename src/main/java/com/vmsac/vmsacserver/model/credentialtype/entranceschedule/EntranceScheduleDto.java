@@ -1,4 +1,4 @@
-package com.vmsac.vmsacserver.model.entranceschedule;
+package com.vmsac.vmsacserver.model.credentialtype.entranceschedule;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
