@@ -7,5 +7,9 @@ import java.util.List;
 
 public interface AuthMethodRepository extends JpaRepository<AuthMethod, Long> {
 
-//    List<AuthMethod> findAllByAuthMethodIdAndDeletedFalse(List<Long> authMethodIds);
+    List<AuthMethod> findAllByAuthMethodIdInAndDeletedFalse(List<Long> authMethodIds);
+
+//    List<AuthMethod> findByAuthMethodIdAndDeletedFalse(Long authMethodId);
+
+
 }

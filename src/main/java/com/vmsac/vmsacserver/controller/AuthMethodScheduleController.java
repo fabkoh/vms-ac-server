@@ -32,18 +32,18 @@ public class AuthMethodScheduleController {
         return new ResponseEntity<>(authMethodScheduleService.findByDeviceId(authDeviceId), HttpStatus.OK);
     };
 
-//    @PutMapping("/auth-method-schedule/add")
-//    public ResponseEntity<?> addAuthMethodSchedules(@RequestBody List<CreateAuthMethodScheduleDto> CreateScheduleList,
-//                                                    @RequestParam("authDeviceIds")List<Long> authDeviceIdList){
-//        if(CreateScheduleList.isEmpty()||authDeviceIdList.isEmpty()){
-//            return ResponseEntity.badRequest().build();
-//        }
-//        List<AuthMethodScheduleDto> createdDtos;
-//        try{
-//             createdDtos = authMethodScheduleService.addAll(CreateScheduleList,authDeviceIdList);
-//        }catch (Exception e){
-//            return ResponseEntity.badRequest().build();
-//        }
-//        return ResponseEntity.ok(createdDtos);
-//    }
+    @PutMapping("/auth-method-schedule/add")
+    public ResponseEntity<?> addAuthMethodSchedules(@RequestBody List<CreateAuthMethodScheduleDto> CreateScheduleList,
+                                                    @RequestParam("authDeviceIds")List<Long> authDeviceIdList){
+        if(CreateScheduleList.isEmpty()||authDeviceIdList.isEmpty()){
+            return ResponseEntity.badRequest().build();
+        }
+        List<AuthMethodScheduleDto> createdDtos;
+        try{
+             createdDtos = authMethodScheduleService.addAll(CreateScheduleList,authDeviceIdList);
+        }catch (Exception e){
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(createdDtos);
+    }
 }
