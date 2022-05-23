@@ -386,10 +386,11 @@ public class ControllerService {
                     if (exisitngDevice1.getMasterpin() == true) {
                         Device1.put("Masterpassword", MASTERPASSWORD);
                     } else {
-                        Device1.put("Masterpassword", "");
+                        Device1.put("Masterpassword", false);
                     }
 
                     Device1.put("Direction", exisitngDevice1.getAuthDeviceDirection().substring(3));
+                    Device1.put("defaultAuthMethod", exisitngDevice1.getDefaultAuthMethod().getAuthMethodDesc());
                     Device1.put("AuthMethod", GetAuthMethodScheduleObjectWithTime(authMethodScheduleService.findByDeviceId(exisitngDevice1.getAuthDeviceId())));
 
                     Map<String, Object> Device2 = new HashMap();
@@ -397,21 +398,21 @@ public class ControllerService {
                     if (exisitngDevice2.getMasterpin() == true) {
                         Device2.put("Masterpassword", MASTERPASSWORD);
                     } else {
-                        Device2.put("Masterpassword", "");
+                        Device2.put("Masterpassword", false);
                     }
 
                     Device2.put("Direction", exisitngDevice2.getAuthDeviceDirection().substring(3));
+                    Device2.put("defaultAuthMethod", exisitngDevice2.getDefaultAuthMethod().getAuthMethodDesc());
+                    Device2.put("AuthMethod", GetAuthMethodScheduleObjectWithTime(authMethodScheduleService.findByDeviceId(exisitngDevice2.getAuthDeviceId())));
 
-                    Device1.put("AuthMethod", GetAuthMethodScheduleObjectWithTime(authMethodScheduleService.findByDeviceId(exisitngDevice2.getAuthDeviceId())));
-                    authdevices.put("Device1", Device1);
-                    authdevices.put("Device2", Device2);
+                    authdevices.put("IN", Device1);
+                    authdevices.put("OUT", Device2);
 
                     existingentrancedetails.put("AuthenticationDevices", authdevices);
 
                     // for all access group in entrances
 //                accessgroups.put()
                     List<Map> accessGroups = new ArrayList<Map>(1);
-
 
                     List<AccessGroupEntranceNtoN> listOfAccessGroupsNtoN = accessGroupEntranceNtoNRepository.findAllByEntranceEntranceIdAndDeletedFalse(existingentrance.getEntranceId());
 
