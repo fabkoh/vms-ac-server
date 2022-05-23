@@ -98,7 +98,7 @@ public class AuthDeviceService {
 
         exisitingAuthDevice.setAuthDeviceName(newAuthDevice.getAuthDeviceName());
         exisitingAuthDevice.setMasterpin(newAuthDevice.getMasterpin());
-        exisitingAuthDevice.setDefaultAuthMethod(newAuthDevice.getDefaultAuthMethod());
+        exisitingAuthDevice.setDefaultAuthMethod(authMethodRepository.findById(newAuthDevice.getDefaultAuthMethod().getAuthMethodId().longValue()).get());
         return authDeviceRepository.save(exisitingAuthDevice);
     }
 

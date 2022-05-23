@@ -1,7 +1,9 @@
 package com.vmsac.vmsacserver.controller;
 
 import com.vmsac.vmsacserver.model.*;
+import com.vmsac.vmsacserver.model.authmethod.AuthMethod;
 import com.vmsac.vmsacserver.repository.AuthDeviceRepository;
+import com.vmsac.vmsacserver.repository.AuthMethodRepository;
 import com.vmsac.vmsacserver.repository.ControllerRepository;
 import com.vmsac.vmsacserver.service.AuthDeviceService;
 import com.vmsac.vmsacserver.service.ControllerService;
@@ -42,7 +44,8 @@ public class ControllerController {
     @Autowired
     private ControllerRepository controllerRepository;
 
-
+    @Autowired
+    private AuthMethodRepository authMethodRepository;
 
     @GetMapping("/controllers")
     public List<Controller> getcontrollers() {
@@ -474,6 +477,10 @@ public class ControllerController {
         return entranceService.getAvailableEntrances();
     }
 
+    @GetMapping("/allAuthMethods")
+    public List<AuthMethod> getAllAuthMethods() {
+        return authMethodRepository.findAll();
+    }
 
     @GetMapping("/controllerConnection/{controllerId}")
     public ResponseEntity<?> getControllerConnection(@PathVariable Long controllerId) throws Exception {
