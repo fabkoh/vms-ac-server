@@ -33,26 +33,29 @@ public class AuthMethodScheduleService {
                 .map(AuthMethodSchedule::toDto)
                 .collect(Collectors.toList());
     }
-//    public List<AuthMethodScheduleDto>addAll(List<CreateAuthMethodScheduleDto> CreateList,
-//                                             List<Long> authDeviceIds){
-//        List<Long> authMethodIds = CreateList.stream().map(createAuthMethodScheduleDto -> createAuthMethodScheduleDto.getAuthMethod().getAuthMethodId()).collect(Collectors.toList());
-////        if(authMethodRepository.findAllByAuthMethodIdAndDeletedFalse(authMethodIds).size()!=authMethodIds.size()){
-////            throw new RuntimeException("Invalid AuthMethod(s)"); //check for empty and invalid authMethod
-////        }
-//        //function to check rrule string here.
-//
-//        List<AuthMethodSchedule> toCreate = new ArrayList<>();
-//        // for each createAccessGroupSchedule, for each id: add a createAccessGroupSchedule with groupToEntranceId id
-//        for (CreateAuthMethodScheduleDto CreateAuthMethodScheduleDto : CreateList) {
-//            toCreate.addAll(
-//                    authDeviceIds.stream()
-//                            .map((id) -> {
-//                                CreateAuthMethodScheduleDto.setAuthMethod(authMethodRepository.findById(id).get());
-//                                return CreateAuthMethodScheduleDto.toAuthMethodSchedule(false);
-//                            })
-//                            .collect(Collectors.toList())
-//            );
-//        }
-//        return authMethodScheduleRepository.saveAll(toCreate).stream().map(AuthMethodSchedule::toDto ).collect(Collectors.toList());
-//    }
+    public List<AuthMethodScheduleDto>addAll(List<CreateAuthMethodScheduleDto> CreateList,
+                                             List<Long> authDeviceIds){
+        List<Long> authMethodIds = CreateList.stream().map(createAuthMethodScheduleDto -> createAuthMethodScheduleDto.getAuthMethod().getAuthMethodId()).collect(Collectors.toList());
+        if(authMethodRepository.findAllByAuthMethodIdInAndDeletedFalse(authMethodIds).size()!=authMethodIds.size()){
+            throw new RuntimeException("Invalid AuthMethod(s)"); //check for empty or invalid authMethod
+        }
+        //function to check rrule string here.
+
+        List<AuthMethodSchedule> toCreate = new ArrayList<>();
+        for (CreateAuthMethodScheduleDto CreateAuthMethodScheduleDto : CreateList) {
+            toCreate.addAll(
+                    authDeviceIds.stream()
+                            .map((id) -> {
+                                CreateAuthMethodScheduleDto.setAuthMethod(authMethodRepository.findById(CreateAuthMethodScheduleDto.getAuthMethod().getAuthMethodId()).get());
+                                CreateAuthMethodScheduleDto.setAuthDevice(authDeviceRepository.findByAuthDeviceId(id).get());
+                                return CreateAuthMethodScheduleDto.toAuthMethodSchedule();
+                            })
+                            .collect(Collectors.toList())
+            );
+        }
+//        List<AuthMethodSchedule> newList = CreateList.stream().map(CreateAuthMethodScheduleDto::toAuthMethodSchedule).collect(Collectors.toList());
+//        List<AuthMethodScheduleDto> nextList = newList.stream().map(authMethodSchedule -> authMethodSchedule.toDto()).collect(Collectors.toList());
+//        return authMethodScheduleRepository.saveAll(nextList);
+        return authMethodScheduleRepository.saveAll(toCreate).stream().map(AuthMethodSchedule::toDto ).collect(Collectors.toList());
+    }
 }

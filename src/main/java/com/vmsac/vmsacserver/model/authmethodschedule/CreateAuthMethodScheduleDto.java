@@ -1,5 +1,6 @@
 package com.vmsac.vmsacserver.model.authmethodschedule;
 
+import com.vmsac.vmsacserver.model.AuthDevice;
 import com.vmsac.vmsacserver.model.authmethod.AuthMethod;
 import com.vmsac.vmsacserver.model.authmethod.AuthMethodDto;
 import lombok.AllArgsConstructor;
@@ -29,7 +30,10 @@ public class CreateAuthMethodScheduleDto {
     @NotNull(message = "authMethod must not be blank")
     private AuthMethod authMethod;
 
-    public AuthMethodSchedule toAuthMethodSchedule(Boolean deleted){
-        return new AuthMethodSchedule(null,authMethodScheduleName,rrule,timeStart,timeEnd,deleted,null,null);
+    @NotNull(message = "authDevice must not be blank")
+    private AuthDevice authDevice;
+
+    public AuthMethodSchedule toAuthMethodSchedule(){
+        return new AuthMethodSchedule(null,authMethodScheduleName,rrule,timeStart,timeEnd,false,authDevice,authMethod);
     }
 }

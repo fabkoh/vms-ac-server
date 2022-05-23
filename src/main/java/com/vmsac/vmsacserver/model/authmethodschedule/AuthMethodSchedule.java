@@ -47,7 +47,7 @@ public class AuthMethodSchedule {
     @JoinColumn(name = "authdeviceid",referencedColumnName = "authdeviceid")
     private AuthDevice authDevice;
 
-    @OneToOne(cascade = CascadeType.MERGE)
+    @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "authmethodid",referencedColumnName = "authmethodid")
     private AuthMethod authMethod;
 

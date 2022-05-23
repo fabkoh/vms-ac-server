@@ -34,12 +34,17 @@ public class AuthMethod {
     private List<AuthMethodCredentialTypeNtoN> authMethodCredentialTypeNtoNList;
 
     @JsonIgnore
+<<<<<<< HEAD
     @OneToMany(mappedBy = "authDeviceId")
     private List<AuthDevice> authDevices;
 
     @JsonIgnore
     @OneToOne(mappedBy = "authMethod")
     private AuthMethodSchedule authMethodSchedule;
+=======
+    @OneToMany(mappedBy = "authMethod", cascade = CascadeType.ALL)
+    private List<AuthMethodSchedule> authMethodSchedule;
+>>>>>>> 36536e40e84509d9d118a79164c162616bdc73c0
 
     @Column(name = "deleted")
     private Boolean deleted;
