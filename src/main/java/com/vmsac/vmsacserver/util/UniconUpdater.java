@@ -19,6 +19,9 @@ public class UniconUpdater {
     @Scheduled(cron = "@monthly")
     public void updateUnicons() {
         List<Controller> controllers = controllerService.findAllNotDeleted();
-        controllers.forEach(controller -> controllerService.generate(controller.getControllerId()));
+        controllers.forEach(controller -> {
+            controllerService.sendEntranceNameRelationship(controller.getControllerId());
+            controllerService.generate(controller.getControllerId());
+        });
     }
 }
