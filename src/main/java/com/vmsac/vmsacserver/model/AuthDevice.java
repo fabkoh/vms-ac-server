@@ -2,6 +2,8 @@ package com.vmsac.vmsacserver.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.vmsac.vmsacserver.model.accessgroupschedule.AccessGroupSchedule;
+import com.vmsac.vmsacserver.model.authmethodschedule.AuthMethodSchedule;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,6 +14,10 @@ import javax.persistence.*;
 import javax.transaction.Transactional;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -51,13 +57,14 @@ public class AuthDevice {
     @JoinColumn(name="entranceid")
     private Entrance entrance;
 
-//    @OneToMany ( cascade = CascadeType.REMOVE )
-//    @JoinColumn(name="authschedule", referencedColumnName = "authscheduleid")
-//    private AuthSchedule authSchedule;
+    @JsonIgnore
+    @OneToMany(mappedBy = "authDevice", cascade = CascadeType.MERGE)
+    private List<AuthMethodSchedule> authMethodSchedules = new ArrayList<>();
+
     public AuthDevice toCreateAuthDevice(String authDeviceName, String authDeviceDirection,
                                          String defaultAuthMethod, Controller controller) {
         return new AuthDevice(null,authDeviceName,authDeviceDirection,null, false,
-                defaultAuthMethod,controller,null);
+                defaultAuthMethod,controller,null,null);
     }
 
     @Override

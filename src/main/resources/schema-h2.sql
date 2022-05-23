@@ -133,24 +133,11 @@ CREATE TABLE IF NOT EXISTS Controller(
   PRIMARY KEY (controllerId)
 );
 
-CREATE TABLE IF NOT EXISTS AuthDevice(
-  authDeviceId SERIAL NOT NULL UNIQUE,
-  authDeviceName VARCHAR(255) NOT NULL,
-  authDeviceDirection VARCHAR(255) NOT NULL,
-  lastOnline TIMESTAMP,
-  masterpin Boolean NOT NULL,
-  defaultAuthMethod VARCHAR(255),
-  controllerId INT REFERENCES Controller (controllerId),
-  entranceId INT REFERENCES Entrances (entranceId),
---  authMethodId INT REFERENCES Entrances (entranceId),
-  PRIMARY KEY (authDeviceId)
-);
-
-
 CREATE TABLE IF NOT EXISTS AuthMethod(
   authMethodId SERIAL NOT NULL UNIQUE,
   authMethodDesc VARCHAR(255) NOT NULL,
   authMethodCondition VARCHAR(255) NOT NULL,
+  credtypeid INT REFERENCES CredentialType (credTypeId),
   deleted BOOLEAN NOT NULL,
   PRIMARY KEY (authMethodId)
 );
@@ -162,3 +149,28 @@ CREATE TABLE IF NOT EXISTS AuthMethodCredentialTypeNtoN(
   deleted BOOLEAN NOT NULL,
   PRIMARY KEY (authMethodCredentialsNtoNId)
 );
+CREATE TABLE IF NOT EXISTS AuthDevice(
+  authDeviceId SERIAL NOT NULL UNIQUE,
+  authDeviceName VARCHAR(255) NOT NULL,
+  authDeviceDirection VARCHAR(255) NOT NULL,
+  lastOnline TIMESTAMP,
+  masterpin Boolean NOT NULL,
+  defaultAuthMethod VARCHAR(255),
+  controllerId INT REFERENCES Controller (controllerId),
+  entranceId INT REFERENCES Entrances (entranceId),
+--  authMethodScheduleId INT REFERENCES AuthMethodSchedule (authMethodScheduleId),
+  PRIMARY KEY (authDeviceId)
+);
+
+CREATE TABLE IF NOT EXISTS AuthMethodSchedule(
+  authMethodScheduleId SERIAL NOT NULL UNIQUE,
+  authMethodScheduleName VARCHAR(255) NOT NULL,
+  rrule VARCHAR(255) NOT NULL,
+  timeStart VARCHAR(128) NOT NULL,
+  timeEnd VARCHAR(128) NOT NULL,
+  authDeviceId INT REFERENCES AuthDevice (authDeviceId),
+  AuthMethodId INT REFERENCES AuthMethod (authMethodId),
+  deleted BOOLEAN NOT NULL,
+  PRIMARY KEY (authMethodScheduleId)
+);
+

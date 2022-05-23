@@ -1,6 +1,8 @@
 package com.vmsac.vmsacserver.model.authmethod;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vmsac.vmsacserver.model.authmethodcredentialtypenton.AuthMethodCredentialTypeNtoN;
+import com.vmsac.vmsacserver.model.authmethodschedule.AuthMethodSchedule;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -30,6 +32,17 @@ public class AuthMethod {
     @OneToMany(mappedBy = "authMethodId")
     private List<AuthMethodCredentialTypeNtoN> authMethodCredentialTypeNtoNList;
 
+    @JsonIgnore
+    @OneToOne(mappedBy = "authMethod")
+    private AuthMethodSchedule authMethodSchedule;
+
     @Column(name = "deleted")
     private Boolean deleted;
+
+//    @OneToOne(mappedBy = "authMethod")
+//    private AuthMethodSchedule authMethodSchedule;
+
+    public AuthMethodDto toDto(){
+        return new AuthMethodDto(authMethodId,authMethodDesc,authMethodCondition);
+    }
 }
