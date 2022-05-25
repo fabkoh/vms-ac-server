@@ -1,6 +1,7 @@
 package com.vmsac.vmsacserver.model.authmethod;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.vmsac.vmsacserver.model.AuthDevice;
 import com.vmsac.vmsacserver.model.authmethodcredentialtypenton.AuthMethodCredentialTypeNtoN;
 import com.vmsac.vmsacserver.model.authmethodschedule.AuthMethodSchedule;
 import lombok.AllArgsConstructor;
@@ -29,8 +30,13 @@ public class AuthMethod {
     @Column(name = "authmethodcondition")
     private String authMethodCondition;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "authMethodId")
     private List<AuthMethodCredentialTypeNtoN> authMethodCredentialTypeNtoNList;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "authDeviceId")
+    private List<AuthDevice> authDevices;
 
     @JsonIgnore
     @OneToMany(mappedBy = "authMethod", cascade = CascadeType.ALL)

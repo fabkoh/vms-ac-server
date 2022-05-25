@@ -155,7 +155,7 @@ CREATE TABLE IF NOT EXISTS AuthDevice(
   authDeviceDirection VARCHAR(255) NOT NULL,
   lastOnline TIMESTAMP,
   masterpin Boolean NOT NULL,
-  defaultAuthMethod VARCHAR(255),
+  defaultAuthMethod INT REFERENCES AuthMethod (authMethodId),
   controllerId INT REFERENCES Controller (controllerId),
   entranceId INT REFERENCES Entrances (entranceId),
 --  authMethodScheduleId INT REFERENCES AuthMethodSchedule (authMethodScheduleId),

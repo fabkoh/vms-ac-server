@@ -3,6 +3,7 @@ package com.vmsac.vmsacserver.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.vmsac.vmsacserver.model.accessgroupschedule.AccessGroupSchedule;
+import com.vmsac.vmsacserver.model.authmethod.AuthMethod;
 import com.vmsac.vmsacserver.model.authmethodschedule.AuthMethodSchedule;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -44,9 +45,9 @@ public class AuthDevice {
     @Column(name="masterpin")
     private Boolean masterpin;
 
-    @Column(name="defaultauthmethod")
-    private String defaultAuthMethod;
-
+    @ManyToOne
+    @JoinColumn(name="defaultauthmethod")
+    private AuthMethod defaultAuthMethod;
 
     @JsonIgnore
     @ManyToOne
@@ -62,7 +63,7 @@ public class AuthDevice {
     private List<AuthMethodSchedule> authMethodSchedules = new ArrayList<>();
 
     public AuthDevice toCreateAuthDevice(String authDeviceName, String authDeviceDirection,
-                                         String defaultAuthMethod, Controller controller) {
+                                         AuthMethod defaultAuthMethod, Controller controller) {
         return new AuthDevice(null,authDeviceName,authDeviceDirection,null, false,
                 defaultAuthMethod,controller,null,null);
     }
