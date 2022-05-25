@@ -21,6 +21,8 @@ public class CreateAuthMethodScheduleDto {
     @NotBlank(message = "rrule must not be blank")
     private String rrule;
 
+    private String[] rruleArray;
+
     @NotBlank(message = "timeStart must not be blank")
     private String timeStart;
 

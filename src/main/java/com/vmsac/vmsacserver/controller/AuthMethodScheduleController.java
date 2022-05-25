@@ -23,7 +23,7 @@ public class AuthMethodScheduleController {
     @Autowired
     AuthDeviceService authDeviceService;
 
-    @GetMapping("/auth-method-schedule/{authDeviceId}")
+    @GetMapping("/authentication-schedule/{authDeviceId}")
     public ResponseEntity<?> getAuthSched(@PathVariable("authDeviceId")Long authDeviceId){
 //        System.out.println(authDeviceId);
         if(authDeviceId==null|| authDeviceService.findbyId(authDeviceId).isEmpty()){
@@ -32,18 +32,36 @@ public class AuthMethodScheduleController {
         return new ResponseEntity<>(authMethodScheduleService.findByDeviceId(authDeviceId), HttpStatus.OK);
     };
 
-    @PutMapping("/auth-method-schedule/add")
+    @PutMapping("/authentication-schedule/add")
     public ResponseEntity<?> addAuthMethodSchedules(@RequestBody List<CreateAuthMethodScheduleDto> CreateScheduleList,
                                                     @RequestParam("authDeviceIds")List<Long> authDeviceIdList){
         if(CreateScheduleList.isEmpty()||authDeviceIdList.isEmpty()){
             return ResponseEntity.badRequest().build();
         }
-        List<AuthMethodScheduleDto> createdDtos;
-        try{
-             createdDtos = authMethodScheduleService.addAll(CreateScheduleList,authDeviceIdList);
-        }catch (Exception e){
-            return ResponseEntity.badRequest().build();
-        }
-        return ResponseEntity.ok(createdDtos);
+//        List<AuthMethodScheduleDto> createdDtos;
+//        try{
+             return authMethodScheduleService.addAll(CreateScheduleList,authDeviceIdList);
+//        }catch (Exception e){
+//            return ResponseEntity.badRequest().build();
+//        }
+//        return ResponseEntity.ok(createdDtos);
+    }
+    @PutMapping("/auth-method-test/") //testing rrule validations, will remove later.
+    public ResponseEntity<?> test(@RequestBody List<CreateAuthMethodScheduleDto> CreateScheduleList,
+                                  @RequestParam("authDeviceIds")List<Long> authDeviceIdList){
+     return new ResponseEntity<>(authMethodScheduleService.checkNewScheds(CreateScheduleList),HttpStatus.OK) ;
+    }
+
+    @PutMapping("/authentication-schedule/replace")
+    public ResponseEntity<?> replace(@RequestBody List<CreateAuthMethodScheduleDto> CreateScheduleList,
+                                     @RequestParam("authDeviceIds")List<Long> authDeviceIdList){
+
+        return authMethodScheduleService.replace(CreateScheduleList,authDeviceIdList);
+    }
+
+    @DeleteMapping("/authentication-schedule/{authMethodScheduleId}")
+    public ResponseEntity<?> deleteSchedule(@PathVariable("authMethodScheduleId")Long authMethodScheduleId){
+
+        return authMethodScheduleService.deleteSched(authMethodScheduleId);
     }
 }

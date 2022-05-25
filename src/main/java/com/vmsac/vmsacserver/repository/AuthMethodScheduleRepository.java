@@ -8,9 +8,9 @@ import java.util.Optional;
 
 public interface AuthMethodScheduleRepository extends JpaRepository<AuthMethodSchedule,Long> {
 
-    Optional<AuthMethodSchedule> findByAuthMethodScheduleIdAndDeletedFalse(Long authMethodScheduleId);
+    List<AuthMethodSchedule> findByAuthDevice_AuthDeviceIdAndDeletedFalse(Long authDeviceId);
 
-    List<AuthMethodSchedule> findByAuthDevice_AuthDeviceId(Long authDeviceId);
+    Optional<AuthMethodSchedule> findByAuthMethodScheduleIdAndDeletedFalse(Long authMethodScheduleId);
 
 
 }
