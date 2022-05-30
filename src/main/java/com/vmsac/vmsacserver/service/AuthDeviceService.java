@@ -4,8 +4,10 @@ import com.vmsac.vmsacserver.model.AuthDevice;
 import com.vmsac.vmsacserver.model.Controller;
 import com.vmsac.vmsacserver.model.Entrance;
 import com.vmsac.vmsacserver.model.authmethod.AuthMethod;
+import com.vmsac.vmsacserver.model.authmethodschedule.AuthMethodSchedule;
 import com.vmsac.vmsacserver.repository.AuthDeviceRepository;
 import com.vmsac.vmsacserver.repository.AuthMethodRepository;
+import com.vmsac.vmsacserver.repository.AuthMethodScheduleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -30,6 +32,9 @@ public class AuthDeviceService {
 
     @Autowired
     private EntranceService entranceService;
+
+    @Autowired
+    private AuthMethodScheduleRepository authMethodScheduleRepository;
 
 
 
@@ -63,6 +68,10 @@ public class AuthDeviceService {
         existingAuthDevice.setLastOnline(null);
         existingAuthDevice.setMasterpin(Boolean.FALSE);
         existingAuthDevice.setDefaultAuthMethod(defaultAuthMethod);
+        //set authMethodSChedules to false
+        List<AuthMethodSchedule> toDeleteSched = authMethodScheduleRepository.findByAuthDevice_AuthDeviceIdAndDeletedFalse(authdeviceid);
+        toDeleteSched.forEach(authMethodSchedule -> authMethodSchedule.setDeleted(true));
+        authMethodScheduleRepository.saveAll(toDeleteSched);
 
         return authDeviceRepository.save(existingAuthDevice);
 
@@ -76,6 +85,10 @@ public class AuthDeviceService {
         existingAuthDevice.setAuthDeviceName("Auth Device "+existingAuthDevice.getAuthDeviceDirection());
         existingAuthDevice.setMasterpin(Boolean.FALSE);
         existingAuthDevice.setDefaultAuthMethod(defaultAuthMethod);
+        //set authMethodSChedules to false
+        List<AuthMethodSchedule> toDeleteSched = authMethodScheduleRepository.findByAuthDevice_AuthDeviceIdAndDeletedFalse(authdeviceid);
+        toDeleteSched.forEach(authMethodSchedule -> authMethodSchedule.setDeleted(true));
+        authMethodScheduleRepository.saveAll(toDeleteSched);
 
         return authDeviceRepository.save(existingAuthDevice);
 

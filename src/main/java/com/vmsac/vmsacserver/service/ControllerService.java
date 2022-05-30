@@ -14,11 +14,7 @@ import com.vmsac.vmsacserver.model.authmethodschedule.AuthMethodScheduleDto;
 import com.vmsac.vmsacserver.model.credential.CredentialDto;
 import com.vmsac.vmsacserver.model.credentialtype.entranceschedule.EntranceSchedule;
 import com.vmsac.vmsacserver.model.credential.Credential;
-import com.vmsac.vmsacserver.repository.AuthDeviceRepository;
-import com.vmsac.vmsacserver.repository.ControllerRepository;
-import com.vmsac.vmsacserver.repository.EntranceRepository;
-import com.vmsac.vmsacserver.repository.EntranceScheduleRepository;
-import com.vmsac.vmsacserver.repository.AccessGroupEntranceNtoNRepository;
+import com.vmsac.vmsacserver.repository.*;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.dmfs.rfc5545.DateTime;
 import org.dmfs.rfc5545.recur.InvalidRecurrenceRuleException;
@@ -80,6 +76,9 @@ public class ControllerService {
 
     @Autowired
     EntranceScheduleRepository entranceScheduleRepository;
+
+    @Autowired
+    AuthMethodScheduleRepository authMethodScheduleRepository;
 
     public List<Controller> findAllNotDeleted() {
         return controllerRepository.findByDeletedIsFalseOrderByCreatedDesc().stream()
@@ -172,6 +171,12 @@ public class ControllerService {
         toDeleted.setDeleted(true);
         toDeleted.setPendingIP(null);
         toDeleted.setAuthDevices(Collections.emptyList());
+
+        //set authMethodSchedules deleted to true
+        List<AuthMethodSchedule> toDeleteSched = authMethodScheduleRepository.findByAuthDevice_Controller_ControllerId(controllerId);
+        toDeleteSched.forEach(authMethodSchedule -> authMethodSchedule.setDeleted(true));
+        authMethodScheduleRepository.saveAll(toDeleteSched);
+
         controllerRepository.save(toDeleted);
     }
 

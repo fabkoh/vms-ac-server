@@ -46,7 +46,7 @@ public class AuthMethodScheduleService {
                     .get();
             toDelete.setDeleted(true);
             authMethodScheduleRepository.save(toDelete);
-            return ResponseEntity.ok("Successfully Deleted");
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
     }
     public ResponseEntity<?>replace(List<CreateAuthMethodScheduleDto> CreateList,
@@ -70,9 +70,9 @@ public class AuthMethodScheduleService {
             return new ResponseEntity<>("Invalid authMethod(s)",HttpStatus.NOT_FOUND);
         }
         //check if new scheds are valid
-//        if(checkNewScheds(CreateList)){
-//            return new ResponseEntity<>("Clashes detected in submitted schedules ",HttpStatus.CONFLICT);
-//        };
+        if(checkNewScheds(CreateList).size()!=0){
+            return new ResponseEntity<>( checkNewScheds(CreateList),HttpStatus.CONFLICT);
+        };
         //removes the old schedules if all checks passed
         authDeviceIds.forEach(aLong ->
                 authMethodScheduleRepository.findByAuthDevice_AuthDeviceIdAndDeletedFalse(aLong)
@@ -102,17 +102,17 @@ public class AuthMethodScheduleService {
 
     public ResponseEntity<?>addAll(List<CreateAuthMethodScheduleDto> CreateList,
                                              List<Long> authDeviceIds){
+
         List<Long> authMethodIds = CreateList.stream().map(createAuthMethodScheduleDto -> createAuthMethodScheduleDto.getAuthMethod().getAuthMethodId()).collect(Collectors.toList());
         List<AuthMethod> foundAuthMethods = new ArrayList<>();
         authMethodIds.forEach(id->foundAuthMethods.add(authMethodRepository.findById(id).get()));
         if(foundAuthMethods.size()!=authMethodIds.size()){
-//            System.out.println(foundAuthMethods.size());
             throw new RuntimeException("Invalid AuthMethod(s)"); //check for empty or invalid authMethod
         }
 
         //gets all authMethodScheds from authDeviceIds
         List<AuthDevice>foundAuthDevice = new ArrayList<>();
-        List<AuthMethodScheduleDto> oldScheduleList = new ArrayList<>();
+        List<AuthMethodScheduleDto> oldScheduleList = new ArrayList<>();//temp
         authDeviceIds.forEach(aLong -> {
             if(authDeviceRepository.findByAuthDeviceId(aLong).isPresent()){
                 foundAuthDevice.add(authDeviceRepository.findByAuthDeviceId(aLong).get());
@@ -127,13 +127,14 @@ public class AuthMethodScheduleService {
                 oldScheduleList.addAll(authMethodScheduleRepository.findByAuthDevice_AuthDeviceIdAndDeletedFalse(aLong)
                         .stream().map(AuthMethodSchedule::toDto).collect(Collectors.toList()))
                 );
-//        System.out.println(oldScheduleList);
 
         ////start of rrule checker functions////
-//        if(checkNewScheds(CreateList)){  //checks for conflicts in new schedules to create
-//            return new ResponseEntity<>("Clashes detected in submitted schedules", HttpStatus.CONFLICT);
-//        }
-
+        if(checkNewScheds(CreateList).size()>0){  //checks for conflicts in new schedules to create
+            return new ResponseEntity<>(checkNewScheds(CreateList), HttpStatus.CONFLICT);
+        }
+        if(!compareScheds(CreateList,oldScheduleList).isEmpty()){ //checks for conflicts between new and existing scheds
+            return new ResponseEntity<>(compareScheds(CreateList,oldScheduleList), HttpStatus.CONFLICT);
+        }
         ////end of rrule checker function////
 
         List<AuthMethodSchedule> toCreate = new ArrayList<>();
@@ -148,16 +149,11 @@ public class AuthMethodScheduleService {
                             .collect(Collectors.toList())
             );
         }
-
-
-//        authMethodScheduleRepository.saveAll(toCreate).stream().map(AuthMethodSchedule::toDto ).collect(Collectors.toList());
-//        return new ResponseEntity<>(oldScheduleList,HttpStatus.OK);
-
         return new ResponseEntity<>(authMethodScheduleRepository.saveAll(toCreate).stream().map(AuthMethodSchedule::toDto ).collect(Collectors.toList()),HttpStatus.OK);
     }
 
     //checks the new scheds and returns true if clashes are detected
-    public Boolean checkNewScheds(List<CreateAuthMethodScheduleDto> Createlist){
+    public List<CreateAuthMethodScheduleDto> checkNewScheds(List<CreateAuthMethodScheduleDto> Createlist){
         List<CreateAuthMethodScheduleDto> cleanedList = convertRruleArray(Createlist);
         List<CreateAuthMethodScheduleDto> clashedlist = new ArrayList<>();
 
@@ -165,27 +161,61 @@ public class AuthMethodScheduleService {
             for (int k = j+1; k < cleanedList.size(); k++) {
                 if(compareRruleArray(cleanedList.get(j).getRruleArray(),cleanedList.get(k).getRruleArray())){
                     //check timestart and time end
-                    clashedlist.add(cleanedList.get(j));
-                    clashedlist.add(cleanedList.get(k));
+                    if (!compareTime(cleanedList.get(j).getTimeStart(), cleanedList.get(j).getTimeEnd(), cleanedList.get(k).getTimeStart(), cleanedList.get(k).getTimeEnd())) {
+
+//                    adds clashes to list if they fail all checks.
+                    if(!clashedlist.contains((cleanedList.get(j)))){
+                        clashedlist.add(cleanedList.get(j));
+                        }
+                    if(!clashedlist.contains((cleanedList.get(k)))){
+                        clashedlist.add(cleanedList.get(k));
+                        }
+                    }
                 }
+
+            }
 //                else{System.out.println("comparerrule returned false,no clashes");}
+        }
+            return clashedlist; //use this result to determine if got clash or not. if empty then no clash.
+    }
+
+    public List<Map<String,List<AuthDevice>>> compareScheds(List<CreateAuthMethodScheduleDto> Createlist,
+                                                           List<AuthMethodScheduleDto> oldScheduleList){
+
+        List<CreateAuthMethodScheduleDto> cleanedCreateList = convertRruleArray(Createlist);
+        List<AuthMethodScheduleDto> cleanedOldSchedList = convertRruleArrayForExisting(oldScheduleList);
+        List<Map<String,List<AuthDevice>>> returnErrorList = new ArrayList<>();
+        Map<String,List<AuthDevice>> errorList = new HashMap<>();
+
+        for (int j = 0; j < cleanedCreateList.size(); j++) {
+            for (int k = 0; k < cleanedOldSchedList.size(); k++) {
+                if(compareRruleArray(cleanedCreateList.get(j).getRruleArray(),cleanedOldSchedList.get(k).getRruleArray())){
+                    //check timestart and time end
+//                    System.out.println(cleanedCreateList.get(j));
+//                    System.out.println(cleanedOldSchedList.get(k));
+                    System.out.println("compaing.... byday clash");
+                    if (!compareTime(cleanedCreateList.get(j).getTimeStart(), cleanedCreateList.get(j).getTimeEnd(), cleanedOldSchedList.get(k).getTimeStart(), cleanedOldSchedList.get(k).getTimeEnd())) {
+                        System.out.println("conapring..timeclash");
+                        AuthDevice device = authDeviceRepository.findByAuthMethodSchedules_AuthMethodScheduleId(cleanedOldSchedList.get(k).getAuthMethodScheduleId()).get();
+
+                        //add to error list
+                        if(errorList.containsKey(cleanedCreateList.get(j).getAuthMethodScheduleName())){ //if key is used,add to value
+                            errorList.get(cleanedCreateList.get(j).getAuthMethodScheduleName()).add(device);
+                        }
+                        else{ //adds key,value pair.
+                            List<AuthDevice> addToValue = new ArrayList<>();
+                            addToValue.add(device);
+                            errorList.put(cleanedCreateList.get(j).getAuthMethodScheduleName(),addToValue);}
+
+                    }
+                }
+
             }
         }
-//        String time = "23:59";
-//        System.out.println(time.substring(0,2));
-//        System.out.println(time.substring(3,5));
-//        LocalTime t1  = LocalTime.parse("23:59");
-//        LocalTime t2  = LocalTime.parse("00:59");
-//        if(t1.compareTo(t2)>0){
-//            System.out.println("t1 is bigger");
-//        }
-//        else{System.out.println("t1 is smaller");}
-
-        if(clashedlist.size()>0){
-            return true;
+        if(!errorList.isEmpty()){
+            returnErrorList.add(errorList);
         }
-        else{
-            return false;}
+        return returnErrorList; //use this result to determine if got clash or not. if empty then no clash.
     }
 
     //Compares rruleArray of 2 scheds. returns true if clashes detected.
@@ -193,6 +223,7 @@ public class AuthMethodScheduleService {
         for (int i = 0; i < arr1.length; i++) {
             for (int j = 0; j < arr2.length; j++) {
                 if(Objects.equals(arr1[i], arr2[j])){
+                    System.out.println("Byday clash");
                     return true; //must check timestart and timeend too
                 }
             }
@@ -206,7 +237,16 @@ public class AuthMethodScheduleService {
         for(int i=0;i<CreateList.size();i++){ //converting rrule to rruleArray for comparison.
             CreateAuthMethodScheduleDto temp = CreateList.get(i);
             temp.setRruleArray(temp.getRrule().substring(36).split(","));
-//            temp.setRrule(temp.getRrule().substring(36));
+            cleanedList.add(temp);
+        }
+        return cleanedList;
+    }
+
+    public List<AuthMethodScheduleDto> convertRruleArrayForExisting(List<AuthMethodScheduleDto> CreateList){
+        List<AuthMethodScheduleDto> cleanedList = new ArrayList<>();
+        for(int i=0;i<CreateList.size();i++){ //converting rrule to rruleArray for comparison.
+            AuthMethodScheduleDto temp = CreateList.get(i);
+            temp.setRruleArray(temp.getRrule().substring(36).split(","));
             cleanedList.add(temp);
         }
         return cleanedList;
@@ -217,12 +257,15 @@ public class AuthMethodScheduleService {
         LocalTime ts2  = LocalTime.parse(timestart2);
         LocalTime te1  = LocalTime.parse(timeend1);
         LocalTime te2  = LocalTime.parse(timeend2);
-        if(ts1.compareTo(te2)>0 && ts2.compareTo(te1)>0){
+        if(ts1.compareTo(te2)>=0 || ts2.compareTo(te1)>=0){
+            System.out.println("no time overlap");
             return true; //no overlap
         }
-        else{return false;} //overlap exists
+        else{
+            System.out.println("time overlap");
+            return false;//overlap exists
+        }
         //case1 timestart 2 > time end 1
-
         //case 2 time start 1 > time end 2
     }
 

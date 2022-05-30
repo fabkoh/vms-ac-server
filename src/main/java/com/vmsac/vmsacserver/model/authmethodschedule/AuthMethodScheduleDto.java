@@ -19,9 +19,12 @@ public class AuthMethodScheduleDto {
 
     private String rrule;
 
+    private String[] rruleArray;
+
     private String timeStart;
 
     private String timeEnd;
 
     private AuthMethodDto authMethod;
+
 }

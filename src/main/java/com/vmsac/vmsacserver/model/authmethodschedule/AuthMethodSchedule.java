@@ -53,6 +53,6 @@ public class AuthMethodSchedule {
 
 
     public AuthMethodScheduleDto toDto(){
-        return new AuthMethodScheduleDto(authMethodScheduleId,authMethodScheduleName,rrule,timeStart,timeEnd,authMethod.toDto());
+        return new AuthMethodScheduleDto(authMethodScheduleId,authMethodScheduleName,rrule,null,timeStart,timeEnd,authMethod.toDto());
     }
 }
