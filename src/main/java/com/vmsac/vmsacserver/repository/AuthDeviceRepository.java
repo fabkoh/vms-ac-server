@@ -19,6 +19,8 @@ public interface AuthDeviceRepository extends JpaRepository<AuthDevice,Long> {
 
     Optional<AuthDevice> findByAuthDeviceId(Long authDeviceId);
 
+    Optional<AuthDevice> findByAuthMethodSchedules_AuthMethodScheduleId(Long authMethodScheduleId);
+
 
 
 }
