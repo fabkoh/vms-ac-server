@@ -31,6 +31,7 @@ public class AuthMethodLoader implements CommandLineRunner {
     }
 
     // just change credTypes list, the generator should take care of auth method combinations
+    // WARNING: DO NOT CHANGE credTypeName, the python code (events.py) relies on cred names
     private void loadData() {
         List<CredentialType> credTypes = credTypeRepository.saveAll( List.of(
                 CredentialType.builder()
@@ -107,7 +108,7 @@ public class AuthMethodLoader implements CommandLineRunner {
                 ).collect(Collectors.toList())
         );
 
-        if (credTypes.size() == 1 || credTypes.get(0).getCredTypeName().equals("Pin")) {
+        if (credTypes.size() == 1) {
             return;
         }
 
