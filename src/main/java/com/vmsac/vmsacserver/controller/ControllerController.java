@@ -9,6 +9,7 @@ import com.vmsac.vmsacserver.service.AuthDeviceService;
 import com.vmsac.vmsacserver.service.ControllerService;
 import com.vmsac.vmsacserver.service.EntranceService;
 
+import com.vmsac.vmsacserver.util.UniconUpdater;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -28,6 +29,9 @@ import java.util.*;
 @RestController
 @RequestMapping("/api")
 public class ControllerController {
+
+    @Autowired
+    private UniconUpdater uniconUpdater;
 
     @Autowired
     private ControllerService controllerService;
@@ -200,6 +204,7 @@ public class ControllerController {
             {
                 return ResponseEntity.badRequest().build();
             }
+            uniconUpdater.updateUnicons();
             return new ResponseEntity<>(created, HttpStatus.CREATED);
 
         }
@@ -226,6 +231,7 @@ public class ControllerController {
             try {
                 if (!optionalAuthDevice.get().getMasterpin()){
                     authDeviceService.UpdateAuthDeviceMasterpin(authdeviceId,true);
+                    uniconUpdater.updateUnicons();
                     return new ResponseEntity<>(HttpStatus.OK);
                 }
                 else{
@@ -252,6 +258,7 @@ public class ControllerController {
             try {
                 if (optionalAuthDevice.get().getMasterpin()){
                     authDeviceService.UpdateAuthDeviceMasterpin(authdeviceId,false);
+                    uniconUpdater.updateUnicons();
                     return new ResponseEntity<>(HttpStatus.OK);
                 }
                 else{
@@ -277,7 +284,9 @@ public class ControllerController {
 
         if (optionalAuthDevice.isPresent() && optionalAuthDevice.get().getAuthDeviceId() == authdeviceId) {
             try {
-                return new ResponseEntity<>(authDeviceService.AuthDeviceUpdate(newAuthDevice), HttpStatus.OK);
+                authDeviceService.AuthDeviceUpdate(newAuthDevice);
+                uniconUpdater.updateUnicons();
+                return new ResponseEntity<>(HttpStatus.OK);
             }//update
             catch(Exception e){
                 return new ResponseEntity<>(e.toString(), HttpStatus.BAD_REQUEST);
@@ -374,8 +383,6 @@ public class ControllerController {
                 }
         }
             //return Response 200
-
-
         return new ResponseEntity<>(updated,HttpStatus.OK);
     }
 
@@ -383,7 +390,9 @@ public class ControllerController {
     public ResponseEntity<?> deleteauthdevice(@PathVariable Long authdeviceid){
         try {
             //System.out.println(controllerService.findById(controllerId).get());
-            return new ResponseEntity<>(authDeviceService.deleteAuthDevice(authdeviceid), HttpStatus.OK);
+            authDeviceService.deleteAuthDevice(authdeviceid);
+            uniconUpdater.updateUnicons();
+            return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.toString(), HttpStatus.NOT_FOUND);
         }
@@ -393,7 +402,9 @@ public class ControllerController {
     public ResponseEntity<?> resetauthdevice(@PathVariable Long authdeviceid){
         try {
             //System.out.println(controllerService.findById(controllerId).get());
-            return new ResponseEntity<>(authDeviceService.resetAuthDevice(authdeviceid), HttpStatus.OK);
+            authDeviceService.resetAuthDevice(authdeviceid);
+            uniconUpdater.updateUnicons();
+            return new ResponseEntity<>( HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.toString(), HttpStatus.NOT_FOUND);
         }
@@ -538,15 +549,12 @@ public class ControllerController {
         }
     }
 
-    @GetMapping("/testing/{controllerId}")
-    public ResponseEntity<?> testing(@PathVariable Long controllerId){
+    @PostMapping("/uniconUpdater")
+    public ResponseEntity<?> testing() {
+        uniconUpdater.updateUnicons();
+        return new ResponseEntity<>(HttpStatus.OK);
 
-        try {
-            HttpStatus asd = controllerService.sendEntranceNameRelationship(controllerId);
-        } catch (Exception e) {
-
-        }
-        return new ResponseEntity<>(controllerService.generate(controllerId));
     }
+
 }
 

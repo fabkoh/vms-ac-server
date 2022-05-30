@@ -303,7 +303,7 @@ public class ControllerService {
 
     }
 
-    public HttpStatus sendEntranceNameRelationship(Long controllerId){
+    public HttpStatus sendEntranceNameRelationship(Long controllerId) throws Exception{
 
         try{
             Controller existingcontroller = controllerRepository.getById(controllerId);
@@ -352,7 +352,7 @@ public class ControllerService {
         return HttpStatus.BAD_REQUEST;
     }
 
-    public HttpStatus generate(Long controllerId){
+    public HttpStatus generate(Long controllerId)throws Exception{
         try {
 
             Controller existingcontroller = controllerRepository.getById(controllerId);
@@ -464,7 +464,7 @@ public class ControllerService {
                 }
             }
 
-                String resourceUrl = "http://"+ existingcontroller.getControllerIP()+":5000/credOccur";
+                String resourceUrl = "http://"+ existingcontroller.getControllerIP()+":5000/api/credOccur";
                 RestTemplate restTemplate = new RestTemplate();
                 HttpEntity<List> request = new HttpEntity<>
                         (RulesSet);

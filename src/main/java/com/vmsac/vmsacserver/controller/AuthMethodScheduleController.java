@@ -6,6 +6,7 @@ import com.vmsac.vmsacserver.model.authmethodschedule.AuthMethodScheduleDto;
 import com.vmsac.vmsacserver.model.authmethodschedule.CreateAuthMethodScheduleDto;
 import com.vmsac.vmsacserver.service.AuthDeviceService;
 import com.vmsac.vmsacserver.service.AuthMethodScheduleService;
+import com.vmsac.vmsacserver.util.UniconUpdater;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,9 @@ public class AuthMethodScheduleController {
     AuthMethodScheduleService authMethodScheduleService;
     @Autowired
     AuthDeviceService authDeviceService;
+
+    @Autowired
+    private UniconUpdater uniconUpdater;
 
     @GetMapping("/authentication-schedule/{authDeviceId}")
     public ResponseEntity<?> getAuthSched(@PathVariable("authDeviceId")Long authDeviceId){
@@ -40,7 +44,9 @@ public class AuthMethodScheduleController {
         }
 //        List<AuthMethodScheduleDto> createdDtos;
 //        try{
-             return authMethodScheduleService.addAll(CreateScheduleList,authDeviceIdList);
+        authMethodScheduleService.addAll(CreateScheduleList,authDeviceIdList);
+        uniconUpdater.updateUnicons();
+        return new ResponseEntity<>(HttpStatus.OK);
 //        }catch (Exception e){
 //            return ResponseEntity.badRequest().build();
 //        }
@@ -49,6 +55,7 @@ public class AuthMethodScheduleController {
     @PutMapping("/auth-method-test/") //testing rrule validations, will remove later.
     public ResponseEntity<?> test(@RequestBody List<CreateAuthMethodScheduleDto> CreateScheduleList,
                                   @RequestParam("authDeviceIds")List<Long> authDeviceIdList){
+
      return new ResponseEntity<>(authMethodScheduleService.checkNewScheds(CreateScheduleList),HttpStatus.OK) ;
     }
 
@@ -56,12 +63,16 @@ public class AuthMethodScheduleController {
     public ResponseEntity<?> replace(@RequestBody List<CreateAuthMethodScheduleDto> CreateScheduleList,
                                      @RequestParam("authDeviceIds")List<Long> authDeviceIdList){
 
-        return authMethodScheduleService.replace(CreateScheduleList,authDeviceIdList);
+        authMethodScheduleService.replace(CreateScheduleList,authDeviceIdList);
+        uniconUpdater.updateUnicons();
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @DeleteMapping("/authentication-schedule/{authMethodScheduleId}")
     public ResponseEntity<?> deleteSchedule(@PathVariable("authMethodScheduleId")Long authMethodScheduleId){
 
-        return authMethodScheduleService.deleteSched(authMethodScheduleId);
+        authMethodScheduleService.deleteSched(authMethodScheduleId);
+        uniconUpdater.updateUnicons();
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
