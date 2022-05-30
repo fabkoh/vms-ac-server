@@ -173,7 +173,7 @@ public class ControllerService {
         toDeleted.setAuthDevices(Collections.emptyList());
 
         //set authMethodSchedules deleted to true
-        List<AuthMethodSchedule> toDeleteSched = authMethodScheduleRepository.findByAuthDevice_Controller_ControllerId(controllerId)
+        List<AuthMethodSchedule> toDeleteSched = authMethodScheduleRepository.findByAuthDevice_Controller_ControllerId(controllerId);
         toDeleteSched.forEach(authMethodSchedule -> authMethodSchedule.setDeleted(true));
         authMethodScheduleRepository.saveAll(toDeleteSched);
 
