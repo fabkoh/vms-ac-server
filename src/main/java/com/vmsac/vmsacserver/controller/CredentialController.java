@@ -21,9 +21,6 @@ public class CredentialController {
     @Autowired
     private CredentialService credentialService;
 
-    @Autowired
-    UniconUpdater uniconUpdater;
-
     @GetMapping("/credentials")
     public List<CredentialDto> findAll(@RequestParam(name="personid", required = false) Long personId) {
         if (personId == null) return credentialService.findAll();
@@ -39,7 +36,7 @@ public class CredentialController {
         } catch(Exception e) {
             return ResponseEntity.badRequest().build();
         }
-        uniconUpdater.updateUnicons();
+
         return new ResponseEntity<>(credential, HttpStatus.CREATED);
     }
 
@@ -51,7 +48,7 @@ public class CredentialController {
         } catch(Exception e) {
             return ResponseEntity.badRequest().build();
         }
-        uniconUpdater.updateUnicons();
+
         return ResponseEntity.ok(credential);
     }
 
@@ -63,7 +60,7 @@ public class CredentialController {
         } catch(Exception e) {
             return ResponseEntity.badRequest().build();
         }
-        uniconUpdater.updateUnicons();
+
         return ResponseEntity.ok(credential);
     }
 
@@ -75,7 +72,7 @@ public class CredentialController {
         } catch(Exception e) {
             return ResponseEntity.badRequest().build();
         }
-        uniconUpdater.updateUnicons();
+
         return ResponseEntity.ok(cred);
     }
 
@@ -86,7 +83,7 @@ public class CredentialController {
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
         }
-        uniconUpdater.updateUnicons();
+
         return ResponseEntity.noContent().build();
     }
 }

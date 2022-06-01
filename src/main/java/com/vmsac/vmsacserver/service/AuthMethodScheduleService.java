@@ -1,6 +1,7 @@
 package com.vmsac.vmsacserver.service;
 
 import com.vmsac.vmsacserver.model.AuthDevice;
+import com.vmsac.vmsacserver.model.Controller;
 import com.vmsac.vmsacserver.model.authmethod.AuthMethod;
 import com.vmsac.vmsacserver.model.authmethodschedule.AuthMethodSchedule;
 import com.vmsac.vmsacserver.model.authmethodschedule.AuthMethodScheduleDto;
@@ -8,6 +9,7 @@ import com.vmsac.vmsacserver.model.authmethodschedule.CreateAuthMethodScheduleDt
 import com.vmsac.vmsacserver.repository.AuthDeviceRepository;
 import com.vmsac.vmsacserver.repository.AuthMethodRepository;
 import com.vmsac.vmsacserver.repository.AuthMethodScheduleRepository;
+import com.vmsac.vmsacserver.repository.ControllerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +30,8 @@ public class AuthMethodScheduleService {
     AuthMethodRepository authMethodRepository;
     @Autowired
     AuthDeviceRepository authDeviceRepository;
-
+    @Autowired
+    ControllerRepository controllerRepository;
 
     public List<AuthMethodScheduleDto> findByDeviceId(Long authDeviceId) {
         return authMethodScheduleRepository.findByAuthDevice_AuthDeviceIdAndDeletedFalse(authDeviceId)
@@ -179,13 +182,13 @@ public class AuthMethodScheduleService {
             return clashedlist; //use this result to determine if got clash or not. if empty then no clash.
     }
 
-    public List<Map<String,List<AuthDevice>>> compareScheds(List<CreateAuthMethodScheduleDto> Createlist,
+    public List<Map<String,List<Object>>> compareScheds(List<CreateAuthMethodScheduleDto> Createlist,
                                                            List<AuthMethodScheduleDto> oldScheduleList){
 
         List<CreateAuthMethodScheduleDto> cleanedCreateList = convertRruleArray(Createlist);
         List<AuthMethodScheduleDto> cleanedOldSchedList = convertRruleArrayForExisting(oldScheduleList);
-        List<Map<String,List<AuthDevice>>> returnErrorList = new ArrayList<>();
-        Map<String,List<AuthDevice>> errorList = new HashMap<>();
+        List<Map<String,List<Object>>> returnErrorList = new ArrayList<>();
+        Map<String,List<Object>> errorList = new HashMap<>();
 
         for (int j = 0; j < cleanedCreateList.size(); j++) {
             for (int k = 0; k < cleanedOldSchedList.size(); k++) {
@@ -193,18 +196,24 @@ public class AuthMethodScheduleService {
                     //check timestart and time end
 //                    System.out.println(cleanedCreateList.get(j));
 //                    System.out.println(cleanedOldSchedList.get(k));
-                    System.out.println("compaing.... byday clash");
+//                    System.out.println("compaing.... byday clash");
                     if (!compareTime(cleanedCreateList.get(j).getTimeStart(), cleanedCreateList.get(j).getTimeEnd(), cleanedOldSchedList.get(k).getTimeStart(), cleanedOldSchedList.get(k).getTimeEnd())) {
-                        System.out.println("conapring..timeclash");
+//                        System.out.println("conapring..timeclash");
                         AuthDevice device = authDeviceRepository.findByAuthMethodSchedules_AuthMethodScheduleId(cleanedOldSchedList.get(k).getAuthMethodScheduleId()).get();
+
+                        Controller controller = device.getController();
+                        Map<String,Object> ControllerAuthDevice = new HashMap<>();
+                        ControllerAuthDevice.put("controller",controller.getControllerName());
+                        ControllerAuthDevice.put("authDevice",device);
 
                         //add to error list
                         if(errorList.containsKey(cleanedCreateList.get(j).getAuthMethodScheduleName())){ //if key is used,add to value
-                            errorList.get(cleanedCreateList.get(j).getAuthMethodScheduleName()).add(device);
+
+                            errorList.get(cleanedCreateList.get(j).getAuthMethodScheduleName()).add(ControllerAuthDevice);
                         }
                         else{ //adds key,value pair.
-                            List<AuthDevice> addToValue = new ArrayList<>();
-                            addToValue.add(device);
+                            List<Object> addToValue = new ArrayList<>();
+                            addToValue.add(ControllerAuthDevice);
                             errorList.put(cleanedCreateList.get(j).getAuthMethodScheduleName(),addToValue);}
 
                     }

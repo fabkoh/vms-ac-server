@@ -20,8 +20,6 @@ public class AccessGroupController {
     AccessGroupService accessGroupService;
     @Autowired
     PersonService personService;
-    @Autowired
-    UniconUpdater uniconUpdater;
 
     //returns all accessgroups
     @GetMapping("/accessgroups")
@@ -65,12 +63,10 @@ public class AccessGroupController {
             persons.forEach(person -> person.setAccessGroup(createdAccessGroup));
             createdAccessGroup.setPersons(persons);
             persons.forEach(person -> personService.save(person.toDto(),false));
-            uniconUpdater.updateUnicons();
             return new ResponseEntity<>(createdAccessGroup.toAccessGroupOnlyDto(), HttpStatus.CREATED);
 
         }
         AccessGroupDto accessGroup = accessGroupService.createAccessGroup(accessGroupDto);
-        uniconUpdater.updateUnicons();
         return new ResponseEntity<>(accessGroup, HttpStatus.CREATED);
     }
 
@@ -104,11 +100,11 @@ public class AccessGroupController {
                 persons.forEach(person -> person.setAccessGroup(newAccessGroup));
                 persons.forEach(person -> personService.save(person.toDto(),false));
                 accessGroupService.save(newAccessGroup.toDto());
-                uniconUpdater.updateUnicons();
+
                 return new ResponseEntity<>(newAccessGroup.toAccessGroupOnlyDto(),HttpStatus.OK);
             }
             AccessGroupOnlyDto accessGroup = accessGroupService.save(accessGroupDto).toAccessGroupOnlyDto();
-            uniconUpdater.updateUnicons();
+
             return new ResponseEntity<>(accessGroup,HttpStatus.OK);
         }
         if(accessGroupDto.getPersons()!= null){
@@ -124,11 +120,11 @@ public class AccessGroupController {
             persons.forEach(person -> person.setAccessGroup(newAccessGroup));
             persons.forEach(person -> personService.save(person.toDto(),false));
             accessGroupService.save(newAccessGroup.toDto());
-            uniconUpdater.updateUnicons();
+
             return new ResponseEntity<>(newAccessGroup.toAccessGroupOnlyDto(),HttpStatus.OK);
         }
         AccessGroupOnlyDto accessGroup = accessGroupService.save(accessGroupDto).toAccessGroupOnlyDto();
-        uniconUpdater.updateUnicons();
+
         return new ResponseEntity<>(accessGroup,HttpStatus.OK);
     }
 
@@ -140,7 +136,7 @@ public class AccessGroupController {
         } catch(Exception e) {
             return ResponseEntity.notFound().build();
         }
-        uniconUpdater.updateUnicons();
+
         return ResponseEntity.noContent().build();
     }
 

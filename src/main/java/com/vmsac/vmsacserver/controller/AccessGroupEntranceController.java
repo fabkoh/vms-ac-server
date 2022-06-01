@@ -19,8 +19,6 @@ public class AccessGroupEntranceController {
     @Autowired
     private AccessGroupEntranceService accessGroupEntranceService;
 
-    @Autowired
-    UniconUpdater uniconUpdater;
 
     // return access group entrance objects
     @GetMapping("/access-group-entrance")
@@ -47,7 +45,7 @@ public class AccessGroupEntranceController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
-        uniconUpdater.updateUnicons();
+
         return ResponseEntity.noContent().build();
     }
 
@@ -60,7 +58,7 @@ public class AccessGroupEntranceController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
-        uniconUpdater.updateUnicons();
+
         return ResponseEntity.noContent().build();
     }
 }

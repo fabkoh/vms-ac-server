@@ -18,8 +18,6 @@ public class EntranceScheduleController {
     @Autowired
     EntranceScheduleService entranceScheduleService;
 
-    @Autowired
-    UniconUpdater uniconUpdater;
 
     @GetMapping("/entrance-schedule")
     public List<EntranceScheduleDto> getEntranceSchedules(@RequestParam(value = "entranceids",required = false)List<Long> entranceIds) {
@@ -39,7 +37,7 @@ public class EntranceScheduleController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
-        uniconUpdater.updateUnicons();
+
         return ResponseEntity.ok(entranceScheduleDtos);
     }
 
@@ -52,7 +50,7 @@ public class EntranceScheduleController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
-        uniconUpdater.updateUnicons();
+
         return ResponseEntity.ok(entranceScheduleDtos);
     }
 
@@ -63,7 +61,7 @@ public class EntranceScheduleController {
         } catch(Exception e) {
             return ResponseEntity.notFound().build();
         }
-        uniconUpdater.updateUnicons();
+
         return ResponseEntity.noContent().build();
     }
 }

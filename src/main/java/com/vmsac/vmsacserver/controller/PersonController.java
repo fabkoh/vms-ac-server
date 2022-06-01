@@ -29,8 +29,6 @@ public class PersonController {
     PersonService personService;
     @Autowired
     AccessGroupService AccessGroupService;
-    @Autowired
-    UniconUpdater uniconUpdater;
 
     @GetMapping("/persons")
     public List<PersonDto> getPersons() {
@@ -86,12 +84,12 @@ public class PersonController {
             AccessGroup accessGroup = AccessGroupService.findById(accessGroupId).get();
             newPersonDto.setAccessGroup(accessGroup);
             PersonDto personDto = personService.createNotDeleted(newPersonDto);
-            uniconUpdater.updateUnicons();
+
             return new ResponseEntity<>(personDto,
                     HttpStatus.CREATED);
         }
         PersonDto personDto = personService.createNotDeleted(newPersonDto);
-        uniconUpdater.updateUnicons();
+
         return new ResponseEntity<>(personDto,
                 HttpStatus.CREATED);
     }
@@ -128,12 +126,12 @@ public class PersonController {
             AccessGroup accessGroup = AccessGroupService.findById(accessGroupId).get();
             updatePersonDto.setAccessGroup(accessGroup.toAccessGroupOnlyDto());
             PersonDto personDto = personService.save(updatePersonDto, false);
-            uniconUpdater.updateUnicons();
+
             return new ResponseEntity<>(personDto,
                     HttpStatus.OK);
         }
         PersonDto personDto = personService.save(updatePersonDto, false);
-        uniconUpdater.updateUnicons();
+
         return ResponseEntity.ok(personDto);
     }
 
@@ -156,7 +154,6 @@ public class PersonController {
         deletePerson.setAccessGroup(null);
         personService.save(deletePerson);
 
-        uniconUpdater.updateUnicons();
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

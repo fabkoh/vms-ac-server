@@ -27,8 +27,7 @@ public class EntranceController {
     EntranceService entranceService;
     @Autowired
     AccessGroupEntranceService accessGroupEntranceService;
-    @Autowired
-    UniconUpdater uniconUpdater;
+
 
     //returns all entrances
     @GetMapping("/entrances")
@@ -79,11 +78,11 @@ public class EntranceController {
                 return new ResponseEntity<>(errors,HttpStatus.NOT_FOUND);
             }
             EntranceDto entranceDto = entranceService.createEntrance(newEntranceDto);
-            uniconUpdater.updateUnicons();
+
             return new ResponseEntity<>(entranceDto, HttpStatus.CREATED);
         }
         EntranceDto entranceDto = entranceService.createEntrance(newEntranceDto);
-        uniconUpdater.updateUnicons();
+
         return new ResponseEntity<>(entranceDto, HttpStatus.CREATED);
     }
 
@@ -95,7 +94,7 @@ public class EntranceController {
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
         }
-        uniconUpdater.updateUnicons();
+
         return ResponseEntity.ok(entranceDto);
     }
 
@@ -107,7 +106,7 @@ public class EntranceController {
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
         }
-        uniconUpdater.updateUnicons();
+
         return ResponseEntity.ok(entranceDto);
     }
 
@@ -119,6 +118,7 @@ public class EntranceController {
 
        Boolean isActive = entranceService.findById(tempid).get().getIsActive();
        entranceDto.setIsActive(isActive);
+
 
        if(checkDto.isEmpty()){
            Map<String, String> errors = new HashMap<>();
@@ -133,12 +133,14 @@ public class EntranceController {
                       entranceDto.getEntranceName() + " in use");
               return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
             }
+            entranceDto.setUsed(false);
             EntranceOnlyDto entrance = entranceService.save(entranceDto).toEntranceOnlyDto();
-            uniconUpdater.updateUnicons();
+
             return new ResponseEntity<>(entrance,HttpStatus.OK);
         }
+        entranceDto.setUsed(checkDto.get().getUsed());
         EntranceOnlyDto entrance = entranceService.save(entranceDto).toEntranceOnlyDto();
-        uniconUpdater.updateUnicons();
+
         return new ResponseEntity<>(entrance,HttpStatus.OK);
     }
 
@@ -158,7 +160,7 @@ public class EntranceController {
             entranceService.save(deleteEntrance.toDto());
             //get NtoN table
             entranceService.delete(id);
-            uniconUpdater.updateUnicons();
+
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         catch (Exception e){

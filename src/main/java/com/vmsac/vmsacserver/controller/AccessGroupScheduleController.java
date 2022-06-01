@@ -21,8 +21,6 @@ public class AccessGroupScheduleController {
     @Autowired
     AccessGroupScheduleService accessGroupScheduleService;
 
-    @Autowired
-    UniconUpdater uniconUpdater;
 
     // returns access group schedules
     @GetMapping("/access-group-schedule")
@@ -56,7 +54,7 @@ public class AccessGroupScheduleController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
-        uniconUpdater.updateUnicons();
+
         return ResponseEntity.ok(accessGroupScheduleDtos);
     }
 
@@ -70,7 +68,7 @@ public class AccessGroupScheduleController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
-        uniconUpdater.updateUnicons();
+
         return ResponseEntity.ok(accessGroupScheduleDtos);
     }
 
@@ -82,7 +80,7 @@ public class AccessGroupScheduleController {
         } catch(Exception e) {
             return ResponseEntity.notFound().build();
         }
-        uniconUpdater.updateUnicons();
+
         return ResponseEntity.noContent().build();
     }
 

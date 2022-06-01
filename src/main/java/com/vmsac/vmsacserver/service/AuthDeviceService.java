@@ -36,10 +36,10 @@ public class AuthDeviceService {
     @Autowired
     private AuthMethodScheduleRepository authMethodScheduleRepository;
 
-
+    long defaultAuthMethodId = 2L;
 
     public void createAuthDevices(Controller controller) throws Exception{
-        AuthMethod defaultAuthMethod = authMethodRepository.findById(6L).get();
+        AuthMethod defaultAuthMethod = authMethodRepository.findById(defaultAuthMethodId).get();
 
         AuthDevice authdevice1 = new AuthDevice();
         authDeviceRepository.save(authdevice1.toCreateAuthDevice("Auth Device E1_IN", "E1_IN",
@@ -59,7 +59,7 @@ public class AuthDeviceService {
     }
 
     public AuthDevice resetAuthDevice(Long authdeviceid) throws Exception{
-        AuthMethod defaultAuthMethod = authMethodRepository.findById(6L).get();
+        AuthMethod defaultAuthMethod = authMethodRepository.findById(defaultAuthMethodId).get();
 
         AuthDevice existingAuthDevice = authDeviceRepository.findById(authdeviceid)
                 .orElseThrow(() -> new RuntimeException("Auth Device with id "+ authdeviceid+ " does not exist"));
@@ -78,7 +78,7 @@ public class AuthDeviceService {
     }
 
     public AuthDevice deleteAuthDevice(Long authdeviceid) throws Exception{
-        AuthMethod defaultAuthMethod = authMethodRepository.findById(6L).get();
+        AuthMethod defaultAuthMethod = authMethodRepository.findById(defaultAuthMethodId).get();
         AuthDevice existingAuthDevice = authDeviceRepository.findById(authdeviceid)
                 .orElseThrow(() -> new RuntimeException("Auth Device with id "+ authdeviceid+ " does not exist"));
 

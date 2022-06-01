@@ -85,7 +85,7 @@ public class AuthMethodLoader implements CommandLineRunner {
     private void createAuthMethods(List<CredentialType> credTypes) {
         // if credTypes is length 0, ignore (empty auth method)
         // create AND method
-        // if credTypes is length 1 or contains "Pin", do not create OR method
+        // if credTypes is length 1, do not create OR method
         if (credTypes.isEmpty()) { return; }
 
         AuthMethod andMethod = authMethodRepository.save(

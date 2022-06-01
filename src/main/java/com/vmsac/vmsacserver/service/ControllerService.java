@@ -358,7 +358,7 @@ public class ControllerService {
     }
 
     public HttpStatus generate(Long controllerId)throws Exception{
-        try {
+//        try {
 
             Controller existingcontroller = controllerRepository.getById(controllerId);
             String MASTERPASSWORD = "666666";
@@ -480,11 +480,11 @@ public class ControllerService {
                 //call entrancename function
                 return HttpStatus.OK;
 
-        }
-        catch(Exception e){
-            System.out.println(e);
-        }
-        return HttpStatus.BAD_REQUEST;
+//        }
+//        catch(Exception e){
+//            System.out.println(e);
+//        }
+
     }
 
     public void save(Controller existingcontroller) {

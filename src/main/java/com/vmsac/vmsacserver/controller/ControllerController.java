@@ -14,6 +14,7 @@ import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,6 +26,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 
+@EnableAsync
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api")
@@ -204,7 +206,7 @@ public class ControllerController {
             {
                 return ResponseEntity.badRequest().build();
             }
-            uniconUpdater.updateUnicons();
+
             return new ResponseEntity<>(created, HttpStatus.CREATED);
 
         }
@@ -231,7 +233,7 @@ public class ControllerController {
             try {
                 if (!optionalAuthDevice.get().getMasterpin()){
                     authDeviceService.UpdateAuthDeviceMasterpin(authdeviceId,true);
-                    uniconUpdater.updateUnicons();
+
                     return new ResponseEntity<>(HttpStatus.OK);
                 }
                 else{
@@ -258,7 +260,7 @@ public class ControllerController {
             try {
                 if (optionalAuthDevice.get().getMasterpin()){
                     authDeviceService.UpdateAuthDeviceMasterpin(authdeviceId,false);
-                    uniconUpdater.updateUnicons();
+
                     return new ResponseEntity<>(HttpStatus.OK);
                 }
                 else{
@@ -285,7 +287,7 @@ public class ControllerController {
         if (optionalAuthDevice.isPresent() && optionalAuthDevice.get().getAuthDeviceId() == authdeviceId) {
             try {
                 authDeviceService.AuthDeviceUpdate(newAuthDevice);
-                uniconUpdater.updateUnicons();
+
                 return new ResponseEntity<>(HttpStatus.OK);
             }//update
             catch(Exception e){
@@ -391,7 +393,7 @@ public class ControllerController {
         try {
             //System.out.println(controllerService.findById(controllerId).get());
             authDeviceService.deleteAuthDevice(authdeviceid);
-            uniconUpdater.updateUnicons();
+
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.toString(), HttpStatus.NOT_FOUND);
@@ -403,7 +405,7 @@ public class ControllerController {
         try {
             //System.out.println(controllerService.findById(controllerId).get());
             authDeviceService.resetAuthDevice(authdeviceid);
-            uniconUpdater.updateUnicons();
+
             return new ResponseEntity<>( HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.toString(), HttpStatus.NOT_FOUND);
@@ -551,8 +553,15 @@ public class ControllerController {
 
     @PostMapping("/uniconUpdater")
     public ResponseEntity<?> testing() {
-        uniconUpdater.updateUnicons();
-        return new ResponseEntity<>(HttpStatus.OK);
+        List<Controller> response = uniconUpdater.updateUnicons();
+        System.out.println(response);
+        if (response.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+        else{
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
 
     }
 

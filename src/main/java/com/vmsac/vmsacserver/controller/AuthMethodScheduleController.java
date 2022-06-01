@@ -24,8 +24,6 @@ public class AuthMethodScheduleController {
     @Autowired
     AuthDeviceService authDeviceService;
 
-    @Autowired
-    private UniconUpdater uniconUpdater;
 
     @GetMapping("/authentication-schedule/{authDeviceId}")
     public ResponseEntity<?> getAuthSched(@PathVariable("authDeviceId")Long authDeviceId){
@@ -44,9 +42,8 @@ public class AuthMethodScheduleController {
         }
 //        List<AuthMethodScheduleDto> createdDtos;
 //        try{
-        authMethodScheduleService.addAll(CreateScheduleList,authDeviceIdList);
-        uniconUpdater.updateUnicons();
-        return new ResponseEntity<>(HttpStatus.OK);
+        ;
+        return (authMethodScheduleService.addAll(CreateScheduleList,authDeviceIdList));
 //        }catch (Exception e){
 //            return ResponseEntity.badRequest().build();
 //        }
@@ -64,7 +61,7 @@ public class AuthMethodScheduleController {
                                      @RequestParam("authDeviceIds")List<Long> authDeviceIdList){
 
         authMethodScheduleService.replace(CreateScheduleList,authDeviceIdList);
-        uniconUpdater.updateUnicons();
+
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -72,7 +69,7 @@ public class AuthMethodScheduleController {
     public ResponseEntity<?> deleteSchedule(@PathVariable("authMethodScheduleId")Long authMethodScheduleId){
 
         authMethodScheduleService.deleteSched(authMethodScheduleId);
-        uniconUpdater.updateUnicons();
+
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }
