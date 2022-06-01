@@ -1,5 +1,6 @@
 package com.vmsac.vmsacserver.repository;
 
+import com.vmsac.vmsacserver.model.AuthDevice;
 import com.vmsac.vmsacserver.model.Controller;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -17,6 +18,8 @@ public interface ControllerRepository extends JpaRepository<Controller, Long>{
     Optional<Controller> findByControllerIdEqualsAndDeletedFalse(Long controllerId);
 
     boolean existsByControllerNameEqualsAndDeletedFalse(String controllerName);
+
+
 
 
 

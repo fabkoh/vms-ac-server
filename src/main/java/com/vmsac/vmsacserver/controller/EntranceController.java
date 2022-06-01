@@ -6,6 +6,7 @@ import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoNDt
 import com.vmsac.vmsacserver.service.AccessGroupEntranceService;
 import com.vmsac.vmsacserver.service.EntranceService;
 import com.vmsac.vmsacserver.service.AccessGroupService;
+import com.vmsac.vmsacserver.util.UniconUpdater;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +27,7 @@ public class EntranceController {
     EntranceService entranceService;
     @Autowired
     AccessGroupEntranceService accessGroupEntranceService;
+
 
     //returns all entrances
     @GetMapping("/entrances")
@@ -75,27 +77,37 @@ public class EntranceController {
                         accessGroupId + " does not exist");
                 return new ResponseEntity<>(errors,HttpStatus.NOT_FOUND);
             }
-            return new ResponseEntity<>(entranceService.createEntrance(newEntranceDto), HttpStatus.CREATED);
+            EntranceDto entranceDto = entranceService.createEntrance(newEntranceDto);
+
+            return new ResponseEntity<>(entranceDto, HttpStatus.CREATED);
         }
-        return new ResponseEntity<>(entranceService.createEntrance(newEntranceDto), HttpStatus.CREATED);
+        EntranceDto entranceDto = entranceService.createEntrance(newEntranceDto);
+
+        return new ResponseEntity<>(entranceDto, HttpStatus.CREATED);
     }
 
     @PutMapping("/entrance/enable/{entranceId}")
     public ResponseEntity<?> enableEntrance(@PathVariable("entranceId") Long entranceId) {
+        EntranceDto entranceDto;
         try {
-            return ResponseEntity.ok(entranceService.updateEntranceIsActiveWithId(true, entranceId));
+            entranceDto = entranceService.updateEntranceIsActiveWithId(true, entranceId);
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
         }
+
+        return ResponseEntity.ok(entranceDto);
     }
 
     @PutMapping("/entrance/unlock/{entranceId}")
     public ResponseEntity<?> disableEntrance(@PathVariable(name = "entranceId") Long entranceId) {
+        EntranceDto entranceDto;
         try {
-            return ResponseEntity.ok(entranceService.updateEntranceIsActiveWithId(false, entranceId));
+            entranceDto = entranceService.updateEntranceIsActiveWithId(false, entranceId);
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
         }
+
+        return ResponseEntity.ok(entranceDto);
     }
 
     //Update name or description of entrance
@@ -106,6 +118,7 @@ public class EntranceController {
 
        Boolean isActive = entranceService.findById(tempid).get().getIsActive();
        entranceDto.setIsActive(isActive);
+
 
        if(checkDto.isEmpty()){
            Map<String, String> errors = new HashMap<>();
@@ -120,9 +133,15 @@ public class EntranceController {
                       entranceDto.getEntranceName() + " in use");
               return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
             }
-            return new ResponseEntity<>(entranceService.save(entranceDto).toEntranceOnlyDto(),HttpStatus.OK);
+            entranceDto.setUsed(false);
+            EntranceOnlyDto entrance = entranceService.save(entranceDto).toEntranceOnlyDto();
+
+            return new ResponseEntity<>(entrance,HttpStatus.OK);
         }
-        return new ResponseEntity<>(entranceService.save(entranceDto).toEntranceOnlyDto(),HttpStatus.OK);
+        entranceDto.setUsed(checkDto.get().getUsed());
+        EntranceOnlyDto entrance = entranceService.save(entranceDto).toEntranceOnlyDto();
+
+        return new ResponseEntity<>(entrance,HttpStatus.OK);
     }
 
 
@@ -141,6 +160,7 @@ public class EntranceController {
             entranceService.save(deleteEntrance.toDto());
             //get NtoN table
             entranceService.delete(id);
+
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         catch (Exception e){

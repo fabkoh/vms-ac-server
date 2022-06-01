@@ -1,16 +1,20 @@
 package com.vmsac.vmsacserver.controller;
 
 import com.vmsac.vmsacserver.model.*;
+import com.vmsac.vmsacserver.model.authmethod.AuthMethod;
 import com.vmsac.vmsacserver.repository.AuthDeviceRepository;
+import com.vmsac.vmsacserver.repository.AuthMethodRepository;
 import com.vmsac.vmsacserver.repository.ControllerRepository;
 import com.vmsac.vmsacserver.service.AuthDeviceService;
 import com.vmsac.vmsacserver.service.ControllerService;
 import com.vmsac.vmsacserver.service.EntranceService;
 
+import com.vmsac.vmsacserver.util.UniconUpdater;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,10 +26,14 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 
+@EnableAsync
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api")
 public class ControllerController {
+
+    @Autowired
+    private UniconUpdater uniconUpdater;
 
     @Autowired
     private ControllerService controllerService;
@@ -42,7 +50,8 @@ public class ControllerController {
     @Autowired
     private ControllerRepository controllerRepository;
 
-
+    @Autowired
+    private AuthMethodRepository authMethodRepository;
 
     @GetMapping("/controllers")
     public List<Controller> getcontrollers() {
@@ -197,6 +206,7 @@ public class ControllerController {
             {
                 return ResponseEntity.badRequest().build();
             }
+
             return new ResponseEntity<>(created, HttpStatus.CREATED);
 
         }
@@ -223,6 +233,7 @@ public class ControllerController {
             try {
                 if (!optionalAuthDevice.get().getMasterpin()){
                     authDeviceService.UpdateAuthDeviceMasterpin(authdeviceId,true);
+
                     return new ResponseEntity<>(HttpStatus.OK);
                 }
                 else{
@@ -249,6 +260,7 @@ public class ControllerController {
             try {
                 if (optionalAuthDevice.get().getMasterpin()){
                     authDeviceService.UpdateAuthDeviceMasterpin(authdeviceId,false);
+
                     return new ResponseEntity<>(HttpStatus.OK);
                 }
                 else{
@@ -274,7 +286,9 @@ public class ControllerController {
 
         if (optionalAuthDevice.isPresent() && optionalAuthDevice.get().getAuthDeviceId() == authdeviceId) {
             try {
-                return new ResponseEntity<>(authDeviceService.AuthDeviceUpdate(newAuthDevice), HttpStatus.OK);
+                authDeviceService.AuthDeviceUpdate(newAuthDevice);
+
+                return new ResponseEntity<>(HttpStatus.OK);
             }//update
             catch(Exception e){
                 return new ResponseEntity<>(e.toString(), HttpStatus.BAD_REQUEST);
@@ -371,8 +385,6 @@ public class ControllerController {
                 }
         }
             //return Response 200
-
-
         return new ResponseEntity<>(updated,HttpStatus.OK);
     }
 
@@ -380,7 +392,9 @@ public class ControllerController {
     public ResponseEntity<?> deleteauthdevice(@PathVariable Long authdeviceid){
         try {
             //System.out.println(controllerService.findById(controllerId).get());
-            return new ResponseEntity<>(authDeviceService.deleteAuthDevice(authdeviceid), HttpStatus.OK);
+            authDeviceService.deleteAuthDevice(authdeviceid);
+
+            return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.toString(), HttpStatus.NOT_FOUND);
         }
@@ -390,7 +404,9 @@ public class ControllerController {
     public ResponseEntity<?> resetauthdevice(@PathVariable Long authdeviceid){
         try {
             //System.out.println(controllerService.findById(controllerId).get());
-            return new ResponseEntity<>(authDeviceService.resetAuthDevice(authdeviceid), HttpStatus.OK);
+            authDeviceService.resetAuthDevice(authdeviceid);
+
+            return new ResponseEntity<>( HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.toString(), HttpStatus.NOT_FOUND);
         }
@@ -474,6 +490,10 @@ public class ControllerController {
         return entranceService.getAvailableEntrances();
     }
 
+    @GetMapping("/allAuthMethods")
+    public List<AuthMethod> getAllAuthMethods() {
+        return authMethodRepository.findAll();
+    }
 
     @GetMapping("/controllerConnection/{controllerId}")
     public ResponseEntity<?> getControllerConnection(@PathVariable Long controllerId) throws Exception {
@@ -531,15 +551,19 @@ public class ControllerController {
         }
     }
 
-    @GetMapping("/testing/{controllerId}")
-    public ResponseEntity<?> testing(@PathVariable Long controllerId){
-
-        try {
-            HttpStatus asd = controllerService.sendEntranceNameRelationship(controllerId);
-        } catch (Exception e) {
-
+    @PostMapping("/uniconUpdater")
+    public ResponseEntity<?> testing() {
+        List<Controller> response = uniconUpdater.updateUnicons();
+        System.out.println(response);
+        if (response.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.OK);
         }
-        return new ResponseEntity<>(controllerService.generate(controllerId));
+        else{
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+
     }
+
 }
 

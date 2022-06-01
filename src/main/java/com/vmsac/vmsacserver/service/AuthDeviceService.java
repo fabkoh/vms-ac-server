@@ -3,7 +3,11 @@ package com.vmsac.vmsacserver.service;
 import com.vmsac.vmsacserver.model.AuthDevice;
 import com.vmsac.vmsacserver.model.Controller;
 import com.vmsac.vmsacserver.model.Entrance;
+import com.vmsac.vmsacserver.model.authmethod.AuthMethod;
+import com.vmsac.vmsacserver.model.authmethodschedule.AuthMethodSchedule;
 import com.vmsac.vmsacserver.repository.AuthDeviceRepository;
+import com.vmsac.vmsacserver.repository.AuthMethodRepository;
+import com.vmsac.vmsacserver.repository.AuthMethodScheduleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -15,7 +19,10 @@ import java.util.Optional;
 @Service
 public class AuthDeviceService {
 
-    String defaultAuthMethod = "1";
+
+
+    @Autowired
+    private AuthMethodRepository authMethodRepository;
 
     @Autowired
     private AuthDeviceRepository authDeviceRepository;
@@ -26,7 +33,14 @@ public class AuthDeviceService {
     @Autowired
     private EntranceService entranceService;
 
+    @Autowired
+    private AuthMethodScheduleRepository authMethodScheduleRepository;
+
+    long defaultAuthMethodId = 2L;
+
     public void createAuthDevices(Controller controller) throws Exception{
+        AuthMethod defaultAuthMethod = authMethodRepository.findById(defaultAuthMethodId).get();
+
         AuthDevice authdevice1 = new AuthDevice();
         authDeviceRepository.save(authdevice1.toCreateAuthDevice("Auth Device E1_IN", "E1_IN",
                 defaultAuthMethod,controller));
@@ -45,25 +59,36 @@ public class AuthDeviceService {
     }
 
     public AuthDevice resetAuthDevice(Long authdeviceid) throws Exception{
+        AuthMethod defaultAuthMethod = authMethodRepository.findById(defaultAuthMethodId).get();
+
         AuthDevice existingAuthDevice = authDeviceRepository.findById(authdeviceid)
                 .orElseThrow(() -> new RuntimeException("Auth Device with id "+ authdeviceid+ " does not exist"));
 
         existingAuthDevice.setAuthDeviceName("Auth Device "+existingAuthDevice.getAuthDeviceDirection());
         existingAuthDevice.setLastOnline(null);
         existingAuthDevice.setMasterpin(Boolean.FALSE);
-        existingAuthDevice.setDefaultAuthMethod("CardAndPin");
+        existingAuthDevice.setDefaultAuthMethod(defaultAuthMethod);
+        //set authMethodSChedules to false
+        List<AuthMethodSchedule> toDeleteSched = authMethodScheduleRepository.findByAuthDevice_AuthDeviceIdAndDeletedFalse(authdeviceid);
+        toDeleteSched.forEach(authMethodSchedule -> authMethodSchedule.setDeleted(true));
+        authMethodScheduleRepository.saveAll(toDeleteSched);
 
         return authDeviceRepository.save(existingAuthDevice);
 
     }
 
     public AuthDevice deleteAuthDevice(Long authdeviceid) throws Exception{
+        AuthMethod defaultAuthMethod = authMethodRepository.findById(defaultAuthMethodId).get();
         AuthDevice existingAuthDevice = authDeviceRepository.findById(authdeviceid)
                 .orElseThrow(() -> new RuntimeException("Auth Device with id "+ authdeviceid+ " does not exist"));
 
         existingAuthDevice.setAuthDeviceName("Auth Device "+existingAuthDevice.getAuthDeviceDirection());
         existingAuthDevice.setMasterpin(Boolean.FALSE);
-        existingAuthDevice.setDefaultAuthMethod("CardAndPin");
+        existingAuthDevice.setDefaultAuthMethod(defaultAuthMethod);
+        //set authMethodSChedules to false
+        List<AuthMethodSchedule> toDeleteSched = authMethodScheduleRepository.findByAuthDevice_AuthDeviceIdAndDeletedFalse(authdeviceid);
+        toDeleteSched.forEach(authMethodSchedule -> authMethodSchedule.setDeleted(true));
+        authMethodScheduleRepository.saveAll(toDeleteSched);
 
         return authDeviceRepository.save(existingAuthDevice);
 
@@ -86,7 +111,7 @@ public class AuthDeviceService {
 
         exisitingAuthDevice.setAuthDeviceName(newAuthDevice.getAuthDeviceName());
         exisitingAuthDevice.setMasterpin(newAuthDevice.getMasterpin());
-        exisitingAuthDevice.setDefaultAuthMethod(newAuthDevice.getDefaultAuthMethod());
+        exisitingAuthDevice.setDefaultAuthMethod(authMethodRepository.findById(newAuthDevice.getDefaultAuthMethod().getAuthMethodId().longValue()).get());
         return authDeviceRepository.save(exisitingAuthDevice);
     }
 

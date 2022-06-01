@@ -9,14 +9,12 @@ import com.vmsac.vmsacserver.model.*;
 import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoN;
 import com.vmsac.vmsacserver.model.accessgroupschedule.AccessGroupSchedule;
 import com.vmsac.vmsacserver.model.accessgroupschedule.AccessGroupScheduleDto;
+import com.vmsac.vmsacserver.model.authmethodschedule.AuthMethodSchedule;
+import com.vmsac.vmsacserver.model.authmethodschedule.AuthMethodScheduleDto;
 import com.vmsac.vmsacserver.model.credential.CredentialDto;
 import com.vmsac.vmsacserver.model.credentialtype.entranceschedule.EntranceSchedule;
 import com.vmsac.vmsacserver.model.credential.Credential;
-import com.vmsac.vmsacserver.repository.AuthDeviceRepository;
-import com.vmsac.vmsacserver.repository.ControllerRepository;
-import com.vmsac.vmsacserver.repository.EntranceRepository;
-import com.vmsac.vmsacserver.repository.EntranceScheduleRepository;
-import com.vmsac.vmsacserver.repository.AccessGroupEntranceNtoNRepository;
+import com.vmsac.vmsacserver.repository.*;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.dmfs.rfc5545.DateTime;
 import org.dmfs.rfc5545.recur.InvalidRecurrenceRuleException;
@@ -56,6 +54,9 @@ public class ControllerService {
     private AuthDeviceRepository authDeviceRepository;
 
     @Autowired
+    private AuthMethodScheduleService authMethodScheduleService;
+
+    @Autowired
     private CredentialService credentialService;
 
     @Autowired
@@ -75,6 +76,9 @@ public class ControllerService {
 
     @Autowired
     EntranceScheduleRepository entranceScheduleRepository;
+
+    @Autowired
+    AuthMethodScheduleRepository authMethodScheduleRepository;
 
     public List<Controller> findAllNotDeleted() {
         return controllerRepository.findByDeletedIsFalseOrderByCreatedDesc().stream()
@@ -167,6 +171,12 @@ public class ControllerService {
         toDeleted.setDeleted(true);
         toDeleted.setPendingIP(null);
         toDeleted.setAuthDevices(Collections.emptyList());
+
+        //set authMethodSchedules deleted to true
+        List<AuthMethodSchedule> toDeleteSched = authMethodScheduleRepository.findByAuthDevice_Controller_ControllerId(controllerId);
+        toDeleteSched.forEach(authMethodSchedule -> authMethodSchedule.setDeleted(true));
+        authMethodScheduleRepository.saveAll(toDeleteSched);
+
         controllerRepository.save(toDeleted);
     }
 
@@ -298,50 +308,57 @@ public class ControllerService {
 
     }
 
-    public HttpStatus sendEntranceNameRelationship(Long controllerId) throws Exception {
-
-        Controller existingcontroller = controllerRepository.getById(2L);
-        String IPaddress = existingcontroller.getControllerIP();
-
-        RestTemplate restTemplate = new RestTemplate();
-        String resourceUrl = "http://"+IPaddress+":5000/api/entrance-name";
-
-        Map <String,Object> jsonbody = new HashMap();
-        jsonbody.put("controllerSerialNo",existingcontroller.getControllerSerialNo());
-
+    public HttpStatus sendEntranceNameRelationship(Long controllerId) throws Exception{
 
         try{
-            jsonbody.put("E1",existingcontroller.getAuthDevices().get(0).getEntrance().getEntranceName());
+            Controller existingcontroller = controllerRepository.getById(controllerId);
+            String IPaddress = existingcontroller.getControllerIP();
+
+            RestTemplate restTemplate = new RestTemplate();
+            String resourceUrl = "http://"+IPaddress+":5000/api/entrance-name";
+
+            Map <String,Object> jsonbody = new HashMap();
+            jsonbody.put("controllerSerialNo",existingcontroller.getControllerSerialNo());
+
+
+            try{
+                jsonbody.put("E1",existingcontroller.getAuthDevices().get(0).getEntrance().getEntranceName());
+            }
+            catch(Exception e){
+                jsonbody.put("E1","");
+            }
+
+            try{
+                jsonbody.put("E2",existingcontroller.getAuthDevices().get(2).getEntrance().getEntranceName());
+            }
+            catch(Exception e){
+                jsonbody.put("E2","");
+            }
+
+            HttpEntity<Map> request = new HttpEntity<>
+                    (jsonbody);
+
+            ResponseEntity<String> productCreateResponse =
+                    restTemplate.exchange(resourceUrl, HttpMethod.POST, request, String.class);
+
+            if (productCreateResponse.getStatusCodeValue() == 200){
+                ObjectMapper mapper = new ObjectMapper();
+                ControllerConnection connection = mapper.readValue(productCreateResponse.getBody(), ControllerConnection.class);
+                return HttpStatus.OK;
+            }
+            else{
+                return HttpStatus.BAD_REQUEST;
+            }
         }
+
         catch(Exception e){
-            jsonbody.put("E1","");
+            System.out.println(e);
         }
-
-        try{
-            jsonbody.put("E2",existingcontroller.getAuthDevices().get(2).getEntrance().getEntranceName());
-        }
-        catch(Exception e){
-            jsonbody.put("E2","");
-        }
-
-        HttpEntity<Map> request = new HttpEntity<>
-                (jsonbody);
-
-        ResponseEntity<String> productCreateResponse =
-                restTemplate.exchange(resourceUrl, HttpMethod.POST, request, String.class);
-
-        if (productCreateResponse.getStatusCodeValue() == 200){
-            ObjectMapper mapper = new ObjectMapper();
-            ControllerConnection connection = mapper.readValue(productCreateResponse.getBody(), ControllerConnection.class);
-            return HttpStatus.OK;
-        }
-        else{
-            return HttpStatus.BAD_REQUEST;
-        }
+        return HttpStatus.BAD_REQUEST;
     }
 
-    public HttpStatus generate(Long controllerId){
-        try {
+    public HttpStatus generate(Long controllerId)throws Exception{
+//        try {
 
             Controller existingcontroller = controllerRepository.getById(controllerId);
             String MASTERPASSWORD = "666666";
@@ -374,36 +391,33 @@ public class ControllerService {
                     if (exisitngDevice1.getMasterpin() == true) {
                         Device1.put("Masterpassword", MASTERPASSWORD);
                     } else {
-                        Device1.put("Masterpassword", "");
+                        Device1.put("Masterpassword", false);
                     }
 
                     Device1.put("Direction", exisitngDevice1.getAuthDeviceDirection().substring(3));
-
-                    List<AuthDevice> AuthMethod1 = new ArrayList<AuthDevice>(1);
-                    Device1.put("AuthMethod", AuthMethod1);
+                    Device1.put("defaultAuthMethod", exisitngDevice1.getDefaultAuthMethod().getAuthMethodDesc());
+                    Device1.put("AuthMethod", GetAuthMethodScheduleObjectWithTime(authMethodScheduleService.findByDeviceId(exisitngDevice1.getAuthDeviceId())));
 
                     Map<String, Object> Device2 = new HashMap();
 
                     if (exisitngDevice2.getMasterpin() == true) {
                         Device2.put("Masterpassword", MASTERPASSWORD);
                     } else {
-                        Device2.put("Masterpassword", "");
+                        Device2.put("Masterpassword", false);
                     }
 
                     Device2.put("Direction", exisitngDevice2.getAuthDeviceDirection().substring(3));
+                    Device2.put("defaultAuthMethod", exisitngDevice2.getDefaultAuthMethod().getAuthMethodDesc());
+                    Device2.put("AuthMethod", GetAuthMethodScheduleObjectWithTime(authMethodScheduleService.findByDeviceId(exisitngDevice2.getAuthDeviceId())));
 
-                    List<AuthDevice> AuthMethod2 = new ArrayList<AuthDevice>(1);
-                    Device2.put("AuthMethod", AuthMethod2);
-
-                    authdevices.put("Device1", Device1);
-                    authdevices.put("Device2", Device2);
+                    authdevices.put("IN", Device1);
+                    authdevices.put("OUT", Device2);
 
                     existingentrancedetails.put("AuthenticationDevices", authdevices);
 
                     // for all access group in entrances
 //                accessgroups.put()
                     List<Map> accessGroups = new ArrayList<Map>(1);
-
 
                     List<AccessGroupEntranceNtoN> listOfAccessGroupsNtoN = accessGroupEntranceNtoNRepository.findAllByEntranceEntranceIdAndDeletedFalse(existingentrance.getEntranceId());
 
@@ -455,11 +469,7 @@ public class ControllerService {
                 }
             }
 
-//                String json = new ObjectMapper().writeValueAsString(RulesSet);
-//
-//                System.out.println(json);
-
-                String resourceUrl = "http://192.168.1.185:5000/credOccur";
+                String resourceUrl = "http://"+ existingcontroller.getControllerIP()+":5000/api/credOccur";
                 RestTemplate restTemplate = new RestTemplate();
                 HttpEntity<List> request = new HttpEntity<>
                         (RulesSet);
@@ -470,11 +480,11 @@ public class ControllerService {
                 //call entrancename function
                 return HttpStatus.OK;
 
-        }
-        catch(Exception e){
-            System.out.println(e);
-        }
-        return HttpStatus.BAD_REQUEST;
+//        }
+//        catch(Exception e){
+//            System.out.println(e);
+//        }
+
     }
 
     public void save(Controller existingcontroller) {
@@ -581,6 +591,43 @@ public class ControllerService {
             }
         }
 
+    // return auth method list with auth method and schedule
+    public List<Map> GetAuthMethodScheduleObjectWithTime(List<AuthMethodScheduleDto> ListofAuthMethodSchedule) throws Exception {
+
+        List<Map> AuthMethod = new ArrayList<Map>();
+
+        for (AuthMethodScheduleDto authMethodSchedule : ListofAuthMethodSchedule) {
+            Map<String, Object> authMethodAndSchedule = new HashMap();
+            Boolean authMethodExists = false;
+
+            String rawrrule = authMethodSchedule.getRrule();
+            String starttime = authMethodSchedule.getTimeStart();
+            String endtime = authMethodSchedule.getTimeEnd();
+
+            // if auth method already exist
+            for (Map existingAuthMethodAndSchedule : AuthMethod){
+                if ( existingAuthMethodAndSchedule.containsValue(authMethodSchedule.getAuthMethod().getAuthMethodDesc())){
+                    ObjectMapper oMapper = new ObjectMapper();
+                    // add to existing schedule
+                    Map existingSchedule = oMapper.convertValue(existingAuthMethodAndSchedule.get("Schedule"),Map.class);
+                    authMethodAndSchedule.put("Schedule", GetScheduleMap(rawrrule,starttime,endtime,existingSchedule));
+                    authMethodExists =  true;
+                    break;
+                }
+            }
+
+            if (!authMethodExists){
+                // add method and schedule
+                authMethodAndSchedule.put("Method", authMethodSchedule.getAuthMethod().getAuthMethodDesc());
+                authMethodAndSchedule.put("Schedule", GetScheduleMap(rawrrule,starttime,endtime,new HashMap<>()));
+            }
+
+            AuthMethod.add(authMethodAndSchedule);
+        }
+
+        return AuthMethod;
+    }
+
     public Map GetEntranceScheduleObjectWithTime(List <EntranceSchedule> exisitngEntranceSchedules) throws Exception {
 
         Map<String,Object> combinedSchedule = new HashMap<>();
@@ -610,6 +657,7 @@ public class ControllerService {
         return combinedSchedule;
     }
 
+    // add to existing schedule and return
     public Map GetScheduleMap(String rawrrule, String starttime, String endtime, Map combinedSchedule) throws Exception {
 
         String startdatetime = rawrrule.split("\n")[0].split(":")[1].split("T")[0];

@@ -3,11 +3,13 @@ package com.vmsac.vmsacserver.controller;
 import com.vmsac.vmsacserver.model.accessgroupschedule.AccessGroupScheduleDto;
 import com.vmsac.vmsacserver.model.accessgroupschedule.CreateAccessGroupScheduleDto;
 import com.vmsac.vmsacserver.service.AccessGroupScheduleService;
+import com.vmsac.vmsacserver.util.UniconUpdater;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,6 +20,7 @@ public class AccessGroupScheduleController {
 
     @Autowired
     AccessGroupScheduleService accessGroupScheduleService;
+
 
     // returns access group schedules
     @GetMapping("/access-group-schedule")
@@ -44,22 +47,29 @@ public class AccessGroupScheduleController {
     @PutMapping("/access-group-schedule/replace")
     public ResponseEntity<?> replaceAccessGroupSchedules(@RequestBody List<CreateAccessGroupScheduleDto> createAccessGroupScheduleDtos,
                                                          @RequestParam("grouptoentranceids") List<Long> groupToEntranceIds) {
+        if (createAccessGroupScheduleDtos.isEmpty()) return ResponseEntity.badRequest().build(); // if empty list, would remove all schedules, leading to empty schedules
+        List<AccessGroupScheduleDto> accessGroupScheduleDtos;
         try {
-            return ResponseEntity.ok(accessGroupScheduleService.replaceSchedulesForEachId(createAccessGroupScheduleDtos, groupToEntranceIds));
+            accessGroupScheduleDtos = accessGroupScheduleService.replaceSchedulesForEachId(createAccessGroupScheduleDtos, groupToEntranceIds);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
+
+        return ResponseEntity.ok(accessGroupScheduleDtos);
     }
 
     // adds the list of access group schedules from each id in group to entrance ids
     @PutMapping("/access-group-schedule/add")
     public ResponseEntity<?> addAccessGroupSchedules(@RequestBody List<CreateAccessGroupScheduleDto> createAccessGroupScheduleDtos,
                                                      @RequestParam("grouptoentranceids") List<Long> groupToEntranceIds) {
+        List<AccessGroupScheduleDto> accessGroupScheduleDtos;
         try {
-            return ResponseEntity.ok(accessGroupScheduleService.addSchedulesForEachId(createAccessGroupScheduleDtos, groupToEntranceIds));
+            accessGroupScheduleDtos = accessGroupScheduleService.addSchedulesForEachId(createAccessGroupScheduleDtos, groupToEntranceIds);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
+
+        return ResponseEntity.ok(accessGroupScheduleDtos);
     }
 
     // deletes schedule with id scheduleId, and deletes accessGroupEntranceNtoN if it is the last schedule
@@ -67,10 +77,11 @@ public class AccessGroupScheduleController {
     public ResponseEntity<?> deleteAccessGroupSchedule(@PathVariable Long scheduleId) {
         try {
             accessGroupScheduleService.deleteScheduleWithId(scheduleId);
-            return ResponseEntity.noContent().build();
         } catch(Exception e) {
             return ResponseEntity.notFound().build();
         }
+
+        return ResponseEntity.noContent().build();
     }
 
 }

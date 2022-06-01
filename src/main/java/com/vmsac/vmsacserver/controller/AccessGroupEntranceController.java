@@ -2,6 +2,7 @@ package com.vmsac.vmsacserver.controller;
 
 import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoNDto;
 import com.vmsac.vmsacserver.service.AccessGroupEntranceService;
+import com.vmsac.vmsacserver.util.UniconUpdater;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +18,7 @@ public class AccessGroupEntranceController {
 
     @Autowired
     private AccessGroupEntranceService accessGroupEntranceService;
+
 
     // return access group entrance objects
     @GetMapping("/access-group-entrance")
@@ -43,6 +45,7 @@ public class AccessGroupEntranceController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
+
         return ResponseEntity.noContent().build();
     }
 
@@ -55,6 +58,7 @@ public class AccessGroupEntranceController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
+
         return ResponseEntity.noContent().build();
     }
 }
