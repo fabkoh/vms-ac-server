@@ -435,10 +435,22 @@ public class ControllerService {
                             eachPerson.put("Name", person.getPersonFirstName() + " " + person.getPersonLastName());
 
                             List<CredentialDto> ListofCred = credentialService.findByPersonId(person.getPersonId());
-                            Map<String, Object> personcredentials = new HashMap();
+                            Map<String, List<Object>> personcredentials = new HashMap();
                             for (CredentialDto credentialDto : ListofCred) {
-                                personcredentials.put(credentialDto.getCredType().getCredTypeName(), credentialDto.getCredUid());
+                                String credType = credentialDto.getCredType().getCredTypeName();
+                                List<Object> temp = new ArrayList<>();
+
+                                if (personcredentials.containsKey(credType)) {
+                                    temp = personcredentials.get(credType);
+                                    temp.add(credentialDto.getCredUid());
+                                }
+                                else{
+
+                                    temp.add(credentialDto.getCredUid());
+                                }
+                                personcredentials.put(credType, temp);
                             }
+
                             eachPerson.put("Credentials", personcredentials);
                             EditedListofPersons.add(eachPerson);
                         }
@@ -461,7 +473,7 @@ public class ControllerService {
 
                     existingentrancedetails.put("AccessGroups", accessGroups);
                     entrance.put("EntranceDetails", existingentrancedetails);
-
+                    entrance.put("isActive", !existingentrance.getIsActive());
 
                     RulesSet.add(entrance);
                 } catch (Exception e) {
@@ -484,7 +496,6 @@ public class ControllerService {
 //        catch(Exception e){
 //            System.out.println(e);
 //        }
-
     }
 
     public void save(Controller existingcontroller) {

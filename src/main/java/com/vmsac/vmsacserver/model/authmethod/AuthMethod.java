@@ -48,6 +48,15 @@ public class AuthMethod {
 //    @OneToOne(mappedBy = "authMethod")
 //    private AuthMethodSchedule authMethodSchedule;
 
+
+    @Override
+    public String toString() {
+        return "AuthMethod{" +
+                "authMethodId=" + authMethodId +
+                ", authMethodDesc='" + authMethodDesc + '\'' +
+                '}';
+    }
+
     public AuthMethodDto toDto(){
         return new AuthMethodDto(authMethodId,authMethodDesc,authMethodCondition);
     }

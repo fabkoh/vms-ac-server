@@ -325,7 +325,7 @@ public class DataLoader implements CommandLineRunner {
 //        );
 
         controllerController.createOrUpdateController(
-                new UniconControllerDto(null,"192.168.1.64",true,"495162159654","5e86805e2bafd54f66cc95c3")
+                new UniconControllerDto(null,"192.168.1.185",true,"495162159654","5e86805e2bafd54f66cc95c3")
         );
     }
 }
