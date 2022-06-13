@@ -30,7 +30,7 @@ public class CredentialService {
 
     public List<CredentialDto> findAll() {
         return credentialRepository
-                .findAll()
+                .findAllByDeletedFalse()
                 .stream()
                 .map(Credential::toDto)
                 .collect(Collectors.toList());
