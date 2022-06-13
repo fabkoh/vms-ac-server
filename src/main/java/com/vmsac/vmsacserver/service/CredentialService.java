@@ -28,9 +28,9 @@ public class CredentialService {
     @Autowired
     private CredTypeRepository credTypeRepository;
 
-    public List<CredentialDto> findAll() {
+    public List<CredentialDto> findAllNotDeleted() {
         return credentialRepository
-                .findAll()
+                .findByDeleted(false)
                 .stream()
                 .map(Credential::toDto)
                 .collect(Collectors.toList());

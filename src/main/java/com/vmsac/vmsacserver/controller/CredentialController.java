@@ -1,11 +1,9 @@
 package com.vmsac.vmsacserver.controller;
 
 import com.vmsac.vmsacserver.model.credential.CreateCredentialDto;
-import com.vmsac.vmsacserver.model.credential.Credential;
 import com.vmsac.vmsacserver.model.credential.CredentialDto;
 import com.vmsac.vmsacserver.model.credential.EditCredentialDto;
 import com.vmsac.vmsacserver.service.CredentialService;
-import com.vmsac.vmsacserver.util.UniconUpdater;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +21,7 @@ public class CredentialController {
 
     @GetMapping("/credentials")
     public List<CredentialDto> findAll(@RequestParam(name="personid", required = false) Long personId) {
-        if (personId == null) return credentialService.findAll();
+        if (personId == null) return credentialService.findAllNotDeleted();
 
         return credentialService.findByPersonId(personId);
     }
