@@ -322,14 +322,14 @@ public class ControllerService {
 
 
             try{
-                jsonbody.put("E1",existingcontroller.getAuthDevices().get(0).getEntrance().getEntranceName());
+                jsonbody.put("E1",existingcontroller.getAuthDevices().get(0).getEntrance().getEntranceId());
             }
             catch(Exception e){
                 jsonbody.put("E1","");
             }
 
             try{
-                jsonbody.put("E2",existingcontroller.getAuthDevices().get(2).getEntrance().getEntranceName());
+                jsonbody.put("E2",existingcontroller.getAuthDevices().get(2).getEntrance().getEntranceId());
             }
             catch(Exception e){
                 jsonbody.put("E2","");
@@ -372,7 +372,7 @@ public class ControllerService {
                     List<EntranceSchedule> exisitngEntranceSchedules = entranceScheduleRepository.findAllByEntranceIdAndDeletedFalse(existingentrance.getEntranceId());
 
                     Map<String, Object> entrance = new HashMap();
-                    entrance.put("Entrance", existingentrance.getEntranceName());
+                    entrance.put("Entrance", existingentrance.getEntranceId());
 
 
                     entrance.put("EntranceSchedule", GetEntranceScheduleObjectWithTime(exisitngEntranceSchedules));
@@ -426,13 +426,13 @@ public class ControllerService {
                         List<Person> ListofPersons = personService.findByAccGrpId((accessGroupEntranceNtoN.getAccessGroup().getAccessGroupId()), false);
                         List<AccessGroupScheduleDto> ListofSchedule = accessGroupScheduleService.findAllByGroupToEntranceIdIn(Collections.singletonList(accessGroupEntranceNtoN.getGroupToEntranceId()));
 
-                        Map<String, Object> oneAccessGroup = new HashMap();
+                        Map<Long, Object> oneAccessGroup = new HashMap();
                         Map<String, Object> personsAndSchedule = new HashMap();
                         List<Map> EditedListofPersons = new ArrayList<Map>(1);
 
                         for (Person person : ListofPersons) {
                             Map<String, Object> eachPerson = new HashMap();
-                            eachPerson.put("Name", person.getPersonFirstName() + " " + person.getPersonLastName());
+                            eachPerson.put("Name", person.getPersonId());
 
                             List<CredentialDto> ListofCred = credentialService.findByPersonId(person.getPersonId());
                             Map<String, List<Object>> personcredentials = new HashMap();
@@ -458,7 +458,7 @@ public class ControllerService {
                         personsAndSchedule.put("Persons", EditedListofPersons);
                         personsAndSchedule.put("Schedule", GetAccessGroupScheduleObjectWithTime(ListofSchedule));
 
-                        oneAccessGroup.put(accessGroupEntranceNtoN.getAccessGroup().getAccessGroupName(), personsAndSchedule);
+                        oneAccessGroup.put(accessGroupEntranceNtoN.getAccessGroup().getAccessGroupId(), personsAndSchedule);
 
                         accessGroups.add(oneAccessGroup);
                     }

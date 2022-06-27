@@ -174,3 +174,23 @@ CREATE TABLE IF NOT EXISTS AuthMethodSchedule(
   PRIMARY KEY (authMethodScheduleId)
 );
 
+CREATE TABLE IF NOT EXISTS EventActionType(
+  eventActionTypeId SERIAL NOT NULL UNIQUE,
+  eventActionTypeName VARCHAR(255) NOT NULL,
+  isTimerEnabled VARCHAR(255) NOT NULL,
+  PRIMARY KEY (eventActionTypeId)
+);
+
+CREATE TABLE IF NOT EXISTS Events(
+  eventId SERIAL NOT NULL UNIQUE,
+  eventTime VARCHAR(255) NOT NULL,
+  direction VARCHAR(255),
+  entranceId INT REFERENCES Entrances (entranceId),
+  personId INT REFERENCES Persons (personId),
+  accessGroupId INT REFERENCES AccessGroups (accessGroupId),
+  eventActionTypeId INT REFERENCES EventActionType (eventActionTypeId),
+  controllerId INT REFERENCES Controller (controllerId),
+  deleted BOOLEAN NOT NULL,
+--  linkedEventsId INT REFERENCES Controller (controllerId),
+  PRIMARY KEY (eventId)
+);

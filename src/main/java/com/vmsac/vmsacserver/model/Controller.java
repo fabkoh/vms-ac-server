@@ -2,6 +2,7 @@ package com.vmsac.vmsacserver.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.vmsac.vmsacserver.model.EventDto.EventControllerDto;
 import com.vmsac.vmsacserver.model.credential.CredentialDto;
 import lombok.*;
 
@@ -57,7 +58,6 @@ public class Controller {
     @Column( name = "settingsconfig")
     private String settingsConfig;
 
-    @JsonIgnore
     @Column( name = "deleted")
     private Boolean deleted;
 
@@ -78,5 +78,8 @@ public class Controller {
                 this.settingsConfig);
     }
 
+    public EventControllerDto toEventDto(){
+        return new EventControllerDto(this.controllerId,this.controllerName,this.deleted,this.controllerSerialNo);
+    }
 
 }

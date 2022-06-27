@@ -3,6 +3,8 @@ package com.vmsac.vmsacserver.model;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.vmsac.vmsacserver.model.EventDto.EventEntranceDto;
+import com.vmsac.vmsacserver.model.EventDto.EventPersonDto;
 import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoN;
 import lombok.*;
 
@@ -61,5 +63,9 @@ public class Entrance {
                 ", used=" + used +
                 ", entranceAuthDevices=" + entranceAuthDevices +
                 '}';
+    }
+
+    public EventEntranceDto toEventDto(){
+        return new EventEntranceDto(this.entranceId,this.entranceName,this.deleted);
     }
 }
