@@ -174,6 +174,7 @@ CREATE TABLE IF NOT EXISTS AuthMethodSchedule(
   PRIMARY KEY (authMethodScheduleId)
 );
 
+
 CREATE TABLE IF NOT EXISTS EventActionType(
   eventActionTypeId SERIAL NOT NULL UNIQUE,
   eventActionTypeName VARCHAR(255) NOT NULL,
@@ -194,3 +195,17 @@ CREATE TABLE IF NOT EXISTS Events(
 --  linkedEventsId INT REFERENCES Controller (controllerId),
   PRIMARY KEY (eventId)
 );
+
+CREATE TABLE IF NOT EXISTS VideoRecorder(
+    recorderId SERIAL NOT NULL UNIQUE,
+    recorderName VARCHAR(255) NOT NULL,
+    recorderSerialNumber VARCHAR(255) NOT NULL,
+    recorderIpAddress VARCHAR(255) NOT NULL,
+    recorderPortNumber INT NOT NULL,
+    recorderUsername VARCHAR(255) NOT NULL,
+    recorderPassword VARCHAR(255) NOT NULL,
+    created TIMESTAMP,
+    deleted BOOLEAN NOT NULL DEFAULT FALSE,
+    PRIMARY KEY (recorderId)
+    );
+
