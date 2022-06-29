@@ -7,6 +7,7 @@ import com.vmsac.vmsacserver.util.UniconUpdater;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -45,6 +46,7 @@ public class AccessGroupScheduleController {
     // deletes all AccessGroupSchedules with id in groupToEntranceIds
     // then adds the list of AccessGroupSchedules from each id in groupToEntranceIds
     @PutMapping("/access-group-schedule/replace")
+    @Transactional
     public ResponseEntity<?> replaceAccessGroupSchedules(@RequestBody List<CreateAccessGroupScheduleDto> createAccessGroupScheduleDtos,
                                                          @RequestParam("grouptoentranceids") List<Long> groupToEntranceIds) {
         if (createAccessGroupScheduleDtos.isEmpty()) return ResponseEntity.badRequest().build(); // if empty list, would remove all schedules, leading to empty schedules

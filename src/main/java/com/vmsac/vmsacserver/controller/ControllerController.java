@@ -432,7 +432,6 @@ public class ControllerController {
         //api call to get status
         try {
             controllerService.shutdownunicon(IPaddress);
-            authDeviceService.deleteRelatedAuthDevices(controllerId);
             controllerService.deleteControllerWithId(controllerId);
 
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -463,7 +462,6 @@ public class ControllerController {
         String IPaddress = existingcontroller.getControllerIP();
         //api call to get status
         try {
-            authDeviceService.deleteRelatedAuthDevices(controllerId);
             controllerService.deleteControllerWithId(controllerId);
 
             if (!controllerService.backToDefault(IPaddress)){

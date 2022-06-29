@@ -67,9 +67,11 @@ public class AuthMethodScheduleController {
 
     @DeleteMapping("/authentication-schedule/{authMethodScheduleId}")
     public ResponseEntity<?> deleteSchedule(@PathVariable("authMethodScheduleId")Long authMethodScheduleId){
-
-        authMethodScheduleService.deleteSched(authMethodScheduleId);
-
-        return new ResponseEntity<>(HttpStatus.OK);
+        try {
+            authMethodScheduleService.deleteSched(authMethodScheduleId);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 }

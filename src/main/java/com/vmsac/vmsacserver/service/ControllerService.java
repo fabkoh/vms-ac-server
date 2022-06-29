@@ -54,6 +54,9 @@ public class ControllerService {
     private AuthDeviceRepository authDeviceRepository;
 
     @Autowired
+    private AuthDeviceService authDeviceService;
+
+    @Autowired
     private AuthMethodScheduleService authMethodScheduleService;
 
     @Autowired
@@ -163,20 +166,26 @@ public class ControllerService {
 
     }
 
+    @Transactional
     public void deleteControllerWithId(Long controllerId) throws Exception {
         Controller toDeleted = controllerRepository.findByControllerIdEqualsAndDeletedFalse(controllerId)
                 .orElseThrow(() -> new RuntimeException("Controller does not exist"));
-
         toDeleted.setControllerName(toDeleted.getControllerSerialNo());
         toDeleted.setDeleted(true);
         toDeleted.setPendingIP(null);
         toDeleted.setAuthDevices(Collections.emptyList());
 
         //set authMethodSchedules deleted to true
-        List<AuthMethodSchedule> toDeleteSched = authMethodScheduleRepository.findByAuthDevice_Controller_ControllerId(controllerId);
-        toDeleteSched.forEach(authMethodSchedule -> authMethodSchedule.setDeleted(true));
-        authMethodScheduleRepository.saveAll(toDeleteSched);
-
+        List<AuthMethodSchedule> toDeleteSchedule = authMethodScheduleRepository.findByAuthDevice_Controller_ControllerId(controllerId);
+        toDeleteSchedule.forEach(authMethodSchedule -> {
+            try {
+                authMethodScheduleService.deleteSched(authMethodSchedule.getAuthMethodScheduleId());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+        authMethodScheduleRepository.saveAll(toDeleteSchedule);
+        authDeviceService.deleteRelatedAuthDevices(toDeleted.getControllerId());
         controllerRepository.save(toDeleted);
     }
 

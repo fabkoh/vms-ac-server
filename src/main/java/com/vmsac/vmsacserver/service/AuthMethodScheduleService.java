@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalTime;
@@ -40,16 +41,16 @@ public class AuthMethodScheduleService {
                 .collect(Collectors.toList());
     }
 
-    public ResponseEntity<?> deleteSched(Long authMethodSchedId){
+    public void deleteSched(Long authMethodSchedId) throws Exception {
         if(authMethodScheduleRepository.findByAuthMethodScheduleIdAndDeletedFalse(authMethodSchedId).isEmpty()){
-            return new ResponseEntity<>("authMethodSchedule not found",HttpStatus.NOT_FOUND);
+            throw new RuntimeException("Controller does not exist");
         }
         else{
             AuthMethodSchedule toDelete = authMethodScheduleRepository.findByAuthMethodScheduleIdAndDeletedFalse(authMethodSchedId)
                     .get();
+            toDelete.setAuthMethod(null);
             toDelete.setDeleted(true);
             authMethodScheduleRepository.save(toDelete);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
     }
     public ResponseEntity<?>replace(List<CreateAuthMethodScheduleDto> CreateList,
