@@ -1,16 +1,14 @@
 package com.vmsac.vmsacserver.util;
 
-import com.vmsac.vmsacserver.model.AccessGroup;
-import com.vmsac.vmsacserver.model.EventActionType;
-import com.vmsac.vmsacserver.repository.EventActionTypeRepository;
+import com.vmsac.vmsacserver.repository.EntranceEventTypeRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 @Component
 public class EventActionTypeLoader implements CommandLineRunner {
-    private final EventActionTypeRepository eventActionTypeRepository;
+    private final EntranceEventTypeRepository eventActionTypeRepository;
 
-    public EventActionTypeLoader(EventActionTypeRepository eventActionTypeRepository) {
+    public EventActionTypeLoader(EntranceEventTypeRepository eventActionTypeRepository) {
         this.eventActionTypeRepository = eventActionTypeRepository;
     }
 
@@ -20,89 +18,77 @@ public class EventActionTypeLoader implements CommandLineRunner {
     }
 
     private void loadData() {
-        EventActionType authenticated_scan = eventActionTypeRepository.save(
-                EventActionType.builder()
-                        .eventActionTypeName("Authenticated Scans")
-                        .isTimerEnabled(false)
+        com.vmsac.vmsacserver.model.EntranceEventType authenticated_scan = eventActionTypeRepository.save(
+                com.vmsac.vmsacserver.model.EntranceEventType.builder()
+                        .actionTypeName("Authenticated Scans")
                         .build()
         );
 
-        EventActionType masterpassword_used = eventActionTypeRepository.save(
-                EventActionType.builder()
-                        .eventActionTypeName("Masterpassword used")
-                        .isTimerEnabled(false)
+        com.vmsac.vmsacserver.model.EntranceEventType masterpassword_used = eventActionTypeRepository.save(
+                com.vmsac.vmsacserver.model.EntranceEventType.builder()
+                        .actionTypeName("Masterpassword used")
                         .build()
         );
 
-        EventActionType unauthenticated_scan = eventActionTypeRepository.save(
-                EventActionType.builder()
-                        .eventActionTypeName("UnAuthenticated Scans")
-                        .isTimerEnabled(false)
+        com.vmsac.vmsacserver.model.EntranceEventType unauthenticated_scan = eventActionTypeRepository.save(
+                com.vmsac.vmsacserver.model.EntranceEventType.builder()
+                        .actionTypeName("UnAuthenticated Scans")
                         .build()
         );
 
-        EventActionType door_opened = eventActionTypeRepository.save(
-                EventActionType.builder()
-                        .eventActionTypeName("Door Opened")
-                        .isTimerEnabled(false)
+        com.vmsac.vmsacserver.model.EntranceEventType door_opened = eventActionTypeRepository.save(
+                com.vmsac.vmsacserver.model.EntranceEventType.builder()
+                        .actionTypeName("Door Opened")
                         .build()
         );
 
-        EventActionType door_closed = eventActionTypeRepository.save(
-                EventActionType.builder()
-                        .eventActionTypeName("Door Closed")
-                        .isTimerEnabled(false)
+        com.vmsac.vmsacserver.model.EntranceEventType door_closed = eventActionTypeRepository.save(
+                com.vmsac.vmsacserver.model.EntranceEventType.builder()
+                        .actionTypeName("Door Closed")
                         .build()
         );
 
-        EventActionType door_opened_warning = eventActionTypeRepository.save(
-                EventActionType.builder()
-                        .eventActionTypeName("Warning : Door Opened without authorisation")
-                        .isTimerEnabled(false)
+        com.vmsac.vmsacserver.model.EntranceEventType door_opened_warning = eventActionTypeRepository.save(
+                com.vmsac.vmsacserver.model.EntranceEventType.builder()
+                        .actionTypeName("Warning : Door Opened without authorisation")
                         .build()
         );
 
-        EventActionType buzzer_start = eventActionTypeRepository.save(
-                EventActionType.builder()
-                        .eventActionTypeName("Buzzer Started buzzing")
-                        .isTimerEnabled(false)
+        com.vmsac.vmsacserver.model.EntranceEventType buzzer_start = eventActionTypeRepository.save(
+                com.vmsac.vmsacserver.model.EntranceEventType.builder()
+                        .actionTypeName("Buzzer Started buzzing")
                         .build()
         );
 
-        EventActionType buzzer_end = eventActionTypeRepository.save(
-                EventActionType.builder()
-                        .eventActionTypeName("Buzzer Stopped buzzing")
-                        .isTimerEnabled(false)
+        com.vmsac.vmsacserver.model.EntranceEventType buzzer_end = eventActionTypeRepository.save(
+                com.vmsac.vmsacserver.model.EntranceEventType.builder()
+                        .actionTypeName("Buzzer Stopped buzzing")
                         .build()
         );
 
 
-        EventActionType push_button_pressed = eventActionTypeRepository.save(
-                EventActionType.builder()
-                        .eventActionTypeName("Push Button pressed")
-                        .isTimerEnabled(false)
+        com.vmsac.vmsacserver.model.EntranceEventType push_button_pressed = eventActionTypeRepository.save(
+                com.vmsac.vmsacserver.model.EntranceEventType.builder()
+                        .actionTypeName("Push Button pressed")
                         .build()
         );
 
 
-        EventActionType GEN_IN_1 = eventActionTypeRepository.save(
-                EventActionType.builder()
-                        .eventActionTypeName("GEN_IN_1 triggered")
-                        .isTimerEnabled(false)
+        com.vmsac.vmsacserver.model.EntranceEventType GEN_IN_1 = eventActionTypeRepository.save(
+                com.vmsac.vmsacserver.model.EntranceEventType.builder()
+                        .actionTypeName("GEN_IN_1 triggered")
                         .build()
         );
 
-        EventActionType GEN_IN_2 = eventActionTypeRepository.save(
-                EventActionType.builder()
-                        .eventActionTypeName("GEN_IN_2 triggered")
-                        .isTimerEnabled(false)
+        com.vmsac.vmsacserver.model.EntranceEventType GEN_IN_2 = eventActionTypeRepository.save(
+                com.vmsac.vmsacserver.model.EntranceEventType.builder()
+                        .actionTypeName("GEN_IN_2 triggered")
                         .build()
         );
 
-        EventActionType GEN_IN_3 = eventActionTypeRepository.save(
-                EventActionType.builder()
-                        .eventActionTypeName("GEN_IN_3 triggered")
-                        .isTimerEnabled(false)
+        com.vmsac.vmsacserver.model.EntranceEventType GEN_IN_3 = eventActionTypeRepository.save(
+                com.vmsac.vmsacserver.model.EntranceEventType.builder()
+                        .actionTypeName("GEN_IN_3 triggered")
                         .build()
         );
 

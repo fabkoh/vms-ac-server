@@ -10,6 +10,8 @@ import java.util.Set;
 
 public interface EntranceRepository extends JpaRepository<Entrance, Long> {
 
+    Boolean existsByEntranceId(Long entranceId);
+
     List<Entrance> findByDeleted(Boolean deleted);
     Optional<Entrance> findByEntranceNameAndDeletedFalse(String entranceName);
 

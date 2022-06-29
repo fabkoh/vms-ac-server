@@ -1,23 +1,22 @@
 package com.vmsac.vmsacserver.service;
 
-import com.fasterxml.jackson.databind.ser.FilterProvider;
-import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
-import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.vmsac.vmsacserver.model.*;
-import com.vmsac.vmsacserver.repository.EventActionTypeRepository;
-import com.vmsac.vmsacserver.repository.EventRepository;
+import com.vmsac.vmsacserver.repository.AuthMethodRepository;
+import com.vmsac.vmsacserver.repository.EntranceEventRepository;
+import com.vmsac.vmsacserver.repository.EntranceEventTypeRepository;
+import com.vmsac.vmsacserver.util.DateTimeParser;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @Service
-public class EventService {
+public class EntranceEventService {
 
     @Autowired
-    private EventRepository eventRepository;
+    private EntranceEventRepository entranceEventRepository;
 
     @Autowired
     private PersonService personService;
@@ -32,78 +31,70 @@ public class EventService {
     private ControllerService controllerService;
 
     @Autowired
-    private EventActionTypeRepository eventActionTypeRepository;
+    private EntranceEventTypeRepository entranceEventTypeRepository;
 
-    public Boolean createEvents(List<Event> newEvents){
+    @Autowired
+    private AuthMethodRepository authMethodRepository;
+
+    @Autowired
+    private DateTimeParser dateTimeParser;
+
+    public Boolean createEvents(List<EntranceEventDto> newEventDtos){
         // iterate over the whole list
         // check if it exists in db
         // check if linked columns are valid
         // record and save
         Boolean success = true;
-        System.out.println(newEvents);
 
         try{
-        for (Event singleEvent : newEvents){
+        for (EntranceEventDto e : newEventDtos){
 
-            if (eventRepository.existsByEventTimeEqualsAndController_ControllerSerialNoEqualsAndEventActionType_EventActionTypeId(singleEvent.getEventTime(), singleEvent.getController().getControllerSerialNo(),singleEvent.getEventActionType().getEventActionTypeId())){
+            LocalDateTime eventTime = dateTimeParser.toLocalDateTime(e.getEventTime());
+
+            if (entranceEventRepository.existsByEventTimeEqualsAndEntrance_EntranceIdEqualsAndEntranceEventType_ActionTypeId
+                    (eventTime, e.getEntranceId(), e.getEventActionTypeId())){
                 continue;
             }
 
-            Event toSave = new Event();
+            EntranceEvent toSave = new EntranceEvent();
             System.out.println("1");
-            toSave.setDirection(singleEvent.getDirection());
-            toSave.setEventTime(singleEvent.getEventTime());
+            toSave.setDirection(e.getDirection());
+            toSave.setEventTime(eventTime);
             toSave.setDeleted(false);
 
-            System.out.println(singleEvent.getPerson());
-            if (singleEvent.getPerson() != null){
-            Optional<Person> optionalPerson = personService.findByIdInUse(singleEvent.getPerson().getPersonId());
+            System.out.println("2");
+            Optional<Person> optionalPerson = personService.findByIdInUse(e.getPersonId());
             if (optionalPerson.isEmpty()){
                 toSave.setPerson(null);
             }
             else{
                 toSave.setPerson(optionalPerson.get());
-            }}
-            else{
-                toSave.setPerson(null);
             }
 
             System.out.println("3");
-            if (singleEvent.getEntrance() != null){
-            Optional<Entrance> optionalEntrance = entranceService.findById(singleEvent.getEntrance().getEntranceId());
+            Optional<Entrance> optionalEntrance = entranceService.findById(e.getEntranceId());
             if (optionalEntrance.isEmpty()){
                 toSave.setEntrance(null);
             }
             else{
                 toSave.setEntrance(optionalEntrance.get());
-            }}
-            else{
-                toSave.setEntrance(null);
             }
+
             System.out.println("4");
-            if (singleEvent.getAccessGroup() != null){
-            Optional<AccessGroup> optionalAccessGroup = accessGroupService.findById(singleEvent.getAccessGroup().getAccessGroupId());
+            Optional<AccessGroup> optionalAccessGroup = accessGroupService.findById(e.getAccessGroupId());
             if (optionalAccessGroup.isEmpty()){
                 toSave.setAccessGroup(null);
             }
             else{
                 toSave.setAccessGroup(optionalAccessGroup.get());
-            }}
-            else{
-                toSave.setAccessGroup(null);
             }
 
-            toSave.setEventActionType(eventActionTypeRepository.getById(singleEvent.getEventActionType().getEventActionTypeId()));
+            toSave.setEntranceEventType(entranceEventTypeRepository.getById(e.getEventActionTypeId()));
 
-            Optional<Controller> optionalController = controllerService.findBySerialNo(singleEvent.getController().getControllerSerialNo());
-            if (optionalController.isEmpty()){
-                toSave.setController(null);
-            }
-            else{
-                toSave.setController(optionalController.get());
-            }
+            toSave.setAuthMethod(authMethodRepository.getById(e.getAuthMethodId()));
+
             System.out.println("5");
-            eventRepository.save(toSave);
+            entranceEventRepository.save(toSave);
 
         }}
         catch (Exception e){
@@ -114,8 +105,8 @@ public class EventService {
         return success;
     }
 
-    public List<Event> getAllEvents(){
-        List<Event> allEvents = eventRepository.findByDeletedIsFalseOrderByEventTimeDesc();
+    public List<EntranceEvent> getAllEvents(){
+        List<EntranceEvent> allEvents = entranceEventRepository.findByDeletedIsFalseOrderByEventTimeDesc();
         return allEvents;
 
     }
