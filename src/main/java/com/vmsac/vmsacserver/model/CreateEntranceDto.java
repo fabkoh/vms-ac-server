@@ -18,9 +18,12 @@ public class CreateEntranceDto {
 
     private Boolean isActive;
 
+    private String thirdPartyOption;
+
     private AccessGroupEntranceNtoN accessGroupsEntrance;
 
     public Entrance toEntrance(Boolean deleted){
-        return new Entrance(null,entranceName,entranceDesc,true, deleted,false,null);
+        return new Entrance(null, entranceName, entranceDesc, true, deleted,
+                false, thirdPartyOption,null);
     }
 }

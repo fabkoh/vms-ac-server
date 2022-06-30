@@ -39,17 +39,20 @@ public class Entrance {
     @Column(name = "used")
     private Boolean used;
 
+    @Column(name = "thirdpartyoption")
+    private String thirdPartyOption;
 
     @JsonIgnore
     @OneToMany(mappedBy = "entrance", fetch = FetchType.LAZY)
     private List<AuthDevice> entranceAuthDevices;
 
     public EntranceDto toDto(){
-        return new EntranceDto(this.entranceId, this.entranceName,
-                this.entranceDesc, this.isActive, this.used, null,this.entranceAuthDevices);
+        return new EntranceDto(this.entranceId, this.entranceName, this.entranceDesc,
+                this.isActive, this.used, thirdPartyOption, null,this.entranceAuthDevices);
     }
     public EntranceOnlyDto toEntranceOnlyDto(){
-        return new EntranceOnlyDto(this.entranceId,this.entranceName,this.entranceDesc, this.isActive,this.used,this.entranceAuthDevices);
+        return new EntranceOnlyDto(this.entranceId, this.entranceName, this.entranceDesc, this.isActive,
+                this.used, this.thirdPartyOption, this.entranceAuthDevices);
     }
 
     @Override

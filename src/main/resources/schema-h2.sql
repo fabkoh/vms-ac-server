@@ -83,6 +83,7 @@ CREATE TABLE IF NOT EXISTS Entrances(
   isActive BOOLEAN NOT NULL,
   deleted BOOLEAN NOT NULL,
   used BOOLEAN NOT NULL,
+  thirdPartyOption VARCHAR(255),
   PRIMARY KEY (entranceId)
 );
 

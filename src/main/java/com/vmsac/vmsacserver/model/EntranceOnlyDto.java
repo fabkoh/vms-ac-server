@@ -27,9 +27,12 @@ public class EntranceOnlyDto {
 
     private Boolean used;
 
+    private String thirdPartyOption;
+
     private List<AuthDevice> entranceAuthDevices;
 
     public Entrance toEntrance(Boolean deleted){
-        return new Entrance(entranceId,entranceName,entranceDesc, isActive, deleted,used,entranceAuthDevices);
+        return new Entrance(entranceId, entranceName, entranceDesc, isActive, deleted,
+                used, thirdPartyOption, entranceAuthDevices);
     }
 }

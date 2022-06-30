@@ -24,15 +24,20 @@ public class EntranceDto {
 
     private String entranceDesc;
 
+    @NotNull
     private Boolean isActive;
 
+    @NotNull
     private Boolean used;
+
+    private String thirdPartyOption;
 
     private List<AccessGroup> accessGroups;
 
     private List<AuthDevice> entranceAuthDevices;
 
     public Entrance toEntrance(Boolean deleted){
-        return new Entrance(entranceId,entranceName,entranceDesc,isActive,deleted,used,entranceAuthDevices);
+        return new Entrance(entranceId, entranceName, entranceDesc, isActive, deleted,
+                used, thirdPartyOption, entranceAuthDevices);
     }
 }
