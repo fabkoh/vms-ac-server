@@ -146,7 +146,7 @@ CREATE TABLE IF NOT EXISTS AuthMethod(
 CREATE TABLE IF NOT EXISTS AuthMethodCredentialTypeNtoN(
   authMethodCredentialsNtoNId SERIAL NOT NULL UNIQUE,
   authMethodId INT REFERENCES AuthMethod (authMethodId),
-  credtypeid INT REFERENCES CredentialType (credTypeId),
+  credTypeId INT REFERENCES CredentialType (credTypeId),
   deleted BOOLEAN NOT NULL,
   PRIMARY KEY (authMethodCredentialsNtoNId)
 );
@@ -177,24 +177,74 @@ CREATE TABLE IF NOT EXISTS AuthMethodSchedule(
 
 
 CREATE TABLE IF NOT EXISTS EntranceEventType(
-  actionTypeId SERIAL NOT NULL UNIQUE,
-  actionTypeName VARCHAR(255) NOT NULL,
-  endTypeConfig VARCHAR(MAX),
-  PRIMARY KEY (actionTypeId)
+    actionTypeId SERIAL NOT NULL UNIQUE,
+    actionTypeName VARCHAR(255) NOT NULL,
+    endTypeConfig JSON,
+    PRIMARY KEY (actionTypeId)
 );
 
 CREATE TABLE IF NOT EXISTS EntranceEvent(
-  eventId SERIAL NOT NULL UNIQUE,
-  eventTime TIMESTAMP NOT NULL,
-  direction VARCHAR(255),
-  entranceId INT REFERENCES Entrances (entranceId),
-  personId INT REFERENCES Persons (personId),
-  accessGroupId INT REFERENCES AccessGroups (accessGroupId),
-  actionTypeId INT REFERENCES EntranceEventType (actionTypeId),
-  authMethodId INT REFERENCES AuthMethod(authMethodId),
-  deleted BOOLEAN NOT NULL,
+    eventId SERIAL NOT NULL UNIQUE,
+    eventTime TIMESTAMP NOT NULL,
+    direction VARCHAR(255),
+    entranceId INT REFERENCES Entrances (entranceId),
+    personId INT REFERENCES Persons (personId),
+    accessGroupId INT REFERENCES AccessGroups (accessGroupId),
+    actionTypeId INT REFERENCES EntranceEventType (actionTypeId),
+    authMethodId INT REFERENCES AuthMethod(authMethodId),
+    deleted BOOLEAN NOT NULL,
 --  linkedEventsId INT REFERENCES Controller (controllerId),
-  PRIMARY KEY (eventId)
+    PRIMARY KEY (eventId)
+);
+
+CREATE TABLE IF NOT EXISTS EventActionInputType(
+   eventActionInputId SERIAL NOT NULL UNIQUE,
+   eventActionInputTypeName VARCHAR(255) NOT NULL,
+   timerEnabled BOOLEAN NOT NULL,
+   eventActionInputTypeConfig JSON,
+   PRIMARY KEY (eventActionInputId)
+);
+
+CREATE TABLE IF NOT EXISTS EventActionOutputType(
+    eventActionOutputId SERIAL NOT NULL UNIQUE,
+    eventActionOutputTypeName VARCHAR(255) NOT NULL,
+    timerEnabled BOOLEAN NOT NULL,
+    eventActionOutputTypeConfig JSON,
+    PRIMARY KEY (eventActionOutputId)
+);
+
+CREATE TABLE IF NOT EXISTS InputEvent(
+    inputEventId SERIAL NOT NULL UNIQUE ,
+    timerDuration INT,
+    eventsManagementId INT NOT NULL ,
+    eventActionInputId INT REFERENCES EventActionInputType(eventActionInputId)
+);
+
+CREATE TABLE IF NOT EXISTS OutputEvent(
+    outputEventId SERIAL NOT NULL UNIQUE ,
+    timerDuration INT,
+    eventsManagementId INT NOT NULL,
+    eventActionOutputId INT REFERENCES EventActionOutputType(eventActionOutputId)
+);
+
+CREATE TABLE IF NOT EXISTS TriggerSchedules(
+   triggerScheduleId SERIAL NOT NULL UNIQUE ,
+   triggerName VARCHAR(255) NOT NULL ,
+   rrule VARCHAR(255) NOT NULL ,
+   timeStart TIME NOT NULL ,
+   tineEnd TIME NOT NULL ,
+   deleted BOOLEAN NOT NULL ,
+   -- eventsManagementId INT REFERENCES
+);
+
+CREATE TABLE IF NOT EXISTS EventsManagement(
+   eventsManagementId SERIAL NOT NULL UNIQUE ,
+   triggerName VARCHAR(255) NOT NULL ,
+   inputEventsId LONG ARRAY ,
+   outputEventsId LONG ARRAY  ,
+   triggerScheduleId LONG REFERENCES TriggerSchedules(triggerScheduleId),
+   entranceId LONG REFERENCES Entrances(entranceId),
+   controllerId LONG REFERENCES Controller(controllerId)
 );
 
 CREATE TABLE IF NOT EXISTS VideoRecorder(
@@ -208,5 +258,5 @@ CREATE TABLE IF NOT EXISTS VideoRecorder(
     created TIMESTAMP,
     deleted BOOLEAN NOT NULL DEFAULT FALSE,
     PRIMARY KEY (recorderId)
-    );
+);
 

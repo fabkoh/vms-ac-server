@@ -1,6 +1,7 @@
 package com.vmsac.vmsacserver.service;
 
 import com.vmsac.vmsacserver.model.*;
+import com.vmsac.vmsacserver.model.authmethod.AuthMethod;
 import com.vmsac.vmsacserver.repository.AuthMethodRepository;
 import com.vmsac.vmsacserver.repository.EntranceEventRepository;
 import com.vmsac.vmsacserver.repository.EntranceEventTypeRepository;
@@ -57,12 +58,13 @@ public class EntranceEventService {
             }
 
             EntranceEvent toSave = new EntranceEvent();
-            System.out.println("1");
+
             toSave.setDirection(e.getDirection());
+
             toSave.setEventTime(eventTime);
+
             toSave.setDeleted(false);
 
-            System.out.println("2");
             Optional<Person> optionalPerson = personService.findByIdInUse(e.getPersonId());
             if (optionalPerson.isEmpty()){
                 toSave.setPerson(null);
@@ -71,16 +73,15 @@ public class EntranceEventService {
                 toSave.setPerson(optionalPerson.get());
             }
 
-            System.out.println("3");
             Optional<Entrance> optionalEntrance = entranceService.findById(e.getEntranceId());
             if (optionalEntrance.isEmpty()){
-                toSave.setEntrance(null);
+                // omit entrance events that does not come with a valid entranceId
+                continue;
             }
             else{
                 toSave.setEntrance(optionalEntrance.get());
             }
 
-            System.out.println("4");
             Optional<AccessGroup> optionalAccessGroup = accessGroupService.findById(e.getAccessGroupId());
             if (optionalAccessGroup.isEmpty()){
                 toSave.setAccessGroup(null);
@@ -89,19 +90,25 @@ public class EntranceEventService {
                 toSave.setAccessGroup(optionalAccessGroup.get());
             }
 
-            toSave.setEntranceEventType(entranceEventTypeRepository.getById(e.getEventActionTypeId()));
+            Optional<EntranceEventType> type = entranceEventTypeRepository.findById(e.getEventActionTypeId());
+            if (type.isEmpty())
+                // omit entrance events that does not come with a valid actionTypeId
+                continue;
+            else toSave.setEntranceEventType(type.get());
 
-            toSave.setAuthMethod(authMethodRepository.getById(e.getAuthMethodId()));
+            Optional<AuthMethod> method = authMethodRepository.findById(e.getAuthMethodId());
+            if (method.isEmpty())
+                toSave.setAuthMethod(null);
+            else toSave.setAuthMethod(method.get());
 
-            System.out.println("5");
             entranceEventRepository.save(toSave);
 
-        }}
+        }
+        }
         catch (Exception e){
             System.out.println(e);
             success = false;
         }
-        System.out.println("6");
         return success;
     }
 

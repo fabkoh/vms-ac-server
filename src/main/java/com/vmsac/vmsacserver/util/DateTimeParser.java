@@ -12,8 +12,8 @@ import java.util.List;
 @Component
 public class DateTimeParser {
 
-    String[] dateTimeFormats = {"dd-MM-yyyy HH:mm:ss", "MM-dd-yyyy HH:mm:ss",
-            "dd-MMM-yyyy HH:mm:ss"};
+    String[] dateTimeFormats = {"dd-MM-yyyy HH:mm:ss", "yyyy-MM-dd HH:mm:ss",
+            "MM-dd-yyyy HH:mm:ss", "dd-MMM-yyyy HH:mm:ss"};
 
     public LocalDateTime toLocalDateTime(String datetime) {
         for (String dtf : dateTimeFormats) {

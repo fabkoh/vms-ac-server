@@ -133,19 +133,6 @@ CREATE TABLE IF NOT EXISTS Controller(
   PRIMARY KEY (controllerId)
 );
 
-CREATE TABLE IF NOT EXISTS AuthDevice(
-  authDeviceId SERIAL NOT NULL UNIQUE,
-  authDeviceName VARCHAR(255) NOT NULL,
-  authDeviceDirection VARCHAR(255) NOT NULL,
-  lastOnline TIMESTAMP,
-  masterpin Boolean NOT NULL,
-  defaultAuthMethod VARCHAR(255),
-  controllerId INT REFERENCES Controller (controllerId),
-  entranceId INT REFERENCES Entrances (entranceId),
---  authMethodId INT REFERENCES Entrances (entranceId),
-  PRIMARY KEY (authDeviceId)
-);
-
 CREATE TABLE IF NOT EXISTS AuthMethod(
   authMethodId SERIAL NOT NULL UNIQUE,
   authMethodDesc VARCHAR(255) NOT NULL,
@@ -154,10 +141,94 @@ CREATE TABLE IF NOT EXISTS AuthMethod(
   PRIMARY KEY (authMethodId)
 );
 
+CREATE TABLE IF NOT EXISTS AuthDevice(
+  authDeviceId SERIAL NOT NULL UNIQUE,
+  authDeviceName VARCHAR(255) NOT NULL,
+  authDeviceDirection VARCHAR(255) NOT NULL,
+  lastOnline TIMESTAMP,
+  masterpin Boolean NOT NULL,
+  defaultAuthMethod INT REFERENCES AuthMethod (authMethodId),
+  controllerId INT REFERENCES Controller (controllerId),
+  entranceId INT REFERENCES Entrances (entranceId),
+--  authMethodId INT REFERENCES Entrances (entranceId),
+  PRIMARY KEY (authDeviceId)
+);
+
 CREATE TABLE IF NOT EXISTS AuthMethodCredentialTypeNtoN(
   authMethodCredentialsNtoNId SERIAL NOT NULL UNIQUE,
   authMethodId INT REFERENCES AuthMethod (authMethodId) NOT NULL,
-  credentialTypeId INT REFERENCES CredentialType (credTypeId) NOT NULL,
+  credTypeId INT REFERENCES CredentialType (credTypeId) NOT NULL,
   deleted BOOLEAN NOT NULL,
   PRIMARY KEY (authMethodCredentialsNtoNId)
+);
+
+CREATE TABLE IF NOT EXISTS EntranceEventType(
+    actionTypeId SERIAL NOT NULL UNIQUE,
+    actionTypeName VARCHAR(255) NOT NULL,
+    endTypeConfig JSON,
+    PRIMARY KEY (actionTypeId)
+);
+
+CREATE TABLE IF NOT EXISTS EntranceEvent(
+    eventId SERIAL NOT NULL UNIQUE,
+    eventTime TIMESTAMP NOT NULL,
+    direction VARCHAR(255),
+    entranceId INT REFERENCES Entrances (entranceId),
+    personId INT REFERENCES Persons (personId),
+    accessGroupId INT REFERENCES AccessGroups (accessGroupId),
+    actionTypeId INT REFERENCES EntranceEventType (actionTypeId),
+    authMethodId INT REFERENCES AuthMethod(authMethodId),
+    deleted BOOLEAN NOT NULL,
+    --  linkedEventsId INT REFERENCES Controller (controllerId),
+    PRIMARY KEY (eventId)
+);
+
+CREATE TABLE IF NOT EXISTS EventActionInputType(
+    eventActionInputId SERIAL NOT NULL UNIQUE,
+    eventActionInputTypeName VARCHAR(255) NOT NULL,
+    timerEnabled BOOLEAN NOT NULL,
+    eventActionInputTypeConfig JSON,
+    PRIMARY KEY (eventActionInputId)
+);
+
+CREATE TABLE IF NOT EXISTS EventActionOutputType(
+   eventActionOutputId SERIAL NOT NULL UNIQUE,
+   eventActionOutputTypeName VARCHAR(255) NOT NULL,
+   timerEnabled BOOLEAN NOT NULL,
+   eventActionOutputTypeConfig JSON,
+   PRIMARY KEY (eventActionOutputId)
+);
+
+CREATE TABLE IF NOT EXISTS InputEvent(
+    inputEventId SERIAL NOT NULL UNIQUE ,
+    timerDuration INT,
+    eventsManagementId INT NOT NULL ,
+    eventActionInputId INT REFERENCES EventActionInputType(eventActionInputId)
+);
+
+CREATE TABLE IF NOT EXISTS OutputEvent(
+    outputEventId SERIAL NOT NULL UNIQUE ,
+    timerDuration INT,
+    eventsManagementId INT NOT NULL,
+    eventActionOutputId INT REFERENCES EventActionOutputType(eventActionOutputId)
+);
+
+CREATE TABLE IF NOT EXISTS TriggerSchedules(
+    triggerScheduleId SERIAL NOT NULL UNIQUE ,
+    triggerName VARCHAR(255) NOT NULL ,
+    rrule VARCHAR(255) NOT NULL ,
+    timeStart TIME NOT NULL ,
+    tineEnd TIME NOT NULL ,
+    deleted BOOLEAN NOT NULL ,
+    eventsManagementId INT
+);
+
+CREATE TABLE IF NOT EXISTS EventsManagement(
+    eventsManagementId SERIAL NOT NULL UNIQUE ,
+    triggerName VARCHAR(255) NOT NULL ,
+    inputEventsId INT[] ,
+    outputEventsId INT[]  ,
+    triggerScheduleId INT REFERENCES TriggerSchedules(triggerScheduleId),
+    entranceId INT REFERENCES Entrances(entranceId),
+    controllerId INT REFERENCES Controller(controllerId)
 );
