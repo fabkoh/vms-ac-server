@@ -217,14 +217,16 @@ CREATE TABLE IF NOT EXISTS InputEvent(
     inputEventId SERIAL NOT NULL UNIQUE ,
     timerDuration INT,
     eventsManagementId INT NOT NULL ,
-    eventActionInputId INT REFERENCES EventActionInputType(eventActionInputId)
+    eventActionInputId INT REFERENCES EventActionInputType(eventActionInputId),
+    PRIMARY KEY (inputEventId)
 );
 
 CREATE TABLE IF NOT EXISTS OutputEvent(
     outputEventId SERIAL NOT NULL UNIQUE ,
     timerDuration INT,
     eventsManagementId INT NOT NULL,
-    eventActionOutputId INT REFERENCES EventActionOutputType(eventActionOutputId)
+    eventActionOutputId INT REFERENCES EventActionOutputType(eventActionOutputId),
+    PRIMARY KEY (outputEventId)
 );
 
 CREATE TABLE IF NOT EXISTS TriggerSchedules(
@@ -232,9 +234,9 @@ CREATE TABLE IF NOT EXISTS TriggerSchedules(
    triggerName VARCHAR(255) NOT NULL ,
    rrule VARCHAR(255) NOT NULL ,
    timeStart TIME NOT NULL ,
-   tineEnd TIME NOT NULL ,
+   timeEnd TIME NOT NULL ,
    deleted BOOLEAN NOT NULL ,
-   -- eventsManagementId INT REFERENCES
+   PRIMARY KEY (triggerScheduleId)
 );
 
 CREATE TABLE IF NOT EXISTS EventsManagement(
@@ -244,7 +246,8 @@ CREATE TABLE IF NOT EXISTS EventsManagement(
    outputEventsId LONG ARRAY  ,
    triggerScheduleId LONG REFERENCES TriggerSchedules(triggerScheduleId),
    entranceId LONG REFERENCES Entrances(entranceId),
-   controllerId LONG REFERENCES Controller(controllerId)
+   controllerId LONG REFERENCES Controller(controllerId),
+   PRIMARY KEY (eventsManagementId)
 );
 
 CREATE TABLE IF NOT EXISTS VideoRecorder(
