@@ -242,11 +242,11 @@ CREATE TABLE IF NOT EXISTS TriggerSchedules(
 CREATE TABLE IF NOT EXISTS EventsManagement(
    eventsManagementId SERIAL NOT NULL UNIQUE ,
    triggerName VARCHAR(255) NOT NULL ,
-   inputEventsId LONG ARRAY ,
-   outputEventsId LONG ARRAY  ,
-   triggerScheduleId LONG REFERENCES TriggerSchedules(triggerScheduleId),
-   entranceId LONG REFERENCES Entrances(entranceId),
-   controllerId LONG REFERENCES Controller(controllerId),
+   inputEventsId ARRAY ,
+   outputEventsId ARRAY ,
+   triggerScheduleId INT REFERENCES TriggerSchedules(triggerScheduleId),
+   entranceId INT REFERENCES Entrances(entranceId),
+   controllerId INT REFERENCES Controller(controllerId),
    PRIMARY KEY (eventsManagementId)
 );
 

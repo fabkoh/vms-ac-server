@@ -19,7 +19,7 @@ public class EventsManagement {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "eventsmanagementid")
+    @Column(name = "eventsmanagementid", columnDefinition = "serial")
     private Long eventsManagementId;
 
     @Column(name = "triggername")
@@ -29,11 +29,11 @@ public class EventsManagement {
     private Boolean deleted;
 
     @ElementCollection
-    @Column(name = "inputeventsid")
+    @Column(name = "inputeventsid", columnDefinition = "array")
     private List<Long> inputEventsId;
 
     @ElementCollection
-    @Column(name = "outputeventsid")
+    @Column(name = "outputeventsid", columnDefinition = "array")
     private List<Long> outputEventsId;
 
     @ManyToOne

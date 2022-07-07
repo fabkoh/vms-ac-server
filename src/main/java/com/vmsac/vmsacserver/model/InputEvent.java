@@ -17,7 +17,7 @@ public class InputEvent {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "inputeventid")
+    @Column(name = "inputeventid", columnDefinition = "serial")
     private Long inputEventId;
 
     @Column(name = "timerduration")

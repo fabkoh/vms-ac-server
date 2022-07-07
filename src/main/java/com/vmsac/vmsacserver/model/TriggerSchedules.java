@@ -18,7 +18,7 @@ public class TriggerSchedules {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "triggerscheduleid")
+    @Column(name = "triggerscheduleid", columnDefinition = "serial")
     private Long triggerScheduleId;
 
     @Column(name = "triggername")

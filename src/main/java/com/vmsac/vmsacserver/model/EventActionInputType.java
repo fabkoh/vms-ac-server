@@ -18,7 +18,7 @@ public class EventActionInputType {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "eventactioninputid")
+    @Column(name = "eventactioninputid", columnDefinition = "serial")
     private Long eventActionInputId;
 
     @Column(name = "eventactioninputtypename")
