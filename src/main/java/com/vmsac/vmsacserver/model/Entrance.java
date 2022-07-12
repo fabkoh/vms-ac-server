@@ -46,13 +46,17 @@ public class Entrance {
     @OneToMany(mappedBy = "entrance", fetch = FetchType.LAZY)
     private List<AuthDevice> entranceAuthDevices;
 
+    @OneToMany(mappedBy = "entrance", cascade = CascadeType.ALL)
+    private List<EventsManagement> eventsManagements;
+
     public EntranceDto toDto(){
         return new EntranceDto(this.entranceId, this.entranceName, this.entranceDesc,
-                this.isActive, this.used, thirdPartyOption, null,this.entranceAuthDevices);
+                this.isActive, this.used, thirdPartyOption, null,this.entranceAuthDevices,
+                this.eventsManagements);
     }
     public EntranceOnlyDto toEntranceOnlyDto(){
         return new EntranceOnlyDto(this.entranceId, this.entranceName, this.entranceDesc, this.isActive,
-                this.used, this.thirdPartyOption, this.entranceAuthDevices);
+                this.used, this.thirdPartyOption, this.entranceAuthDevices, this.eventsManagements);
     }
 
     @Override

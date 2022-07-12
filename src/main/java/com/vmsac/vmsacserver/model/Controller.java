@@ -59,10 +59,15 @@ public class Controller {
     private String settingsConfig;
 
     @Column( name = "deleted")
+    @JsonIgnore
     private Boolean deleted;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "controller")
     private List<AuthDevice> AuthDevices;
+
+    @OneToMany(mappedBy = "controller", cascade = CascadeType.ALL)
+    private List<EventsManagement> eventsManagements;
 
     public UniconControllerDto touniconDto(){
         return new UniconControllerDto(this.controllerId,this.controllerIP,
@@ -75,7 +80,7 @@ public class Controller {
 
                 this.controllerIPStatic,this.controllerMAC,
                 this.controllerSerialNo,this.pendingIP,this.masterController, this.pinAssignmentConfig,
-                this.settingsConfig);
+                this.settingsConfig, this.eventsManagements);
     }
 
     public EventControllerDto toEventDto(){

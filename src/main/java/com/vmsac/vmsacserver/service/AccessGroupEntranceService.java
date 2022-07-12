@@ -1,7 +1,6 @@
 package com.vmsac.vmsacserver.service;
 
 import com.vmsac.vmsacserver.model.AccessGroup;
-import com.vmsac.vmsacserver.model.AccessGroupOnlyDto;
 import com.vmsac.vmsacserver.model.Entrance;
 import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoN;
 import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoNDto;

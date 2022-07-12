@@ -31,8 +31,10 @@ public class EntranceOnlyDto {
 
     private List<AuthDevice> entranceAuthDevices;
 
+    private List<EventsManagement> eventsManagements;
+
     public Entrance toEntrance(Boolean deleted){
         return new Entrance(entranceId, entranceName, entranceDesc, isActive, deleted,
-                used, thirdPartyOption, entranceAuthDevices);
+                used, thirdPartyOption, entranceAuthDevices, eventsManagements);
     }
 }

@@ -7,10 +7,12 @@ import com.vmsac.vmsacserver.repository.EntranceEventRepository;
 import com.vmsac.vmsacserver.repository.EntranceEventTypeRepository;
 import com.vmsac.vmsacserver.service.EntranceEventService;
 import com.vmsac.vmsacserver.service.EntranceEventTypeServie;
+import com.vmsac.vmsacserver.util.FieldsModifier;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -23,6 +25,7 @@ import java.util.Optional;
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/entrance")
+@Validated
 public class EntranceEventController {
 
     @Autowired
@@ -36,8 +39,11 @@ public class EntranceEventController {
     @Autowired
     private EntranceEventTypeServie typeServie;
 
+    @Autowired
+    private FieldsModifier fieldsModifier;
+
     @PostMapping("/event/type")
-    public ResponseEntity<?> createEventType(@RequestBody EntranceEventTypeCreateDto dto) {
+    public ResponseEntity<?> createEventType(@RequestBody @Valid EntranceEventTypeCreateDto dto) {
 
         // create and save the new event type
         EntranceEventType newType = typeServie.createType(dto);
@@ -62,19 +68,14 @@ public class EntranceEventController {
             return ResponseEntity.notFound().build();
     }
 
-    @PatchMapping("/event/type/{id}")
+    @PutMapping("/event/type/{id}")
     public ResponseEntity<?> updateEventType(@PathVariable Long id,
                                              @RequestBody Map<String, Object> fields) {
         // does not save if not found
         Optional<EntranceEventType> typeOptional = typeRepository.findById(id);
         if (typeOptional.isPresent()) {
             EntranceEventType type = typeOptional.get();
-            fields.forEach((k, v) -> {
-                // use reflection to get field k and set it to value v
-                Field field = ReflectionUtils.findField(EntranceEventType.class, k);
-                field.setAccessible(true);
-                ReflectionUtils.setField(field, type, v);
-            });
+            fieldsModifier.modify((Object) type, fields, EntranceEventType.class);
             typeRepository.save(type);
             return ResponseEntity.ok().build();
         }
@@ -103,13 +104,13 @@ public class EntranceEventController {
     }
 
     @GetMapping("/events")
-    public ResponseEntity getEvents() {
-        return new ResponseEntity(eventRepository.findAll(), HttpStatus.OK);
+    public ResponseEntity<?> getEvents() {
+        return new ResponseEntity<>(eventRepository.findAll(), HttpStatus.OK);
         //return new ResponseEntity(entranceEventService.getAllEvents(), HttpStatus.OK);
     }
 
     @DeleteMapping("/event/{id}")
-    public ResponseEntity deleteEventById(@PathVariable Long id) {
+    public ResponseEntity<?> deleteEventById(@PathVariable Long id) {
         // delete if this id exists, do nothing otherwise, always return status code 200
         eventRepository.deleteById(id);
         return ResponseEntity.ok().build();

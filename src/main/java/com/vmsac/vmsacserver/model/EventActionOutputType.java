@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
@@ -15,25 +14,25 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 @Entity
 @Data
-@Table(name="eventactioninputtype")
+@Table(name="eventactionoutputtype")
 @Builder
-public class EventActionInputType {
+public class EventActionOutputType {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "eventactioninputid", columnDefinition = "serial")
-    private Long eventActionInputId;
+    @Column(name = "eventactionoutputid", columnDefinition = "serial")
+    private Long eventActionOutputId;
 
-    @Column(name = "eventactioninputname")
+    @Column(name = "eventactionoutputname")
     @NotNull
     @NotBlank
-    private String eventActionInputName;
+    private String eventActionOutputName;
 
     @Column(name = "timerenabled")
     @NotNull
     private Boolean timerEnabled;
 
-    @Column(name = "eventactioninputconfig")
+    @Column(name = "eventactionoutputconfig")
     @JsonIgnore
-    private String eventActionInputConfig;
+    private String eventActionOutputConfig;
 }

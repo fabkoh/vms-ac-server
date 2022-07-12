@@ -3,8 +3,10 @@ package com.vmsac.vmsacserver.model;
 import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoN;
 import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoNDto;
 import lombok.Data;
+import lombok.NonNull;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 
@@ -12,6 +14,7 @@ import java.util.List;
 public class CreateEntranceDto {
 
     @NotBlank(message = "EntranceName must not be empty")
+    @NotNull
     private String entranceName;
 
     private String entranceDesc;
@@ -24,6 +27,6 @@ public class CreateEntranceDto {
 
     public Entrance toEntrance(Boolean deleted){
         return new Entrance(null, entranceName, entranceDesc, true, deleted,
-                false, thirdPartyOption,null);
+                false, thirdPartyOption,null, null);
     }
 }

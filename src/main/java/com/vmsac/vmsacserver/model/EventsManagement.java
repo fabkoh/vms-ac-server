@@ -1,12 +1,21 @@
 package com.vmsac.vmsacserver.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.vladmihalcea.hibernate.type.array.ListArrayType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
 import java.util.List;
 
 @NoArgsConstructor
@@ -15,6 +24,12 @@ import java.util.List;
 @Data
 @Table(name="eventsmanagement")
 @Builder
+@TypeDef(
+        name = "list-array",
+        typeClass = ListArrayType.class
+)
+@SQLDelete(sql = "update eventsmanagement set deleted=true where eventsmanagementid=?")
+@Where(clause = "deleted=false")
 public class EventsManagement {
 
     @Id
@@ -22,28 +37,38 @@ public class EventsManagement {
     @Column(name = "eventsmanagementid", columnDefinition = "serial")
     private Long eventsManagementId;
 
-    @Column(name = "triggername")
-    private String triggerName;
+    @Column(name = "eventsmanagementname")
+    @NotNull
+    @NotBlank
+    private String eventsManagementName;
 
     @Column(name = "deleted")
+    @JsonIgnore
     private Boolean deleted;
 
-    @ElementCollection
-    @Column(name = "inputeventsid", columnDefinition = "array")
-    private List<Long> inputEventsId;
+    @Type( type = "list-array" )
+    @Column(name = "inputeventsid")
+    @NotNull
+    @NotEmpty
+    private List<Integer> inputEventsId;
 
-    @ElementCollection
-    @Column(name = "outputeventsid", columnDefinition = "array")
-    private List<Long> outputEventsId;
+    @Type( type = "list-array" )
+    @Column(name = "outputactionsid")
+    @NotNull
+    @NotEmpty
+    private List<Integer> outputActionsId;
 
     @ManyToOne
     @JoinColumn(name = "controllerid")
+    @JsonIgnore
     private Controller controller;
 
     @ManyToOne
     @JoinColumn(name = "entranceid")
+    @JsonIgnore
     private Entrance entrance;
 
-    @OneToMany(mappedBy = "eventsManagement")
+    @OneToMany(mappedBy = "eventsManagement", cascade = CascadeType.ALL)
     private List<TriggerSchedules> triggerSchedules;
+
 }

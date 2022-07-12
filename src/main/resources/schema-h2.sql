@@ -199,24 +199,23 @@ CREATE TABLE IF NOT EXISTS EntranceEvent(
 
 CREATE TABLE IF NOT EXISTS EventActionInputType(
    eventActionInputId SERIAL NOT NULL UNIQUE,
-   eventActionInputTypeName VARCHAR(255) NOT NULL,
+   eventActionInputName VARCHAR(255) NOT NULL,
    timerEnabled BOOLEAN NOT NULL,
-   eventActionInputTypeConfig JSON,
+   eventActionInputConfig JSON,
    PRIMARY KEY (eventActionInputId)
 );
 
 CREATE TABLE IF NOT EXISTS EventActionOutputType(
     eventActionOutputId SERIAL NOT NULL UNIQUE,
-    eventActionOutputTypeName VARCHAR(255) NOT NULL,
+    eventActionOutputName VARCHAR(255) NOT NULL,
     timerEnabled BOOLEAN NOT NULL,
-    eventActionOutputTypeConfig JSON,
+    eventActionOutputConfig JSON,
     PRIMARY KEY (eventActionOutputId)
 );
 
 CREATE TABLE IF NOT EXISTS InputEvent(
     inputEventId SERIAL NOT NULL UNIQUE ,
     timerDuration INT,
-    eventsManagementId INT NOT NULL ,
     eventActionInputId INT REFERENCES EventActionInputType(eventActionInputId),
     PRIMARY KEY (inputEventId)
 );
@@ -224,9 +223,19 @@ CREATE TABLE IF NOT EXISTS InputEvent(
 CREATE TABLE IF NOT EXISTS OutputEvent(
     outputEventId SERIAL NOT NULL UNIQUE ,
     timerDuration INT,
-    eventsManagementId INT NOT NULL,
     eventActionOutputId INT REFERENCES EventActionOutputType(eventActionOutputId),
     PRIMARY KEY (outputEventId)
+);
+
+CREATE TABLE IF NOT EXISTS EventsManagement(
+   eventsManagementId SERIAL NOT NULL UNIQUE ,
+   eventsManagementName VARCHAR(255) NOT NULL ,
+   deleted BOOLEAN NOT NULL ,
+   inputEventsId ARRAY  ,
+   outputActionsId ARRAY ,
+   entranceId INT REFERENCES Entrances(entranceId),
+   controllerId INT REFERENCES Controller(controllerId),
+   PRIMARY KEY (eventsManagementId)
 );
 
 CREATE TABLE IF NOT EXISTS TriggerSchedules(
@@ -235,19 +244,9 @@ CREATE TABLE IF NOT EXISTS TriggerSchedules(
    rrule VARCHAR(255) NOT NULL ,
    timeStart TIME NOT NULL ,
    timeEnd TIME NOT NULL ,
+   eventsManagementId INT REFERENCES EventsManagement(eventsManagementId),
    deleted BOOLEAN NOT NULL ,
    PRIMARY KEY (triggerScheduleId)
-);
-
-CREATE TABLE IF NOT EXISTS EventsManagement(
-   eventsManagementId SERIAL NOT NULL UNIQUE ,
-   triggerName VARCHAR(255) NOT NULL ,
-   inputEventsId ARRAY ,
-   outputEventsId ARRAY ,
-   triggerScheduleId INT REFERENCES TriggerSchedules(triggerScheduleId),
-   entranceId INT REFERENCES Entrances(entranceId),
-   controllerId INT REFERENCES Controller(controllerId),
-   PRIMARY KEY (eventsManagementId)
 );
 
 CREATE TABLE IF NOT EXISTS VideoRecorder(

@@ -83,6 +83,7 @@ CREATE TABLE IF NOT EXISTS Entrances(
   isActive BOOLEAN NOT NULL,
   deleted BOOLEAN NOT NULL,
   used BOOLEAN NOT NULL,
+  thirdPartyOption VARCHAR(255),
   PRIMARY KEY (entranceId)
 );
 
@@ -185,31 +186,29 @@ CREATE TABLE IF NOT EXISTS EntranceEvent(
 
 CREATE TABLE IF NOT EXISTS EventActionInputType(
     eventActionInputId SERIAL NOT NULL UNIQUE,
-    eventActionInputTypeName VARCHAR(255) NOT NULL,
+    eventActionInputName VARCHAR(255) NOT NULL,
     timerEnabled BOOLEAN NOT NULL,
-    eventActionInputTypeConfig JSON,
+    eventActionInputConfig JSON,
     PRIMARY KEY (eventActionInputId)
 );
 
 CREATE TABLE IF NOT EXISTS EventActionOutputType(
    eventActionOutputId SERIAL NOT NULL UNIQUE,
-   eventActionOutputTypeName VARCHAR(255) NOT NULL,
+   eventActionOutputName VARCHAR(255) NOT NULL,
    timerEnabled BOOLEAN NOT NULL,
-   eventActionOutputTypeConfig JSON,
+   eventActionOutputConfig JSON,
    PRIMARY KEY (eventActionOutputId)
 );
 
 CREATE TABLE IF NOT EXISTS InputEvent(
     inputEventId SERIAL NOT NULL UNIQUE ,
     timerDuration INT,
-    eventsManagementId INT NOT NULL ,
     eventActionInputId INT REFERENCES EventActionInputType(eventActionInputId)
 );
 
 CREATE TABLE IF NOT EXISTS OutputEvent(
     outputEventId SERIAL NOT NULL UNIQUE ,
     timerDuration INT,
-    eventsManagementId INT NOT NULL,
     eventActionOutputId INT REFERENCES EventActionOutputType(eventActionOutputId)
 );
 
@@ -218,17 +217,17 @@ CREATE TABLE IF NOT EXISTS TriggerSchedules(
     triggerName VARCHAR(255) NOT NULL ,
     rrule VARCHAR(255) NOT NULL ,
     timeStart TIME NOT NULL ,
-    tineEnd TIME NOT NULL ,
+    timeEnd TIME NOT NULL ,
     deleted BOOLEAN NOT NULL ,
     eventsManagementId INT
 );
 
 CREATE TABLE IF NOT EXISTS EventsManagement(
     eventsManagementId SERIAL NOT NULL UNIQUE ,
-    triggerName VARCHAR(255) NOT NULL ,
+    eventsManagementName VARCHAR(255) NOT NULL ,
+    deleted BOOLEAN NOT NULL ,
     inputEventsId INT[] ,
-    outputEventsId INT[]  ,
-    triggerScheduleId INT REFERENCES TriggerSchedules(triggerScheduleId),
+    outputActionsId INT[]  ,
     entranceId INT REFERENCES Entrances(entranceId),
     controllerId INT REFERENCES Controller(controllerId)
 );

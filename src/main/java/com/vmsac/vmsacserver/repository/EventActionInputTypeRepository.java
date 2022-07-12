@@ -7,6 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface EventActionInputTypeRepository extends JpaRepository<EventActionInputType, Long> {
-    @Query("from EventActionInputType t order by t.eventActionInputTypeName")
-    public List<EventActionInputType> findAllOrderByEventActionInputTypeNameAsc();
+    @Query("from EventActionInputType t order by t.eventActionInputName")
+    public List<EventActionInputType> findAllOrderByEventActionInputNameAsc();
 }
