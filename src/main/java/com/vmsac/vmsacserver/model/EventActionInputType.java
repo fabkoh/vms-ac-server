@@ -34,6 +34,5 @@ public class EventActionInputType {
     private Boolean timerEnabled;
 
     @Column(name = "eventactioninputconfig")
-    @JsonIgnore
     private String eventActionInputConfig;
 }
