@@ -24,11 +24,11 @@ public class EventsManagementCreateDto {
 
     @NotNull
     @NotEmpty
-    private List<Integer> inputEventsId;
+    private List<InputEvent> inputEvents;
 
     @NotNull
     @NotEmpty
-    private List<Integer> outputActionsId;
+    private List<OutputEvent> outputEvents;
 
     private Long entranceId;
 

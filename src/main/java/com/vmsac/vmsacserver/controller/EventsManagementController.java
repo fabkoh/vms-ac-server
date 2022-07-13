@@ -2,6 +2,7 @@ package com.vmsac.vmsacserver.controller;
 
 import com.vmsac.vmsacserver.model.*;
 import com.vmsac.vmsacserver.repository.*;
+import com.vmsac.vmsacserver.service.EventService;
 import com.vmsac.vmsacserver.service.EventsManagementService;
 import com.vmsac.vmsacserver.service.TriggerSchedulesService;
 import com.vmsac.vmsacserver.util.DateTimeParser;
@@ -53,6 +54,9 @@ public class EventsManagementController {
     OutputEventRepository outputEventRepository;
 
     @Autowired
+    EventService eventService;
+
+    @Autowired
     FieldsModifier fieldsModifier;
 
     @Autowired
@@ -99,21 +103,13 @@ public class EventsManagementController {
     // POST InputEvent
     @PostMapping("/event/input")
     public ResponseEntity<?> postInputEvent(@RequestBody @Valid InputEvent dto) {
-        Optional<EventActionInputType> opEait = inputTypeRepository.findById(
-                dto.getEventActionInputType().getEventActionInputId());
+        Optional<InputEvent> opEvent = eventService.createInputEvent(dto);
 
-        if (opEait.isPresent()) {
-            EventActionInputType type = opEait.get();
-            if ((type.getTimerEnabled() && dto.getTimerDuration() == null)
-            || (!type.getTimerEnabled() && dto.getTimerDuration() != null)) {
-                    return new ResponseEntity<>(type, HttpStatus.BAD_REQUEST);
-            }
-            InputEvent ie = inputEventRepository.save(new InputEvent(null,
-                    dto.getTimerDuration(), type));
-            return new ResponseEntity<>(ie, HttpStatus.CREATED);
+        if (opEvent.isPresent()) {
+            return new ResponseEntity<>(opEvent.get(), HttpStatus.CREATED);
         }
-        else return ResponseEntity.notFound().build();
 
+        else return ResponseEntity.badRequest().build();
     }
 
     // PUT InputEvent
@@ -159,6 +155,12 @@ public class EventsManagementController {
         return new ResponseEntity<>(saved, HttpStatus.CREATED);
     }
 
+    // GET ALL EventActionInputType
+    @GetMapping("/event/output/types")
+    public ResponseEntity<?> getAllOutputTypes() {
+        return new ResponseEntity<>(outputTypeRepository.findAll(), HttpStatus.OK);
+    }
+
     // PUT EventActionOutputType
     @PutMapping("event/output/type/{id}")
     public ResponseEntity<?> putOutputType(@RequestBody @Valid EventActionOutputType dto,
@@ -186,22 +188,13 @@ public class EventsManagementController {
     @PostMapping("event/output")
     public ResponseEntity<?> postOutputEvent(@RequestBody @Valid OutputEvent dto) {
 
-        Optional<EventActionOutputType> opType = outputTypeRepository.findById(
-                dto.getEventActionOutputType().getEventActionOutputId());
+        Optional<OutputEvent> opEvent = eventService.createOutputEvent(dto);
 
-        if(opType.isPresent()) {
-
-            EventActionOutputType type = opType.get();
-            if ((type.getTimerEnabled() && dto.getTimerDuration() == null)
-                    || (!type.getTimerEnabled() && dto.getTimerDuration() != null)) {
-                return new ResponseEntity<>(type, HttpStatus.BAD_REQUEST);
-            }
-
-            OutputEvent oe = outputEventRepository.save(new OutputEvent(null,
-                    dto.getTimerDuration(), type));
-            return new ResponseEntity<>(oe, HttpStatus.CREATED);
+        if (opEvent.isPresent()) {
+            return new ResponseEntity<>(opEvent.get(), HttpStatus.CREATED);
         }
-        return ResponseEntity.notFound().build();
+
+        else return ResponseEntity.badRequest().build();
     }
 
     // PUT OutputEvent
@@ -237,23 +230,11 @@ public class EventsManagementController {
         return ResponseEntity.notFound().build();
     }
 
-    // POST EventsManagement for controller
-    @PostMapping("eventsmanagement/controller")
-    public ResponseEntity<?> postForController(
-            @RequestBody @Valid EventsManagementCreateDto dto) {
+    // POST EventsManagement
+    @PostMapping("eventsmanagement")
+    public ResponseEntity<?> postEventsMangement(@RequestBody @Valid EventsManagementCreateDto dto) {
 
-        Optional<EventsManagement> toCreate = eventsManagementService.createForController(dto);
-
-        if (toCreate.isPresent())
-            return new ResponseEntity<>(toCreate.get(), HttpStatus.CREATED);
-        else return ResponseEntity.notFound().build();
-    }
-
-    // POST EventsManagement for Entrance
-    @PostMapping("eventsmanagement/entrance")
-    public ResponseEntity<?> postForEntrance(@RequestBody @Valid EventsManagementCreateDto dto) {
-
-        Optional<EventsManagement> opEm = eventsManagementService.createForEntrance(dto);
+        Optional<EventsManagement> opEm = eventsManagementService.create(dto);
 
         if (opEm.isPresent())
             return new ResponseEntity<>(opEm.get(), HttpStatus.CREATED);
@@ -266,44 +247,6 @@ public class EventsManagementController {
         return new ResponseEntity<>(eventsManagementRepository.findAllByDeletedFalse(),
                 HttpStatus.OK);
     }
-
-//    // PUT EventsManagement's Controller
-//    @PutMapping("eventsmanagement/{emId}/controller")
-//    public ResponseEntity<?> putController(@RequestBody Map<String, Long> controllerId,
-//                                           @PathVariable Long emId) {
-//
-//        Optional<EventsManagement> opEm = eventsManagementRepository.findByDeletedFalseAndEventsManagementId(emId);
-//
-//        Optional<Controller> opCon = controllerRepository.findByControllerIdEqualsAndDeletedFalse(controllerId.get("controllerId"));
-//
-//        if (opEm.isPresent() && opCon.isPresent()) {
-//            EventsManagement em = opEm.get();
-//            Controller con = opCon.get();
-//            em.setController(con);
-//            em = eventsManagementRepository.save(em);
-//            return new ResponseEntity<>(em, HttpStatus.OK);
-//        }
-//        return ResponseEntity.notFound().build();
-//    }
-//
-//    // PUT EventsManagement's Entrance
-//    @PutMapping("eventsmanagement/{emId}/entrance")
-//    public ResponseEntity<?> putEntrance(@RequestBody Map<String, Long> entranceId,
-//                                         @PathVariable Long emId) {
-//
-//        Optional<EventsManagement> opEm = eventsManagementRepository.findByDeletedFalseAndEventsManagementId(emId);
-//
-//        Optional<Entrance> opEnt = entranceRepository.findByEntranceIdAndDeletedFalse(entranceId.get("entranceId"));
-//
-//        if (opEm.isPresent() && opEnt.isPresent()) {
-//            EventsManagement em = opEm.get();
-//            Entrance ent = opEnt.get();
-//            em.setEntrance(ent);
-//            em = eventsManagementRepository.save(em);
-//            return new ResponseEntity<>(em, HttpStatus.OK);
-//        }
-//        return ResponseEntity.notFound().build();
-//    }
 
     // PUT EventsMangement
     @PutMapping("eventsmanagement/{emId}")

@@ -44,19 +44,19 @@ public class EventsManagement {
 
     @Column(name = "deleted")
     @JsonIgnore
-    private Boolean deleted;
+    private Boolean deleted = false;
 
     @Type( type = "list-array" )
     @Column(name = "inputeventsid")
     @NotNull
     @NotEmpty
-    private List<Integer> inputEventsId;
+    private List<Long> inputEventsId;
 
     @Type( type = "list-array" )
     @Column(name = "outputactionsid")
     @NotNull
     @NotEmpty
-    private List<Integer> outputActionsId;
+    private List<Long> outputActionsId;
 
     @ManyToOne
     @JoinColumn(name = "controllerid")

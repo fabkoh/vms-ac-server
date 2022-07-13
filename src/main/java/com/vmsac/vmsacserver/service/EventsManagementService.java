@@ -29,53 +29,75 @@ public class EventsManagementService {
     @Autowired
     OutputEventRepository outputEventRepository;
 
-    public Optional<EventsManagement> createForController(EventsManagementCreateDto dto) {
+    @Autowired
+    EventService eventService;
+
+    public Optional<EventsManagement> create(EventsManagementCreateDto dto) {
 
         // check if this controller exists
-        Optional<Controller> opController = controllerRepository.findById(dto.getControllerId());
+        Optional<Controller> opController = controllerRepository.findByControllerIdEqualsAndDeletedFalse(dto.getControllerId());
 
-        // check if all input events exists
-        for (Integer inputId : dto.getInputEventsId()) {
-            if (!inputEventRepository.existsById(inputId.longValue()))
-                return Optional.empty();
+        // check if this entrance exists
+        Optional<Entrance> opEntrance = entranceRepository.findByEntranceIdAndDeletedFalse(dto.getEntranceId());
+
+        // create input events
+        List<Long> inputEventsId = new ArrayList<>();
+        for (InputEvent input : dto.getInputEvents()) {
+            Long id = input.getInputEventId();
+            if (id == null) {
+                Optional<InputEvent> opInput = eventService.createInputEvent(input);
+                if (opInput.isPresent()) {
+                    inputEventsId.add(opInput.get().getInputEventId());
+                }
+            } else {
+                if (inputEventRepository.existsById(id))
+                    inputEventsId.add(id);
+                else
+                    return Optional.empty();
+            }
         }
-        // check if all output events exists
-        for (Integer outputId : dto.getOutputActionsId()) {
-            if (!outputEventRepository.existsById(outputId.longValue()))
-                return Optional.empty();
+
+        // create output events
+        List<Long> outputActionsId = new ArrayList<>();
+        for (OutputEvent output : dto.getOutputEvents()) {
+            Long id = output.getOutputEventId();
+            if (id == null) {
+                Optional<OutputEvent> opOutput = eventService.createOutputEvent(output);
+                if (opOutput.isPresent()) {
+                    outputActionsId.add(opOutput.get().getOutputEventId());
+                }
+            } else {
+                if (outputEventRepository.existsById(id))
+                    outputActionsId.add(id);
+                else
+                    return Optional.empty();
+            }
         }
 
         if (opController.isPresent()) {
-            return Optional.of(
-                    eventsManagementRepository.save(new EventsManagement(null,
-                            dto.getEventsManagementName(), false, dto.getInputEventsId(),
-                            dto.getOutputActionsId(), opController.get(), null, dto.getTriggerSchedules()))
-            );
-        } else return Optional.empty();
-    }
+            EventsManagement em = eventsManagementRepository.save(new EventsManagement(null,
+                            dto.getEventsManagementName(), false, inputEventsId,
+                            outputActionsId, opController.get(), null, dto.getTriggerSchedules()));
 
-    public Optional<EventsManagement> createForEntrance(EventsManagementCreateDto dto) {
-        // check if this controller exists
-        Optional<Entrance> opEntrance = entranceRepository.findByEntranceIdAndDeletedFalse(dto.getEntranceId());
+            for (TriggerSchedules ts : em.getTriggerSchedules()) {
+                ts.setEventsManagement(em);
+                triggerSchedulesRepository.save(ts);
+            }
 
-        // check if all input events exists
-        for (Integer inputId : dto.getInputEventsId()) {
-            if (!inputEventRepository.existsById(inputId.longValue()))
-                return Optional.empty();
+            return Optional.of(em);
+        } else if (opEntrance.isPresent()) {
+            EventsManagement em = eventsManagementRepository.save(new EventsManagement(null,
+                            dto.getEventsManagementName(), false, inputEventsId,
+                            outputActionsId, null, opEntrance.get(), dto.getTriggerSchedules()));
+
+            for (TriggerSchedules ts : em.getTriggerSchedules()) {
+                ts.setEventsManagement(em);
+                triggerSchedulesRepository.save(ts);
+            }
+
+            return Optional.of(em);
         }
-        // check if all output events exists
-        for (Integer outputId : dto.getOutputActionsId()) {
-            if (!outputEventRepository.existsById(outputId.longValue()))
-                return Optional.empty();
-        }
-
-        if (opEntrance.isPresent()) {
-            return Optional.of(
-                    eventsManagementRepository.save(new EventsManagement(null,
-                            dto.getEventsManagementName(), false, dto.getInputEventsId(),
-                            dto.getOutputActionsId(), null, opEntrance.get(), dto.getTriggerSchedules()))
-            );
-        } else return Optional.empty();
+        else return Optional.empty();
     }
 
     public void deleteById(Long id) {

@@ -48,7 +48,7 @@ public class TriggerSchedules {
 
     @Column(name = "deleted")
     @JsonIgnore
-    private Boolean deleted;
+    private Boolean deleted = false;
 
     @ManyToOne
     @JoinColumn(name = "eventsmanagementid")
