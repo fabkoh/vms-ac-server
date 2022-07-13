@@ -565,5 +565,17 @@ public class ControllerController {
 
     }
 
+    // GET All EventsManagement of the Controller with the specified Id
+    @GetMapping("api/controller/{id}/eventsmanagement")
+    public ResponseEntity<?> getEventsManagement(@PathVariable Long id) {
+        if (controllerRepository.existsByDeletedFalseAndAndControllerId(id)) {
+            return new ResponseEntity<>(controllerRepository
+                    .findByControllerIdEqualsAndDeletedFalse(id)
+                    .get()
+                    .getEventsManagements(), HttpStatus.OK);
+        }
+        return ResponseEntity.notFound().build();
+    }
+
 }
 

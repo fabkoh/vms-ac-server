@@ -19,7 +19,7 @@ public interface ControllerRepository extends JpaRepository<Controller, Long>{
 
     boolean existsByControllerNameEqualsAndDeletedFalse(String controllerName);
 
-
+    boolean existsByDeletedFalseAndAndControllerId(Long controllerId);
 
 
 
