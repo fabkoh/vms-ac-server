@@ -358,6 +358,12 @@ public class EventsManagementController {
         else return ResponseEntity.notFound().build();
     }
 
+    // GET all TriggerSchedules
+    @GetMapping("/triggerschedules")
+    public ResponseEntity<?> getAllTriggerSchedules() {
+        return new ResponseEntity<>(triggerSchedulesRepository.findAll(), HttpStatus.OK);
+    }
+
     // PUT TriggerSchedules
     @PutMapping("/triggerschedules/{tsId}")
     public ResponseEntity<?> putTriggerSchedules(@RequestBody @Valid TriggerSchedules dto,

@@ -74,14 +74,16 @@ public class EventsManagementService {
             if (opController.isPresent()) {
                 EventsManagement em = eventsManagementRepository.save(new EventsManagement(null,
                         dto.getEventsManagementName(), false, inputEventsId,
-                        outputActionsId, opController.get(), null, dto.getTriggerSchedules()));
+                        outputActionsId, opController.get(), null, new ArrayList<>()));
 
-                resultEms.add(em);
+                for (TriggerSchedules ts : dto.getTriggerSchedules()) {
+                    TriggerSchedules newTs = triggerSchedulesRepository.save(new TriggerSchedules(
+                            null, ts.getTriggerName(), ts.getRrule(), ts.getTimeStart(),
+                            ts.getTimeEnd(), false, em));
 
-                for (TriggerSchedules ts : em.getTriggerSchedules()) {
-                    ts.setEventsManagement(em);
-                    triggerSchedulesRepository.save(ts);
+                    em.getTriggerSchedules().add(newTs);
                 }
+                resultEms.add(em);
             }
         }
 
@@ -90,14 +92,16 @@ public class EventsManagementService {
             if (opEntrance.isPresent()) {
                 EventsManagement em = eventsManagementRepository.save(new EventsManagement(null,
                         dto.getEventsManagementName(), false, inputEventsId,
-                        outputActionsId, null, opEntrance.get(), dto.getTriggerSchedules()));
+                        outputActionsId, null, opEntrance.get(), new ArrayList<>()));
 
-                resultEms.add(em);
+                for (TriggerSchedules ts : dto.getTriggerSchedules()) {
+                    TriggerSchedules newTs = triggerSchedulesRepository.save(new TriggerSchedules(
+                            null, ts.getTriggerName(), ts.getRrule(), ts.getTimeStart(),
+                            ts.getTimeEnd(), false, em));
 
-                for (TriggerSchedules ts : em.getTriggerSchedules()) {
-                    ts.setEventsManagement(em);
-                    triggerSchedulesRepository.save(ts);
+                    em.getTriggerSchedules().add(newTs);
                 }
+                resultEms.add(em);
             }
         }
 
