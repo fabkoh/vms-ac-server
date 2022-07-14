@@ -2,6 +2,8 @@ package com.vmsac.vmsacserver.controller;
 
 import com.vmsac.vmsacserver.model.*;
 import com.vmsac.vmsacserver.repository.*;
+import com.vmsac.vmsacserver.service.AuthDeviceService;
+import com.vmsac.vmsacserver.service.ControllerService;
 import com.vmsac.vmsacserver.service.EventService;
 import com.vmsac.vmsacserver.service.EventsManagementService;
 import com.vmsac.vmsacserver.service.TriggerSchedulesService;
@@ -14,6 +16,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -22,6 +26,12 @@ import java.util.Optional;
 @Validated
 @RequestMapping("/api")
 public class EventsManagementController {
+
+    @Autowired
+    private ControllerService controllerService;
+
+    @Autowired
+    private AuthDeviceService authDeviceService;
 
     @Autowired
     EventActionInputTypeRepository inputTypeRepository;
@@ -244,11 +254,42 @@ public class EventsManagementController {
     // GET EventsManagement
     @GetMapping("eventsmanagements")
     public ResponseEntity<?> getAllEventsMangement() {
-        return new ResponseEntity<>(eventsManagementRepository.findAllByDeletedFalse(),
-                HttpStatus.OK);
+        return new ResponseEntity<>(eventsManagementRepository.findAllByDeletedFalse(), HttpStatus.OK);
     }
 
-    // PUT EventsMangement
+    // GET EventsManagement Entrance
+    @GetMapping("eventsmanagements/entrance/{entranceId}")
+    public ResponseEntity<?> getAllEventsMangementForEntrance(@PathVariable Long entranceId) {
+        return new ResponseEntity<>(eventsManagementRepository.findByDeletedFalseAndEntrance_EntranceIdOrderByEventsManagementNameAsc(entranceId), HttpStatus.OK);
+    }
+
+    // GET EventsManagement Controller
+    @GetMapping("eventsmanagements/controller/{controllerId}")
+    public ResponseEntity<?> getAllEventsMangementForController(@PathVariable Long controllerId) {
+        Optional<Controller> optionalController = controllerService.findById(controllerId);
+        if (optionalController.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        List<AuthDevice> authdevicelist = authDeviceService.findbyControllerId(controllerId);
+        List<EventsManagement> eventManagements = eventsManagementRepository.findByDeletedFalseAndController_ControllerIdOrderByEventsManagementNameAsc(controllerId);
+
+        authdevicelist.forEach(authdevice-> {
+            try {
+                if (authdevice.getEntrance() != null){
+                    Entrance entrance = entranceRepository.findByEntranceIdAndDeletedFalse(authdevice.getEntrance().getEntranceId()).get();
+                    if (entrance != null) {
+                        eventManagements.addAll(eventsManagementRepository.findByDeletedFalseAndEntrance_EntranceIdOrderByEventsManagementNameAsc(entrance.getEntranceId()));
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        return new ResponseEntity<>(eventManagements, HttpStatus.OK);
+    }
+
+    // PUT EventsManagement
     @PutMapping("eventsmanagement/{emId}")
     public ResponseEntity<?> putEventsMangement(@RequestBody @Valid EventsManagement dto,
                                                 @PathVariable Long emId) {

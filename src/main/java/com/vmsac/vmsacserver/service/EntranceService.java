@@ -102,7 +102,7 @@ public class EntranceService {
         }
     }
 
-    public void FreeEntrances(Long controllerId)throws Exception{
+    public void FreeEntrances(Long controllerId) throws Exception{
 
         List <AuthDevice> authdevicelist = authDeviceService.findbyControllerId(controllerId);
 
@@ -119,7 +119,5 @@ public class EntranceService {
                 e.printStackTrace();
             }
         });
-
-
     }
 }
