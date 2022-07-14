@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -244,10 +245,10 @@ public class EventsManagementController {
     @PostMapping("eventsmanagement")
     public ResponseEntity<?> postEventsMangement(@RequestBody @Valid EventsManagementCreateDto dto) {
 
-        Optional<EventsManagement> opEm = eventsManagementService.create(dto);
+        List<EventsManagement> eventsManagements = eventsManagementService.create(dto);
 
-        if (opEm.isPresent())
-            return new ResponseEntity<>(opEm.get(), HttpStatus.CREATED);
+        if (eventsManagements.size() > 0)
+            return new ResponseEntity<>(eventsManagements, HttpStatus.CREATED);
         else return ResponseEntity.badRequest().build();
     }
 
@@ -302,6 +303,37 @@ public class EventsManagementController {
             return new ResponseEntity<>(eventsManagementRepository.save(dto), HttpStatus.OK);
         }
         return ResponseEntity.notFound().build();
+    }
+
+    // Replace all eventsmanagement with newly created ones
+    @PutMapping("eventsmanagement/replace")
+    public ResponseEntity<?> replaceEventsMangement(@RequestBody @Valid List<EventsManagementCreateDto> dtos,
+                                                    @RequestParam("entranceIds") List<Integer> entranceIds,
+                                                    @RequestParam("controllerIds") List<Integer> controllerIds) {
+        for (Integer controllerId : controllerIds) {
+            Optional<Controller> opCon = controllerRepository.findByControllerIdEqualsAndDeletedFalse(controllerId.longValue());
+            if (opCon.isPresent())
+                for (EventsManagement em : opCon.get().getEventsManagements()) {
+                    eventsManagementRepository.deleteById(em.getEventsManagementId());
+                }
+        }
+
+        for (Integer entranceId : entranceIds) {
+            Optional<Entrance> opEnt = entranceRepository.findByEntranceIdAndDeletedFalse(entranceId.longValue());
+            if (opEnt.isPresent())
+                for (EventsManagement em : opEnt.get().getEventsManagements()) {
+                    eventsManagementRepository.deleteById(em.getEventsManagementId());
+                }
+        }
+
+        List<EventsManagement> eventsManagements = new ArrayList<>();
+
+        for (EventsManagementCreateDto dto : dtos)
+            eventsManagements.addAll(eventsManagementService.create(dto));
+
+        if (eventsManagements.size() > 0)
+            return new ResponseEntity<>(eventsManagements, HttpStatus.CREATED);
+        else return ResponseEntity.badRequest().build();
     }
 
     // DELETE EventsManagement

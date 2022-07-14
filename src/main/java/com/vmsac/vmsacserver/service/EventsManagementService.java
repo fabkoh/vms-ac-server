@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class EventsManagementService {
@@ -32,13 +31,9 @@ public class EventsManagementService {
     @Autowired
     EventService eventService;
 
-    public Optional<EventsManagement> create(EventsManagementCreateDto dto) {
+    public List<EventsManagement> create(EventsManagementCreateDto dto) {
 
-        // check if this controller exists
-        Optional<Controller> opController = controllerRepository.findByControllerIdEqualsAndDeletedFalse(dto.getControllerId());
-
-        // check if this entrance exists
-        Optional<Entrance> opEntrance = entranceRepository.findByEntranceIdAndDeletedFalse(dto.getEntranceId());
+        List<EventsManagement> resultEms = new ArrayList<>();
 
         // create input events
         List<Long> inputEventsId = new ArrayList<>();
@@ -53,7 +48,7 @@ public class EventsManagementService {
                 if (inputEventRepository.existsById(id))
                     inputEventsId.add(id);
                 else
-                    return Optional.empty();
+                    return resultEms;
             }
         }
 
@@ -70,34 +65,43 @@ public class EventsManagementService {
                 if (outputEventRepository.existsById(id))
                     outputActionsId.add(id);
                 else
-                    return Optional.empty();
+                    return resultEms;
             }
         }
 
-        if (opController.isPresent()) {
-            EventsManagement em = eventsManagementRepository.save(new EventsManagement(null,
-                            dto.getEventsManagementName(), false, inputEventsId,
-                            outputActionsId, opController.get(), null, dto.getTriggerSchedules()));
+        for (Integer controllerId : dto.getControllerIds()) {
+            Optional<Controller> opController = controllerRepository.findByControllerIdEqualsAndDeletedFalse(controllerId.longValue());
+            if (opController.isPresent()) {
+                EventsManagement em = eventsManagementRepository.save(new EventsManagement(null,
+                        dto.getEventsManagementName(), false, inputEventsId,
+                        outputActionsId, opController.get(), null, dto.getTriggerSchedules()));
 
-            for (TriggerSchedules ts : em.getTriggerSchedules()) {
-                ts.setEventsManagement(em);
-                triggerSchedulesRepository.save(ts);
+                resultEms.add(em);
+
+                for (TriggerSchedules ts : em.getTriggerSchedules()) {
+                    ts.setEventsManagement(em);
+                    triggerSchedulesRepository.save(ts);
+                }
             }
-
-            return Optional.of(em);
-        } else if (opEntrance.isPresent()) {
-            EventsManagement em = eventsManagementRepository.save(new EventsManagement(null,
-                            dto.getEventsManagementName(), false, inputEventsId,
-                            outputActionsId, null, opEntrance.get(), dto.getTriggerSchedules()));
-
-            for (TriggerSchedules ts : em.getTriggerSchedules()) {
-                ts.setEventsManagement(em);
-                triggerSchedulesRepository.save(ts);
-            }
-
-            return Optional.of(em);
         }
-        else return Optional.empty();
+
+        for (Integer entranceId : dto.getEntranceIds()) {
+            Optional<Entrance> opEntrance = entranceRepository.findByEntranceIdAndDeletedFalse(entranceId.longValue());
+            if (opEntrance.isPresent()) {
+                EventsManagement em = eventsManagementRepository.save(new EventsManagement(null,
+                        dto.getEventsManagementName(), false, inputEventsId,
+                        outputActionsId, null, opEntrance.get(), dto.getTriggerSchedules()));
+
+                resultEms.add(em);
+
+                for (TriggerSchedules ts : em.getTriggerSchedules()) {
+                    ts.setEventsManagement(em);
+                    triggerSchedulesRepository.save(ts);
+                }
+            }
+        }
+
+        return resultEms;
     }
 
     public void deleteById(Long id) {
