@@ -189,21 +189,19 @@ public class EventsManagementController {
     // GET EventsManagement
     @GetMapping("eventsmanagements")
     public ResponseEntity<?> getAllEventsMangement() {
-        List<EventsManagementDto> ems = new ArrayList<>();
+        List<EventsManagement> ems = new ArrayList<>();
 
         controllerRepository.findByDeletedIsFalseOrderByCreatedDesc().forEach(controller -> {
-            ems.addAll(controller.getEventsManagements().stream().map(
-                    em -> eventsManagementService.toDto(em)
-            ).collect(Collectors.toList()));
+            ems.addAll(controller.getEventsManagements());
         });
 
         entranceRepository.findByDeleted(false).forEach(entrance -> {
-            ems.addAll(entrance.getEventsManagements().stream().map(
-                    em -> eventsManagementService.toDto(em)
-            ).collect(Collectors.toList()));
+            ems.addAll(entrance.getEventsManagements());
         });
 
-        return new ResponseEntity<>(ems, HttpStatus.OK);
+        return new ResponseEntity<>(ems.stream()
+                .map(em -> eventsManagementService.toDto(em))
+                .collect(Collectors.toList()), HttpStatus.OK);
     }
 
     // GET EventsManagement Entrance
