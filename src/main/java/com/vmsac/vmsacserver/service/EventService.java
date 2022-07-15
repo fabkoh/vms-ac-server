@@ -1,9 +1,6 @@
 package com.vmsac.vmsacserver.service;
 
-import com.vmsac.vmsacserver.model.EventActionInputType;
-import com.vmsac.vmsacserver.model.EventActionOutputType;
-import com.vmsac.vmsacserver.model.InputEvent;
-import com.vmsac.vmsacserver.model.OutputEvent;
+import com.vmsac.vmsacserver.model.*;
 import com.vmsac.vmsacserver.repository.EventActionInputTypeRepository;
 import com.vmsac.vmsacserver.repository.EventActionOutputTypeRepository;
 import com.vmsac.vmsacserver.repository.InputEventRepository;
@@ -35,10 +32,16 @@ public class EventService {
     }
 
     public InputEvent createInputEvent(InputEvent dto) {
+        Optional<EventActionInputType> type = inputTypeRepository.findById(
+                dto.getEventActionInputType().getEventActionInputId());
+        dto.setEventActionInputType(type.get());
         return inputEventRepository.save(dto);
     }
 
     public OutputEvent createOutputEvent(OutputEvent dto) {
+        Optional<EventActionOutputType> type = outputTypeRepository.findById(
+                dto.getEventActionOutputType().getEventActionOutputId());
+        dto.setEventActionOutputType(type.get());
         return outputEventRepository.save(dto);
     }
 }

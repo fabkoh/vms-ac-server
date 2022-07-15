@@ -43,7 +43,7 @@ public class EventsManagementService {
                 inputEventsId.add(id);
             }
         }
-        return  inputEventsId;
+        return inputEventsId;
     }
 
     public List<Long> createOutputActions(List<OutputEvent> dto) {
@@ -133,12 +133,15 @@ public class EventsManagementService {
     public EventsManagementDto toDto(EventsManagement em) {
         EventEntranceDto entrance;
         EventControllerDto controller;
+
         if (em.getEntrance() != null)
             entrance = em.getEntrance().toEventDto();
         else entrance = null;
+
         if (em.getController() != null)
             controller = em.getController().toEventDto();
         else controller = null;
+
         return new EventsManagementDto(em.getEventsManagementId(), em.getEventsManagementName(),
                 inputEventRepository.findAllById(em.getInputEventsId()),
                 outputEventRepository.findAllById(em.getOutputActionsId()),
