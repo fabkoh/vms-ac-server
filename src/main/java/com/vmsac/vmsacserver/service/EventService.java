@@ -8,6 +8,7 @@ import com.vmsac.vmsacserver.repository.EventActionInputTypeRepository;
 import com.vmsac.vmsacserver.repository.EventActionOutputTypeRepository;
 import com.vmsac.vmsacserver.repository.InputEventRepository;
 import com.vmsac.vmsacserver.repository.OutputEventRepository;
+import org.springframework.beans.InvalidPropertyException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,30 +34,11 @@ public class EventService {
                 (timerEnabled.equals(false) && timerDuration == null));
     }
 
-    public Optional<InputEvent> createInputEvent(InputEvent dto) {
-        Optional<EventActionInputType> opType = inputTypeRepository.findById(
-                dto.getEventActionInputType().getEventActionInputId());
-
-        if (opType.isPresent()) {
-            EventActionInputType type = opType.get();
-            if (checkValidEvent(dto.getTimerDuration(), type.getTimerEnabled()))
-                return Optional.of(inputEventRepository.save(
-                        new InputEvent(null, dto.getTimerDuration(), type)));
-        }
-        return Optional.empty();
+    public InputEvent createInputEvent(InputEvent dto) {
+        return inputEventRepository.save(dto);
     }
 
-    public Optional<OutputEvent> createOutputEvent(OutputEvent dto) {
-        Optional<EventActionOutputType> opType = outputTypeRepository.findById(
-                dto.getEventActionOutputType().getEventActionOutputId());
-
-        if (opType.isPresent()) {
-            EventActionOutputType type = opType.get();
-            if (checkValidEvent(dto.getTimerDuration(), type.getTimerEnabled())) {
-                return Optional.of(outputEventRepository.save(
-                        new OutputEvent(null, dto.getTimerDuration(), type)));
-            }
-        }
-        return Optional.empty();
+    public OutputEvent createOutputEvent(OutputEvent dto) {
+        return outputEventRepository.save(dto);
     }
 }

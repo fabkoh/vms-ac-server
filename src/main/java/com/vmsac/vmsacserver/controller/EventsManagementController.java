@@ -112,47 +112,14 @@ public class EventsManagementController {
         return ResponseEntity.notFound().build();
     }
 
-    // POST InputEvent
-    @PostMapping("/event/input")
-    public ResponseEntity<?> postInputEvent(@RequestBody @Valid InputEvent dto) {
-        Optional<InputEvent> opEvent = eventService.createInputEvent(dto);
-
-        if (opEvent.isPresent()) {
-            return new ResponseEntity<>(opEvent.get(), HttpStatus.CREATED);
-        }
-
-        else return ResponseEntity.badRequest().build();
-    }
-
     // PUT InputEvent
     @PutMapping("/event/input/{id}")
     public ResponseEntity<?> putInputEvent(@RequestBody @Valid InputEvent dto,
                                            @PathVariable Long id) {
-
         if (inputEventRepository.existsById(id)) {
-            Optional<EventActionInputType> opType = inputTypeRepository
-                    .findById(dto.getEventActionInputType().getEventActionInputId());
-
-            if (opType.isPresent()) {
-                EventActionInputType type = opType.get();
-                if ((type.getTimerEnabled() && dto.getTimerDuration() == null)
-                        || (!type.getTimerEnabled() && dto.getTimerDuration() != null)) {
-                    return new ResponseEntity<>(type, HttpStatus.BAD_REQUEST);
-                }
-
+            if (inputTypeRepository.existsById(dto.getEventActionInputType().getEventActionInputId())) {
                 return new ResponseEntity<>(inputEventRepository.save(dto), HttpStatus.OK);
             }
-        }
-        return ResponseEntity.notFound().build();
-    }
-
-    // DELETE InputEvent
-    @DeleteMapping("event/input/{id}")
-    public ResponseEntity<?> deleteInputEvent(@PathVariable Long id) {
-
-        if (inputEventRepository.existsById(id)) {
-            inputEventRepository.deleteById(id);
-            return ResponseEntity.ok().build();
         }
         return ResponseEntity.notFound().build();
     }
@@ -167,7 +134,7 @@ public class EventsManagementController {
         return new ResponseEntity<>(saved, HttpStatus.CREATED);
     }
 
-    // GET ALL EventActionInputType
+    // GET ALL EventActionOutputType
     @GetMapping("/event/output/types")
     public ResponseEntity<?> getAllOutputTypes() {
         return new ResponseEntity<>(outputTypeRepository.findAll(), HttpStatus.OK);
@@ -196,48 +163,13 @@ public class EventsManagementController {
         return ResponseEntity.notFound().build();
     }
 
-    // POST OutputEvent
-    @PostMapping("event/output")
-    public ResponseEntity<?> postOutputEvent(@RequestBody @Valid OutputEvent dto) {
-
-        Optional<OutputEvent> opEvent = eventService.createOutputEvent(dto);
-
-        if (opEvent.isPresent()) {
-            return new ResponseEntity<>(opEvent.get(), HttpStatus.CREATED);
-        }
-
-        else return ResponseEntity.badRequest().build();
-    }
-
     // PUT OutputEvent
     @PutMapping("event/output/{id}")
     public ResponseEntity<?> putOutputEvent(@RequestBody @Valid OutputEvent dto,
                                             @PathVariable Long id) {
-        Optional<OutputEvent> opEvent = outputEventRepository.findById(id);
-
-        if (opEvent.isPresent()) {
-            Optional<EventActionOutputType> opType = outputTypeRepository.findById(
-                    dto.getEventActionOutputType().getEventActionOutputId());
-
-            if (opType.isPresent()) {
-                EventActionOutputType type = opType.get();
-                if ((type.getTimerEnabled() && dto.getTimerDuration() == null)
-                        || (!type.getTimerEnabled() && dto.getTimerDuration() != null)) {
-                    return new ResponseEntity<>(type, HttpStatus.BAD_REQUEST);
-                }
-
+        if (outputEventRepository.existsById(dto.getOutputEventId())) {
+            if(outputTypeRepository.existsById(dto.getEventActionOutputType().getEventActionOutputId()))
                 return new ResponseEntity<>(outputEventRepository.save(dto), HttpStatus.OK);
-            }
-        }
-        return ResponseEntity.notFound().build();
-    }
-
-    // DELETE OutputEvent
-    @DeleteMapping("event/output/{id}")
-    public ResponseEntity<?> deleteOutputEvent(@PathVariable Long id) {
-        if (outputEventRepository.existsById(id)) {
-            outputEventRepository.deleteById(id);
-            return ResponseEntity.ok().build();
         }
         return ResponseEntity.notFound().build();
     }
@@ -265,9 +197,13 @@ public class EventsManagementController {
     // GET EventsManagement Entrance
     @GetMapping("eventsmanagements/entrance/{entranceId}")
     public ResponseEntity<?> getAllEventsMangementForEntrance(@PathVariable Long entranceId) {
-        return new ResponseEntity<>(eventsManagementRepository.findByDeletedFalseAndEntrance_EntranceIdOrderByEventsManagementNameAsc(entranceId)
-                .stream().map(em -> {return eventsManagementService.toDto(em);})
+        if (entranceRepository.existsByEntranceId(entranceId))
+            return new ResponseEntity<>(entranceRepository.findByEntranceIdAndDeletedFalse(entranceId)
+                .get().getEventsManagements()
+                .stream().map(em -> eventsManagementService.toDto(em))
                 .collect(Collectors.toList()), HttpStatus.OK);
+
+        else return ResponseEntity.notFound().build();
     }
 
     // GET EventsManagement Controller
@@ -279,21 +215,17 @@ public class EventsManagementController {
         }
 
         List<AuthDevice> authdevicelist = authDeviceService.findbyControllerId(controllerId);
-        List<EventsManagement> eventManagements = eventsManagementRepository.findByDeletedFalseAndController_ControllerIdOrderByEventsManagementNameAsc(controllerId);
+        List<EventsManagement> eventManagements = optionalController.get().getEventsManagements();
 
         authdevicelist.forEach(authdevice-> {
-            try {
-                if (authdevice.getEntrance() != null){
-                    Entrance entrance = entranceRepository.findByEntranceIdAndDeletedFalse(authdevice.getEntrance().getEntranceId()).get();
-                    if (entrance != null) {
-                        eventManagements.addAll(eventsManagementRepository.findByDeletedFalseAndEntrance_EntranceIdOrderByEventsManagementNameAsc(entrance.getEntranceId()));
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
+            if (authdevice.getEntrance() != null){
+                authdevice.getEntrance().getEventsManagements().forEach(em -> {
+                    if (!eventManagements.contains(em)) eventManagements.add(em);
+                });
             }
         });
-        return new ResponseEntity<>(eventManagements.stream().map(em -> {return eventsManagementService.toDto(em);})
+        return new ResponseEntity<>(eventManagements
+                .stream().map(em -> eventsManagementService.toDto(em))
                 .collect(Collectors.toList()), HttpStatus.OK);
     }
 
@@ -357,17 +289,6 @@ public class EventsManagementController {
         } else return ResponseEntity.notFound().build();
     }
 
-    // POST TriggerSchedules
-    @PostMapping("/triggerschedules")
-    public ResponseEntity<?> postTriggerSchedules(@RequestBody @Valid
-                                                      TriggerSchedulesCreateDto dto) {
-        Optional<TriggerSchedules> opTs = triggerSchedulesService.create(dto);
-
-        if (opTs.isPresent())
-            return new ResponseEntity<>(opTs.get(), HttpStatus.CREATED);
-        else return ResponseEntity.notFound().build();
-    }
-
     // GET all TriggerSchedules
     @GetMapping("/triggerschedules")
     public ResponseEntity<?> getAllTriggerSchedules() {
@@ -387,17 +308,5 @@ public class EventsManagementController {
             return new ResponseEntity<>(triggerSchedulesRepository.save(dto), HttpStatus.OK);
        }
        return ResponseEntity.notFound().build();
-    }
-
-    // DELETE TriggerSchedules
-    @DeleteMapping("/triggerschedules/{tsId}")
-    public ResponseEntity<?> deleteTriggerSchedules(@PathVariable Long tsId) {
-        Optional<TriggerSchedules> opTs = triggerSchedulesRepository.findByDeletedFalseAndAndTriggerScheduleId(tsId);
-
-        if (opTs.isPresent()) {
-            triggerSchedulesRepository.deleteById(tsId);
-            return ResponseEntity.ok().build();
-        }
-        return  ResponseEntity.notFound().build();
     }
 }

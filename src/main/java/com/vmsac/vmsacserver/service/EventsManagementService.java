@@ -33,45 +33,42 @@ public class EventsManagementService {
     @Autowired
     EventService eventService;
 
+    public List<Long> createInputEvents(List<InputEvent> dto) {
+        List<Long> inputEventsId = new ArrayList<>();
+        for (InputEvent input : dto) {
+            Long id = input.getInputEventId();
+            if (id == null) {
+                inputEventsId.add(eventService.createInputEvent(input).getInputEventId());
+            } else {
+                inputEventsId.add(id);
+            }
+        }
+        return  inputEventsId;
+    }
+
+    public List<Long> createOutputActions(List<OutputEvent> dto) {
+        List<Long> outputActionsId = new ArrayList<>();
+        for (OutputEvent output : dto) {
+            Long id = output.getOutputEventId();
+            if (id == null) {
+                outputActionsId.add(eventService.createOutputEvent(output).getOutputEventId());
+            } else {
+            outputActionsId.add(id);
+            }
+        }
+        return outputActionsId;
+    }
+
     public List<EventsManagement> create(EventsManagementCreateDto dto) {
 
         List<EventsManagement> resultEms = new ArrayList<>();
 
-        // create input events
-        List<Long> inputEventsId = new ArrayList<>();
-        for (InputEvent input : dto.getInputEvents()) {
-            Long id = input.getInputEventId();
-            if (id == null) {
-                Optional<InputEvent> opInput = eventService.createInputEvent(input);
-                if (opInput.isPresent()) {
-                    inputEventsId.add(opInput.get().getInputEventId());
-                }
-            } else {
-                if (inputEventRepository.existsById(id))
-                    inputEventsId.add(id);
-                else
-                    return resultEms;
-            }
-        }
-
-        // create output events
-        List<Long> outputActionsId = new ArrayList<>();
-        for (OutputEvent output : dto.getOutputEvents()) {
-            Long id = output.getOutputEventId();
-            if (id == null) {
-                Optional<OutputEvent> opOutput = eventService.createOutputEvent(output);
-                if (opOutput.isPresent()) {
-                    outputActionsId.add(opOutput.get().getOutputEventId());
-                }
-            } else {
-                if (outputEventRepository.existsById(id))
-                    outputActionsId.add(id);
-                else
-                    return resultEms;
-            }
-        }
-
         for (Integer controllerId : dto.getControllerIds()) {
+            // create different input and output events for each eventsManagement
+            // in case users want to modify input/output events
+            List<Long> inputEventsId = createInputEvents(dto.getInputEvents());
+            List<Long> outputActionsId = createOutputActions(dto.getOutputEvents());
+
             Optional<Controller> opController = controllerRepository.findByControllerIdEqualsAndDeletedFalse(controllerId.longValue());
             if (opController.isPresent()) {
                 EventsManagement em = eventsManagementRepository.save(new EventsManagement(null,
@@ -90,6 +87,11 @@ public class EventsManagementService {
         }
 
         for (Integer entranceId : dto.getEntranceIds()) {
+            // create different input and output events for each eventsManagement
+            // in case users want to modify input/output events
+            List<Long> inputEventsId = createInputEvents(dto.getInputEvents());
+            List<Long> outputActionsId = createOutputActions(dto.getOutputEvents());
+
             Optional<Entrance> opEntrance = entranceRepository.findByEntranceIdAndDeletedFalse(entranceId.longValue());
             if (opEntrance.isPresent()) {
                 EventsManagement em = eventsManagementRepository.save(new EventsManagement(null,
@@ -129,8 +131,8 @@ public class EventsManagementService {
     }
 
     public EventsManagementDto toDto(EventsManagement em) {
-        EventEntranceDto entrance = new EventEntranceDto();
-        EventControllerDto controller = new EventControllerDto();
+        EventEntranceDto entrance;
+        EventControllerDto controller;
         if (em.getEntrance() != null)
             entrance = em.getEntrance().toEventDto();
         else entrance = null;
