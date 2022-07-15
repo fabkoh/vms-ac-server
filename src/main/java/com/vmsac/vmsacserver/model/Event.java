@@ -1,7 +1,9 @@
 package com.vmsac.vmsacserver.model;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vmsac.vmsacserver.model.EventDto.EventAccessGroupDto;
+import com.vmsac.vmsacserver.model.EventDto.EventControllerDto;
 import com.vmsac.vmsacserver.model.EventDto.EventEntranceDto;
 import com.vmsac.vmsacserver.model.EventDto.EventPersonDto;
 import com.vmsac.vmsacserver.model.authmethod.AuthMethod;
@@ -9,30 +11,28 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
-import java.time.Instant;
 import java.time.LocalDateTime;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @Data
-@Table(name="entranceevent")
+@Table(name="events")
 @Builder
-public class EntranceEvent {
+public class Event {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "eventid", columnDefinition = "serial")
-    private Long entranceEventId;
+    private Long eventId;
 
     @Column(name="direction")
     private String direction;
 
-    @Column(name="eventtime", nullable = false)
-    private LocalDateTime eventTime;
+    @Column(name="eventtime")
+    private String eventTime;
 
     @Column(name = "deleted")
     private Boolean deleted;
@@ -42,7 +42,7 @@ public class EntranceEvent {
     private Person person;
 
     @ManyToOne
-    @JoinColumn(name="entranceid", nullable = false)
+    @JoinColumn(name="entranceid")
     private Entrance entrance;
 
     @ManyToOne
@@ -50,36 +50,37 @@ public class EntranceEvent {
     private AccessGroup accessGroup;
 
     @ManyToOne
-    @JoinColumn(name="actiontypeid")
-    private EntranceEventType entranceEventType;
+    @JoinColumn(name="eventactiontypeid")
+    private EventActionType eventActionType;
 
     @ManyToOne
-    @JoinColumn(name="authmethodid")
-    private AuthMethod authMethod;
+    @JoinColumn(name="controllerid")
+    private Controller controller;
 
     @Override
     public String toString() {
         return "Event{" +
-                "eventId=" + entranceEventId +
+                "eventId=" + eventId +
                 ", direction='" + direction + '\'' +
                 ", eventTime=" + eventTime +
                 ", deleted=" + deleted +
                 ", person=" + person +
                 ", entrance=" + entrance +
                 ", accessGroup=" + accessGroup +
-                ", eventActionType=" + entranceEventType +
+                ", eventActionType=" + eventActionType +
+                ", controller=" + controller +
                 '}';
     }
 
-    public EventPersonDto getPersonDto() {
+    public EventPersonDto getPerson() {
         try{
-        return person.toEventDto();}
+            return person.toEventDto();}
         catch ( Exception e){
             return null;
         }
     }
 
-    public EventEntranceDto getEntranceDto() {
+    public EventEntranceDto getEntrance() {
         try{
             return entrance.toEventDto();}
         catch ( Exception e){
@@ -88,7 +89,7 @@ public class EntranceEvent {
 
     }
 
-    public EventAccessGroupDto getAccessGroupDto() {
+    public EventAccessGroupDto getAccessGroup() {
         try{
             return accessGroup.toEventDto();}
         catch ( Exception e){
@@ -97,4 +98,12 @@ public class EntranceEvent {
 
     }
 
+    public EventControllerDto getController() {
+        try{
+            return controller.toEventDto();}
+        catch ( Exception e){
+            return null;
+        }
+
+    }
 }

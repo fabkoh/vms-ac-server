@@ -31,14 +31,14 @@ public class EventsManagementService {
     OutputEventRepository outputEventRepository;
 
     @Autowired
-    EventService eventService;
+    InOutEventService inOutEventService;
 
     public List<Long> createInputEvents(List<InputEvent> dto) {
         List<Long> inputEventsId = new ArrayList<>();
         for (InputEvent input : dto) {
             Long id = input.getInputEventId();
             if (id == null) {
-                inputEventsId.add(eventService.createInputEvent(input).getInputEventId());
+                inputEventsId.add(inOutEventService.createInputEvent(input).getInputEventId());
             } else {
                 inputEventsId.add(id);
             }
@@ -51,7 +51,7 @@ public class EventsManagementService {
         for (OutputEvent output : dto) {
             Long id = output.getOutputEventId();
             if (id == null) {
-                outputActionsId.add(eventService.createOutputEvent(output).getOutputEventId());
+                outputActionsId.add(inOutEventService.createOutputEvent(output).getOutputEventId());
             } else {
             outputActionsId.add(id);
             }

@@ -1,175 +1,111 @@
 package com.vmsac.vmsacserver.util;
 
-import com.vmsac.vmsacserver.model.EventActionInputType;
-import com.vmsac.vmsacserver.model.EventActionOutputType;
-import com.vmsac.vmsacserver.repository.EventActionInputTypeRepository;
-import com.vmsac.vmsacserver.repository.EventActionOutputTypeRepository;
+import com.vmsac.vmsacserver.model.AccessGroup;
+import com.vmsac.vmsacserver.model.EventActionType;
+import com.vmsac.vmsacserver.repository.EventActionTypeRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 @Component
 public class EventActionTypeLoader implements CommandLineRunner {
+    private final EventActionTypeRepository eventActionTypeRepository;
 
-    private final EventActionInputTypeRepository inputTypeRepository;
-
-    private final EventActionOutputTypeRepository outputTypeRepository;
-
-    public EventActionTypeLoader(EventActionInputTypeRepository inputTypeRepository,
-                                 EventActionOutputTypeRepository outputTypeRepository) {
-        this.inputTypeRepository = inputTypeRepository;
-        this.outputTypeRepository = outputTypeRepository;
+    public EventActionTypeLoader(EventActionTypeRepository eventActionTypeRepository) {
+        this.eventActionTypeRepository = eventActionTypeRepository;
     }
 
+    @Override
     public void run(String... args) throws Exception {
-        if (inputTypeRepository.findAll().isEmpty()) loadInputData();
-        if (outputTypeRepository.findAll().isEmpty()) loadOutputData();
+        if (eventActionTypeRepository.findAll().isEmpty()) loadData();
     }
 
-    private void loadInputData() {
-        // 1
-        EventActionInputType AUTHENTICATED_SCAN = inputTypeRepository.save(
-                EventActionInputType.builder()
-                        .eventActionInputName("AUTHENTICATED_SCAN")
-                        .timerEnabled(false)
+    private void loadData() {
+        EventActionType authenticated_scan = eventActionTypeRepository.save(
+                EventActionType.builder()
+                        .eventActionTypeName("Authenticated Scans")
+                        .isTimerEnabled(false)
                         .build()
         );
 
-        // 2
-        EventActionInputType UNAUTHENTICATED_SCAN = inputTypeRepository.save(
-                EventActionInputType.builder()
-                        .eventActionInputName("UNAUTHENTICATED_SCAN")
-                        .timerEnabled(false)
+        EventActionType masterpassword_used = eventActionTypeRepository.save(
+                EventActionType.builder()
+                        .eventActionTypeName("Masterpassword used")
+                        .isTimerEnabled(false)
                         .build()
         );
 
-        // 3
-        EventActionInputType EXIT_BUTTON_PRESSED = inputTypeRepository.save(
-                EventActionInputType.builder()
-                        .eventActionInputName("EXIT_BUTTON_PRESSED")
-                        .timerEnabled(false)
+        EventActionType unauthenticated_scan = eventActionTypeRepository.save(
+                EventActionType.builder()
+                        .eventActionTypeName("UnAuthenticated Scans")
+                        .isTimerEnabled(false)
                         .build()
         );
 
-        // 4
-        EventActionInputType CONTACT_OPEN_WITHOUT_AUTHENTICATION = inputTypeRepository.save(
-                EventActionInputType.builder()
-                        .eventActionInputName("CONTACT_OPEN_WITHOUT_AUTHENTICATION")
-                        .timerEnabled(true)
+        EventActionType door_opened = eventActionTypeRepository.save(
+                EventActionType.builder()
+                        .eventActionTypeName("Door Opened")
+                        .isTimerEnabled(false)
                         .build()
         );
 
-        // 5
-        EventActionInputType CONTACT_OPEN_WITH_AUTHENTICATION = inputTypeRepository.save(
-                EventActionInputType.builder()
-                        .eventActionInputName("CONTACT_OPEN_WITH_AUTHENTICATION")
-                        .timerEnabled(true)
+        EventActionType door_closed = eventActionTypeRepository.save(
+                EventActionType.builder()
+                        .eventActionTypeName("Door Closed")
+                        .isTimerEnabled(false)
                         .build()
         );
 
-        // 6
-        EventActionInputType FIRE = inputTypeRepository.save(
-                EventActionInputType.builder()
-                        .eventActionInputName("FIRE")
-                        .timerEnabled(false)
+        EventActionType door_opened_warning = eventActionTypeRepository.save(
+                EventActionType.builder()
+                        .eventActionTypeName("Warning : Door Opened without authorisation")
+                        .isTimerEnabled(false)
                         .build()
         );
 
-        // 7
-        EventActionInputType GEN_IN_1 = inputTypeRepository.save(
-                EventActionInputType.builder()
-                        .eventActionInputName("GEN_IN_1")
-                        .timerEnabled(false)
+        EventActionType buzzer_start = eventActionTypeRepository.save(
+                EventActionType.builder()
+                        .eventActionTypeName("Buzzer Started buzzing")
+                        .isTimerEnabled(false)
                         .build()
         );
 
-        // 8
-        EventActionInputType GEN_IN_2 = inputTypeRepository.save(
-                EventActionInputType.builder()
-                        .eventActionInputName("GEN_IN_2")
-                        .timerEnabled(false)
+        EventActionType buzzer_end = eventActionTypeRepository.save(
+                EventActionType.builder()
+                        .eventActionTypeName("Buzzer Stopped buzzing")
+                        .isTimerEnabled(false)
                         .build()
         );
 
-        // 9
-        EventActionInputType GEN_IN_3 = inputTypeRepository.save(
-                EventActionInputType.builder()
-                        .eventActionInputName("GEN_IN_3")
-                        .timerEnabled(false)
+
+        EventActionType push_button_pressed = eventActionTypeRepository.save(
+                EventActionType.builder()
+                        .eventActionTypeName("Push Button pressed")
+                        .isTimerEnabled(false)
                         .build()
         );
 
-        // 10
-        EventActionInputType CONTACT_CLOSE = inputTypeRepository.save(
-                EventActionInputType.builder()
-                        .eventActionInputName("CONTACT_CLOSE")
-                        .timerEnabled(false)
-                        .build()
-        );
-    }
 
-    private void loadOutputData() {
-        // 1
-        EventActionOutputType GEN_OUT_1 = outputTypeRepository.save(
-                EventActionOutputType.builder()
-                        .eventActionOutputName("GEN_OUT_1")
-                        .timerEnabled(true)
+        EventActionType GEN_IN_1 = eventActionTypeRepository.save(
+                EventActionType.builder()
+                        .eventActionTypeName("GEN_IN_1 triggered")
+                        .isTimerEnabled(false)
                         .build()
         );
 
-        // 2
-        EventActionOutputType GEN_OUT_2 = outputTypeRepository.save(
-                EventActionOutputType.builder()
-                        .eventActionOutputName("GEN_OUT_2")
-                        .timerEnabled(true)
+        EventActionType GEN_IN_2 = eventActionTypeRepository.save(
+                EventActionType.builder()
+                        .eventActionTypeName("GEN_IN_2 triggered")
+                        .isTimerEnabled(false)
                         .build()
         );
 
-        // 3
-        EventActionOutputType GEN_OUT_3 = outputTypeRepository.save(
-                EventActionOutputType.builder()
-                        .eventActionOutputName("GEN_OUT_3")
-                        .timerEnabled(true)
+        EventActionType GEN_IN_3 = eventActionTypeRepository.save(
+                EventActionType.builder()
+                        .eventActionTypeName("GEN_IN_3 triggered")
+                        .isTimerEnabled(false)
                         .build()
         );
 
-        // 4
-        EventActionOutputType EMLOCK_1 = outputTypeRepository.save(
-                EventActionOutputType.builder()
-                        .eventActionOutputName("EMLOCK_1")
-                        .timerEnabled(false)
-                        .build()
-        );
 
-        // 5
-        EventActionOutputType EMLOCK_2 = outputTypeRepository.save(
-                EventActionOutputType.builder()
-                        .eventActionOutputName("EMLOCK_2")
-                        .timerEnabled(false)
-                        .build()
-        );
-
-        // 6
-        EventActionOutputType BUZZER = outputTypeRepository.save(
-                EventActionOutputType.builder()
-                        .eventActionOutputName("BUZZER")
-                        .timerEnabled(true)
-                        .build()
-        );
-
-        // 7
-        EventActionOutputType LED = outputTypeRepository.save(
-                EventActionOutputType.builder()
-                        .eventActionOutputName("LED")
-                        .timerEnabled(true)
-                        .build()
-        );
-
-        // 8
-        EventActionOutputType NOTIFICATION = outputTypeRepository.save(
-                EventActionOutputType.builder()
-                        .eventActionOutputName("NOTIFICATION")
-                        .timerEnabled(false)
-                        .build()
-        );
     }
 }

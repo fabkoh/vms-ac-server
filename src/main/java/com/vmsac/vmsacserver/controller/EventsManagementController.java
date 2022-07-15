@@ -4,7 +4,7 @@ import com.vmsac.vmsacserver.model.*;
 import com.vmsac.vmsacserver.repository.*;
 import com.vmsac.vmsacserver.service.AuthDeviceService;
 import com.vmsac.vmsacserver.service.ControllerService;
-import com.vmsac.vmsacserver.service.EventService;
+import com.vmsac.vmsacserver.service.InOutEventService;
 import com.vmsac.vmsacserver.service.EventsManagementService;
 import com.vmsac.vmsacserver.service.TriggerSchedulesService;
 import com.vmsac.vmsacserver.util.DateTimeParser;
@@ -19,7 +19,6 @@ import javax.validation.Valid;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -66,7 +65,7 @@ public class EventsManagementController {
     OutputEventRepository outputEventRepository;
 
     @Autowired
-    EventService eventService;
+    InOutEventService inOutEventService;
 
     @Autowired
     FieldsModifier fieldsModifier;

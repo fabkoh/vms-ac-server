@@ -1,6 +1,5 @@
 package com.vmsac.vmsacserver.util;
 
-import com.vmsac.vmsacserver.model.EntranceEventType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 
