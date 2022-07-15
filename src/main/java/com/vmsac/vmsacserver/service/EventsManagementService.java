@@ -1,6 +1,8 @@
 package com.vmsac.vmsacserver.service;
 
 import com.vmsac.vmsacserver.model.*;
+import com.vmsac.vmsacserver.model.EventDto.EventControllerDto;
+import com.vmsac.vmsacserver.model.EventDto.EventEntranceDto;
 import com.vmsac.vmsacserver.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -124,5 +126,22 @@ public class EventsManagementService {
 
             eventsManagementRepository.save(em);
         }
+    }
+
+    public EventsManagementDto toDto(EventsManagement em) {
+        EventEntranceDto entrance = new EventEntranceDto();
+        EventControllerDto controller = new EventControllerDto();
+        if (em.getEntrance() != null)
+            entrance = em.getEntrance().toEventDto();
+        else entrance = null;
+        if (em.getController() != null)
+            controller = em.getController().toEventDto();
+        else controller = null;
+        return new EventsManagementDto(em.getEventsManagementId(), em.getEventsManagementName(),
+                inputEventRepository.findAllById(em.getInputEventsId()),
+                outputEventRepository.findAllById(em.getOutputActionsId()),
+                em.getTriggerSchedules(),
+                entrance,
+                controller);
     }
 }

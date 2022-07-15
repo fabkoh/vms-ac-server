@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -248,20 +249,25 @@ public class EventsManagementController {
         List<EventsManagement> eventsManagements = eventsManagementService.create(dto);
 
         if (eventsManagements.size() > 0)
-            return new ResponseEntity<>(eventsManagements, HttpStatus.CREATED);
+            return new ResponseEntity<>(eventsManagements.stream().map(em -> {return eventsManagementService.toDto(em);})
+                    .collect(Collectors.toList()), HttpStatus.CREATED);
         else return ResponseEntity.badRequest().build();
     }
 
     // GET EventsManagement
     @GetMapping("eventsmanagements")
     public ResponseEntity<?> getAllEventsMangement() {
-        return new ResponseEntity<>(eventsManagementRepository.findAllByDeletedFalse(), HttpStatus.OK);
+        return new ResponseEntity<>(eventsManagementRepository.findAllByDeletedFalse()
+                .stream().map(em -> {return eventsManagementService.toDto(em);})
+                .collect(Collectors.toList()), HttpStatus.OK);
     }
 
     // GET EventsManagement Entrance
     @GetMapping("eventsmanagements/entrance/{entranceId}")
     public ResponseEntity<?> getAllEventsMangementForEntrance(@PathVariable Long entranceId) {
-        return new ResponseEntity<>(eventsManagementRepository.findByDeletedFalseAndEntrance_EntranceIdOrderByEventsManagementNameAsc(entranceId), HttpStatus.OK);
+        return new ResponseEntity<>(eventsManagementRepository.findByDeletedFalseAndEntrance_EntranceIdOrderByEventsManagementNameAsc(entranceId)
+                .stream().map(em -> {return eventsManagementService.toDto(em);})
+                .collect(Collectors.toList()), HttpStatus.OK);
     }
 
     // GET EventsManagement Controller
@@ -287,7 +293,8 @@ public class EventsManagementController {
                 e.printStackTrace();
             }
         });
-        return new ResponseEntity<>(eventManagements, HttpStatus.OK);
+        return new ResponseEntity<>(eventManagements.stream().map(em -> {return eventsManagementService.toDto(em);})
+                .collect(Collectors.toList()), HttpStatus.OK);
     }
 
     // PUT EventsManagement
@@ -300,7 +307,7 @@ public class EventsManagementController {
             dto.setDeleted(em.getDeleted());
             dto.setController(em.getController());
             dto.setEntrance(em.getEntrance());
-            return new ResponseEntity<>(eventsManagementRepository.save(dto), HttpStatus.OK);
+            return new ResponseEntity<>(eventsManagementService.toDto(eventsManagementRepository.save(dto)), HttpStatus.OK);
         }
         return ResponseEntity.notFound().build();
     }
@@ -308,13 +315,13 @@ public class EventsManagementController {
     // Replace all eventsmanagement with newly created ones
     @PutMapping("eventsmanagement/replace")
     public ResponseEntity<?> replaceEventsMangement(@RequestBody @Valid List<EventsManagementCreateDto> dtos,
-                                                    @RequestParam("entranceIds") List<Integer> entranceIds,
-                                                    @RequestParam("controllerIds") List<Integer> controllerIds) {
+                                                    @RequestParam("controllerIds") List<Integer> controllerIds,
+                                                    @RequestParam("entranceIds") List<Integer> entranceIds) {
         for (Integer controllerId : controllerIds) {
             Optional<Controller> opCon = controllerRepository.findByControllerIdEqualsAndDeletedFalse(controllerId.longValue());
             if (opCon.isPresent())
                 for (EventsManagement em : opCon.get().getEventsManagements()) {
-                    eventsManagementRepository.deleteById(em.getEventsManagementId());
+                    eventsManagementService.deleteById(em.getEventsManagementId());
                 }
         }
 
@@ -322,17 +329,20 @@ public class EventsManagementController {
             Optional<Entrance> opEnt = entranceRepository.findByEntranceIdAndDeletedFalse(entranceId.longValue());
             if (opEnt.isPresent())
                 for (EventsManagement em : opEnt.get().getEventsManagements()) {
-                    eventsManagementRepository.deleteById(em.getEventsManagementId());
+                    eventsManagementService.deleteById(em.getEventsManagementId());
                 }
         }
 
         List<EventsManagement> eventsManagements = new ArrayList<>();
 
-        for (EventsManagementCreateDto dto : dtos)
+        for (EventsManagementCreateDto dto : dtos) {
+            dto.setControllerIds(controllerIds);
+            dto.setEntranceIds(entranceIds);
             eventsManagements.addAll(eventsManagementService.create(dto));
-
+        }
         if (eventsManagements.size() > 0)
-            return new ResponseEntity<>(eventsManagements, HttpStatus.CREATED);
+            return new ResponseEntity<>(eventsManagements.stream().map(em -> {return eventsManagementService.toDto(em);})
+                    .collect(Collectors.toList()), HttpStatus.CREATED);
         else return ResponseEntity.badRequest().build();
     }
 
@@ -341,7 +351,7 @@ public class EventsManagementController {
     public ResponseEntity<?> deleteEventsManagement(@PathVariable Long emId) {
         if (eventsManagementRepository.findById(emId).isPresent()) {
 
-            eventsManagementRepository.deleteById(emId);
+            eventsManagementService.deleteById(emId);
             return ResponseEntity.ok().build();
 
         } else return ResponseEntity.notFound().build();
