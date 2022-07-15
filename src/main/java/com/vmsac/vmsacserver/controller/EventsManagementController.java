@@ -189,9 +189,17 @@ public class EventsManagementController {
     // GET EventsManagement
     @GetMapping("eventsmanagements")
     public ResponseEntity<?> getAllEventsMangement() {
-        return new ResponseEntity<>(eventsManagementRepository.findAllByDeletedFalse()
-                .stream().map(em -> {return eventsManagementService.toDto(em);})
-                .collect(Collectors.toList()), HttpStatus.OK);
+        List<EventsManagement> ems = new ArrayList<>();
+
+        controllerRepository.findByDeletedIsFalseOrderByCreatedDesc().forEach(controller -> {
+            ems.addAll(controller.getEventsManagements());
+        });
+
+        entranceRepository.findByDeleted(false).forEach(entrance -> {
+            ems.addAll(entrance.getEventsManagements());
+        });
+
+        return new ResponseEntity<>(ems, HttpStatus.OK);
     }
 
     // GET EventsManagement Entrance
@@ -214,8 +222,10 @@ public class EventsManagementController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        List<AuthDevice> authdevicelist = authDeviceService.findbyControllerId(controllerId);
         List<EventsManagement> eventManagements = optionalController.get().getEventsManagements();
+
+        // also get the events managements of entrances that are linked to this controller
+        List<AuthDevice> authdevicelist = authDeviceService.findbyControllerId(controllerId);
 
         authdevicelist.forEach(authdevice-> {
             if (authdevice.getEntrance() != null){
@@ -278,7 +288,7 @@ public class EventsManagementController {
         else return ResponseEntity.badRequest().build();
     }
 
-    // DELETE EventsManagement
+    // DELETE One EventsManagement
     @DeleteMapping("eventsmanagement/{emId}")
     public ResponseEntity<?> deleteEventsManagement(@PathVariable Long emId) {
         if (eventsManagementRepository.findById(emId).isPresent()) {
@@ -287,6 +297,35 @@ public class EventsManagementController {
             return ResponseEntity.ok().build();
 
         } else return ResponseEntity.notFound().build();
+    }
+
+    // DELETE All events-management of a list of controllers
+    @DeleteMapping("eventsmanagement/controller")
+    public ResponseEntity<?> deleteForController(@RequestParam("controllerIds") List<Long> controllerIds) {
+        for (Long id : controllerIds) {
+            Optional<Controller> opController = controllerRepository.findByControllerIdEqualsAndDeletedFalse(id);
+            if (opController.isPresent()) {
+                opController.get().getEventsManagements().forEach(em -> {
+                    eventsManagementService.deleteById(em.getEventsManagementId());
+                });
+            }
+            else return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok().build();
+    }
+
+    // DELETE All events-management of a list of entrances
+    @DeleteMapping("eventsmanagement/entrance")
+    public ResponseEntity<?> deleteForEntrance(@RequestParam("entranceIds") List<Long> entranceIds) {
+        for (Long id : entranceIds) {
+            Optional<Entrance> opEntrance = entranceRepository.findByEntranceIdAndDeletedFalse(id);
+            if (opEntrance.isPresent()) {
+                opEntrance.get().getEventsManagements().forEach(em -> {
+                    eventsManagementService.deleteById(em.getEventsManagementId());
+                });
+            } else return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok().build();
     }
 
     // GET all TriggerSchedules
