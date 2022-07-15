@@ -62,7 +62,6 @@ public class Controller {
     @JsonIgnore
     private Boolean deleted;
 
-    @JsonIgnore
     @OneToMany(mappedBy = "controller")
     private List<AuthDevice> AuthDevices;
 
