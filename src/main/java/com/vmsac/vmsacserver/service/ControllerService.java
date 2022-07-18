@@ -364,23 +364,25 @@ public class ControllerService {
     }
 
     public HttpStatus generate(Long controllerId)throws Exception{
-//        try {
 
+            // find controller object
             Controller existingcontroller = controllerRepository.getById(controllerId);
             String MASTERPASSWORD = "666666";
 
             List<Map> RulesSet = new ArrayList<Map>(1);
 
+            // iterate twice, find entrance 1 and 2 related to controller
             for ( int i=0; i<2;i++) {
                 try {
+                    // find entrance object
                     Entrance existingentrance = existingcontroller.getAuthDevices().get(i * 2).getEntrance();
-
+                    // find entrance-schedule object related to entrance
                     List<EntranceSchedule> exisitngEntranceSchedules = entranceScheduleRepository.findAllByEntranceIdAndDeletedFalse(existingentrance.getEntranceId());
 
                     Map<String, Object> entrance = new HashMap();
                     entrance.put("Entrance", existingentrance.getEntranceId());
 
-
+                    // resolving rrule
                     entrance.put("EntranceSchedule", GetEntranceScheduleObjectWithTime(exisitngEntranceSchedules));
 
                     Map<String, Object> existingentrancedetails = new HashMap();
@@ -693,6 +695,8 @@ public class ControllerService {
         return AuthMethod;
     }
 
+    // takes in a list of entrance schedule and return schedule
+
     public Map GetEntranceScheduleObjectWithTime(List <EntranceSchedule> exisitngEntranceSchedules) throws Exception {
 
         Map<String,Object> combinedSchedule = new HashMap<>();
@@ -724,6 +728,31 @@ public class ControllerService {
 
     // add to existing schedule and return
     public Map getScheduleMap(String rawrrule, String starttime, String endtime, Map combinedSchedule) throws Exception {
+    // add to existing schedule and return {
+    //    //            "2022-07-15":[
+    //    //                {
+    //    //                    "endtime":"23:59",
+    //    //                    "starttime":"00:00"
+    //    //                },
+    //    //                {
+    //    //                    "endtime":"12:00",
+    //    //                    "starttime":"11:59"
+    //    //                }
+    //    //            ],
+    //    //            "2023-05-30":[
+    //    //                {
+    //    //                    "endtime":"23:57",
+    //    //                    "starttime":"22:56"
+    //    //                },
+    //    //                {
+    //    //                    "endtime":"11:56",
+    //    //                    "starttime":"11:55"
+    //    //                }
+    //    //            ]
+    //    //        }
+
+    // iterate through a list of objects ( schedules ), call GetScheduleMap and keep adding to the combined schedule
+    // can refer to GetEntranceScheduleObjectWithTime for reference
 
         String startdatetime = rawrrule.split("\n")[0].split(":")[1].split("T")[0];
         String rrule = rawrrule.split("\n")[1].split(":")[1];
