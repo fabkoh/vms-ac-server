@@ -29,7 +29,7 @@ public class EventActionInOutLoader implements CommandLineRunner {
         // 1
         EventActionInputType AUTHENTICATED_SCAN = inputTypeRepository.save(
                 EventActionInputType.builder()
-                        .eventActionInputName("AUTHENTICATED_SCAN")
+                        .eventActionInputName("AUTHENTICATED SCAN")
                         .timerEnabled(false)
                         .build()
         );
@@ -37,7 +37,7 @@ public class EventActionInOutLoader implements CommandLineRunner {
         // 2
         EventActionInputType UNAUTHENTICATED_SCAN = inputTypeRepository.save(
                 EventActionInputType.builder()
-                        .eventActionInputName("UNAUTHENTICATED_SCAN")
+                        .eventActionInputName("UNAUTHENTICATED SCAN")
                         .timerEnabled(false)
                         .build()
         );
@@ -45,7 +45,7 @@ public class EventActionInOutLoader implements CommandLineRunner {
         // 3
         EventActionInputType EXIT_BUTTON_PRESSED = inputTypeRepository.save(
                 EventActionInputType.builder()
-                        .eventActionInputName("EXIT_BUTTON_PRESSED")
+                        .eventActionInputName("EXIT BUTTON PRESSED")
                         .timerEnabled(false)
                         .build()
         );
@@ -53,7 +53,7 @@ public class EventActionInOutLoader implements CommandLineRunner {
         // 4
         EventActionInputType CONTACT_OPEN_WITHOUT_AUTHENTICATION = inputTypeRepository.save(
                 EventActionInputType.builder()
-                        .eventActionInputName("CONTACT_OPEN_WITHOUT_AUTHENTICATION")
+                        .eventActionInputName("DOOR OPEN WITHOUT AUTHENTICATION")
                         .timerEnabled(true)
                         .build()
         );
@@ -61,7 +61,7 @@ public class EventActionInOutLoader implements CommandLineRunner {
         // 5
         EventActionInputType CONTACT_OPEN_WITH_AUTHENTICATION = inputTypeRepository.save(
                 EventActionInputType.builder()
-                        .eventActionInputName("CONTACT_OPEN_WITH_AUTHENTICATION")
+                        .eventActionInputName("DOOR OPEN WITH AUTHENTICATION")
                         .timerEnabled(true)
                         .build()
         );
@@ -101,7 +101,7 @@ public class EventActionInOutLoader implements CommandLineRunner {
         // 10
         EventActionInputType CONTACT_CLOSE = inputTypeRepository.save(
                 EventActionInputType.builder()
-                        .eventActionInputName("CONTACT_CLOSE")
+                        .eventActionInputName("DOOR CLOSE")
                         .timerEnabled(false)
                         .build()
         );
@@ -133,22 +133,14 @@ public class EventActionInOutLoader implements CommandLineRunner {
         );
 
         // 4
-        EventActionOutputType EMLOCK_1 = outputTypeRepository.save(
+        EventActionOutputType DOOR_UNLOCK = outputTypeRepository.save(
                 EventActionOutputType.builder()
-                        .eventActionOutputName("EMLOCK_1")
+                        .eventActionOutputName("DOOR UNLOCK")
                         .timerEnabled(false)
                         .build()
         );
 
         // 5
-        EventActionOutputType EMLOCK_2 = outputTypeRepository.save(
-                EventActionOutputType.builder()
-                        .eventActionOutputName("EMLOCK_2")
-                        .timerEnabled(false)
-                        .build()
-        );
-
-        // 6
         EventActionOutputType BUZZER = outputTypeRepository.save(
                 EventActionOutputType.builder()
                         .eventActionOutputName("BUZZER")
@@ -156,7 +148,7 @@ public class EventActionInOutLoader implements CommandLineRunner {
                         .build()
         );
 
-        // 7
+        // 6
         EventActionOutputType LED = outputTypeRepository.save(
                 EventActionOutputType.builder()
                         .eventActionOutputName("LED")
@@ -164,7 +156,7 @@ public class EventActionInOutLoader implements CommandLineRunner {
                         .build()
         );
 
-        // 8
+        // 7
         EventActionOutputType NOTIFICATION = outputTypeRepository.save(
                 EventActionOutputType.builder()
                         .eventActionOutputName("NOTIFICATION")

@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -85,8 +86,16 @@ public class EventsManagementController {
 
     // GET ALL EventActionInputType
     @GetMapping("/event/input/types")
-    public ResponseEntity<?> getAllInputTypes() {
-        return new ResponseEntity<>(inputTypeRepository.findAll(), HttpStatus.OK);
+    public ResponseEntity<?> getAllInputTypes(@RequestParam("forController") Boolean forController) {
+
+        // FIRE; GEN_IN_1,2,3
+        final Long[] typeIdsForController = {6L, 7L, 8L, 9L};
+
+        if (forController) {
+            return new ResponseEntity<>(inputTypeRepository.findAllById(Arrays.asList(typeIdsForController)),
+                    HttpStatus.OK);
+        } else
+            return new ResponseEntity<>(inputTypeRepository.findAll(), HttpStatus.OK);
     }
 
     // PUT EventActionInputType
@@ -135,8 +144,16 @@ public class EventsManagementController {
 
     // GET ALL EventActionOutputType
     @GetMapping("/event/output/types")
-    public ResponseEntity<?> getAllOutputTypes() {
-        return new ResponseEntity<>(outputTypeRepository.findAll(), HttpStatus.OK);
+    public ResponseEntity<?> getAllOutputTypes(@RequestParam("forController") Boolean forController) {
+
+        // GEN_OUT_1,2,3; NOTIFICATION
+        final Long[] typeIdsForController = {1L, 2L, 3L, 7L};
+
+        if (forController) {
+            return new ResponseEntity<>(outputTypeRepository.findAllById(Arrays.asList(typeIdsForController)),
+                    HttpStatus.OK);
+        } else
+            return new ResponseEntity<>(outputTypeRepository.findAll(), HttpStatus.OK);
     }
 
     // PUT EventActionOutputType
