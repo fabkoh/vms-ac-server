@@ -34,6 +34,7 @@ public class UniconUpdater {
 
                 controllerService.sendEntranceNameRelationship(controller.getControllerId());
                 controllerService.generate(controller.getControllerId());
+                controllerService.sendEventsManagementToController(controller);
                 System.out.println("controller" + controller.getControllerId());
             }
             catch(Exception e){
