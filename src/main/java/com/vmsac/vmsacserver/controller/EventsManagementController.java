@@ -89,11 +89,11 @@ public class EventsManagementController {
     public ResponseEntity<?> getAllInputTypes(@RequestParam("forController") Boolean forController) {
 
         // FIRE; GEN_IN_1,2,3
-        final Long[] typeIdsForController = {6L, 7L, 8L, 9L};
+        final String[] typeNamesForController = {"FIRE", "GEN_IN_1", "GEN_IN_2", "GEN_IN_3"};
 
         if (forController) {
-            return new ResponseEntity<>(inputTypeRepository.findAllById(Arrays.asList(typeIdsForController)),
-                    HttpStatus.OK);
+            return new ResponseEntity<>(inputTypeRepository.findAllByEventActionInputNameIgnoreCaseIn(
+                    typeNamesForController), HttpStatus.OK);
         } else
             return new ResponseEntity<>(inputTypeRepository.findAll(), HttpStatus.OK);
     }
@@ -147,11 +147,11 @@ public class EventsManagementController {
     public ResponseEntity<?> getAllOutputTypes(@RequestParam("forController") Boolean forController) {
 
         // GEN_OUT_1,2,3; NOTIFICATION
-        final Long[] typeIdsForController = {1L, 2L, 3L, 7L};
+        final String[] typeNamesForController = {"GEN_OUT_1", "GEN_OUT_2", "GEN_OUT_3", "NOTIFICATION"};
 
         if (forController) {
-            return new ResponseEntity<>(outputTypeRepository.findAllById(Arrays.asList(typeIdsForController)),
-                    HttpStatus.OK);
+            return new ResponseEntity<>(outputTypeRepository.findAllByEventActionOutputNameIgnoreCaseIn(
+                    typeNamesForController), HttpStatus.OK);
         } else
             return new ResponseEntity<>(outputTypeRepository.findAll(), HttpStatus.OK);
     }

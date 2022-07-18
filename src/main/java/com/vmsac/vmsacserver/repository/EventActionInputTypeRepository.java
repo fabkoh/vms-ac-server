@@ -9,4 +9,6 @@ import java.util.List;
 public interface EventActionInputTypeRepository extends JpaRepository<EventActionInputType, Long> {
     @Query("from EventActionInputType t order by t.eventActionInputName")
     public List<EventActionInputType> findAllOrderByEventActionInputNameAsc();
+
+    public List<EventActionInputType> findAllByEventActionInputNameIgnoreCaseIn(String[] names);
 }
