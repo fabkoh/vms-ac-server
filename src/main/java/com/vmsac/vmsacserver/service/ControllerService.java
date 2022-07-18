@@ -1,26 +1,22 @@
 package com.vmsac.vmsacserver.service;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
-import com.fasterxml.jackson.core.JsonProcessingException;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmsac.vmsacserver.model.*;
 import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoN;
-import com.vmsac.vmsacserver.model.accessgroupschedule.AccessGroupSchedule;
 import com.vmsac.vmsacserver.model.accessgroupschedule.AccessGroupScheduleDto;
 import com.vmsac.vmsacserver.model.authmethodschedule.AuthMethodSchedule;
 import com.vmsac.vmsacserver.model.authmethodschedule.AuthMethodScheduleDto;
 import com.vmsac.vmsacserver.model.credential.CredentialDto;
 import com.vmsac.vmsacserver.model.credentialtype.entranceschedule.EntranceSchedule;
-import com.vmsac.vmsacserver.model.credential.Credential;
 import com.vmsac.vmsacserver.repository.*;
-import io.netty.handler.codec.http.HttpResponseStatus;
 import org.dmfs.rfc5545.DateTime;
-import org.dmfs.rfc5545.recur.InvalidRecurrenceRuleException;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
-import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -28,8 +24,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.client.RestTemplate;
 
 import javax.persistence.EntityManager;
@@ -66,10 +60,22 @@ public class ControllerService {
     private PersonService personService;
 
     @Autowired
+    private EventsManagementService emService;
+
+    @Autowired
+    private InputEventRepository inputEventRepo;
+
+    @Autowired
+    private OutputEventRepository outputEventRepo;
+
+    @Autowired
     private AccessGroupEntranceNtoNRepository accessGroupEntranceNtoNRepository;
 
     @Autowired
     private ControllerRepository controllerRepository;
+
+    @Autowired
+    private EntranceRepository entranceRepo;
 
     @PersistenceContext
     EntityManager entityManager;
@@ -498,6 +504,54 @@ public class ControllerService {
 //        }
     }
 
+    public ResponseEntity<?> sendEventsManagementToController(Controller controller) {
+
+        List<EventsManagement> toSend = controller.getEventsManagements();
+
+        Set<Long> entranceIds = new HashSet<>();
+        for (AuthDevice ad : controller.getAuthDevices()) {
+            if (ad.getEntrance() != null)
+                entranceIds.add(ad.getEntrance().getEntranceId());
+        }
+
+        List<Entrance> entrances = entranceRepo.findByEntranceIdInAndDeletedFalse(entranceIds);
+        entrances.forEach(ent -> toSend.addAll(ent.getEventsManagements()));
+
+        List<EventsManagementPiDto> controllerEms = toSend.stream()
+                .map(em -> {
+
+                            Map<String, Object> schedules = new HashMap<>();
+
+                            for (TriggerSchedules ts : em.getTriggerSchedules())
+                                try {
+                                    schedules = getScheduleMap(ts.getTimeStart().truncatedTo(ChronoUnit.MINUTES).toString(),
+                                            ts.getTimeEnd().truncatedTo(ChronoUnit.MINUTES).toString(), ts.getRrule(), schedules);
+                                } catch (Exception e) {
+                                    schedules = null;
+                                }
+
+                            return new EventsManagementPiDto(
+                                    em.getEventsManagementId(), em.getEventsManagementName(),
+                                    inputEventRepo.findAllById(em.getInputEventsId()),
+                                    outputEventRepo.findAllById(em.getOutputActionsId()),
+                                    schedules,
+                                    em.getEntrance() == null ? null : EventsManagementPiDto.getEntranceId(em),
+                                    em.getController() == null ? null : EventsManagementPiDto.getControllerId(em)
+                            );
+                        }
+                ).collect(Collectors.toList());
+
+        String resourceUrl = "http://"+ controller.getControllerIP()+":5000/api/eventActionTriggers";
+        RestTemplate restTemplate = new RestTemplate();
+        HttpEntity<List> request = new HttpEntity<>(controllerEms);
+        ResponseEntity<String> productCreateResponse =
+                restTemplate.exchange(resourceUrl, HttpMethod.POST, request, String.class);
+
+        return new ResponseEntity<>(productCreateResponse.getBody(), productCreateResponse.getStatusCode());
+
+
+    }
+
     public void save(Controller existingcontroller) {
         controllerRepository.save(existingcontroller);
     }
@@ -621,7 +675,7 @@ public class ControllerService {
                     ObjectMapper oMapper = new ObjectMapper();
                     // add to existing schedule
                     Map existingSchedule = oMapper.convertValue(existingAuthMethodAndSchedule.get("Schedule"),Map.class);
-                    authMethodAndSchedule.put("Schedule", GetScheduleMap(rawrrule,starttime,endtime,existingSchedule));
+                    authMethodAndSchedule.put("Schedule", getScheduleMap(rawrrule,starttime,endtime,existingSchedule));
                     authMethodExists =  true;
                     break;
                 }
@@ -630,7 +684,7 @@ public class ControllerService {
             if (!authMethodExists){
                 // add method and schedule
                 authMethodAndSchedule.put("Method", authMethodSchedule.getAuthMethod().getAuthMethodDesc());
-                authMethodAndSchedule.put("Schedule", GetScheduleMap(rawrrule,starttime,endtime,new HashMap<>()));
+                authMethodAndSchedule.put("Schedule", getScheduleMap(rawrrule,starttime,endtime,new HashMap<>()));
             }
 
             AuthMethod.add(authMethodAndSchedule);
@@ -648,7 +702,7 @@ public class ControllerService {
             String rawrrule = singleEntranceSchedule.getRrule();
             String starttime = singleEntranceSchedule.getTimeStart();
             String endtime = singleEntranceSchedule.getTimeEnd();
-            combinedSchedule = GetScheduleMap(rawrrule,starttime,endtime,combinedSchedule);
+            combinedSchedule = getScheduleMap(rawrrule,starttime,endtime,combinedSchedule);
         }
 //        System.out.println(combinedSchedule);
         return combinedSchedule;
@@ -662,14 +716,14 @@ public class ControllerService {
             String rawrrule = singleAccessGroupSchedule.getRrule();
             String starttime = singleAccessGroupSchedule.getTimeStart();
             String endtime = singleAccessGroupSchedule.getTimeEnd();
-            combinedSchedule = GetScheduleMap(rawrrule,starttime,endtime,combinedSchedule);
+            combinedSchedule = getScheduleMap(rawrrule,starttime,endtime,combinedSchedule);
         }
 //        System.out.println(combinedSchedule);
         return combinedSchedule;
     }
 
     // add to existing schedule and return
-    public Map GetScheduleMap(String rawrrule, String starttime, String endtime, Map combinedSchedule) throws Exception {
+    public Map getScheduleMap(String rawrrule, String starttime, String endtime, Map combinedSchedule) throws Exception {
 
         String startdatetime = rawrrule.split("\n")[0].split(":")[1].split("T")[0];
         String rrule = rawrrule.split("\n")[1].split(":")[1];
