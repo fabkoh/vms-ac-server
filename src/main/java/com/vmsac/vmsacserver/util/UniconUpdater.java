@@ -21,9 +21,9 @@ public class UniconUpdater {
     }
 
     @Scheduled(cron = "@monthly")
-    public List<Controller> updateUnicons() {
+    public List<Long> updateUnicons() {
         List<Controller> controllers = controllerService.findAllNotDeleted();
-        List<Controller> errors = new ArrayList<Controller>() ;
+        List<Long> errors = new ArrayList<Long>() ;
 
         if (controllers.isEmpty()){
             return errors;
@@ -38,7 +38,7 @@ public class UniconUpdater {
                 System.out.println("controller" + controller.getControllerId());
             }
             catch(Exception e){
-                errors.add(controller);
+                errors.add(controller.getControllerId());
             }
         });
         return errors;

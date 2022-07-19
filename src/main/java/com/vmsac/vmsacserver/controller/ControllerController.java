@@ -553,7 +553,7 @@ public class ControllerController {
 
     @PostMapping("/uniconUpdater")
     public ResponseEntity<?> testing() {
-        List<Controller> response = uniconUpdater.updateUnicons();
+        List<Long> response = uniconUpdater.updateUnicons();
         System.out.println(response);
         if (response.isEmpty()){
             return new ResponseEntity<>(HttpStatus.OK);
