@@ -550,8 +550,7 @@ public class ControllerService {
         ResponseEntity<String> productCreateResponse =
                 restTemplate.exchange(resourceUrl, HttpMethod.POST, request, String.class);
 
-        return new ResponseEntity<>(productCreateResponse.getBody(), productCreateResponse.getStatusCode());
-
+        return ResponseEntity.ok().build();
 
     }
 
