@@ -36,7 +36,7 @@ public class AuthDeviceService {
     @Autowired
     private AuthMethodScheduleRepository authMethodScheduleRepository;
 
-    long defaultAuthMethodId = 2L;
+    long defaultAuthMethodId = 9L;
 
     public void createAuthDevices(Controller controller) throws Exception{
         AuthMethod defaultAuthMethod = authMethodRepository.findById(defaultAuthMethodId).get();

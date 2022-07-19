@@ -130,6 +130,7 @@ public class DataLoader implements CommandLineRunner {
                         .isActive(true)
                         .deleted(false)
                         .used(false)
+                        .thirdPartyOption("N.A.")
                         .build()
         );
 
@@ -139,6 +140,7 @@ public class DataLoader implements CommandLineRunner {
                         .isActive(true)
                         .deleted(false)
                         .used(false)
+                        .thirdPartyOption("N.A.")
                         .build()
         );
 
@@ -148,6 +150,7 @@ public class DataLoader implements CommandLineRunner {
                         .isActive(false)
                         .deleted(false)
                         .used(false)
+                        .thirdPartyOption("N.A.")
                         .build()
         );
 

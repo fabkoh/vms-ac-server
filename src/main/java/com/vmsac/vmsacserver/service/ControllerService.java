@@ -480,6 +480,7 @@ public class ControllerService {
 
 
                     existingentrancedetails.put("AccessGroups", accessGroups);
+                    entrance.put("ThirdPartyOptions", existingentrance.getThirdPartyOption());
                     entrance.put("EntranceDetails", existingentrancedetails);
                     entrance.put("isActive", !existingentrance.getIsActive());
 
