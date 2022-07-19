@@ -547,8 +547,7 @@ public class ControllerService {
         String resourceUrl = "http://"+ controller.getControllerIP()+":5000/api/eventActionTriggers";
         RestTemplate restTemplate = new RestTemplate();
         HttpEntity<List> request = new HttpEntity<>(controllerEms);
-        ResponseEntity<String> productCreateResponse =
-                restTemplate.exchange(resourceUrl, HttpMethod.POST, request, String.class);
+        restTemplate.exchange(resourceUrl, HttpMethod.POST, request, ResponseEntity.class);
 
         return ResponseEntity.ok().build();
 
