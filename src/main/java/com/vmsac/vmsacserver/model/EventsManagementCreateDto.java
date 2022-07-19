@@ -24,7 +24,7 @@ public class EventsManagementCreateDto {
 
     @NotNull
     @NotEmpty
-    private List<OutputEvent> outputEvents;
+    private List<OutputEvent> outputActions;
 
     private List<Integer> entranceIds;
 

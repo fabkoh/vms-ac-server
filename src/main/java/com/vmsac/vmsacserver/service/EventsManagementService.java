@@ -67,7 +67,7 @@ public class EventsManagementService {
             // create different input and output events for each eventsManagement
             // in case users want to modify input/output events
             List<Long> inputEventsId = createInputEvents(dto.getInputEvents());
-            List<Long> outputActionsId = createOutputActions(dto.getOutputEvents());
+            List<Long> outputActionsId = createOutputActions(dto.getOutputActions());
 
             Optional<Controller> opController = controllerRepository.findByControllerIdEqualsAndDeletedFalse(controllerId.longValue());
             if (opController.isPresent()) {
@@ -90,7 +90,7 @@ public class EventsManagementService {
             // create different input and output events for each eventsManagement
             // in case users want to modify input/output events
             List<Long> inputEventsId = createInputEvents(dto.getInputEvents());
-            List<Long> outputActionsId = createOutputActions(dto.getOutputEvents());
+            List<Long> outputActionsId = createOutputActions(dto.getOutputActions());
 
             Optional<Entrance> opEntrance = entranceRepository.findByEntranceIdAndDeletedFalse(entranceId.longValue());
             if (opEntrance.isPresent()) {
