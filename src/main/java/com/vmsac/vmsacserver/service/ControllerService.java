@@ -363,19 +363,21 @@ public class ControllerService {
         return HttpStatus.BAD_REQUEST;
     }
 
-    public HttpStatus generate(Long controllerId)throws Exception{
+    public HttpStatus generate(Long controllerId) {
 
             // find controller object
             Controller existingcontroller = controllerRepository.getById(controllerId);
             String MASTERPASSWORD = "666666";
 
-            List<Map> RulesSet = new ArrayList<Map>(1);
+            List<Object> RulesSet = new ArrayList<>(1);
 
             // iterate twice, find entrance 1 and 2 related to controller
             for ( int i=0; i<2;i++) {
-                try {
-                    // find entrance object
-                    Entrance existingentrance = existingcontroller.getAuthDevices().get(i * 2).getEntrance();
+//                try {
+                // find entrance object
+                Entrance existingentrance = existingcontroller.getAuthDevices().get(i * 2).getEntrance();
+
+                if (!(existingentrance == null)) {
                     // find entrance-schedule object related to entrance
                     List<EntranceSchedule> exisitngEntranceSchedules = entranceScheduleRepository.findAllByEntranceIdAndDeletedFalse(existingentrance.getEntranceId());
 
@@ -383,7 +385,11 @@ public class ControllerService {
                     entrance.put("Entrance", existingentrance.getEntranceId());
 
                     // resolving rrule
-                    entrance.put("EntranceSchedule", GetEntranceScheduleObjectWithTime(exisitngEntranceSchedules));
+                    try {
+                        entrance.put("EntranceSchedule", GetEntranceScheduleObjectWithTime(exisitngEntranceSchedules));
+                    } catch (Exception e) {
+                        System.out.println("ERROR WITH EntranceSchedule" + e);
+                    }
 
                     Map<String, Object> existingentrancedetails = new HashMap();
                     existingentrancedetails.put("Antipassback", "No");
@@ -404,7 +410,11 @@ public class ControllerService {
 
                     Device1.put("Direction", exisitngDevice1.getAuthDeviceDirection().substring(3));
                     Device1.put("defaultAuthMethod", exisitngDevice1.getDefaultAuthMethod().getAuthMethodDesc());
-                    Device1.put("AuthMethod", GetAuthMethodScheduleObjectWithTime(authMethodScheduleService.findByDeviceId(exisitngDevice1.getAuthDeviceId())));
+                    try {
+                        Device1.put("AuthMethod", GetAuthMethodScheduleObjectWithTime(authMethodScheduleService.findByDeviceId(exisitngDevice1.getAuthDeviceId())));
+                    } catch (Exception e) {
+                        System.out.println("ERROR WITH AUTH METHOD SCHEDULE 1" + e);
+                    }
 
                     Map<String, Object> Device2 = new HashMap();
 
@@ -416,7 +426,11 @@ public class ControllerService {
 
                     Device2.put("Direction", exisitngDevice2.getAuthDeviceDirection().substring(3));
                     Device2.put("defaultAuthMethod", exisitngDevice2.getDefaultAuthMethod().getAuthMethodDesc());
-                    Device2.put("AuthMethod", GetAuthMethodScheduleObjectWithTime(authMethodScheduleService.findByDeviceId(exisitngDevice2.getAuthDeviceId())));
+                    try {
+                        Device2.put("AuthMethod", GetAuthMethodScheduleObjectWithTime(authMethodScheduleService.findByDeviceId(exisitngDevice2.getAuthDeviceId())));
+                    } catch (Exception e) {
+                        System.out.println("ERROR WITH AUTH METHOD SCHEDULE 2" + e);
+                    }
 
                     authdevices.put("IN", Device1);
                     authdevices.put("OUT", Device2);
@@ -424,7 +438,7 @@ public class ControllerService {
                     existingentrancedetails.put("AuthenticationDevices", authdevices);
 
                     // for all access group in entrances
-//                accessgroups.put()
+//
                     List<Map> accessGroups = new ArrayList<Map>(1);
 
                     List<AccessGroupEntranceNtoN> listOfAccessGroupsNtoN = accessGroupEntranceNtoNRepository.findAllByEntranceEntranceIdAndDeletedFalse(existingentrance.getEntranceId());
@@ -451,8 +465,7 @@ public class ControllerService {
                                 if (personcredentials.containsKey(credType)) {
                                     temp = personcredentials.get(credType);
                                     temp.add(credentialDto.getCredUid());
-                                }
-                                else{
+                                } else {
 
                                     temp.add(credentialDto.getCredUid());
                                 }
@@ -464,7 +477,11 @@ public class ControllerService {
                         }
 
                         personsAndSchedule.put("Persons", EditedListofPersons);
-                        personsAndSchedule.put("Schedule", GetAccessGroupScheduleObjectWithTime(ListofSchedule));
+                        try {
+                            personsAndSchedule.put("Schedule", GetAccessGroupScheduleObjectWithTime(ListofSchedule));
+                        } catch (Exception e) {
+                            System.out.println("ERROR WITH Access Group Schedule" + e);
+                        }
 
                         oneAccessGroup.put(accessGroupEntranceNtoN.getAccessGroup().getAccessGroupId(), personsAndSchedule);
 
@@ -485,21 +502,31 @@ public class ControllerService {
                     entrance.put("isActive", !existingentrance.getIsActive());
 
                     RulesSet.add(entrance);
-                } catch (Exception e) {
-                    System.out.println(e.toString());
+//                } catch (Exception e) {
+//
+//                    System.out.println("ERROR "+e);
+//                }
+                }else{
+                    System.out.println(existingentrance);
                 }
             }
+        System.out.println("SENDING CREDOCCUR TO CONTROLLER IP "+ existingcontroller.getControllerIP());
 
-                String resourceUrl = "http://"+ existingcontroller.getControllerIP()+":5000/api/credOccur";
-                RestTemplate restTemplate = new RestTemplate();
-                HttpEntity<List> request = new HttpEntity<>
-                        (RulesSet);
+        try{
 
-                ResponseEntity<String> productCreateResponse =
-                        restTemplate.exchange(resourceUrl, HttpMethod.POST, request, String.class);
+            String resourceUrl = "http://"+ existingcontroller.getControllerIP()+":5000/api/credOccur";
+            RestTemplate restTemplate = new RestTemplate();
+            HttpEntity<List> request = new HttpEntity<>(RulesSet);
+//            System.out.println(request);
+            System.out.println("CHECKPOINT");
+            restTemplate.exchange(resourceUrl, HttpMethod.POST, request, ResponseEntity.class);
 
                 //call entrancename function
-                return HttpStatus.OK;
+                return HttpStatus.OK;}
+        catch (Exception e){
+            System.out.println(e);
+            return HttpStatus.OK;
+        }
 
 //        }
 //        catch(Exception e){
@@ -508,7 +535,7 @@ public class ControllerService {
     }
 
     public ResponseEntity<?> sendEventsManagementToController(Controller controller) {
-
+        System.out.println("SENDING EVENTMANAGEMENT TO CONTROLLER IP "+ controller.getControllerIP().toString());
         List<EventsManagement> toSend = controller.getEventsManagements();
 
         Set<Long> entranceIds = new HashSet<>();
@@ -547,8 +574,8 @@ public class ControllerService {
         String resourceUrl = "http://"+ controller.getControllerIP()+":5000/api/eventActionTriggers";
         RestTemplate restTemplate = new RestTemplate();
         HttpEntity<List> request = new HttpEntity<>(controllerEms);
-        restTemplate.exchange(resourceUrl, HttpMethod.POST, request, ResponseEntity.class);
-
+        ResponseEntity<ResponseEntity> productCreateResponse = restTemplate.exchange(resourceUrl, HttpMethod.POST, request, ResponseEntity.class);
+//        System.out.println(productCreateResponse.getStatusCode());
         return ResponseEntity.ok().build();
 
     }
