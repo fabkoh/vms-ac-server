@@ -27,15 +27,15 @@ public class TriggerSchedulesService {
 
     public Optional<TriggerSchedules> create(TriggerSchedulesCreateDto dto) {
 
-        LocalTime timeStart = dateTimeParser.toLocalTime(dto.getTimeStart());
-        LocalTime timeEnd = dateTimeParser.toLocalTime(dto.getTimeEnd());
+//        LocalTime timeStart = dateTimeParser.toLocalTime(dto.getTimeStart());
+//        LocalTime timeEnd = dateTimeParser.toLocalTime(dto.getTimeEnd());
 
         Optional<EventsManagement> opEm = eventsManagementRepository.findByDeletedFalseAndEventsManagementId(dto.getEventsManagementId());
 
         if (opEm.isPresent()) {
             return Optional.of(triggerSchedulesRepository.save(
                     new TriggerSchedules(null, dto.getTriggerName(),
-                            dto.getRrule(), timeStart, timeEnd, false, opEm.get())
+                            dto.getRrule(), dto.getTimeStart(), dto.getTimeEnd(), false, opEm.get())
                     )
             );
         }

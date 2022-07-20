@@ -40,11 +40,11 @@ public class TriggerSchedules {
 
     @Column(name = "timestart")
     @NotNull
-    private LocalTime timeStart;
+    private String timeStart;
 
     @Column(name = "timeend")
     @NotNull
-    private LocalTime timeEnd;
+    private String timeEnd;
 
     @Column(name = "deleted")
     @JsonIgnore

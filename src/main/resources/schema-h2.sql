@@ -242,8 +242,8 @@ CREATE TABLE IF NOT EXISTS TriggerSchedules(
    triggerScheduleId SERIAL NOT NULL UNIQUE ,
    triggerName VARCHAR(255) NOT NULL ,
    rrule VARCHAR(255) NOT NULL ,
-   timeStart TIME NOT NULL ,
-   timeEnd TIME NOT NULL ,
+   timeStart VARCHAR(128) NOT NULL ,
+   timeEnd VARCHAR(128) NOT NULL ,
    eventsManagementId INT REFERENCES EventsManagement(eventsManagementId),
    deleted BOOLEAN NOT NULL ,
    PRIMARY KEY (triggerScheduleId)

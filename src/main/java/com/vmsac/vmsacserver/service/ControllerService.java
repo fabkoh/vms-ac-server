@@ -554,8 +554,8 @@ public class ControllerService {
 
                             for (TriggerSchedules ts : em.getTriggerSchedules())
                                 try {
-                                    schedules = getScheduleMap(ts.getTimeStart().truncatedTo(ChronoUnit.MINUTES).toString(),
-                                            ts.getTimeEnd().truncatedTo(ChronoUnit.MINUTES).toString(), ts.getRrule(), schedules);
+                                    schedules = getScheduleMap(ts.getTimeStart(),
+                                            ts.getTimeEnd(), ts.getRrule(), schedules);
                                 } catch (Exception e) {
                                     schedules = null;
                                 }
