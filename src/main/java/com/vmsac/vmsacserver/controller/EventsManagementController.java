@@ -203,7 +203,7 @@ public class EventsManagementController {
     }
 
     // GET EventsManagement
-    @GetMapping("eventsmanagements")
+    @GetMapping("eventsmanagement")
     public ResponseEntity<?> getAllEventsMangement() {
         List<EventsManagement> ems = new ArrayList<>();
 
@@ -221,7 +221,7 @@ public class EventsManagementController {
     }
 
     // GET EventsManagement Entrance
-    @GetMapping("eventsmanagements/entrance/{entranceId}")
+    @GetMapping("eventsmanagement/entrance/{entranceId}")
     public ResponseEntity<?> getAllEventsMangementForEntrance(@PathVariable Long entranceId) {
         if (entranceRepository.existsByEntranceId(entranceId))
             return new ResponseEntity<>(entranceRepository.findByEntranceIdAndDeletedFalse(entranceId)
@@ -233,7 +233,7 @@ public class EventsManagementController {
     }
 
     // GET EventsManagement Controller
-    @GetMapping("eventsmanagements/controller/{controllerId}")
+    @GetMapping("eventsmanagement/controller/{controllerId}")
     public ResponseEntity<?> getAllEventsMangementForController(@PathVariable Long controllerId) {
         Optional<Controller> optionalController = controllerService.findById(controllerId);
         if (optionalController.isEmpty()){
@@ -306,7 +306,40 @@ public class EventsManagementController {
         else return ResponseEntity.badRequest().build();
     }
 
-    // DELETE One EventsManagement
+    @PutMapping("eventsmanagement/add")
+    public ResponseEntity<?> addEventsManagement(@RequestBody @Valid List<EventsManagementCreateDto> dtos,
+                                                    @RequestParam("controllerIds") List<Integer> controllerIds,
+                                                    @RequestParam("entranceIds") List<Integer> entranceIds) {
+        for (Integer controllerId : controllerIds) {
+            Optional<Controller> opCon = controllerRepository.findByControllerIdEqualsAndDeletedFalse(controllerId.longValue());
+            if (opCon.isPresent())
+                for (EventsManagement em : opCon.get().getEventsManagements()) {
+                    eventsManagementService.deleteById(em.getEventsManagementId());
+                }
+        }
+
+        for (Integer entranceId : entranceIds) {
+            Optional<Entrance> opEnt = entranceRepository.findByEntranceIdAndDeletedFalse(entranceId.longValue());
+            if (opEnt.isPresent())
+                for (EventsManagement em : opEnt.get().getEventsManagements()) {
+                    eventsManagementService.deleteById(em.getEventsManagementId());
+                }
+        }
+
+        List<EventsManagement> eventsManagements = new ArrayList<>();
+
+        for (EventsManagementCreateDto dto : dtos) {
+            dto.setControllerIds(controllerIds);
+            dto.setEntranceIds(entranceIds);
+            eventsManagements.addAll(eventsManagementService.create(dto));
+        }
+        if (eventsManagements.size() > 0)
+            return new ResponseEntity<>(eventsManagements.stream().map(em -> {return eventsManagementService.toDto(em);})
+                    .collect(Collectors.toList()), HttpStatus.CREATED);
+        else return ResponseEntity.badRequest().build();
+    }
+
+    // DELETE EventsManagement
     @DeleteMapping("eventsmanagement/{emId}")
     public ResponseEntity<?> deleteEventsManagement(@PathVariable Long emId) {
         if (eventsManagementRepository.findById(emId).isPresent()) {
