@@ -37,12 +37,14 @@ public class EventsManagementPiDto {
 
 @NoArgsConstructor
 @AllArgsConstructor
+@Data
 class EntranceIdOnly {
     private Long entranceId;
 }
 
 @NoArgsConstructor
 @AllArgsConstructor
+@Data
 class ControllerIdOnly {
     private Long controllerId;
 }

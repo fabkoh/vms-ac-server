@@ -518,8 +518,8 @@ public class ControllerService {
             RestTemplate restTemplate = new RestTemplate();
             HttpEntity<List> request = new HttpEntity<>(RulesSet);
 //            System.out.println(request);
-            System.out.println("CHECKPOINT");
-            restTemplate.exchange(resourceUrl, HttpMethod.POST, request, ResponseEntity.class);
+            System.out.println("CHECKPOINT CredOccur");
+            restTemplate.exchange(resourceUrl, HttpMethod.POST, request, String.class);
 
                 //call entrancename function
                 return HttpStatus.OK;}
@@ -537,49 +537,52 @@ public class ControllerService {
     public ResponseEntity<?> sendEventsManagementToController(Controller controller) {
         System.out.println("SENDING EVENTMANAGEMENT TO CONTROLLER IP "+ controller.getControllerIP().toString());
         List<EventsManagement> toSend = controller.getEventsManagements();
+        try {
+            Set<Long> entranceIds = new HashSet<>();
+            for (AuthDevice ad : controller.getAuthDevices()) {
+                if (ad.getEntrance() != null)
+                    entranceIds.add(ad.getEntrance().getEntranceId());
+            }
 
-        Set<Long> entranceIds = new HashSet<>();
-        for (AuthDevice ad : controller.getAuthDevices()) {
-            if (ad.getEntrance() != null)
-                entranceIds.add(ad.getEntrance().getEntranceId());
+            List<Entrance> entrances = entranceRepo.findByEntranceIdInAndDeletedFalse(entranceIds);
+            entrances.forEach(ent -> toSend.addAll(ent.getEventsManagements()));
+            System.out.println("CHECKPOINT EMS 1");
+            List<EventsManagementPiDto> controllerEms = toSend.stream()
+                    .map(em -> {
+
+                                Map<String, Object> schedules = new HashMap<>();
+
+                                for (TriggerSchedules ts : em.getTriggerSchedules())
+                                    try {
+
+                                        schedules = getScheduleMap(ts.getRrule(),ts.getTimeStart(),
+                                                ts.getTimeEnd(),  schedules);
+                                    } catch (Exception e) {
+                                        System.out.println("ERROR TS:" + e);
+                                    }
+
+                                return new EventsManagementPiDto(
+                                        em.getEventsManagementId(), em.getEventsManagementName(),
+                                        inputEventRepo.findAllById(em.getInputEventsId()),
+                                        outputEventRepo.findAllById(em.getOutputActionsId()),
+                                        schedules,
+                                        em.getEntrance() == null ? null : EventsManagementPiDto.getEntranceId(em),
+                                        em.getController() == null ? null : EventsManagementPiDto.getControllerId(em)
+                                );
+                            }
+                    ).collect(Collectors.toList());
+
+            System.out.println("CHECKPOINT EMS 2");
+
+            String resourceUrl = "http://" + controller.getControllerIP() + ":5000/api/eventActionTriggers";
+            RestTemplate restTemplate = new RestTemplate();
+            HttpEntity<List> request = new HttpEntity<>(controllerEms);
+            restTemplate.exchange(resourceUrl, HttpMethod.POST, request, String.class);
+            //        System.out.println(productCreateResponse.getStatusCode());
         }
-
-        List<Entrance> entrances = entranceRepo.findByEntranceIdInAndDeletedFalse(entranceIds);
-        entrances.forEach(ent -> toSend.addAll(ent.getEventsManagements()));
-
-        List<EventsManagementPiDto> controllerEms = toSend.stream()
-                .map(em -> {
-
-                            Map<String, Object> schedules = new HashMap<>();
-
-                            for (TriggerSchedules ts : em.getTriggerSchedules())
-                                try {
-                                    schedules = getScheduleMap(ts.getTimeStart(),
-                                            ts.getTimeEnd(), ts.getRrule(), schedules);
-                                } catch (Exception e) {
-                                    schedules = null;
-                                }
-
-                            return new EventsManagementPiDto(
-                                    em.getEventsManagementId(), em.getEventsManagementName(),
-                                    inputEventRepo.findAllById(em.getInputEventsId()),
-                                    outputEventRepo.findAllById(em.getOutputActionsId()),
-                                    schedules,
-                                    em.getEntrance() == null ? null : EventsManagementPiDto.getEntranceId(em),
-                                    em.getController() == null ? null : EventsManagementPiDto.getControllerId(em)
-                            );
-                        }
-                ).collect(Collectors.toList());
-
-        String resourceUrl = "http://"+ controller.getControllerIP()+":5000/api/eventActionTriggers";
-        RestTemplate restTemplate = new RestTemplate();
-        HttpEntity<List> request = new HttpEntity<>(controllerEms);
-
-        ResponseEntity<ResponseEntity> productCreateResponse = restTemplate.exchange(resourceUrl, HttpMethod.POST, request, ResponseEntity.class);
-//        System.out.println(productCreateResponse.getStatusCode());
-
-        restTemplate.exchange(resourceUrl, HttpMethod.POST, request, String.class);
-
+        catch(Exception e){
+            System.out.println("ERROR: "+e);
+        }
         return ResponseEntity.ok().build();
 
     }
