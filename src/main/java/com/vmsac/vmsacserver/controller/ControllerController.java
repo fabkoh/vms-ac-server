@@ -5,6 +5,7 @@ import com.vmsac.vmsacserver.model.authmethod.AuthMethod;
 import com.vmsac.vmsacserver.repository.AuthDeviceRepository;
 import com.vmsac.vmsacserver.repository.AuthMethodRepository;
 import com.vmsac.vmsacserver.repository.ControllerRepository;
+import com.vmsac.vmsacserver.repository.GENConfigsRepository;
 import com.vmsac.vmsacserver.service.AuthDeviceService;
 import com.vmsac.vmsacserver.service.ControllerService;
 import com.vmsac.vmsacserver.service.EntranceService;
@@ -52,6 +53,9 @@ public class ControllerController {
 
     @Autowired
     private AuthMethodRepository authMethodRepository;
+
+    @Autowired
+    private GENConfigsRepository genRepo;
 
     @GetMapping("/controllers")
     public List<Controller> getcontrollers() {
@@ -321,7 +325,7 @@ public class ControllerController {
             AuthDevice authDevice2 = authDeviceService.findbyId(newAuthDevices.get(1).getAuthDeviceId()).get();
 
             if (entranceid!=null){
-                if (entranceService.findById(entranceid).isEmpty() && entranceid != null){
+                if (entranceService.findById(entranceid).isEmpty()){
                     Map<String, String> errors = new HashMap<>();
                     errors.put("Error", "EntranceId "+entranceid+" does not exist" );
                     return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
@@ -367,20 +371,32 @@ public class ControllerController {
                 AuthDevice newSingleAuthDevice = newAuthDevices.get(i);
                 AuthDevice authdevice = authDeviceService.findbyId(newSingleAuthDevice.getAuthDeviceId()).get();
                 entranceService.setEntranceUsed(authdevice.getEntrance(),false);
-                if ( entranceid == null && authdevice.getEntrance() != null){
+                if (entranceid == null && authdevice.getEntrance() != null) {
                     // set previous entrance to not used
                     // set current to used
-                    entranceService.setEntranceUsed(entranceService.findById(authdevice.getEntrance().getEntranceId()).get(),false);
-                    updated.add(authDeviceService.AuthDeviceEntranceUpdate(authdevice, null));
-                }
-                else{
-                    entranceService.setEntranceUsed(entranceService.findById(entranceid).get(),true);
-                    updated.add(authDeviceService.AuthDeviceEntranceUpdate(authdevice, entranceService.findById(entranceid).get()));
-                }
+                    try {
+                        updated.add(authDeviceService.AuthDeviceEntranceUpdate(authdevice, null));
+                        entranceService.setEntranceUsed(entranceService.findById(authdevice.getEntrance().getEntranceId()).get(),false);
+                    } catch (IllegalArgumentException e) {
+                        return new ResponseEntity<>("Cannot assign this entrance to this auth device because of" +
+                                " conflict between in GEN In/Out configure. Please remove any use of this controller's" +
+                                " " + e.getMessage(), HttpStatus.BAD_REQUEST);
+                    }
 
+                }
+                else {
+                    try {
+                        updated.add(authDeviceService.AuthDeviceEntranceUpdate(authdevice, entranceService.findById(entranceid).get()));
+                        entranceService.setEntranceUsed(entranceService.findById(entranceid).get(),true);
+                    } catch (IllegalArgumentException e) {
+                        return new ResponseEntity<>("Cannot assign this entrance to this auth device because of" +
+                                " conflict between in GEN In/Out configure. Please remove any use of this controller's" +
+                                " " + e.getMessage(), HttpStatus.BAD_REQUEST);
+                    }
+                }
             }
 
-            catch(Exception e){
+            catch(Exception e) {
                 return new ResponseEntity<>(e.toString(), HttpStatus.BAD_REQUEST);
                 }
         }
@@ -565,16 +581,16 @@ public class ControllerController {
 
     }
 
-    // GET All EventsManagement of the Controller with the specified Id
-    @GetMapping("api/controller/{id}/eventsmanagement")
-    public ResponseEntity<?> getEventsManagement(@PathVariable Long id) {
-        if (controllerRepository.existsByDeletedFalseAndAndControllerId(id)) {
-            return new ResponseEntity<>(controllerRepository
-                    .findByControllerIdEqualsAndDeletedFalse(id)
-                    .get()
-                    .getEventsManagements(), HttpStatus.OK);
+    @PutMapping("/controller/reset/config")
+    public ResponseEntity<?> resetConfig(@RequestParam("controllerIds") List<Long> controllerIds) {
+        for (Long controllerId : controllerIds) {
+            List<GENConfigs> gens = genRepo.findByController_ControllerId(controllerId);
+            gens.forEach(g -> {
+                g.setStatus(null);
+                genRepo.save(g);
+            });
         }
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.ok().build();
     }
 
 }

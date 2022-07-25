@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface GENConfigsRepository extends JpaRepository<GENConfigs, Long> {
     GENConfigs getByController_ControllerIdAndPinName(Long controllerId, String pinName);
+
+    List<GENConfigs> findByController_ControllerId(Long controllerId);
 }

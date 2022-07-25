@@ -128,47 +128,47 @@ public class EventsManagementService {
         Optional<EventsManagement> opEm = eventsManagementRepository.findByDeletedFalseAndEventsManagementId(id);
         if (opEm.isPresent()) {
             EventsManagement em = opEm.get();
-
-            List<InputEvent> inputs = inputEventRepository.findAllById(em.getInputEventsId());
-            List<OutputEvent> outputs = outputEventRepository.findAllById(em.getOutputActionsId());
-
-            inputs.forEach(e -> {
-                String name = e.getEventActionInputType().getEventActionInputName();
-                if (name.startsWith("GEN_IN")) {
-                    Controller c = em.getController();
-                    Entrance ent = em.getEntrance();
-                    if (c == null) {
-                        List<AuthDevice> devices = ent.getEntranceAuthDevices();
-                        if (!devices.isEmpty()) {
-                            c = devices.get(0).getController();
-                        }
-                    }
-                    if (c != null) {
-                        GENConfigs g = genRepo.getByController_ControllerIdAndPinName(c.getControllerId(), name.substring(7));
-                        g.setStatus(null);
-                        genRepo.save(g);
-                    }
-                }
-            });
-
-            outputs.forEach(e -> {
-                String name = e.getEventActionOutputType().getEventActionOutputName();
-                if (name.startsWith("GEN_OUT")) {
-                    Controller c = em.getController();
-                    Entrance ent = em.getEntrance();
-                    if (c == null) {
-                        List<AuthDevice> devices = ent.getEntranceAuthDevices();
-                        if (!devices.isEmpty()) {
-                            c = devices.get(0).getController();
-                        }
-                    }
-                    if (c != null) {
-                        GENConfigs g = genRepo.getByController_ControllerIdAndPinName(c.getControllerId(), name.substring(8));
-                        g.setStatus(null);
-                        genRepo.save(g);
-                    }
-                }
-            });
+//
+//            List<InputEvent> inputs = inputEventRepository.findAllById(em.getInputEventsId());
+//            List<OutputEvent> outputs = outputEventRepository.findAllById(em.getOutputActionsId());
+//
+//            inputs.forEach(e -> {
+//                String name = e.getEventActionInputType().getEventActionInputName();
+//                if (name.startsWith("GEN_IN")) {
+//                    Controller c = em.getController();
+//                    Entrance ent = em.getEntrance();
+//                    if (c == null) {
+//                        List<AuthDevice> devices = ent.getEntranceAuthDevices();
+//                        if (!devices.isEmpty()) {
+//                            c = devices.get(0).getController();
+//                        }
+//                    }
+//                    if (c != null) {
+//                        GENConfigs g = genRepo.getByController_ControllerIdAndPinName(c.getControllerId(), name.substring(7));
+//                        g.setStatus(null);
+//                        genRepo.save(g);
+//                    }
+//                }
+//            });
+//
+//            outputs.forEach(e -> {
+//                String name = e.getEventActionOutputType().getEventActionOutputName();
+//                if (name.startsWith("GEN_OUT")) {
+//                    Controller c = em.getController();
+//                    Entrance ent = em.getEntrance();
+//                    if (c == null) {
+//                        List<AuthDevice> devices = ent.getEntranceAuthDevices();
+//                        if (!devices.isEmpty()) {
+//                            c = devices.get(0).getController();
+//                        }
+//                    }
+//                    if (c != null) {
+//                        GENConfigs g = genRepo.getByController_ControllerIdAndPinName(c.getControllerId(), name.substring(8));
+//                        g.setStatus(null);
+//                        genRepo.save(g);
+//                    }
+//                }
+//            });
 
             // soft delete
             em.setDeleted(true);

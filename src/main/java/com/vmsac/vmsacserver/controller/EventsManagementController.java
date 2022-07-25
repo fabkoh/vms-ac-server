@@ -211,18 +211,21 @@ public class EventsManagementController {
     // Replace all eventsmanagement with newly created ones
     @PutMapping("eventsmanagement/replace")
     public ResponseEntity<?> replaceEventsMangement(@RequestBody @Valid List<EventsManagementCreateDto> dtos,
-                                                    @RequestParam("controllerIds") List<Integer> controllerIds,
-                                                    @RequestParam("entranceIds") List<Integer> entranceIds) throws NotFoundException {
-        for (Integer controllerId : controllerIds) {
-            Optional<Controller> opCon = controllerRepository.findByControllerIdEqualsAndDeletedFalse(controllerId.longValue());
+                                                    @RequestParam("controllerIds") List<Integer> controllerReqIds,
+                                                    @RequestParam("entranceIds") List<Integer> entranceReqIds) throws NotFoundException {
+        List<Long> controllerIds = controllerReqIds.stream().map(Integer::longValue).collect(Collectors.toList());
+        List<Long> entranceIds = entranceReqIds.stream().map(Integer::longValue).collect(Collectors.toList());
+
+        for (Long controllerId : controllerIds) {
+            Optional<Controller> opCon = controllerRepository.findByControllerIdEqualsAndDeletedFalse(controllerId);
             if (opCon.isPresent())
                 for (EventsManagement em : opCon.get().getEventsManagements()) {
                     eventsManagementService.deleteById(em.getEventsManagementId());
                 }
         }
 
-        for (Integer entranceId : entranceIds) {
-            Optional<Entrance> opEnt = entranceRepo.findByEntranceIdAndDeletedFalse(entranceId.longValue());
+        for (Long entranceId : entranceIds) {
+            Optional<Entrance> opEnt = entranceRepo.findByEntranceIdAndDeletedFalse(entranceId);
             if (opEnt.isPresent())
                 for (EventsManagement em : opEnt.get().getEventsManagements()) {
                     eventsManagementService.deleteById(em.getEventsManagementId());
@@ -232,8 +235,52 @@ public class EventsManagementController {
         List<EventsManagement> eventsManagements = new ArrayList<>();
 
         for (EventsManagementCreateDto dto : dtos) {
-            dto.setControllerIds(controllerIds);
-            dto.setEntranceIds(entranceIds);
+
+            // get ALL related controllers
+            entranceIds.forEach(id -> {
+                Optional<Entrance> op = entranceRepo.findByEntranceIdAndDeletedFalse(id);
+                List<AuthDevice> authDevices = op.get().getEntranceAuthDevices();
+                if (!authDevices.isEmpty()) {
+                    Long controllerId = authDevices.get(0).getController().getControllerId();
+                    if (!controllerIds.contains(controllerId))
+                        controllerIds.add(controllerId);
+                }
+            });
+
+            // check input events
+            for (InputEvent e : dto.getInputEvents()) {
+                String name = inputTypeRepository.findById(e.getEventActionInputType().getEventActionInputId())
+                        .get().getEventActionInputName();
+                if (name.startsWith("GEN_IN")) {
+                    for (Long id : controllerIds) {
+                        GENConfigs gen = genRepo.getByController_ControllerIdAndPinName(id, name.substring(7));
+                        if (gen.getStatus() != null && gen.getStatus().equals("OUT")) {
+                            Controller c = controllerRepository.findByControllerIdEqualsAndDeletedFalse(id).get();
+                            return new ResponseEntity<>("Conflict GEN IN/OUT " + name + " at controller "
+                                    + c.getControllerName() + ". Please check again!", HttpStatus.BAD_REQUEST);
+                        }
+                    }
+                }
+            }
+
+            // check output events
+            for (OutputEvent e : dto.getOutputActions()) {
+                String name = outputTypeRepository.findById(e.getEventActionOutputType().getEventActionOutputId())
+                        .get().getEventActionOutputName();
+                if (name.startsWith("GEN_OUT")) {
+                    for (Long id : controllerIds) {
+                        GENConfigs gen = genRepo.getByController_ControllerIdAndPinName(id, name.substring(8));
+                        if (gen.getStatus() != null && gen.getStatus().equals("IN")) {
+                            Controller c = controllerRepository.findByControllerIdEqualsAndDeletedFalse(id).get();
+                            return new ResponseEntity<>("Conflict GEN IN/OUT " + name + " at controller "
+                                    + c.getControllerName() + ". Please check again!", HttpStatus.BAD_REQUEST);
+                        }
+                    }
+                }
+            }
+
+            dto.setControllerIds(controllerReqIds);
+            dto.setEntranceIds(entranceReqIds);
             eventsManagements.addAll(eventsManagementService.create(dto));
         }
         if (eventsManagements.size() > 0)
@@ -273,13 +320,13 @@ public class EventsManagementController {
                         if (gen.getStatus() != null && gen.getStatus().equals("OUT")) {
                             Controller c = controllerRepository.findByControllerIdEqualsAndDeletedFalse(id).get();
                             return new ResponseEntity<>("Conflict GEN IN/OUT " + name + " at controller "
-                                    + c.getControllerName() + ".Please check again!", HttpStatus.BAD_REQUEST);
+                                    + c.getControllerName() + ". Please check again!", HttpStatus.BAD_REQUEST);
                         }
                     }
                 }
             }
 
-            // check output
+            // check output events
             for (OutputEvent e : dto.getOutputActions()) {
                 String name = outputTypeRepository.findById(e.getEventActionOutputType().getEventActionOutputId())
                         .get().getEventActionOutputName();
@@ -289,7 +336,7 @@ public class EventsManagementController {
                         if (gen.getStatus() != null && gen.getStatus().equals("IN")) {
                             Controller c = controllerRepository.findByControllerIdEqualsAndDeletedFalse(id).get();
                             return new ResponseEntity<>("Conflict GEN IN/OUT " + name + " at controller "
-                                    + c.getControllerName() + ".Please check again!", HttpStatus.BAD_REQUEST);
+                                    + c.getControllerName() + ". Please check again!", HttpStatus.BAD_REQUEST);
                         }
                     }
                 }
