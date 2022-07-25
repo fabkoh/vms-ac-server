@@ -1,3 +1,8 @@
+DROP SCHEMA public CASCADE;
+CREATE SCHEMA public;
+GRANT ALL ON SCHEMA public TO postgres;
+GRANT ALL ON SCHEMA public TO public;
+
 CREATE TABLE IF NOT EXISTS Visitor (
     idNumber VARCHAR(128) NOT NULL,
     firstName VARCHAR(128),
@@ -20,21 +25,21 @@ CREATE TABLE IF NOT EXISTS ScheduledVisit (
 );
 
 CREATE TABLE IF NOT EXISTS AccessGroups (
-  accessGroupId SERIAL NOT NULL UNIQUE,
+  accessGroupId SERIAL ,
   accessGroupName VARCHAR(255) NOT NULL,
-  accessGroupDesc TEXT,
+  accessGroupDesc VARCHAR(5000),
   deleted BOOLEAN NOT NULL,
   PRIMARY KEY (accessGroupId)
 );
 
 CREATE TABLE IF NOT EXISTS Persons (
-  personId SERIAL NOT NULL UNIQUE,
+  personId SERIAL ,
   personFirstName VARCHAR(128) NOT NULL,
   personLastName VARCHAR(128) NOT NULL,
   personUID VARCHAR(128) NOT NULL,
   personMobileNumber VARCHAR(128),
   personEmail VARCHAR(128),
-  accessGroupId INT REFERENCES AccessGroups (accessGroupId),
+  accessGroupId INT REFERENCES AccessGroups (accessGroupId) ,
   deleted BOOLEAN NOT NULL,
   PRIMARY KEY (personId)
 );
@@ -42,7 +47,7 @@ CREATE TABLE IF NOT EXISTS Persons (
 CREATE TABLE IF NOT EXISTS OrgGroups (
   orgGroupId SERIAL NOT NULL UNIQUE,
   orgGroupName VARCHAR(255) NOT NULL,
-  orgGroupDesc TEXT,
+  orgGroupDesc VARCHAR(5000),
   deleted BOOLEAN NOT NULL,
   PRIMARY KEY (orgGroupId)
 );
@@ -128,10 +133,17 @@ CREATE TABLE IF NOT EXISTS Controller(
   lastOnline TIMESTAMP,
   created TIMESTAMP,
   masterController Boolean,
-  pinAssignmentConfig text NOT NULL,
-  settingsConfig text NOT NULL,
+  pinAssignmentConfig VARCHAR(5000) NOT NULL,
+  settingsConfig VARCHAR(5000) NOT NULL,
   deleted BOOLEAN NOT NULL,
   PRIMARY KEY (controllerId)
+);
+
+CREATE TABLE IF NOT EXISTS GENConfigs(
+     id SERIAL PRIMARY KEY ,
+     controllerId INT REFERENCES Controller(controllerId),
+     pinName VARCHAR(25) NOT NULL ,
+     status VARCHAR(25)
 );
 
 CREATE TABLE IF NOT EXISTS AuthMethod(
@@ -188,7 +200,7 @@ CREATE TABLE IF NOT EXISTS EventActionInputType(
     eventActionInputId SERIAL NOT NULL UNIQUE,
     eventActionInputName VARCHAR(255) NOT NULL,
     timerEnabled BOOLEAN NOT NULL,
-    eventActionInputConfig JSON,
+    eventActionInputConfig VARCHAR(5000),
     PRIMARY KEY (eventActionInputId)
 );
 
@@ -196,7 +208,7 @@ CREATE TABLE IF NOT EXISTS EventActionOutputType(
    eventActionOutputId SERIAL NOT NULL UNIQUE,
    eventActionOutputName VARCHAR(255) NOT NULL,
    timerEnabled BOOLEAN NOT NULL,
-   eventActionOutputConfig JSON,
+   eventActionOutputConfig VARCHAR(5000),
    PRIMARY KEY (eventActionOutputId)
 );
 
@@ -216,8 +228,8 @@ CREATE TABLE IF NOT EXISTS TriggerSchedules(
     triggerScheduleId SERIAL NOT NULL UNIQUE ,
     triggerName VARCHAR(255) NOT NULL ,
     rrule VARCHAR(255) NOT NULL ,
-    timeStart TIME NOT NULL ,
-    timeEnd TIME NOT NULL ,
+    timeStart VARCHAR(128) NOT NULL ,
+    timeEnd VARCHAR(128) NOT NULL ,
     deleted BOOLEAN NOT NULL ,
     eventsManagementId INT
 );
@@ -226,8 +238,20 @@ CREATE TABLE IF NOT EXISTS EventsManagement(
     eventsManagementId SERIAL NOT NULL UNIQUE ,
     eventsManagementName VARCHAR(255) NOT NULL ,
     deleted BOOLEAN NOT NULL ,
-    inputEventsId INT[] ,
-    outputActionsId INT[]  ,
+    inputEventsId BIGINT[] ,
+    outputActionsId BIGINT[]  ,
     entranceId INT REFERENCES Entrances(entranceId),
     controllerId INT REFERENCES Controller(controllerId)
 );
+
+CREATE FUNCTION get_gen_config() RETURNS trigger AS '
+    BEGIN
+        for counter in 1..3 loop
+            INSERT INTO GENConfigs(controllerId, pinName) VALUES (NEW.controllerId, '''' || counter);
+        end loop;
+        RETURN NEW;
+    END
+' LANGUAGE plpgsql;
+
+CREATE TRIGGER get_gen_config AFTER INSERT ON Controller
+    FOR EACH ROW EXECUTE PROCEDURE get_gen_config();

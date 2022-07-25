@@ -7,6 +7,7 @@ import com.vmsac.vmsacserver.repository.AuthMethodCredentialTypeNtoNRepository;
 import com.vmsac.vmsacserver.repository.AuthMethodRepository;
 import com.vmsac.vmsacserver.repository.CredTypeRepository;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
+@Profile({"dev", "devpostgres"})
 public class AuthMethodLoader implements CommandLineRunner {
     private final AuthMethodRepository authMethodRepository;
     private final AuthMethodCredentialTypeNtoNRepository authMethodCredentialTypeNtoNRepository;

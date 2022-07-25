@@ -4,10 +4,12 @@ import com.vmsac.vmsacserver.model.*;
 import com.vmsac.vmsacserver.model.EventDto.EventControllerDto;
 import com.vmsac.vmsacserver.model.EventDto.EventEntranceDto;
 import com.vmsac.vmsacserver.repository.*;
+import javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class EventsManagementService {
@@ -33,12 +35,15 @@ public class EventsManagementService {
     @Autowired
     InOutEventService inOutEventService;
 
-    public List<Long> createInputEvents(List<InputEvent> dto) {
+    @Autowired
+    GENConfigsRepository genRepo;
+
+    public List<Long> createInputEvents(List<InputEvent> dto, Long controllerId) throws NotFoundException {
         List<Long> inputEventsId = new ArrayList<>();
         for (InputEvent input : dto) {
             Long id = input.getInputEventId();
             if (id == null) {
-                inputEventsId.add(inOutEventService.createInputEvent(input).getInputEventId());
+                inputEventsId.add(inOutEventService.createInputEvent(input, controllerId).getInputEventId());
             } else {
                 inputEventsId.add(id);
             }
@@ -46,12 +51,12 @@ public class EventsManagementService {
         return inputEventsId;
     }
 
-    public List<Long> createOutputActions(List<OutputEvent> dto) {
+    public List<Long> createOutputActions(List<OutputEvent> dto, Long controllerId) throws NotFoundException {
         List<Long> outputActionsId = new ArrayList<>();
         for (OutputEvent output : dto) {
             Long id = output.getOutputEventId();
             if (id == null) {
-                outputActionsId.add(inOutEventService.createOutputEvent(output).getOutputEventId());
+                outputActionsId.add(inOutEventService.createOutputEvent(output, controllerId).getOutputEventId());
             } else {
             outputActionsId.add(id);
             }
@@ -59,15 +64,16 @@ public class EventsManagementService {
         return outputActionsId;
     }
 
-    public List<EventsManagement> create(EventsManagementCreateDto dto) {
+    public List<EventsManagement> create(EventsManagementCreateDto dto) throws NotFoundException {
 
         List<EventsManagement> resultEms = new ArrayList<>();
+        List<Long> controllerIds = dto.getControllerIds().stream().map(Integer::longValue).collect(Collectors.toList());
 
-        for (Integer controllerId : dto.getControllerIds()) {
+        for (Long controllerId : controllerIds) {
             // create different input and output events for each eventsManagement
             // in case users want to modify input/output events
-            List<Long> inputEventsId = createInputEvents(dto.getInputEvents());
-            List<Long> outputActionsId = createOutputActions(dto.getOutputActions());
+            List<Long> inputEventsId = createInputEvents(dto.getInputEvents(), controllerId);
+            List<Long> outputActionsId = createOutputActions(dto.getOutputActions(), controllerId);
 
             Optional<Controller> opController = controllerRepository.findByControllerIdEqualsAndDeletedFalse(controllerId.longValue());
             if (opController.isPresent()) {
@@ -89,8 +95,14 @@ public class EventsManagementService {
         for (Integer entranceId : dto.getEntranceIds()) {
             // create different input and output events for each eventsManagement
             // in case users want to modify input/output events
-            List<Long> inputEventsId = createInputEvents(dto.getInputEvents());
-            List<Long> outputActionsId = createOutputActions(dto.getOutputActions());
+            List<AuthDevice> devices = entranceRepository.findByEntranceIdAndDeletedFalse(entranceId.longValue())
+                    .get().getEntranceAuthDevices();
+            Long controllerId = null;
+            if (!devices.isEmpty()) {
+                controllerId = devices.get(0).getController().getControllerId();
+            }
+            List<Long> inputEventsId = createInputEvents(dto.getInputEvents(), controllerId);
+            List<Long> outputActionsId = createOutputActions(dto.getOutputActions(), controllerId);
 
             Optional<Entrance> opEntrance = entranceRepository.findByEntranceIdAndDeletedFalse(entranceId.longValue());
             if (opEntrance.isPresent()) {
@@ -116,6 +128,47 @@ public class EventsManagementService {
         Optional<EventsManagement> opEm = eventsManagementRepository.findByDeletedFalseAndEventsManagementId(id);
         if (opEm.isPresent()) {
             EventsManagement em = opEm.get();
+
+            List<InputEvent> inputs = inputEventRepository.findAllById(em.getInputEventsId());
+            List<OutputEvent> outputs = outputEventRepository.findAllById(em.getOutputActionsId());
+
+            inputs.forEach(e -> {
+                String name = e.getEventActionInputType().getEventActionInputName();
+                if (name.startsWith("GEN_IN")) {
+                    Controller c = em.getController();
+                    Entrance ent = em.getEntrance();
+                    if (c == null) {
+                        List<AuthDevice> devices = ent.getEntranceAuthDevices();
+                        if (!devices.isEmpty()) {
+                            c = devices.get(0).getController();
+                        }
+                    }
+                    if (c != null) {
+                        GENConfigs g = genRepo.getByController_ControllerIdAndPinName(c.getControllerId(), name.substring(7));
+                        g.setStatus(null);
+                        genRepo.save(g);
+                    }
+                }
+            });
+
+            outputs.forEach(e -> {
+                String name = e.getEventActionOutputType().getEventActionOutputName();
+                if (name.startsWith("GEN_OUT")) {
+                    Controller c = em.getController();
+                    Entrance ent = em.getEntrance();
+                    if (c == null) {
+                        List<AuthDevice> devices = ent.getEntranceAuthDevices();
+                        if (!devices.isEmpty()) {
+                            c = devices.get(0).getController();
+                        }
+                    }
+                    if (c != null) {
+                        GENConfigs g = genRepo.getByController_ControllerIdAndPinName(c.getControllerId(), name.substring(8));
+                        g.setStatus(null);
+                        genRepo.save(g);
+                    }
+                }
+            });
 
             // soft delete
             em.setDeleted(true);

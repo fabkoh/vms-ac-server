@@ -4,9 +4,11 @@ import com.vmsac.vmsacserver.model.AccessGroup;
 import com.vmsac.vmsacserver.model.EventActionType;
 import com.vmsac.vmsacserver.repository.EventActionTypeRepository;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 @Component
+@Profile({"dev", "devpostgres"})
 public class EventActionTypeLoader implements CommandLineRunner {
     private final EventActionTypeRepository eventActionTypeRepository;
 

@@ -41,7 +41,7 @@ public class Person {
     private Boolean deleted;
 
     @ManyToOne(cascade = CascadeType.MERGE)
-    @JoinColumn(name = "accessgroupid",referencedColumnName = "accessgroupid")
+    @JoinColumn(name = "accessgroupid")
     private AccessGroup accessGroup;
 
 

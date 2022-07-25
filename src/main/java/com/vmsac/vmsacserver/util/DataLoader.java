@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-@Profile("dev")
+@Profile({"dev", "devpostgres"})
 @Component
 public class DataLoader implements CommandLineRunner {
     private final AccessGroupRepository accessGroupRepository;

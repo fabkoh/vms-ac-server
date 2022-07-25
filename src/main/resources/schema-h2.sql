@@ -175,6 +175,13 @@ CREATE TABLE IF NOT EXISTS AuthMethodSchedule(
   PRIMARY KEY (authMethodScheduleId)
 );
 
+CREATE TABLE IF NOT EXISTS GENConfigs(
+    id SERIAL NOT NULL UNIQUE ,
+    controllerId INT REFERENCES Controller(controllerId),
+    pinName VARCHAR(25) NOT NULL ,
+    status VARCHAR(3) ,
+    PRIMARY KEY (id)
+);
 
 CREATE TABLE IF NOT EXISTS EventActionType(
   eventActionTypeId SERIAL NOT NULL UNIQUE,

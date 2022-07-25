@@ -9,6 +9,7 @@ import com.vmsac.vmsacserver.service.EventsManagementService;
 import com.vmsac.vmsacserver.service.TriggerSchedulesService;
 import com.vmsac.vmsacserver.util.DateTimeParser;
 import com.vmsac.vmsacserver.util.FieldsModifier;
+import javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,10 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*")
@@ -51,7 +49,7 @@ public class EventsManagementController {
     TriggerSchedulesService triggerSchedulesService;
 
     @Autowired
-    EntranceRepository entranceRepository;
+    EntranceRepository entranceRepo;
 
     @Autowired
     ControllerRepository controllerRepository;
@@ -74,15 +72,8 @@ public class EventsManagementController {
     @Autowired
     DateTimeParser dateTimeParser;
 
-    // POST EventActionInputType
-    @PostMapping("/event/input/type")
-    public ResponseEntity<?> postInputType(@RequestBody @Valid EventActionInputType dto) {
-        EventActionInputType inputType = inputTypeRepository.save(
-                new EventActionInputType(null, dto.getEventActionInputName(),
-                        dto.getTimerEnabled(), dto.getEventActionInputConfig())
-        );
-        return new ResponseEntity<>(inputType, HttpStatus.CREATED);
-    }
+    @Autowired
+    GENConfigsRepository genRepo;
 
     // GET ALL EventActionInputType
     @GetMapping("/event/input/types")
@@ -98,28 +89,6 @@ public class EventsManagementController {
             return new ResponseEntity<>(inputTypeRepository.findAll(), HttpStatus.OK);
     }
 
-    // PUT EventActionInputType
-    @PutMapping("/event/input/type/{id}")
-    public ResponseEntity<?> putInputType(@RequestBody @Valid EventActionInputType dto,
-                                          @PathVariable Long id) {
-
-        if (inputTypeRepository.existsById(dto.getEventActionInputId())) {
-            EventActionInputType type = inputTypeRepository.save(dto);
-            return new ResponseEntity<>(type, HttpStatus.OK);
-        }
-        else return ResponseEntity.notFound().build();
-    }
-
-    // DELETE EventActionInputType
-    @DeleteMapping("/event/input/type/{id}")
-    public ResponseEntity<?> deleteInputType(@PathVariable Long id) {
-        if (inputTypeRepository.existsById(id)) {
-            inputTypeRepository.deleteById(id);
-            return ResponseEntity.ok().build();
-        }
-        return ResponseEntity.notFound().build();
-    }
-
     // PUT InputEvent
     @PutMapping("/event/input/{id}")
     public ResponseEntity<?> putInputEvent(@RequestBody @Valid InputEvent dto,
@@ -130,16 +99,6 @@ public class EventsManagementController {
             }
         }
         return ResponseEntity.notFound().build();
-    }
-
-    // POST EventActionOutputType
-    @PostMapping("event/output/type")
-    public ResponseEntity<?> postOutputType(@RequestBody @Valid EventActionOutputType dto) {
-        EventActionOutputType saved = outputTypeRepository.save(
-                new EventActionOutputType(null, dto.getEventActionOutputName(),
-                        dto.getTimerEnabled(), dto.getEventActionOutputConfig())
-        );
-        return new ResponseEntity<>(saved, HttpStatus.CREATED);
     }
 
     // GET ALL EventActionOutputType
@@ -156,29 +115,6 @@ public class EventsManagementController {
             return new ResponseEntity<>(outputTypeRepository.findAll(), HttpStatus.OK);
     }
 
-    // PUT EventActionOutputType
-    @PutMapping("event/output/type/{id}")
-    public ResponseEntity<?> putOutputType(@RequestBody @Valid EventActionOutputType dto,
-                                           @PathVariable Long id) {
-
-        if(outputTypeRepository.existsById(dto.getEventActionOutputId())) {
-            EventActionOutputType type = outputTypeRepository.save(dto);
-            return new ResponseEntity<>(type, HttpStatus.OK);
-        }
-        return ResponseEntity.notFound().build();
-    }
-
-    // DELETE EventActionOutputType
-    @DeleteMapping("event/output/type/{id}")
-    public ResponseEntity<?> deleteOutputType(@PathVariable Long id) {
-
-        if (outputTypeRepository.existsById(id)) {
-            outputTypeRepository.deleteById(id);
-            return ResponseEntity.ok().build();
-        }
-        return ResponseEntity.notFound().build();
-    }
-
     // PUT OutputEvent
     @PutMapping("event/output/{id}")
     public ResponseEntity<?> putOutputEvent(@RequestBody @Valid OutputEvent dto,
@@ -192,7 +128,7 @@ public class EventsManagementController {
 
     // POST EventsManagement
     @PostMapping("eventsmanagement")
-    public ResponseEntity<?> postEventsMangement(@RequestBody @Valid EventsManagementCreateDto dto) {
+    public ResponseEntity<?> postEventsMangement(@RequestBody @Valid EventsManagementCreateDto dto) throws NotFoundException {
 
         List<EventsManagement> eventsManagements = eventsManagementService.create(dto);
 
@@ -211,7 +147,7 @@ public class EventsManagementController {
             ems.addAll(controller.getEventsManagements());
         });
 
-        entranceRepository.findByDeleted(false).forEach(entrance -> {
+        entranceRepo.findByDeleted(false).forEach(entrance -> {
             ems.addAll(entrance.getEventsManagements());
         });
 
@@ -223,8 +159,8 @@ public class EventsManagementController {
     // GET EventsManagement Entrance
     @GetMapping("eventsmanagement/entrance/{entranceId}")
     public ResponseEntity<?> getAllEventsMangementForEntrance(@PathVariable Long entranceId) {
-        if (entranceRepository.existsByEntranceId(entranceId))
-            return new ResponseEntity<>(entranceRepository.findByEntranceIdAndDeletedFalse(entranceId)
+        if (entranceRepo.existsByEntranceId(entranceId))
+            return new ResponseEntity<>(entranceRepo.findByEntranceIdAndDeletedFalse(entranceId)
                 .get().getEventsManagements()
                 .stream().map(em -> eventsManagementService.toDto(em))
                 .collect(Collectors.toList()), HttpStatus.OK);
@@ -276,7 +212,7 @@ public class EventsManagementController {
     @PutMapping("eventsmanagement/replace")
     public ResponseEntity<?> replaceEventsMangement(@RequestBody @Valid List<EventsManagementCreateDto> dtos,
                                                     @RequestParam("controllerIds") List<Integer> controllerIds,
-                                                    @RequestParam("entranceIds") List<Integer> entranceIds) {
+                                                    @RequestParam("entranceIds") List<Integer> entranceIds) throws NotFoundException {
         for (Integer controllerId : controllerIds) {
             Optional<Controller> opCon = controllerRepository.findByControllerIdEqualsAndDeletedFalse(controllerId.longValue());
             if (opCon.isPresent())
@@ -286,7 +222,7 @@ public class EventsManagementController {
         }
 
         for (Integer entranceId : entranceIds) {
-            Optional<Entrance> opEnt = entranceRepository.findByEntranceIdAndDeletedFalse(entranceId.longValue());
+            Optional<Entrance> opEnt = entranceRepo.findByEntranceIdAndDeletedFalse(entranceId.longValue());
             if (opEnt.isPresent())
                 for (EventsManagement em : opEnt.get().getEventsManagements()) {
                     eventsManagementService.deleteById(em.getEventsManagementId());
@@ -308,29 +244,58 @@ public class EventsManagementController {
 
     @PutMapping("eventsmanagement/add")
     public ResponseEntity<?> addEventsManagement(@RequestBody @Valid List<EventsManagementCreateDto> dtos,
-                                                    @RequestParam("controllerIds") List<Integer> controllerIds,
-                                                    @RequestParam("entranceIds") List<Integer> entranceIds) {
-        for (Integer controllerId : controllerIds) {
-            Optional<Controller> opCon = controllerRepository.findByControllerIdEqualsAndDeletedFalse(controllerId.longValue());
-            if (opCon.isPresent())
-                for (EventsManagement em : opCon.get().getEventsManagements()) {
-                    eventsManagementService.deleteById(em.getEventsManagementId());
-                }
-        }
-
-        for (Integer entranceId : entranceIds) {
-            Optional<Entrance> opEnt = entranceRepository.findByEntranceIdAndDeletedFalse(entranceId.longValue());
-            if (opEnt.isPresent())
-                for (EventsManagement em : opEnt.get().getEventsManagements()) {
-                    eventsManagementService.deleteById(em.getEventsManagementId());
-                }
-        }
+                                                    @RequestParam("controllerIds") List<Integer> controllerReqIds,
+                                                    @RequestParam("entranceIds") List<Integer> entranceReqIds) throws NotFoundException {
 
         List<EventsManagement> eventsManagements = new ArrayList<>();
 
         for (EventsManagementCreateDto dto : dtos) {
-            dto.setControllerIds(controllerIds);
-            dto.setEntranceIds(entranceIds);
+
+            // get ALL related controllers
+            List<Long> controllerIds = controllerReqIds.stream().map(Integer::longValue).collect(Collectors.toList());
+            entranceReqIds.forEach(id -> {
+                Optional<Entrance> op = entranceRepo.findByEntranceIdAndDeletedFalse(id.longValue());
+                List<AuthDevice> authDevices = op.get().getEntranceAuthDevices();
+                if (!authDevices.isEmpty()) {
+                    Long controllerId = authDevices.get(0).getController().getControllerId();
+                    if (!controllerIds.contains(controllerId))
+                        controllerIds.add(controllerId);
+                }
+            });
+
+            // check input events
+            for (InputEvent e : dto.getInputEvents()) {
+                String name = inputTypeRepository.findById(e.getEventActionInputType().getEventActionInputId())
+                        .get().getEventActionInputName();
+                if (name.startsWith("GEN_IN")) {
+                    for (Long id : controllerIds) {
+                        GENConfigs gen = genRepo.getByController_ControllerIdAndPinName(id, name.substring(7));
+                        if (gen.getStatus() != null && gen.getStatus().equals("OUT")) {
+                            Controller c = controllerRepository.findByControllerIdEqualsAndDeletedFalse(id).get();
+                            return new ResponseEntity<>("Conflict GEN IN/OUT " + name + " at controller "
+                                    + c.getControllerName() + ".Please check again!", HttpStatus.BAD_REQUEST);
+                        }
+                    }
+                }
+            }
+
+            // check output
+            for (OutputEvent e : dto.getOutputActions()) {
+                String name = outputTypeRepository.findById(e.getEventActionOutputType().getEventActionOutputId())
+                        .get().getEventActionOutputName();
+                if (name.startsWith("GEN_OUT")) {
+                    for (Long id : controllerIds) {
+                        GENConfigs gen = genRepo.getByController_ControllerIdAndPinName(id, name.substring(8));
+                        if (gen.getStatus() != null && gen.getStatus().equals("IN")) {
+                            Controller c = controllerRepository.findByControllerIdEqualsAndDeletedFalse(id).get();
+                            return new ResponseEntity<>("Conflict GEN IN/OUT " + name + " at controller "
+                                    + c.getControllerName() + ".Please check again!", HttpStatus.BAD_REQUEST);
+                        }
+                    }
+                }
+            }
+            dto.setControllerIds(controllerReqIds);
+            dto.setEntranceIds(entranceReqIds);
             eventsManagements.addAll(eventsManagementService.create(dto));
         }
         if (eventsManagements.size() > 0)
@@ -369,7 +334,7 @@ public class EventsManagementController {
     @DeleteMapping("eventsmanagement/entrance")
     public ResponseEntity<?> deleteForEntrance(@RequestParam("entranceIds") List<Long> entranceIds) {
         for (Long id : entranceIds) {
-            Optional<Entrance> opEntrance = entranceRepository.findByEntranceIdAndDeletedFalse(id);
+            Optional<Entrance> opEntrance = entranceRepo.findByEntranceIdAndDeletedFalse(id);
             if (opEntrance.isPresent()) {
                 opEntrance.get().getEventsManagements().forEach(em -> {
                     eventsManagementService.deleteById(em.getEventsManagementId());

@@ -21,7 +21,7 @@ public class Controller {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column( name = "controllerid", columnDefinition = "serial")
+    @Column( name = "controllerid")
     private Long controllerId;
 
     @Column( name = "controlleripstatic")
