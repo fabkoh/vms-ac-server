@@ -7,6 +7,7 @@ import com.vmsac.vmsacserver.repository.*;
 import javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -78,9 +79,10 @@ public class EventsManagementService {
 
             Optional<Controller> opController = controllerRepository.findByControllerIdEqualsAndDeletedFalse(controllerId.longValue());
             if (opController.isPresent()) {
+                Controller c = opController.get();
                 EventsManagement em = eventsManagementRepository.save(new EventsManagement(null,
                         dto.getEventsManagementName(), false, inputEventsId,
-                        outputActionsId, opController.get(), null, new ArrayList<>()));
+                        outputActionsId, c, null, new ArrayList<>()));
 
                 for (TriggerSchedules ts : dto.getTriggerSchedules()) {
                     TriggerSchedules newTs = triggerSchedulesRepository.save(new TriggerSchedules(
@@ -90,6 +92,7 @@ public class EventsManagementService {
                     em.getTriggerSchedules().add(newTs);
                 }
                 resultEms.add(em);
+                c.getEventsManagements().add(em);
             }
         }
 
@@ -107,9 +110,10 @@ public class EventsManagementService {
 
             Optional<Entrance> opEntrance = entranceRepository.findByEntranceIdAndDeletedFalse(entranceId);
             if (opEntrance.isPresent()) {
+                Entrance e = opEntrance.get();
                 EventsManagement em = eventsManagementRepository.save(new EventsManagement(null,
                         dto.getEventsManagementName(), false, inputEventsId,
-                        outputActionsId, null, opEntrance.get(), new ArrayList<>()));
+                        outputActionsId, null, e, new ArrayList<>()));
 
                 for (TriggerSchedules ts : dto.getTriggerSchedules()) {
                     TriggerSchedules newTs = triggerSchedulesRepository.save(new TriggerSchedules(
@@ -119,6 +123,7 @@ public class EventsManagementService {
                     em.getTriggerSchedules().add(newTs);
                 }
                 resultEms.add(em);
+                e.getEventsManagements().add(em);
             }
         }
 

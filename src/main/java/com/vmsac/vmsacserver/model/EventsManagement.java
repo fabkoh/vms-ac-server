@@ -58,12 +58,12 @@ public class EventsManagement {
     @NotEmpty
     private List<Long> outputActionsId;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.REFRESH)
     @JoinColumn(name = "controllerid")
     @JsonIgnore
     private Controller controller;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.REFRESH)
     @JoinColumn(name = "entranceid")
     @JsonIgnore
     private Entrance entrance;
