@@ -64,10 +64,11 @@ public class EventsManagementService {
         return outputActionsId;
     }
 
-    public List<EventsManagement> create(EventsManagementCreateDto dto) throws NotFoundException {
+    public List<EventsManagement> create(EventsManagementCreateDto dto,
+                                         List<Long> controllerIds,
+                                         List<Long> entranceIds) throws NotFoundException {
 
         List<EventsManagement> resultEms = new ArrayList<>();
-        List<Long> controllerIds = dto.getControllerIds().stream().map(Integer::longValue).collect(Collectors.toList());
 
         for (Long controllerId : controllerIds) {
             // create different input and output events for each eventsManagement
@@ -92,10 +93,10 @@ public class EventsManagementService {
             }
         }
 
-        for (Integer entranceId : dto.getEntranceIds()) {
+        for (Long entranceId : entranceIds) {
             // create different input and output events for each eventsManagement
             // in case users want to modify input/output events
-            List<AuthDevice> devices = entranceRepository.findByEntranceIdAndDeletedFalse(entranceId.longValue())
+            List<AuthDevice> devices = entranceRepository.findByEntranceIdAndDeletedFalse(entranceId)
                     .get().getEntranceAuthDevices();
             Long controllerId = null;
             if (!devices.isEmpty()) {
@@ -104,7 +105,7 @@ public class EventsManagementService {
             List<Long> inputEventsId = createInputEvents(dto.getInputEvents(), controllerId);
             List<Long> outputActionsId = createOutputActions(dto.getOutputActions(), controllerId);
 
-            Optional<Entrance> opEntrance = entranceRepository.findByEntranceIdAndDeletedFalse(entranceId.longValue());
+            Optional<Entrance> opEntrance = entranceRepository.findByEntranceIdAndDeletedFalse(entranceId);
             if (opEntrance.isPresent()) {
                 EventsManagement em = eventsManagementRepository.save(new EventsManagement(null,
                         dto.getEventsManagementName(), false, inputEventsId,

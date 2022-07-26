@@ -203,7 +203,10 @@ public class ControllerController {
             // return Response 201
             UniconControllerDto created = controllerService.uniconControllerCreate(newUniconControllerDto);
             try {
+                System.out.println("Creating auth devices...");
                 authDeviceService.createAuthDevices(created.toController());
+                System.out.println("Creating gen configs...");
+                controllerService.createGenConfigs(created.toController());
                 getControllerConnection(created.getControllerId());
             }
             catch(Exception e)

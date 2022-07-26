@@ -77,6 +77,9 @@ public class ControllerService {
     @Autowired
     private EntranceRepository entranceRepo;
 
+    @Autowired
+    private GENConfigsRepository genRepo;
+
     @PersistenceContext
     EntityManager entityManager;
 
@@ -890,5 +893,12 @@ public class ControllerService {
             }
         }
         return combinedSchedule;
+    }
+
+    public void createGenConfigs(Controller c) {
+        for (int i = 1; i <= 3; i++) {
+            GENConfigs g = new GENConfigs(null, c, "" + i, null);
+            genRepo.save(g);
+        }
     }
 }

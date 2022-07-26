@@ -179,7 +179,7 @@ CREATE TABLE IF NOT EXISTS GENConfigs(
     id SERIAL NOT NULL UNIQUE ,
     controllerId INT REFERENCES Controller(controllerId),
     pinName VARCHAR(25) NOT NULL ,
-    status VARCHAR(3) ,
+    status VARCHAR(25) ,
     PRIMARY KEY (id)
 );
 
