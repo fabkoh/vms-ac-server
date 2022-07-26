@@ -139,7 +139,7 @@ public class AuthDeviceService {
                 if (name.startsWith("GEN_IN")) {
                     GENConfigs g = genRepo.getByController_ControllerIdAndPinName(c.getControllerId(), name.substring(7));
                     if (g.getStatus() != null && g.getStatus().equals("OUT"))
-                        throw new IllegalArgumentException(g.getOutName());
+                        throw new IllegalArgumentException(g.getOutName() + " " + name);
                     else {
                         g.setStatus("IN");
                         genRepo.save(g);
@@ -154,7 +154,7 @@ public class AuthDeviceService {
                 if (name.startsWith("GEN_OUT")) {
                     GENConfigs g = genRepo.getByController_ControllerIdAndPinName(c.getControllerId(), name.substring(8));
                     if (g.getStatus() != null && g.getStatus().equals("IN"))
-                        throw new IllegalArgumentException(g.getInName());
+                        throw new IllegalArgumentException(g.getInName() + " " + name);
                     else {
                         g.setStatus("OUT");
                         genRepo.save(g);

@@ -203,9 +203,7 @@ public class ControllerController {
             // return Response 201
             UniconControllerDto created = controllerService.uniconControllerCreate(newUniconControllerDto);
             try {
-                System.out.println("Creating auth devices...");
                 authDeviceService.createAuthDevices(created.toController());
-                System.out.println("Creating gen configs...");
                 controllerService.createGenConfigs(created.toController());
                 getControllerConnection(created.getControllerId());
             }
@@ -381,9 +379,10 @@ public class ControllerController {
                         updated.add(authDeviceService.AuthDeviceEntranceUpdate(authdevice, null));
                         entranceService.setEntranceUsed(entranceService.findById(authdevice.getEntrance().getEntranceId()).get(),false);
                     } catch (IllegalArgumentException e) {
+                        String[] msg = e.getMessage().split(" ");
                         return new ResponseEntity<>("Cannot assign this entrance to this auth device because of" +
                                 " conflict between in GEN In/Out configure. Please remove any use of this controller's" +
-                                " " + e.getMessage(), HttpStatus.BAD_REQUEST);
+                                " " + msg[0] + " or this Entrance's " + msg[1] + ".", HttpStatus.BAD_REQUEST);
                     }
 
                 }
@@ -392,9 +391,10 @@ public class ControllerController {
                         updated.add(authDeviceService.AuthDeviceEntranceUpdate(authdevice, entranceService.findById(entranceid).get()));
                         entranceService.setEntranceUsed(entranceService.findById(entranceid).get(),true);
                     } catch (IllegalArgumentException e) {
+                        String[] msg = e.getMessage().split(" ");
                         return new ResponseEntity<>("Cannot assign this entrance to this auth device because of" +
                                 " conflict between in GEN In/Out configure. Please remove any use of this controller's" +
-                                " " + e.getMessage(), HttpStatus.BAD_REQUEST);
+                                " " + msg[0] + " or this Entrance's " + msg[1] + ".", HttpStatus.BAD_REQUEST);
                     }
                 }
             }

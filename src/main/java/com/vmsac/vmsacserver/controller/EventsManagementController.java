@@ -218,9 +218,8 @@ public class EventsManagementController {
                 }
         }
 
-        Map<String, Object> result = new HashMap<>();
         List<EventsManagement> eventsManagements = new ArrayList<>();
-        Map<String, Object> errorEvMs = new HashMap<>();
+        Set<EventsManagement> errorEvMs = new HashSet<>();
 
         for (EventsManagementCreateDto dto : dtos) {
 
@@ -237,8 +236,14 @@ public class EventsManagementController {
                         if (gen.getStatus() != null && gen.getStatus().equals("OUT")) {
                             Controller c = controllerRepository.findByControllerIdEqualsAndDeletedFalse(id).get();
                             thisControllerIds.remove(id);
-                            e.getEventActionInputType().setEventActionInputName(name);
-                            errorEvMs.put(c.getControllerName(), dto);
+                            for (EventsManagement em : c.getEventsManagements()) {
+                                for (OutputEvent oe : outputEventRepository.findAllById(em.getOutputActionsId())) {
+                                    if (oe.getEventActionOutputType().getEventActionOutputName().equals(
+                                            "GEN_OUT_" + name.substring(7))) {
+                                        errorEvMs.add(em);
+                                    }
+                                }
+                            }
                         }
                     }
                     for (Long id : entranceIds) {
@@ -250,8 +255,16 @@ public class EventsManagementController {
                                     name.substring(7));
                             if (gen.getStatus() != null && gen.getStatus().equals("OUT")) {
                                 thisEntranceIds.remove(id);
-                                e.getEventActionInputType().setEventActionInputName(name);
-                                errorEvMs.put(entrance.getEntranceName(), dto);
+                                List<EventsManagement> controllerEms = c.getEventsManagements();
+                                controllerEms.addAll(entrance.getEventsManagements());
+                                for (EventsManagement em : controllerEms) {
+                                    for (OutputEvent oe : outputEventRepository.findAllById(em.getOutputActionsId())) {
+                                        if (oe.getEventActionOutputType().getEventActionOutputName().equals(
+                                                "GEN_OUT_" + name.substring(7))) {
+                                            errorEvMs.add(em);
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -268,8 +281,14 @@ public class EventsManagementController {
                         if (gen.getStatus() != null && gen.getStatus().equals("IN")) {
                             Controller c = controllerRepository.findByControllerIdEqualsAndDeletedFalse(id).get();
                             thisControllerIds.remove(id);
-                            e.getEventActionOutputType().setEventActionOutputName(name);
-                            errorEvMs.put(c.getControllerName(), dto);
+                            for (EventsManagement em : c.getEventsManagements()) {
+                                for (InputEvent ie : inputEventRepository.findAllById(em.getInputEventsId())) {
+                                    if (ie.getEventActionInputType().getEventActionInputName().equals(
+                                            "GEN_IN_" + name.substring(8))) {
+                                        errorEvMs.add(em);
+                                    }
+                                }
+                            }
                         }
                     }
                     for (Long id : entranceIds) {
@@ -281,8 +300,16 @@ public class EventsManagementController {
                                     name.substring(8));
                             if (gen.getStatus() != null && gen.getStatus().equals("IN")) {
                                 thisEntranceIds.remove(id);
-                                e.getEventActionOutputType().setEventActionOutputName(name);
-                                errorEvMs.put(entrance.getEntranceName(), dto);
+                                List<EventsManagement> controllerEms = c.getEventsManagements();
+                                controllerEms.addAll(entrance.getEventsManagements());
+                                for (EventsManagement em : controllerEms) {
+                                    for (InputEvent ie : inputEventRepository.findAllById(em.getInputEventsId())) {
+                                        if (ie.getEventActionInputType().getEventActionInputName().equals(
+                                                "GEN_IN_" + name.substring(8))) {
+                                            errorEvMs.add(em);
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -294,7 +321,8 @@ public class EventsManagementController {
         if (errorEvMs.isEmpty())
             return new ResponseEntity<>(eventsManagements.stream().map(em -> {return eventsManagementService.toDto(em);})
                     .collect(Collectors.toList()), HttpStatus.CREATED);
-        else return new ResponseEntity<>(errorEvMs, HttpStatus.BAD_REQUEST);
+        else return new ResponseEntity<>(errorEvMs.stream().map(em -> {return eventsManagementService.toDto(em);})
+                .collect(Collectors.toList()), HttpStatus.BAD_REQUEST);
     }
 
     @PutMapping("eventsmanagement/add")
@@ -303,7 +331,7 @@ public class EventsManagementController {
                                                     @RequestParam("entranceIds") List<Long> entranceIds) throws NotFoundException {
 
         List<EventsManagement> eventsManagements = new ArrayList<>();
-        Map<String, Object> errorEvMs = new HashMap<>();
+        Set<EventsManagement> errorEvMs = new HashSet<>();
 
         for (EventsManagementCreateDto dto : dtos) {
 
@@ -320,8 +348,14 @@ public class EventsManagementController {
                         if (gen.getStatus() != null && gen.getStatus().equals("OUT")) {
                             Controller c = controllerRepository.findByControllerIdEqualsAndDeletedFalse(id).get();
                             thisControllerIds.remove(id);
-                            e.getEventActionInputType().setEventActionInputName(name);
-                            errorEvMs.put(c.getControllerName(), e);
+                            for (EventsManagement em : c.getEventsManagements()) {
+                                for (OutputEvent oe : outputEventRepository.findAllById(em.getOutputActionsId())) {
+                                    if (oe.getEventActionOutputType().getEventActionOutputName().equals(
+                                            "GEN_OUT_" + name.substring(7))) {
+                                        errorEvMs.add(em);
+                                    }
+                                }
+                            }
                         }
                     }
                     for (Long id : entranceIds) {
@@ -333,8 +367,16 @@ public class EventsManagementController {
                                     name.substring(7));
                             if (gen.getStatus() != null && gen.getStatus().equals("OUT")) {
                                 thisEntranceIds.remove(id);
-                                e.getEventActionInputType().setEventActionInputName(name);
-                                errorEvMs.put(entrance.getEntranceName(), e);
+                                List<EventsManagement> controllerEms = c.getEventsManagements();
+                                controllerEms.addAll(entrance.getEventsManagements());
+                                for (EventsManagement em : controllerEms) {
+                                    for (OutputEvent oe : outputEventRepository.findAllById(em.getOutputActionsId())) {
+                                        if (oe.getEventActionOutputType().getEventActionOutputName().equals(
+                                                "GEN_OUT_" + name.substring(7))) {
+                                            errorEvMs.add(em);
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -351,8 +393,14 @@ public class EventsManagementController {
                         if (gen.getStatus() != null && gen.getStatus().equals("IN")) {
                             Controller c = controllerRepository.findByControllerIdEqualsAndDeletedFalse(id).get();
                             thisControllerIds.remove(id);
-                            e.getEventActionOutputType().setEventActionOutputName(name);
-                            errorEvMs.put(c.getControllerName(), e);
+                            for (EventsManagement em : c.getEventsManagements()) {
+                                for (InputEvent ie : inputEventRepository.findAllById(em.getInputEventsId())) {
+                                    if (ie.getEventActionInputType().getEventActionInputName().equals(
+                                            "GEN_IN_" + name.substring(8))) {
+                                        errorEvMs.add(em);
+                                    }
+                                }
+                            }
                         }
                     }
                     for (Long id : entranceIds) {
@@ -364,8 +412,16 @@ public class EventsManagementController {
                                     name.substring(8));
                             if (gen.getStatus() != null && gen.getStatus().equals("IN")) {
                                 thisEntranceIds.remove(id);
-                                e.getEventActionOutputType().setEventActionOutputName(name);
-                                errorEvMs.put(entrance.getEntranceName(), e);
+                                List<EventsManagement> controllerEms = c.getEventsManagements();
+                                controllerEms.addAll(entrance.getEventsManagements());
+                                for (EventsManagement em : controllerEms) {
+                                    for (InputEvent ie : inputEventRepository.findAllById(em.getInputEventsId())) {
+                                        if (ie.getEventActionInputType().getEventActionInputName().equals(
+                                                "GEN_IN_" + name.substring(8))) {
+                                            errorEvMs.add(em);
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -373,10 +429,12 @@ public class EventsManagementController {
             }
             eventsManagements.addAll(eventsManagementService.create(dto, thisControllerIds, thisEntranceIds));
         }
+
         if (errorEvMs.isEmpty())
             return new ResponseEntity<>(eventsManagements.stream().map(em -> {return eventsManagementService.toDto(em);})
                     .collect(Collectors.toList()), HttpStatus.CREATED);
-        else return new ResponseEntity<>(errorEvMs, HttpStatus.BAD_REQUEST);
+        else return new ResponseEntity<>(errorEvMs.stream().map(em -> {return eventsManagementService.toDto(em);})
+                .collect(Collectors.toList()), HttpStatus.BAD_REQUEST);
     }
 
     // DELETE EventsManagement
