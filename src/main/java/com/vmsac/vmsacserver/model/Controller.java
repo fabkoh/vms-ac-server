@@ -9,7 +9,10 @@ import lombok.*;
 import javax.persistence.*;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -84,6 +87,23 @@ public class Controller {
 
     public EventControllerDto toEventDto(){
         return new EventControllerDto(this.controllerId,this.controllerName,this.deleted,this.controllerSerialNo);
+    }
+
+    public List<Entrance> getAssignedEntrances() {
+        List<Entrance> entrances = new ArrayList<>();
+        AuthDevices.forEach(ad -> {
+            if (ad.getEntrance() != null) entrances.add(ad.getEntrance());
+        });
+
+        return entrances;
+    }
+
+    @JsonIgnore
+    public Set<EventsManagement> getAllEventsManagement() {
+        Set<EventsManagement> ems = new HashSet<>(eventsManagements);
+        getAssignedEntrances().forEach(e -> ems.addAll(e.getEventsManagements()));
+
+        return ems;
     }
 
 }

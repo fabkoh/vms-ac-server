@@ -75,4 +75,11 @@ public class Entrance {
     public EventEntranceDto toEventDto(){
         return new EventEntranceDto(this.entranceId,this.entranceName,this.deleted);
     }
+
+    @JsonIgnore
+    public Controller getAssignedController() {
+        if (!entranceAuthDevices.isEmpty())
+            return entranceAuthDevices.get(0).getController();
+        else return null;
+    }
 }

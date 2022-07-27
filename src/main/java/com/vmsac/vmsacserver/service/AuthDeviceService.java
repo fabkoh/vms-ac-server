@@ -14,6 +14,7 @@ import javax.naming.InvalidNameException;
 import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class AuthDeviceService {
@@ -127,41 +128,43 @@ public class AuthDeviceService {
         AuthDevice exisitingAuthDevice = authDeviceRepository.findById(newAuthDevice.getAuthDeviceId())
                 .orElseThrow(()-> new RuntimeException("Auth Device does not exist"));
 
+        // get all controller EvM (includes those of the assigned entrances)
         Controller c = exisitingAuthDevice.getController();
+        Set<EventsManagement> controllerEvm = c.getAllEventsManagement();
 
-        List<EventsManagement> ems = entrance.getEventsManagements();
+        if (entrance != null) {
+            List<EventsManagement> entranceEvm = entrance.getEventsManagements();
 
-        ems.forEach(em -> {
-            // check input events
-            List<InputEvent> ies = inputEventRepo.findAllById(em.getInputEventsId());
-            ies.forEach(ie -> {
-                String name = ie.getEventActionInputType().getEventActionInputName();
-                if (name.startsWith("GEN_IN")) {
-                    GENConfigs g = genRepo.getByController_ControllerIdAndPinName(c.getControllerId(), name.substring(7));
-                    if (g.getStatus() != null && g.getStatus().equals("OUT"))
-                        throw new IllegalArgumentException(g.getOutName() + " " + name);
-                    else {
-                        g.setStatus("IN");
-                        genRepo.save(g);
+            controllerEvm.forEach(em1 -> {
+                // check input events
+                inputEventRepo.findAllById(em1.getInputEventsId()).forEach(ie -> {
+                    String name1 = ie.getEventActionInputType().getEventActionInputName();
+                    if (name1.startsWith("GEN_IN_")) {
+                        entranceEvm.forEach(em2 -> {
+                            outputEventRepo.findAllById(em2.getOutputActionsId()).forEach(oe -> {
+                                String name2 = oe.getEventActionOutputType().getEventActionOutputName();
+                                if (name2.equals("GEN_OUT_" + name1.substring(7)))
+                                    throw new IllegalArgumentException(name1 + " " + name2);
+                            });
+                        });
                     }
-                }
-            });
+                });
 
-            // check output events
-            List<OutputEvent> oes = outputEventRepo.findAllById(em.getOutputActionsId());
-            oes.forEach(oe -> {
-                String name = oe.getEventActionOutputType().getEventActionOutputName();
-                if (name.startsWith("GEN_OUT")) {
-                    GENConfigs g = genRepo.getByController_ControllerIdAndPinName(c.getControllerId(), name.substring(8));
-                    if (g.getStatus() != null && g.getStatus().equals("IN"))
-                        throw new IllegalArgumentException(g.getInName() + " " + name);
-                    else {
-                        g.setStatus("OUT");
-                        genRepo.save(g);
+                // check output events
+                outputEventRepo.findAllById(em1.getOutputActionsId()).forEach(oe -> {
+                    String name1 = oe.getEventActionOutputType().getEventActionOutputName();
+                    if (name1.startsWith("GEN_OUT_")) {
+                        entranceEvm.forEach(em2 -> {
+                            inputEventRepo.findAllById(em2.getInputEventsId()).forEach(ie -> {
+                                String name2 = ie.getEventActionInputType().getEventActionInputName();
+                                if (name2.equals("GEN_IN_" + name1.substring(8)))
+                                    throw new IllegalArgumentException(name1 + " " + name2);
+                            });
+                        });
                     }
-                }
+                });
             });
-        });
+        }
 
         exisitingAuthDevice.setEntrance(entrance);
         return authDeviceRepository.save(exisitingAuthDevice);
