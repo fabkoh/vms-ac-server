@@ -549,7 +549,6 @@ public class ControllerService {
 
             List<Entrance> entrances = entranceRepo.findByEntranceIdInAndDeletedFalse(entranceIds);
             entrances.forEach(ent -> toSend.addAll(ent.getEventsManagements()));
-            System.out.println("CHECKPOINT EMS 1");
             List<EventsManagementPiDto> controllerEms = toSend.stream()
                     .map(em -> {
 
@@ -574,8 +573,6 @@ public class ControllerService {
                                 );
                             }
                     ).collect(Collectors.toList());
-
-            System.out.println("CHECKPOINT EMS 2");
 
             String resourceUrl = "http://" + controller.getControllerIP() + ":5000/api/eventActionTriggers";
             RestTemplate restTemplate = new RestTemplate();

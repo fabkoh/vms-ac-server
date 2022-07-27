@@ -89,6 +89,7 @@ public class Controller {
         return new EventControllerDto(this.controllerId,this.controllerName,this.deleted,this.controllerSerialNo);
     }
 
+    @JsonIgnore
     public Set<Entrance> getAssignedEntrances() {
         Set<Entrance> entrances = new HashSet<>();
         AuthDevices.forEach(ad -> {
