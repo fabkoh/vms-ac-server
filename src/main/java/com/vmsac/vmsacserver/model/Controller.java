@@ -89,8 +89,8 @@ public class Controller {
         return new EventControllerDto(this.controllerId,this.controllerName,this.deleted,this.controllerSerialNo);
     }
 
-    public List<Entrance> getAssignedEntrances() {
-        List<Entrance> entrances = new ArrayList<>();
+    public Set<Entrance> getAssignedEntrances() {
+        Set<Entrance> entrances = new HashSet<>();
         AuthDevices.forEach(ad -> {
             if (ad.getEntrance() != null) entrances.add(ad.getEntrance());
         });
