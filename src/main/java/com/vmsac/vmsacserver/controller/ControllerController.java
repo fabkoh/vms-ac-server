@@ -307,7 +307,7 @@ public class ControllerController {
         return new ResponseEntity<>(errors, HttpStatus.NOT_FOUND);
     }
 
-    @PutMapping(path = "authdevice/entrance")
+    @PutMapping(path = "/authdevice/entrance")
     public ResponseEntity<?> UpdateAuthDeviceEntrance(
             @RequestParam(name = "entranceid", required = false)
                     Long entranceid,@Valid @RequestBody List<AuthDevice> newAuthDevices) {
@@ -377,7 +377,6 @@ public class ControllerController {
                     // set current to used
                     try {
                         updated.add(authDeviceService.AuthDeviceEntranceUpdate(authdevice, null));
-                        entranceService.setEntranceUsed(entranceService.findById(authdevice.getEntrance().getEntranceId()).get(),false);
                     } catch (IllegalArgumentException e) {
                         String[] msg = e.getMessage().split(" ");
                         return new ResponseEntity<>("Cannot assign this entrance to this auth device because of" +

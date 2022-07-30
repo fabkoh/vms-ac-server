@@ -462,17 +462,19 @@ public class ControllerService {
                             List<CredentialDto> ListofCred = credentialService.findByPersonId(person.getPersonId());
                             Map<String, List<Object>> personcredentials = new HashMap();
                             for (CredentialDto credentialDto : ListofCred) {
-                                String credType = credentialDto.getCredType().getCredTypeName();
-                                List<Object> temp = new ArrayList<>();
+                                if (credentialDto.getIsValid()) {
+                                    String credType = credentialDto.getCredType().getCredTypeName();
+                                    List<Object> temp = new ArrayList<>();
 
-                                if (personcredentials.containsKey(credType)) {
-                                    temp = personcredentials.get(credType);
-                                    temp.add(credentialDto.getCredUid());
-                                } else {
+                                    if (personcredentials.containsKey(credType)) {
+                                        temp = personcredentials.get(credType);
+                                        temp.add(credentialDto.getCredUid());
+                                    } else {
 
-                                    temp.add(credentialDto.getCredUid());
+                                        temp.add(credentialDto.getCredUid());
+                                    }
+                                    personcredentials.put(credType, temp);
                                 }
-                                personcredentials.put(credType, temp);
                             }
 
                             eachPerson.put("Credentials", personcredentials);

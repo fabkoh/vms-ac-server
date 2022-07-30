@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import javax.naming.ConfigurationException;
 import javax.naming.InvalidNameException;
+import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
@@ -44,6 +45,9 @@ public class AuthDeviceService {
 
     @Autowired
     private GENConfigsRepository genRepo;
+
+    @Autowired
+    EntityManager em;
 
     long defaultAuthMethodId = 9L;
 
@@ -124,19 +128,23 @@ public class AuthDeviceService {
         return authDeviceRepository.save(exisitingAuthDevice);
     }
 
+    @Transactional
     public AuthDevice AuthDeviceEntranceUpdate(AuthDevice newAuthDevice,Entrance entrance) throws IllegalArgumentException{
         AuthDevice exisitingAuthDevice = authDeviceRepository.findById(newAuthDevice.getAuthDeviceId())
                 .orElseThrow(()-> new RuntimeException("Auth Device does not exist"));
 
+        System.out.println("---" + newAuthDevice.getAuthDeviceName());
         // get all controller EvM (includes those of the assigned entrances)
         Controller c = exisitingAuthDevice.getController();
         Set<EventsManagement> controllerEvm = c.getAllEventsManagement();
+        System.out.println("Length of EvMs is " + controllerEvm.size());
 
         if (entrance != null) {
             List<EventsManagement> entranceEvm = entrance.getEventsManagements();
 
             controllerEvm.forEach(em1 -> {
                 // check input events
+                System.out.println("---" + inputEventRepo.findAllById(em1.getInputEventsId()));
                 inputEventRepo.findAllById(em1.getInputEventsId()).forEach(ie -> {
                     String name1 = ie.getEventActionInputType().getEventActionInputName();
                     if (name1.startsWith("GEN_IN_")) {

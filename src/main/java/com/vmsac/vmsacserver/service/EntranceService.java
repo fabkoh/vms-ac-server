@@ -89,7 +89,7 @@ public class EntranceService {
         accessGroupEntranceService.deleteAccessGroupEntranceNtoN(toDelete);
     }
 
-    public List <Entrance> getAvailableEntrances(){
+    public List<Entrance> getAvailableEntrances(){
         return entranceRepository.findByUsedIsFalseAndDeletedIsFalseOrderByEntranceNameAsc();
     }
 
