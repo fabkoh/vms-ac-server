@@ -462,15 +462,19 @@ public class ControllerService {
                             List<CredentialDto> ListofCred = credentialService.findByPersonId(person.getPersonId());
                             Map<String, List<Object>> personcredentials = new HashMap();
                             for (CredentialDto credentialDto : ListofCred) {
+                                // if not valid then don't send
                                 if (credentialDto.getIsValid()) {
                                     String credType = credentialDto.getCredType().getCredTypeName();
+                                    Map<String, Object> cred = new HashMap<>();
+                                    cred.put("Value", credentialDto.getCredUid());
+                                    cred.put("isPermanent", credentialDto.getIsPerm());
+                                    cred.put("EndDate", credentialDto.getCredTTL().toLocalDate().toString());
                                     List<Object> temp = new ArrayList<>();
 
                                     if (personcredentials.containsKey(credType)) {
                                         temp = personcredentials.get(credType);
-                                        temp.add(credentialDto.getCredUid());
+                                        temp.add(cred);
                                     } else {
-
                                         temp.add(credentialDto.getCredUid());
                                     }
                                     personcredentials.put(credType, temp);
