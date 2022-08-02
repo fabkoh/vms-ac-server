@@ -466,12 +466,18 @@ public class ControllerService {
                                     String credType = credentialDto.getCredType().getCredTypeName();
                                     List<Object> temp = new ArrayList<>();
 
+                                    Map<String, Object> eachCred = new HashMap();
+
+                                    eachCred.put("Value",credentialDto.getCredUid());
+                                    eachCred.put("EndDate",credentialDto.getCredTTL().toString().substring(0,10));
+                                    eachCred.put("IsPerm",credentialDto.getIsPerm());
+
                                     if (personcredentials.containsKey(credType)) {
                                         temp = personcredentials.get(credType);
-                                        temp.add(credentialDto.getCredUid());
+                                        temp.add(eachCred);
                                     } else {
 
-                                        temp.add(credentialDto.getCredUid());
+                                        temp.add(eachCred);
                                     }
                                     personcredentials.put(credType, temp);
                                 }

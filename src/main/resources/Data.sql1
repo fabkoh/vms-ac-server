@@ -1,4 +1,13 @@
-insert into visitor values ('96653993','Fabian','Koh','470A','koh.fabian@gmail.com')
-insert into visitor values ('78945621','Dan','Tham','456A','daniel.tham@gmail.com')
-insert into visitor values ('12345678', 'John','Smith','321Z','john.smith@gmail.com')
-insert into visitor values ('48997562','Jane','Tan','586G','jane.tan@gmail.com')
+--insert into visitor values ('96653993','Fabian','Koh','470A','koh.fabian@gmail.com')
+--insert into visitor values ('78945621','Dan','Tham','456A','daniel.tham@gmail.com')
+--insert into visitor values ('12345678', 'John','Smith','321Z','john.smith@gmail.com')
+--insert into visitor values ('48997562','Jane','Tan','586G','jane.tan@gmail.com')
+--
+--INSERT INTO users (username, firstname, lastname) VALUES
+--  ('lala', 'lala', 'lala'),
+--  ('lolo', 'lolo', 'lolo');
+
+--INSERT INTO CredentialType values ('Card', 'RFID Card', false)
+--INSERT INTO CredentialType values ('Face', 'Face Recognition', false)
+--INSERT INTO CredentialType values ('Fingerprint', 'Fingerprint scanner', false)
+--INSERT INTO CredentialType values ('Pin', 'Digit pin', false)
