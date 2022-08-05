@@ -876,11 +876,11 @@ public class ControllerService {
             // do something with nextInstance
             String formattedDate = Integer.toString(nextInstance.getYear());
 
-            if (((Integer.toString(nextInstance.getMonth())).length())==2){
-                formattedDate += "-"+nextInstance.getMonth();
+            if (((Integer.toString(nextInstance.getMonth() + 1)).length())==2){
+                formattedDate += "-"+(nextInstance.getMonth() + 1);
             }
             else{
-                formattedDate += "-0"+nextInstance.getMonth();
+                formattedDate += "-0"+(nextInstance.getMonth() + 1);
             }
 
             if (((Integer.toString(nextInstance.getDayOfMonth())).length())==2){
