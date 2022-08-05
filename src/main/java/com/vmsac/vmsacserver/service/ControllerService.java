@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 public class ControllerService {
 
 
-    String pinAssignment = "{'E1_IN_D0': '14', 'E1_IN_D1': '15', 'E1_IN_Buzz': '23', 'E1_IN_Led': '18', 'E1_OUT_D0': '2', 'E1_OUT_D1': '3', 'E1_OUT_Buzz': '17', 'E1_OUT_Led': '4', 'E1_Mag': '6', 'E1_Button': '5','E2_IN_D0': '24', 'E2_IN_D1':'25', 'E2_IN_Buzz': '7', 'E2_IN_Led': '8', 'E2_OUT_D0': '22', 'E2_OUT_D1': '10', 'E2_OUT_Buzz': '11', 'E2_OUT_Led': '9', 'E2_Mag': '26', 'E2_Button': '12', 'Relay_1': '27', 'Relay_2': '13', 'Fire': '26', 'Gen_In_1': '16', 'Gen_Out_1': '', 'Gen_In_2': '20', 'Gen_Out_2': '', 'Gen_In_3': '21', 'Gen_Out_3': ''}";
+    String pinAssignment = "{'E1_IN_D0': '14'}";
     String settingsConfig = "testsettings";
 
 
