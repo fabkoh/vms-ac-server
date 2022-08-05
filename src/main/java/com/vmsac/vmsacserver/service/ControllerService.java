@@ -331,14 +331,22 @@ public class ControllerService {
 
 
             try{
-                jsonbody.put("E1",existingcontroller.getAuthDevices().get(0).getEntrance().getEntranceId());
+                Long entranceId1 = existingcontroller.getAuthDevices().stream()
+                        .filter(ad -> ad.getAuthDeviceDirection().equals("E1_IN"))
+                        .findFirst()
+                        .get().getEntrance().getEntranceId();
+                jsonbody.put("E1", entranceId1);
             }
             catch(Exception e){
                 jsonbody.put("E1","");
             }
 
             try{
-                jsonbody.put("E2",existingcontroller.getAuthDevices().get(2).getEntrance().getEntranceId());
+                Long entranceId2 = existingcontroller.getAuthDevices().stream()
+                        .filter(ad -> ad.getAuthDeviceDirection().equals("E2_IN"))
+                        .findFirst()
+                        .get().getEntrance().getEntranceId();
+                jsonbody.put("E2", entranceId2);
             }
             catch(Exception e){
                 jsonbody.put("E2","");
@@ -375,10 +383,14 @@ public class ControllerService {
             List<Object> RulesSet = new ArrayList<>(1);
 
             // iterate twice, find entrance 1 and 2 related to controller
-            for ( int i=0; i<2;i++) {
+            for ( int i=1; i<3; i++) {
 //                try {
                 // find entrance object
-                Entrance existingentrance = existingcontroller.getAuthDevices().get(i * 2).getEntrance();
+                int finalI = i;
+                Entrance existingentrance = existingcontroller.getAuthDevices().stream()
+                        .filter(ad -> ad.getAuthDeviceDirection().equals("E" + finalI + "_IN"))
+                        .findFirst()
+                        .get().getEntrance();
 
                 if (!(existingentrance == null)) {
                     // find entrance-schedule object related to entrance
