@@ -47,13 +47,13 @@ public class EventsManagement {
     private Boolean deleted = false;
 
     @Type( type = "list-array" )
-    @Column(name = "inputeventsid", columnDefinition = "int[]")
+    @Column(name = "inputeventsid")
     @NotNull
     @NotEmpty
     private List<Long> inputEventsId;
 
     @Type( type = "list-array" )
-    @Column(name = "outputactionsid", columnDefinition = "int[]")
+    @Column(name = "outputactionsid")
     @NotNull
     @NotEmpty
     private List<Long> outputActionsId;
