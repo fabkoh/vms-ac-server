@@ -133,7 +133,6 @@ public class EntranceController {
                       entranceDto.getEntranceName() + " in use");
               return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
             }
-            entranceDto.setUsed(false);
             EntranceOnlyDto entrance = entranceService.save(entranceDto).toEntranceOnlyDto();
 
             return new ResponseEntity<>(entrance,HttpStatus.OK);

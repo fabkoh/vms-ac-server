@@ -26,6 +26,7 @@ import javax.validation.constraints.Null;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @EnableAsync
 @CrossOrigin(origins = "*")
@@ -68,7 +69,14 @@ public class ControllerController {
 
         Optional<Controller> optionalController = controllerService.findById(controllerId);
         if (optionalController.isPresent()) {
-            return ResponseEntity.ok(optionalController.get());
+            Controller con = optionalController.get();
+            // sort auth devices of a controller by Direction ascending : E1_IN will be to the left of E1_OUT in the
+            // auth devices list
+            con.setAuthDevices(con.getAuthDevices().stream()
+                    .sorted((obj1, obj2) -> obj1.getAuthDeviceDirection()
+                            .compareToIgnoreCase(obj2.getAuthDeviceDirection())).collect(Collectors.toList()));
+
+            return ResponseEntity.ok(con);
         }
 
         Map<String, String> errors = new HashMap<>();
@@ -310,9 +318,7 @@ public class ControllerController {
     @PutMapping(path = "/authdevice/entrance")
     public ResponseEntity<?> UpdateAuthDeviceEntrance(
             @RequestParam(name = "entranceid", required = false)
-                    Long entranceid,@Valid @RequestBody List<AuthDevice> newAuthDevices) {
-
-
+                    Long entranceid,@Valid @RequestBody List<AuthDevice> newAuthDevices) throws Exception {
 
         if (newAuthDevices.size() != 2){
             Map<String, String> errors = new HashMap<>();
@@ -332,15 +338,15 @@ public class ControllerController {
                     return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
                 }
 
-                // compare database entrance id
-                if (entranceService.findById(entranceid).get().getUsed() == true){
-                    if (!(authDevice1.getEntrance().getEntranceId().equals(entranceid))){
-                        Map<String, String> errors = new HashMap<>();
-                        errors.put("Error", "EntranceId "+entranceid+" is being used" );
-                        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
-                    }
-                }
-            }
+//                // compare database entrance id
+//                if (){
+//                    if (!(authDevice1.getEntrance().getEntranceId().equals(entranceid))){
+//                        Map<String, String> errors = new HashMap<>();
+//                        errors.put("Error", "EntranceId "+entranceid+" is being used" );
+//                        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+//                    }
+//                }
+           }
 
             if (authDevice1.getController().getControllerId() !=
                     authDevice2.getController().getControllerId()){
@@ -371,12 +377,12 @@ public class ControllerController {
 
                 AuthDevice newSingleAuthDevice = newAuthDevices.get(i);
                 AuthDevice authdevice = authDeviceService.findbyId(newSingleAuthDevice.getAuthDeviceId()).get();
-                entranceService.setEntranceUsed(authdevice.getEntrance(),false);
                 if (entranceid == null && authdevice.getEntrance() != null) {
                     // set previous entrance to not used
                     // set current to used
                     try {
                         updated.add(authDeviceService.AuthDeviceEntranceUpdate(authdevice, null));
+                        entranceService.setEntranceUsed(authdevice.getEntrance(),false);
                     } catch (IllegalArgumentException e) {
                         String[] msg = e.getMessage().split(" ");
                         return new ResponseEntity<>("Cannot assign this entrance to this auth device because of" +
