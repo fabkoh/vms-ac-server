@@ -391,7 +391,7 @@ public class ControllerController {
                     }
 
                 }
-                else {
+                else if (entranceid != null) {
                     try {
                         updated.add(authDeviceService.AuthDeviceEntranceUpdate(authdevice, entranceService.findById(entranceid).get()));
                         entranceService.setEntranceUsed(entranceService.findById(entranceid).get(),true);
