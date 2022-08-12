@@ -10,6 +10,8 @@ public interface CredentialRepository extends JpaRepository<Credential, Long> {
 
     List<Credential> findByDeleted(Boolean deleted);
 
+    Optional<Credential> findFirstByDeletedFalseAndCredUid(String credUid);
+
     Optional<Credential> findByCredTypeCredTypeIdAndCredUidAndDeletedFalse(Long credTypeId, String credUid);
 
     List<Credential> findAllByPersonPersonIdAndDeletedFalse(Long personId);

@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @Data
 public class CreateCredentialDto {
 
+    private Long credId;
     private String credUid;
 
     private LocalDateTime credTTL;
