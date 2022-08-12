@@ -51,6 +51,9 @@ public class Controller {
     @Column( name = "lastonline")
     private LocalDateTime lastOnline;
 
+    @Column( name = "lastsync")
+    private LocalDateTime lastSync;
+
     @Column( name = "created")
     private LocalDateTime created;
 

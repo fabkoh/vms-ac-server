@@ -46,7 +46,7 @@ public class FrontendControllerDto {
 
     public Controller toController(){
         return new Controller(controllerId,controllerIPStatic,controllerName,controllerIP,pendingIP,
-                controllerMAC,controllerSerialNo,null,null,masterController,
+                controllerMAC,controllerSerialNo,null, null, null,masterController,
                 pinAssignmentConfig,settingsConfig,false,null, eventsManagements);
     }
 }

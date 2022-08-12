@@ -117,7 +117,7 @@ public class ControllerService {
         }
 
         return controllerRepository.save(uniconControllerDto.toCreateController(uniconControllerDto.getControllerSerialNo(),
-                LocalDateTime.now(ZoneId.of("GMT+08:00")),status,LocalDateTime.now(ZoneId.of("GMT+08:00")),pinAssignment,settingsConfig,false)).touniconDto();
+                LocalDateTime.now(ZoneId.of("GMT+08:00")), null, status,LocalDateTime.now(ZoneId.of("GMT+08:00")),pinAssignment,settingsConfig,false)).touniconDto();
     }
 
     public UniconControllerDto uniconControllerUpdate(UniconControllerDto uniconControllerDto) throws Exception{
@@ -139,6 +139,7 @@ public class ControllerService {
             toSave.setPendingIP(existingcontroller.getPendingIP());
             toSave.setMasterController(existingcontroller.getMasterController());
             toSave.setCreated(existingcontroller.getCreated());
+            toSave.setLastSync(existingcontroller.getLastSync());
 
             return controllerRepository.save(toSave).touniconDto();
         }
