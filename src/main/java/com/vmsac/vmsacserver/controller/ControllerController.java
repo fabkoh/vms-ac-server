@@ -338,14 +338,14 @@ public class ControllerController {
                     return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
                 }
 
-//                // compare database entrance id
-//                if (){
-//                    if (!(authDevice1.getEntrance().getEntranceId().equals(entranceid))){
-//                        Map<String, String> errors = new HashMap<>();
-//                        errors.put("Error", "EntranceId "+entranceid+" is being used" );
-//                        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
-//                    }
-//                }
+                // compare database entrance id
+                if (entranceService.findById(entranceid).get().getUsed() == true){
+                    if (!(authDevice1.getEntrance().getEntranceId().equals(entranceid))){
+                        Map<String, String> errors = new HashMap<>();
+                        errors.put("Error", "EntranceId "+entranceid+" is being used" );
+                        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+                    }
+                }
            }
 
             if (authDevice1.getController().getControllerId() !=
@@ -377,21 +377,31 @@ public class ControllerController {
 
                 AuthDevice newSingleAuthDevice = newAuthDevices.get(i);
                 AuthDevice authdevice = authDeviceService.findbyId(newSingleAuthDevice.getAuthDeviceId()).get();
-                if (entranceid == null && authdevice.getEntrance() != null) {
-                    // set previous entrance to not used
-                    // set current to used
-                    try {
-                        updated.add(authDeviceService.AuthDeviceEntranceUpdate(authdevice, null));
-                        entranceService.setEntranceUsed(authdevice.getEntrance(),false);
-                    } catch (IllegalArgumentException e) {
-                        String[] msg = e.getMessage().split(" ");
-                        return new ResponseEntity<>("Cannot assign this entrance to this auth device because of" +
-                                " conflict between in GEN In/Out configure. Please remove any use of this controller's" +
-                                " " + msg[0] + " or this Entrance's " + msg[1] + ".", HttpStatus.BAD_REQUEST);
-                    }
 
+                if (authdevice.getEntrance() != null) {
+                    entranceService.setEntranceUsed(authdevice.getEntrance(),false);
+                    authDeviceService.AuthDeviceEntranceUpdate(authdevice, null);
                 }
-                else if (entranceid != null) {
+
+//                if (entranceid == null) {
+//                    // set previous entrance to not used
+//                    // set current to used
+//                    try {
+//                        System.out.println("----Removing entrance...1");
+//                        updated.add(authDeviceService.AuthDeviceEntranceUpdate(authdevice, null));
+//                        System.out.println("----Removing entrance...2");
+//                        entranceService.setEntranceUsed(authdevice.getEntrance(),false);
+//                        System.out.println("----Removing entrance...3" + " entranceName " +
+//                                authdevice.getEntrance().getEntranceName());
+//                    } catch (IllegalArgumentException e) {
+//                        String[] msg = e.getMessage().split(" ");
+//                        return new ResponseEntity<>("Cannot assign this entrance to this auth device because of" +
+//                                " conflict between in GEN In/Out configure. Please remove any use of this controller's" +
+//                                " " + msg[0] + " or this Entrance's " + msg[1] + ".", HttpStatus.BAD_REQUEST);
+//                    }
+//
+//                }
+                if (entranceid != null) {
                     try {
                         updated.add(authDeviceService.AuthDeviceEntranceUpdate(authdevice, entranceService.findById(entranceid).get()));
                         entranceService.setEntranceUsed(entranceService.findById(entranceid).get(),true);

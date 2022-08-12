@@ -244,9 +244,9 @@ public class AuthMethodScheduleService {
     //Converts rrule into rruleArray. returns updated list of createDto
     public List<CreateAuthMethodScheduleDto> convertRruleArray(List<CreateAuthMethodScheduleDto> CreateList){
         List<CreateAuthMethodScheduleDto> cleanedList = new ArrayList<>();
-        for(int i=0;i<CreateList.size();i++){ //converting rrule to rruleArray for comparison.
-            CreateAuthMethodScheduleDto temp = CreateList.get(i);
-            temp.setRruleArray(temp.getRrule().substring(36).split(","));
+        for(CreateAuthMethodScheduleDto temp : CreateList){ //converting rrule to rruleArray for comparison.
+            String[] split = temp.getRrule().split("BYDAY=");
+            temp.setRruleArray(split[1].split(","));
             cleanedList.add(temp);
         }
         return cleanedList;
@@ -256,7 +256,8 @@ public class AuthMethodScheduleService {
         List<AuthMethodScheduleDto> cleanedList = new ArrayList<>();
         for(int i=0;i<CreateList.size();i++){ //converting rrule to rruleArray for comparison.
             AuthMethodScheduleDto temp = CreateList.get(i);
-            temp.setRruleArray(temp.getRrule().substring(36).split(","));
+            String[] split = temp.getRrule().split("BYDAY=");
+            temp.setRruleArray(split[1].split(","));
             cleanedList.add(temp);
         }
         return cleanedList;
