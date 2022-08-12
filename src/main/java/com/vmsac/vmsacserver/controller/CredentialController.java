@@ -32,10 +32,10 @@ public class CredentialController {
     public ResponseEntity<?> createCredential(@RequestBody CreateCredentialDto createCred) {
         CredentialDto credential;
         if (createCred.getCredTypeId() != 4) {
-            if (credentialService.uidInUse(createCred.getCredUid())) {
+            if (credentialService.uidInUse(createCred.getCredUid(), createCred.getCredId())) {
                 Map<Long, String> errors = new HashMap<>();
                 // as currently only cred uid error is being returned like this, we can use credId as key instead
-                errors.put(createCred.getCredId(), "Cred value in use");
+                errors.put(createCred.getCredId(), "cred value in use");
                 return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
             }
         }
@@ -77,10 +77,10 @@ public class CredentialController {
         CredentialDto cred;
         // Cred type ID of pin is 4
         if (credential.getCredTypeId() != 4) {
-            if (credentialService.uidInUse(credential.getCredUid())) {
+            if (credentialService.uidInUse(credential.getCredUid(), credential.getCredId())) {
                 Map<Long, String> errors = new HashMap<>();
                 // as currently only cred uid error is being returned like this, we can use credId as key instead
-                errors.put(credential.getCredId(), "Cred value in use");
+                errors.put(credential.getCredId(), "cred value in use");
                 return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
             }
         }

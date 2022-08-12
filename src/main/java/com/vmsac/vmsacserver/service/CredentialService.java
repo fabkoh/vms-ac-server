@@ -60,8 +60,8 @@ public class CredentialService {
         return credentialRepository.save(credential).toDto();
     }
 
-    public Boolean uidInUse(String uid) {
-        return credentialRepository.findFirstByDeletedFalseAndCredUid(uid)
+    public Boolean uidInUse(String uid, Long credId) {
+        return credentialRepository.findByDeletedFalseAndCredUidAndCredType_CredTypeIdNotAndCredIdNot(uid, 4L, credId)
                 .isPresent();
     }
 
