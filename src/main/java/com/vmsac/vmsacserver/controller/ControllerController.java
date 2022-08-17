@@ -383,24 +383,6 @@ public class ControllerController {
                     authDeviceService.AuthDeviceEntranceUpdate(authdevice, null);
                 }
 
-//                if (entranceid == null) {
-//                    // set previous entrance to not used
-//                    // set current to used
-//                    try {
-//                        System.out.println("----Removing entrance...1");
-//                        updated.add(authDeviceService.AuthDeviceEntranceUpdate(authdevice, null));
-//                        System.out.println("----Removing entrance...2");
-//                        entranceService.setEntranceUsed(authdevice.getEntrance(),false);
-//                        System.out.println("----Removing entrance...3" + " entranceName " +
-//                                authdevice.getEntrance().getEntranceName());
-//                    } catch (IllegalArgumentException e) {
-//                        String[] msg = e.getMessage().split(" ");
-//                        return new ResponseEntity<>("Cannot assign this entrance to this auth device because of" +
-//                                " conflict between in GEN In/Out configure. Please remove any use of this controller's" +
-//                                " " + msg[0] + " or this Entrance's " + msg[1] + ".", HttpStatus.BAD_REQUEST);
-//                    }
-//
-//                }
                 if (entranceid != null) {
                     try {
                         updated.add(authDeviceService.AuthDeviceEntranceUpdate(authdevice, entranceService.findById(entranceid).get()));
