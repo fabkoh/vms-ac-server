@@ -130,16 +130,13 @@ public class AuthDeviceService {
         return authDeviceRepository.save(exisitingAuthDevice);
     }
 
-    @Transactional
     public AuthDevice AuthDeviceEntranceUpdate(AuthDevice newAuthDevice,Entrance entrance) throws IllegalArgumentException{
         AuthDevice exisitingAuthDevice = authDeviceRepository.findById(newAuthDevice.getAuthDeviceId())
                 .orElseThrow(()-> new RuntimeException("Auth Device does not exist"));
 
-        System.out.println("---" + newAuthDevice.getAuthDeviceName());
         // get all controller EvM (includes those of the assigned entrances)
         Controller c = exisitingAuthDevice.getController();
         Set<EventsManagement> controllerEvm = c.getAllEventsManagement();
-        System.out.println("Length of EvMs is " + controllerEvm.size());
 
         if (entrance != null) {
             List<EventsManagement> entranceEvm = entrance.getEventsManagements();

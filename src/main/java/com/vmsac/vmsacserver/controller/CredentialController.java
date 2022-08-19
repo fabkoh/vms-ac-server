@@ -9,7 +9,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -29,6 +31,14 @@ public class CredentialController {
     @PostMapping("/credential")
     public ResponseEntity<?> createCredential(@RequestBody CreateCredentialDto createCred) {
         CredentialDto credential;
+        if (createCred.getCredTypeId() != 4) {
+            if (credentialService.uidInUse(createCred.getCredUid(), createCred.getCredId())) {
+                Map<Long, String> errors = new HashMap<>();
+                // as currently only cred uid error is being returned like this, we can use credId as key instead
+                errors.put(createCred.getCredId(), "cred value in use");
+                return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
+            }
+        }
         try {
             credential = credentialService.createCredential(createCred);
         } catch(Exception e) {
@@ -36,6 +46,20 @@ public class CredentialController {
         }
 
         return new ResponseEntity<>(credential, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/credential/check")
+    public ResponseEntity<?> checkCredential(@RequestBody CreateCredentialDto createCred) {
+        if (createCred.getCredTypeId() != 4) {
+            if (credentialService.uidInUse(createCred.getCredUid(), createCred.getCredId())) {
+                Map<Long, String> errors = new HashMap<>();
+                // as currently only cred uid error is being returned like this, we can use credId as key instead
+                errors.put(createCred.getCredId(), "cred value in use");
+                return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
+            }
+        }
+
+        return new ResponseEntity<>(null, HttpStatus.OK);
     }
 
     @PutMapping("/credential/{credentialId}/enable")
@@ -65,6 +89,15 @@ public class CredentialController {
     @PutMapping("/credential")
     public ResponseEntity<?> editCredential(@RequestBody EditCredentialDto credential) {
         CredentialDto cred;
+        // Cred type ID of pin is 4
+        if (credential.getCredTypeId() != 4) {
+            if (credentialService.uidInUse(credential.getCredUid(), credential.getCredId())) {
+                Map<Long, String> errors = new HashMap<>();
+                // as currently only cred uid error is being returned like this, we can use credId as key instead
+                errors.put(credential.getCredId(), "cred value in use");
+                return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
+            }
+        }
         try {
             cred = credentialService.editCredential(credential);
         } catch(Exception e) {

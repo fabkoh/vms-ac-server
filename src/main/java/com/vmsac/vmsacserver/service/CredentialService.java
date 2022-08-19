@@ -60,6 +60,11 @@ public class CredentialService {
         return credentialRepository.save(credential).toDto();
     }
 
+    public Boolean uidInUse(String uid, Long credId) {
+        return credentialRepository.findByDeletedFalseAndCredUidAndCredType_CredTypeIdNotAndCredIdNot(uid, 4L, credId)
+                .isPresent();
+    }
+
     public List<CredentialDto> findByPersonId(Long personId) {
         return credentialRepository
                 .findAllByPersonPersonIdAndDeletedFalse(personId)

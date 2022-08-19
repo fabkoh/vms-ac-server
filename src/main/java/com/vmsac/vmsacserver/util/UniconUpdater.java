@@ -8,6 +8,8 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,10 +40,14 @@ public class UniconUpdater {
                 System.out.println("Generate Done");
                 controllerService.sendEventsManagementToController(controller);
                 System.out.println("sendEventsManagementToController Done");
+
+                controller.setLastSync(LocalDateTime.now(ZoneId.of("GMT+08:00")));
             }
             catch(Exception e){
                 errors.add(controller.getControllerId());
             }
+
+            controllerService.save(controller);
         });
         return errors;
     }

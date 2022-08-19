@@ -126,6 +126,9 @@ public class EntranceController {
                    tempid + " not found");
            return new ResponseEntity<>(errors, HttpStatus.NOT_FOUND);
        }
+        // set the used of the entrance
+        entranceDto.setUsed(checkDto.get().getUsed());
+
         if (!Objects.equals(entranceDto.getEntranceName(), checkDto.get().getEntranceName())){
             if(entranceService.nameInUse(entranceDto.getEntranceName())){
               Map<String, String> errors = new HashMap<>();
@@ -133,12 +136,10 @@ public class EntranceController {
                       entranceDto.getEntranceName() + " in use");
               return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
             }
-            entranceDto.setUsed(false);
             EntranceOnlyDto entrance = entranceService.save(entranceDto).toEntranceOnlyDto();
 
             return new ResponseEntity<>(entrance,HttpStatus.OK);
         }
-        entranceDto.setUsed(checkDto.get().getUsed());
         EntranceOnlyDto entrance = entranceService.save(entranceDto).toEntranceOnlyDto();
 
         return new ResponseEntity<>(entrance,HttpStatus.OK);

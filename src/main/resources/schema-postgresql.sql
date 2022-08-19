@@ -131,6 +131,7 @@ CREATE TABLE IF NOT EXISTS Controller(
     controllerMAC VARCHAR(255) NOT NULL,
     controllerSerialNo VARCHAR(255) NOT NULL,
     lastOnline TIMESTAMP,
+    lastSync TIMESTAMP,
     created TIMESTAMP,
     masterController Boolean,
     pinAssignmentConfig VARCHAR(255) NOT NULL,

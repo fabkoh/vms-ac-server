@@ -26,6 +26,7 @@ import javax.validation.constraints.Null;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @EnableAsync
 @CrossOrigin(origins = "*")
@@ -68,7 +69,14 @@ public class ControllerController {
 
         Optional<Controller> optionalController = controllerService.findById(controllerId);
         if (optionalController.isPresent()) {
-            return ResponseEntity.ok(optionalController.get());
+            Controller con = optionalController.get();
+            // sort auth devices of a controller by Direction ascending : E1_IN will be to the left of E1_OUT in the
+            // auth devices list
+            con.setAuthDevices(con.getAuthDevices().stream()
+                    .sorted((obj1, obj2) -> obj1.getAuthDeviceDirection()
+                            .compareToIgnoreCase(obj2.getAuthDeviceDirection())).collect(Collectors.toList()));
+
+            return ResponseEntity.ok(con);
         }
 
         Map<String, String> errors = new HashMap<>();
@@ -336,9 +344,7 @@ public class ControllerController {
     @PutMapping(path = "/authdevice/entrance")
     public ResponseEntity<?> UpdateAuthDeviceEntrance(
             @RequestParam(name = "entranceid", required = false)
-                    Long entranceid,@Valid @RequestBody List<AuthDevice> newAuthDevices) {
-
-
+                    Long entranceid,@Valid @RequestBody List<AuthDevice> newAuthDevices) throws Exception {
 
         if (newAuthDevices.size() != 2){
             Map<String, String> errors = new HashMap<>();
@@ -366,7 +372,7 @@ public class ControllerController {
                         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
                     }
                 }
-            }
+           }
 
             if (authDevice1.getController().getControllerId() !=
                     authDevice2.getController().getControllerId()){
@@ -397,21 +403,13 @@ public class ControllerController {
 
                 AuthDevice newSingleAuthDevice = newAuthDevices.get(i);
                 AuthDevice authdevice = authDeviceService.findbyId(newSingleAuthDevice.getAuthDeviceId()).get();
-                entranceService.setEntranceUsed(authdevice.getEntrance(),false);
-                if (entranceid == null && authdevice.getEntrance() != null) {
-                    // set previous entrance to not used
-                    // set current to used
-                    try {
-                        updated.add(authDeviceService.AuthDeviceEntranceUpdate(authdevice, null));
-                    } catch (IllegalArgumentException e) {
-                        String[] msg = e.getMessage().split(" ");
-                        return new ResponseEntity<>("Cannot assign this entrance to this auth device because of" +
-                                " conflict between in GEN In/Out configure. Please remove any use of this controller's" +
-                                " " + msg[0] + " or this Entrance's " + msg[1] + ".", HttpStatus.BAD_REQUEST);
-                    }
 
+                if (authdevice.getEntrance() != null) {
+                    entranceService.setEntranceUsed(authdevice.getEntrance(),false);
+                    authDeviceService.AuthDeviceEntranceUpdate(authdevice, null);
                 }
-                else {
+
+                if (entranceid != null) {
                     try {
                         updated.add(authDeviceService.AuthDeviceEntranceUpdate(authdevice, entranceService.findById(entranceid).get()));
                         entranceService.setEntranceUsed(entranceService.findById(entranceid).get(),true);
@@ -600,13 +598,11 @@ public class ControllerController {
         List<Long> response = uniconUpdater.updateUnicons();
         System.out.println(response);
         if (response.isEmpty()){
-            return new ResponseEntity<>(HttpStatus.OK);
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }
         else{
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
-
-
     }
 
     @PutMapping("/controller/reset/config")
