@@ -48,6 +48,20 @@ public class CredentialController {
         return new ResponseEntity<>(credential, HttpStatus.CREATED);
     }
 
+    @PostMapping("/credential/check")
+    public ResponseEntity<?> checkCredential(@RequestBody CreateCredentialDto createCred) {
+        if (createCred.getCredTypeId() != 4) {
+            if (credentialService.uidInUse(createCred.getCredUid(), createCred.getCredId())) {
+                Map<Long, String> errors = new HashMap<>();
+                // as currently only cred uid error is being returned like this, we can use credId as key instead
+                errors.put(createCred.getCredId(), "cred value in use");
+                return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
+            }
+        }
+
+        return new ResponseEntity<>(null, HttpStatus.OK);
+    }
+
     @PutMapping("/credential/{credentialId}/enable")
     public ResponseEntity<?> enableCredentialWithId(@PathVariable Long credentialId) {
         CredentialDto credential;
