@@ -359,9 +359,9 @@ public class ControllerService {
             ResponseEntity<String> productCreateResponse =
                     restTemplate.exchange(resourceUrl, HttpMethod.POST, request, String.class);
 
-            if (productCreateResponse.getStatusCodeValue() == 200){
-                ObjectMapper mapper = new ObjectMapper();
-                ControllerConnection connection = mapper.readValue(productCreateResponse.getBody(), ControllerConnection.class);
+            if (productCreateResponse.getStatusCodeValue() == 204){
+//                ObjectMapper mapper = new ObjectMapper();
+//                ControllerConnection connection = mapper.readValue(productCreateResponse.getBody(), ControllerConnection.class);
                 return HttpStatus.OK;
             }
             else{
@@ -545,9 +545,9 @@ public class ControllerService {
             System.out.println("CHECKPOINT CredOccur");
             ResponseEntity<String> response = restTemplate.exchange(resourceUrl, HttpMethod.POST, request, String.class);
 
-            if (response.getStatusCodeValue() == 200){
-                ObjectMapper mapper = new ObjectMapper();
-                ControllerConnection connection = mapper.readValue(response.getBody(), ControllerConnection.class);
+            if (response.getStatusCodeValue() == 204){
+//                ObjectMapper mapper = new ObjectMapper();
+//                ControllerConnection connection = mapper.readValue(response.getBody(), ControllerConnection.class);
                 return HttpStatus.OK;
             }
             else{
@@ -613,9 +613,9 @@ public class ControllerService {
             HttpEntity<List> request = new HttpEntity<>(controllerEms);
             ResponseEntity<String> response = restTemplate.exchange(resourceUrl, HttpMethod.POST, request, String.class);
 
-            if (response.getStatusCodeValue() == 200){
-                ObjectMapper mapper = new ObjectMapper();
-                ControllerConnection connection = mapper.readValue(response.getBody(), ControllerConnection.class);
+            if (response.getStatusCodeValue() == 204){
+//                ObjectMapper mapper = new ObjectMapper();
+//                ControllerConnection connection = mapper.readValue(response.getBody(), ControllerConnection.class);
                 return ResponseEntity.ok().build();
             }
             else{
