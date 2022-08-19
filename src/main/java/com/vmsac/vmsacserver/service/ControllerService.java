@@ -845,7 +845,7 @@ public class ControllerService {
         }
 
         RecurrenceRule rule = new RecurrenceRule(rrule);
-        DateTime start = new DateTime(year, month /* 0-based month numbers! */,day);
+        DateTime start = new DateTime(year, month-1 /* 0-based month numbers! */,day);
         RecurrenceRuleIterator it = rule.iterator(start);
 
         int maxInstances = 100; // limit instances for rules that recur forever

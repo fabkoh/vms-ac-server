@@ -13,9 +13,11 @@ import javax.naming.ConfigurationException;
 import javax.naming.InvalidNameException;
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.util.*;
 
 @Service
 public class AuthDeviceService {
@@ -182,8 +184,58 @@ public class AuthDeviceService {
         return authDeviceRepository.findByEntrance_EntranceIdEquals(entranceid);
     }
 
-    public List<AuthDevice> findbyControllerId(Long controllerId){
-        return authDeviceRepository.findByController_ControllerIdEquals(controllerId);
+    public String findCurrentAuthMethod(Long authdeviceId){
+        List<AuthMethodSchedule> listOfExistingAuthMethodSchedules = authMethodScheduleRepository.findByAuthDevice_AuthDeviceIdAndDeletedFalse(authdeviceId);
+
+        for ( AuthMethodSchedule authMethodSchedule :  listOfExistingAuthMethodSchedules){
+
+            String rawrrule = authMethodSchedule.getRrule();
+            String starttime = authMethodSchedule.getTimeStart();
+            String endtime = authMethodSchedule.getTimeEnd();
+
+
+            String startdatetime = rawrrule.split("\n")[0].split(":")[1].split("T")[0];
+            String rrule = rawrrule.split("\n")[1].split(":")[1];
+
+            System.out.println(startdatetime +" "+ rrule +" "+ starttime +" "+ endtime);
+
+            // startdatetime will always be valid
+            String today = String.valueOf(LocalDate.now().getDayOfWeek()).substring(0,2);
+            String byDay =  rrule.split("BYDAY=")[1];
+            System.out.println(today +":" + byDay);
+            //SU,MO,TU,WE,TH,FR,SA
+            if (byDay.contains(today)){
+                // check for timing
+                LocalTime timeNow = LocalTime.now(ZoneId.of("GMT+08:00"));
+
+                LocalTime startTime = LocalTime.parse(starttime);
+
+                if (endtime.equals("24:00")) {
+                    if( timeNow.compareTo(startTime)>=0){
+                        return authMethodSchedule.getAuthMethod().getAuthMethodDesc();
+                    }
+                }
+
+                LocalTime endTime = LocalTime.parse(endtime);
+
+
+                if( (timeNow.compareTo(startTime)>=0) && (endTime.compareTo(timeNow)>=0)){
+                    return authMethodSchedule.getAuthMethod().getAuthMethodDesc();
+                }
+            }
+
+        };
+
+        return authDeviceRepository.findById(authdeviceId).get().getDefaultAuthMethod().getAuthMethodDesc();
+    }
+
+    public Map<String, String> findControllerCurrentAuthMethod(Long controllerId){
+        Map<String, String> listOfCurrentAuthMethod = new HashMap<>();
+        List <AuthDevice> ListOfAuthDevice = authDeviceRepository.findByController_ControllerIdEquals(controllerId);
+        for ( AuthDevice authDevice  : ListOfAuthDevice){
+            listOfCurrentAuthMethod.put(authDevice.getAuthDeviceId().toString(),findCurrentAuthMethod(authDevice.getAuthDeviceId()));
+        }
+        return listOfCurrentAuthMethod;
     }
 
     public void UpdateAuthDeviceMasterpin(Long authdeviceId, Boolean state)throws Exception{
@@ -193,6 +245,10 @@ public class AuthDeviceService {
         exisitingAuthDevice.setMasterpin(state);
         authDeviceRepository.save(exisitingAuthDevice);
 
+    }
+
+    public List<AuthDevice> findbyControllerId(Long controllerId){
+        return authDeviceRepository.findByController_ControllerIdEquals(controllerId);
     }
 
     public void save(AuthDevice existingauthDevice) {
