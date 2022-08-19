@@ -2,6 +2,7 @@ package com.vmsac.vmsacserver.util;
 
 import com.vmsac.vmsacserver.model.EventActionInputType;
 import com.vmsac.vmsacserver.model.EventActionOutputType;
+import com.vmsac.vmsacserver.model.EventActionType;
 import com.vmsac.vmsacserver.repository.EventActionInputTypeRepository;
 import com.vmsac.vmsacserver.repository.EventActionOutputTypeRepository;
 import org.springframework.boot.CommandLineRunner;
@@ -165,5 +166,7 @@ public class EventActionInOutLoader implements CommandLineRunner {
                         .timerEnabled(false)
                         .build()
         );
+
+
     }
 }

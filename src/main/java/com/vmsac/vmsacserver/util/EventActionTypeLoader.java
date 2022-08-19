@@ -108,6 +108,13 @@ public class EventActionTypeLoader implements CommandLineRunner {
                         .build()
         );
 
+        EventActionType Valid_PIN_used = eventActionTypeRepository.save(
+                EventActionType.builder()
+                        .eventActionTypeName("Valid PIN used")
+                        .isTimerEnabled(false)
+                        .build()
+        );
+
 
     }
 }

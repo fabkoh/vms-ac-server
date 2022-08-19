@@ -96,3 +96,4 @@ INSERT INTO EventActionType VALUES ('9','Push Button pressed', false);
 INSERT INTO EventActionType VALUES ('10','GEN_IN_1 detected', false);
 INSERT INTO EventActionType VALUES ('11','GEN_IN_2 detected', false);
 INSERT INTO EventActionType VALUES ('12','GEN_IN_3 detected', false);
+INSERT INTO EventActionType VALUES ('13','Valid PIN used', false);
