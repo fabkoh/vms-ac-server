@@ -572,13 +572,11 @@ public class ControllerController {
         List<Long> response = uniconUpdater.updateUnicons();
         System.out.println(response);
         if (response.isEmpty()){
-            return new ResponseEntity<>(HttpStatus.OK);
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }
         else{
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
-
-
     }
 
     @PutMapping("/controller/reset/config")

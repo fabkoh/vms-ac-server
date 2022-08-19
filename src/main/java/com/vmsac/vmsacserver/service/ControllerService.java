@@ -1,7 +1,6 @@
 package com.vmsac.vmsacserver.service;
 
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,6 +31,7 @@ import java.net.InetAddress;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 
@@ -365,17 +365,17 @@ public class ControllerService {
                 return HttpStatus.OK;
             }
             else{
-                return HttpStatus.BAD_REQUEST;
+                throw new Exception("API call fail");
             }
         }
 
         catch(Exception e){
             System.out.println(e);
         }
-        return HttpStatus.BAD_REQUEST;
+        throw new Exception("An error occurred");
     }
 
-    public HttpStatus generate(Long controllerId) {
+    public HttpStatus generate(Long controllerId) throws Exception {
 
             // find controller object
             Controller existingcontroller = controllerRepository.getById(controllerId);
@@ -404,7 +404,7 @@ public class ControllerService {
                     try {
                         entrance.put("EntranceSchedule", GetEntranceScheduleObjectWithTime(exisitngEntranceSchedules));
                     } catch (Exception e) {
-                        System.out.println("ERROR WITH EntranceSchedule" + e);
+                        throw new Exception ("ERROR WITH EntranceSchedule: " + e);
                     }
 
                     Map<String, Object> existingentrancedetails = new HashMap();
@@ -429,7 +429,7 @@ public class ControllerService {
                     try {
                         Device1.put("AuthMethod", GetAuthMethodScheduleObjectWithTime(authMethodScheduleService.findByDeviceId(exisitngDevice1.getAuthDeviceId())));
                     } catch (Exception e) {
-                        System.out.println("ERROR WITH AUTH METHOD SCHEDULE 1" + e);
+                        throw new Exception ("ERROR WITH AUTH METHOD SCHEDULE 1: " + e);
                     }
 
                     Map<String, Object> Device2 = new HashMap();
@@ -445,7 +445,7 @@ public class ControllerService {
                     try {
                         Device2.put("AuthMethod", GetAuthMethodScheduleObjectWithTime(authMethodScheduleService.findByDeviceId(exisitngDevice2.getAuthDeviceId())));
                     } catch (Exception e) {
-                        System.out.println("ERROR WITH AUTH METHOD SCHEDULE 2" + e);
+                        throw new Exception("ERROR WITH AUTH METHOD SCHEDULE 2: " + e);
                     }
 
                     authdevices.put("IN", Device1);
@@ -504,7 +504,7 @@ public class ControllerService {
                         try {
                             personsAndSchedule.put("Schedule", GetAccessGroupScheduleObjectWithTime(ListofSchedule));
                         } catch (Exception e) {
-                            System.out.println("ERROR WITH Access Group Schedule" + e);
+                            throw new Exception ("ERROR WITH Access Group Schedule: " + e);
                         }
 
                         oneAccessGroup.put(accessGroupEntranceNtoN.getAccessGroup().getAccessGroupId(), personsAndSchedule);
@@ -543,13 +543,21 @@ public class ControllerService {
             HttpEntity<List> request = new HttpEntity<>(RulesSet);
 //            System.out.println(request);
             System.out.println("CHECKPOINT CredOccur");
-            restTemplate.exchange(resourceUrl, HttpMethod.POST, request, String.class);
+            ResponseEntity<String> response = restTemplate.exchange(resourceUrl, HttpMethod.POST, request, String.class);
 
-                //call entrancename function
-                return HttpStatus.OK;}
+            if (response.getStatusCodeValue() == 200){
+                ObjectMapper mapper = new ObjectMapper();
+                ControllerConnection connection = mapper.readValue(response.getBody(), ControllerConnection.class);
+                return HttpStatus.OK;
+            }
+            else{
+                throw new Exception("API call fail");
+            }
+
+            //call entrancename function
+            }
         catch (Exception e){
-            System.out.println(e);
-            return HttpStatus.OK;
+            throw e;
         }
 
 //        }
@@ -558,7 +566,7 @@ public class ControllerService {
 //        }
     }
 
-    public ResponseEntity<?> sendEventsManagementToController(Controller controller) {
+    public ResponseEntity<?> sendEventsManagementToController(Controller controller) throws Exception {
         System.out.println("SENDING EVENTMANAGEMENT TO CONTROLLER IP "+ controller.getControllerIP().toString());
         List<EventsManagement> toSend = controller.getEventsManagements();
         try {
@@ -570,6 +578,7 @@ public class ControllerService {
 
             List<Entrance> entrances = entranceRepo.findByEntranceIdInAndDeletedFalse(entranceIds);
             entrances.forEach(ent -> toSend.addAll(ent.getEventsManagements()));
+            AtomicBoolean genScheduleError = new AtomicBoolean(false);
             List<EventsManagementPiDto> controllerEms = toSend.stream()
                     .map(em -> {
 
@@ -581,7 +590,7 @@ public class ControllerService {
                                         schedules = getScheduleMap(ts.getRrule(),ts.getTimeStart(),
                                                 ts.getTimeEnd(),  schedules);
                                     } catch (Exception e) {
-                                        System.out.println("ERROR TS:" + e);
+                                        genScheduleError.set(true);
                                     }
 
                                 return new EventsManagementPiDto(
@@ -595,17 +604,28 @@ public class ControllerService {
                             }
                     ).collect(Collectors.toList());
 
+            if (genScheduleError.get()) {
+                throw new Exception("Schedule generation error");
+            }
+
             String resourceUrl = "http://" + controller.getControllerIP() + ":5000/api/eventActionTriggers";
             RestTemplate restTemplate = new RestTemplate();
             HttpEntity<List> request = new HttpEntity<>(controllerEms);
-            restTemplate.exchange(resourceUrl, HttpMethod.POST, request, String.class);
+            ResponseEntity<String> response = restTemplate.exchange(resourceUrl, HttpMethod.POST, request, String.class);
+
+            if (response.getStatusCodeValue() == 200){
+                ObjectMapper mapper = new ObjectMapper();
+                ControllerConnection connection = mapper.readValue(response.getBody(), ControllerConnection.class);
+                return ResponseEntity.ok().build();
+            }
+            else{
+                throw new Exception("API call fail");
+            }
             //        System.out.println(productCreateResponse.getStatusCode());
         }
         catch(Exception e){
-            System.out.println("ERROR: "+e);
+            throw new Exception("An error occurred");
         }
-        return ResponseEntity.ok().build();
-
     }
 
     public void save(Controller existingcontroller) {
