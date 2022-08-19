@@ -13,8 +13,8 @@ CREATE TABLE IF NOT EXISTS Visitor (
     );
 
 CREATE TABLE IF NOT EXISTS ScheduledVisit (
-                                              scheduledVisitId SERIAL NOT NULL,
-                                              idNumber VARCHAR(128) REFERENCES Visitor (idNumber),
+  scheduledVisitId SERIAL NOT NULL,
+  idNumber VARCHAR(128) REFERENCES Visitor (idNumber),
     startDateOfVisit DATE,
     endDateOfVisit DATE,
     qrCodeId VARCHAR(128),

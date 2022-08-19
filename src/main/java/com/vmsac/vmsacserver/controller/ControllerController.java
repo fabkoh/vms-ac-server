@@ -238,6 +238,32 @@ public class ControllerController {
         return new ResponseEntity<>(errors, HttpStatus.NOT_FOUND);
     }
 
+    @GetMapping(path = "authdevice/currentAuthMethod/{authdeviceId}")
+    public ResponseEntity<?> GetAuthDeviceCurrentAuthMethod( @PathVariable Long authdeviceId) {
+
+        if (authDeviceService.findbyId(authdeviceId).isPresent()){
+            return new ResponseEntity<>(authDeviceService.findCurrentAuthMethod(authdeviceId),HttpStatus.OK);
+        }
+        Map<String, String> errors = new HashMap<>();
+        errors.put("authdeviceId", "Auth Device with Id " +
+                authdeviceId + " does not exist");
+
+        return new ResponseEntity<>(errors, HttpStatus.NOT_FOUND);
+    }
+
+    @GetMapping(path = "controller/currentAuthMethod/{controllerId}")
+    public ResponseEntity<?> GetControllerCurrentAuthMethod( @PathVariable Long controllerId) {
+
+        if (controllerService.findById(controllerId).isPresent()){
+            return new ResponseEntity<>(authDeviceService.findControllerCurrentAuthMethod(controllerId),HttpStatus.OK);
+        }
+        Map<String, String> errors = new HashMap<>();
+        errors.put("controllerId", "Controller with Id " +
+                controllerId + " does not exist");
+
+        return new ResponseEntity<>(errors, HttpStatus.NOT_FOUND);
+    }
+
     @PutMapping(path = "authdevice/masterpinToTrue/{authdeviceId}")
     public ResponseEntity<?> UpdateAuthDeviceMasterpinToTrue( @PathVariable Long authdeviceId) {
         Optional<AuthDevice> optionalAuthDevice = authDeviceService.findbyId(authdeviceId);
