@@ -11,7 +11,9 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class UniconUpdater {
@@ -23,9 +25,9 @@ public class UniconUpdater {
     }
 
     @Scheduled(cron = "@monthly")
-    public List<Long> updateUnicons() {
+    public Map<String, String> updateUnicons() {
         List<Controller> controllers = controllerService.findAllNotDeleted();
-        List<Long> errors = new ArrayList<Long>() ;
+        Map<String, String> errors = new HashMap<>();
 
         if (controllers.isEmpty()){
             return errors;
@@ -44,7 +46,7 @@ public class UniconUpdater {
                 controller.setLastSync(LocalDateTime.now(ZoneId.of("GMT+08:00")));
             }
             catch(Exception e){
-                errors.add(controller.getControllerId());
+                errors.put(controller.getControllerName(), controller.getControllerSerialNo());
             }
 
             controllerService.save(controller);
