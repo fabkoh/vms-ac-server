@@ -105,7 +105,12 @@ public class ControllerController {
                 return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
             }
 
-            if (controllerService.existsByControllerNameEquals(newFrontendControllerDto.getControllerName())){
+            // check for any different controller with the same name as the currently want-to-update controller
+
+            Optional<Controller> opCon = controllerRepository.findByControllerNameAndDeletedFalse(
+                    newFrontendControllerDto.getControllerName());
+
+            if (opCon.isPresent() && !opCon.get().getControllerId().equals(newFrontendControllerDto.getControllerId())){
                 Map<String, String> errors = new HashMap<>();
                 errors.put("controllerNameError", "Controller with name " + newFrontendControllerDto.getControllerName()+" already exists.");
                 return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
