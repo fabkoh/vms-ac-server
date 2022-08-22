@@ -152,7 +152,7 @@ public class ControllerService {
         controllerRepository.findByControllerSerialNoEqualsAndDeletedIsFalse(newFrontendControllerDto.getControllerSerialNo())
                 .orElseThrow(() -> new RuntimeException("Controller does not exist"));
 
-        Controller existingcontroller = (((controllerRepository.findByControllerSerialNoEqualsAndDeletedIsFalse(newFrontendControllerDto.getControllerSerialNo())).get()));
+        Controller existingcontroller = controllerRepository.findByControllerSerialNoEqualsAndDeletedIsFalse(newFrontendControllerDto.getControllerSerialNo()).get();
 
         if ( (existingcontroller.getControllerId() == newFrontendControllerDto.getControllerId()) ||
                 Objects.isNull(newFrontendControllerDto.getControllerId()) ){
@@ -676,12 +676,11 @@ public class ControllerService {
         Controller existingController = controllerRepository.findById(newFrontendControllerDto.getControllerId()).get();
         if (newFrontendControllerDto.getControllerIPStatic() == true){
             existingController.setPendingIP(newFrontendControllerDto.getControllerIP());
+            save(existingController);
         }
         else{
             existingController.setPendingIP(null);
         }
-
-        save(existingController);
 
         String resourceUrl = "http://"+ existingController.getControllerIP()+":5000/api/config";
 
@@ -694,9 +693,14 @@ public class ControllerService {
 
         try{
 
-            ResponseEntity<String> productCreateResponse =
+            ResponseEntity<?> productCreateResponse =
                     restTemplate.exchange(resourceUrl, HttpMethod.POST, request, String.class);
-            return false;
+            if (productCreateResponse.getStatusCodeValue() == 204) {
+                existingController.setControllerIP(existingController.getPendingIP());
+                existingController.setPendingIP(null);
+                save(existingController);
+            }
+            return true;
         }
         catch(Exception e){
             if (newFrontendControllerDto.getControllerIPStatic() == false){

@@ -143,7 +143,8 @@ public class ControllerController {
 
             }
 
-            if (optionalController.get().getPendingIP() != optionalController.get().getControllerIP() && optionalController.get().getPendingIP() != null ){
+            if (optionalController.get().getPendingIP() != null &&
+                    Objects.equals(optionalController.get().getPendingIP(), newFrontendControllerDto.getControllerIP())){
                 Map<String, String> errors = new HashMap<>();
                 errors.put("controllerId", "Controller with Id " +
                         controllerId + " with Serial No " + newFrontendControllerDto.getControllerSerialNo()+" has clashing pending and current IP ");
