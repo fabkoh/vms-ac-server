@@ -42,6 +42,7 @@ public class CredentialController {
         try {
             credential = credentialService.createCredential(createCred);
         } catch(Exception e) {
+            System.out.println(e);
             return ResponseEntity.badRequest().build();
         }
 
@@ -101,6 +102,7 @@ public class CredentialController {
         try {
             cred = credentialService.editCredential(credential);
         } catch(Exception e) {
+            System.out.println(e);
             return ResponseEntity.badRequest().build();
         }
 
