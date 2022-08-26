@@ -51,7 +51,7 @@ public class AuthDeviceService {
     @Autowired
     EntityManager em;
 
-    long defaultAuthMethodId = 9L;
+    long defaultAuthMethodId = 1L;
 
     public void createAuthDevices(Controller controller) throws Exception{
         AuthMethod defaultAuthMethod = authMethodRepository.findById(defaultAuthMethodId).get();
