@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-@Profile("dev")
+@Profile({"dev", "devpostgres"})
 @Component
 public class DataLoader implements CommandLineRunner {
     private final AccessGroupRepository accessGroupRepository;
@@ -130,6 +130,7 @@ public class DataLoader implements CommandLineRunner {
                         .isActive(true)
                         .deleted(false)
                         .used(false)
+                        .thirdPartyOption("N.A.")
                         .build()
         );
 
@@ -139,6 +140,7 @@ public class DataLoader implements CommandLineRunner {
                         .isActive(true)
                         .deleted(false)
                         .used(false)
+                        .thirdPartyOption("N.A.")
                         .build()
         );
 
@@ -148,6 +150,7 @@ public class DataLoader implements CommandLineRunner {
                         .isActive(false)
                         .deleted(false)
                         .used(false)
+                        .thirdPartyOption("N.A.")
                         .build()
         );
 
@@ -325,7 +328,7 @@ public class DataLoader implements CommandLineRunner {
 //        );
 
         controllerController.createOrUpdateController(
-                new UniconControllerDto(null,"192.168.1.64",true,"495162159654","5e86805e2bafd54f66cc95c3")
+                new UniconControllerDto(null,"192.168.1.155",true,"495162159654","5e86805e2bafd54f66cc95c3")
         );
     }
 }

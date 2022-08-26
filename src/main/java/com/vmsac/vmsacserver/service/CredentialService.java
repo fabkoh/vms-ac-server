@@ -28,9 +28,9 @@ public class CredentialService {
     @Autowired
     private CredTypeRepository credTypeRepository;
 
-    public List<CredentialDto> findAll() {
+    public List<CredentialDto> findAllNotDeleted() {
         return credentialRepository
-                .findAll()
+                .findAllByDeletedFalse()
                 .stream()
                 .map(Credential::toDto)
                 .collect(Collectors.toList());
@@ -39,17 +39,27 @@ public class CredentialService {
     public CredentialDto createCredential(CreateCredentialDto createCred) throws Exception {
         Long credTypeId = createCred.getCredTypeId();
 
+        Optional<Credential> credentialExactCopyFromSamePerson = credentialRepository
+                .findByDeletedFalseAndCredType_CredTypeIdAndCredUidAndPerson_PersonId(createCred.getCredTypeId(), createCred.getCredUid(), createCred.getPersonId());
+
+        if (credentialExactCopyFromSamePerson.isPresent()) {
+            throw new RuntimeException("Credential type and value repeated from the same person");
+        }
+
         if (credTypeId == null) throw new RuntimeException("Cred type missing");
 
         CredentialType credType = credTypeRepository.findById(credTypeId)
                 .orElseThrow(() -> new RuntimeException("Cred type does not exist"));
 
-        if (credentialRepository
-                .findByCredTypeCredTypeIdAndCredUidAndDeletedFalse(
-                        createCred.getCredTypeId(),
-                        createCred.getCredUid()
-                ).isPresent()
+        // Check for duplicate exact pairing cred type and cred value iff the cred type is not pin
+        if (createCred.getCredTypeId() != 4) {
+            if (credentialRepository
+                    .findByCredTypeCredTypeIdAndCredUidAndDeletedFalse(
+                            createCred.getCredTypeId(),
+                            createCred.getCredUid()
+                    ).isPresent()
             ) throw new RuntimeException("Credential type and value repeated");
+        }
 
         Person p = personRepository.findById(createCred.getPersonId()).orElseThrow(() -> new RuntimeException("Person does not exist"));
 
@@ -58,6 +68,11 @@ public class CredentialService {
         credential.setCredType(credType);
 
         return credentialRepository.save(credential).toDto();
+    }
+
+    public Boolean uidInUse(String uid, Long credId) {
+        return credentialRepository.findByDeletedFalseAndCredUidAndCredType_CredTypeIdNotAndCredIdNot(uid, 4L, credId)
+                .isPresent();
     }
 
     public List<CredentialDto> findByPersonId(Long personId) {
@@ -94,9 +109,18 @@ public class CredentialService {
 
         Optional<Credential> credentialOptional = credentialRepository
                 .findByCredTypeCredTypeIdAndCredUidAndDeletedFalse(credType.getCredTypeId(), editCred.getCredUid());
+        Optional<Credential> credentialExactCopyFromSamePerson = credentialRepository
+                .findByDeletedFalseAndCredType_CredTypeIdAndCredUidAndPerson_PersonId(credType.getCredTypeId(), editCred.getCredUid(), person.getPersonId());
 
-        if (credentialOptional.isPresent() && !credentialOptional.get().getCredId().equals(editCred.getCredId())) {
-            throw new RuntimeException("Credential type and value repeated");
+        // Check for duplicate exact pairing cred type and cred value iff the cred type is not pin
+        if (credentialOptional.get().getCredType().getCredTypeId() != 4) {
+            if (credentialOptional.isPresent() && !credentialOptional.get().getCredId().equals(editCred.getCredId())) {
+                throw new RuntimeException("Credential type and value repeated");
+            }
+        }
+
+        if (credentialExactCopyFromSamePerson.isPresent() && !credentialExactCopyFromSamePerson.get().getCredId().equals(editCred.getCredId())) {
+            throw new RuntimeException("Credential type and value repeated from the same person");
         }
 
         Credential toSave = editCred.toCredential();

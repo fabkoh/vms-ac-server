@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import com.fasterxml.jackson.annotation.ObjectIdGenerator;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.vmsac.vmsacserver.model.EventDto.EventAccessGroupDto;
 import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoN;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -67,5 +68,9 @@ public class AccessGroup {
                 ", deleted=" + deleted +
                 ", persons=" + persons +
                 '}';
+    }
+
+    public EventAccessGroupDto toEventDto(){
+        return new EventAccessGroupDto(this.accessGroupId,this.accessGroupName,this.deleted);
     }
 }

@@ -3,7 +3,9 @@ package com.vmsac.vmsacserver.controller;
 
 import com.vmsac.vmsacserver.model.*;
 
+import com.vmsac.vmsacserver.model.credential.CredentialDto;
 import com.vmsac.vmsacserver.service.AccessGroupService;
+import com.vmsac.vmsacserver.service.CredentialService;
 import com.vmsac.vmsacserver.service.PersonService;
 import com.vmsac.vmsacserver.util.UniconUpdater;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +31,8 @@ public class PersonController {
     PersonService personService;
     @Autowired
     AccessGroupService AccessGroupService;
+    @Autowired
+    CredentialService credentialService;
 
     @GetMapping("/persons")
     public List<PersonDto> getPersons() {
@@ -150,6 +154,14 @@ public class PersonController {
         }
 
         Person deletePerson = optionalPerson.get();
+        List<CredentialDto> credentials = credentialService.findByPersonId(personId);
+        credentials.forEach(credential -> {
+            try {
+                credentialService.deleteCredentialWithId(credential.getCredId());
+            } catch (Exception e) {
+                // ignore exception as cred id should always be valid
+            }
+        });
         deletePerson.setDeleted(true);
         deletePerson.setAccessGroup(null);
         personService.save(deletePerson);

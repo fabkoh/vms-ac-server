@@ -83,6 +83,7 @@ CREATE TABLE IF NOT EXISTS Entrances(
   isActive BOOLEAN NOT NULL,
   deleted BOOLEAN NOT NULL,
   used BOOLEAN NOT NULL,
+  thirdPartyOption VARCHAR(255),
   PRIMARY KEY (entranceId)
 );
 
@@ -125,6 +126,7 @@ CREATE TABLE IF NOT EXISTS Controller(
   controllerMAC VARCHAR(255) NOT NULL,
   controllerSerialNo VARCHAR(255) NOT NULL,
   lastOnline TIMESTAMP,
+  lastSync TIMESTAMP,
   created TIMESTAMP,
   masterController Boolean,
   pinAssignmentConfig VARCHAR(MAX) NOT NULL,
@@ -145,7 +147,7 @@ CREATE TABLE IF NOT EXISTS AuthMethod(
 CREATE TABLE IF NOT EXISTS AuthMethodCredentialTypeNtoN(
   authMethodCredentialsNtoNId SERIAL NOT NULL UNIQUE,
   authMethodId INT REFERENCES AuthMethod (authMethodId),
-  credtypeid INT REFERENCES CredentialType (credTypeId),
+  credTypeId INT REFERENCES CredentialType (credTypeId),
   deleted BOOLEAN NOT NULL,
   PRIMARY KEY (authMethodCredentialsNtoNId)
 );
@@ -172,5 +174,99 @@ CREATE TABLE IF NOT EXISTS AuthMethodSchedule(
   AuthMethodId INT REFERENCES AuthMethod (authMethodId),
   deleted BOOLEAN NOT NULL,
   PRIMARY KEY (authMethodScheduleId)
+);
+
+CREATE TABLE IF NOT EXISTS GENConfigs(
+    id SERIAL NOT NULL UNIQUE ,
+    controllerId INT REFERENCES Controller(controllerId),
+    pinName VARCHAR(25) NOT NULL ,
+    status VARCHAR(25) ,
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE IF NOT EXISTS EventActionType(
+  eventActionTypeId SERIAL NOT NULL UNIQUE,
+  eventActionTypeName VARCHAR(255) NOT NULL,
+  isTimerEnabled VARCHAR(255) NOT NULL,
+  PRIMARY KEY (eventActionTypeId)
+);
+
+CREATE TABLE IF NOT EXISTS Events(
+     eventId SERIAL NOT NULL UNIQUE,
+     eventTime VARCHAR(255) NOT NULL,
+     direction VARCHAR(255),
+     entranceId INT REFERENCES Entrances (entranceId),
+     personId INT REFERENCES Persons (personId),
+     accessGroupId INT REFERENCES AccessGroups (accessGroupId),
+     eventActionTypeId INT REFERENCES EventActionType (eventActionTypeId),
+     controllerId INT REFERENCES Controller (controllerId),
+     deleted BOOLEAN NOT NULL,
+    --  linkedEventsId INT REFERENCES Controller (controllerId),
+     PRIMARY KEY (eventId)
+);
+
+CREATE TABLE IF NOT EXISTS EventActionInputType(
+   eventActionInputId SERIAL NOT NULL UNIQUE,
+   eventActionInputName VARCHAR(255) NOT NULL,
+   timerEnabled BOOLEAN NOT NULL,
+   eventActionInputConfig JSON,
+   PRIMARY KEY (eventActionInputId)
+);
+
+CREATE TABLE IF NOT EXISTS EventActionOutputType(
+    eventActionOutputId SERIAL NOT NULL UNIQUE,
+    eventActionOutputName VARCHAR(255) NOT NULL,
+    timerEnabled BOOLEAN NOT NULL,
+    eventActionOutputConfig JSON,
+    PRIMARY KEY (eventActionOutputId)
+);
+
+CREATE TABLE IF NOT EXISTS InputEvent(
+    inputEventId SERIAL NOT NULL UNIQUE ,
+    timerDuration INT,
+    eventActionInputId INT REFERENCES EventActionInputType(eventActionInputId),
+    PRIMARY KEY (inputEventId)
+);
+
+CREATE TABLE IF NOT EXISTS OutputEvent(
+    outputEventId SERIAL NOT NULL UNIQUE ,
+    timerDuration INT,
+    eventActionOutputId INT REFERENCES EventActionOutputType(eventActionOutputId),
+    PRIMARY KEY (outputEventId)
+);
+
+CREATE TABLE IF NOT EXISTS EventsManagement(
+   eventsManagementId SERIAL NOT NULL UNIQUE ,
+   eventsManagementName VARCHAR(255) NOT NULL ,
+   deleted BOOLEAN NOT NULL ,
+   inputEventsId ARRAY  ,
+   outputActionsId ARRAY ,
+   entranceId INT REFERENCES Entrances(entranceId),
+   controllerId INT REFERENCES Controller(controllerId),
+   PRIMARY KEY (eventsManagementId)
+);
+
+CREATE TABLE IF NOT EXISTS TriggerSchedules(
+   triggerScheduleId SERIAL NOT NULL UNIQUE ,
+   triggerName VARCHAR(255) NOT NULL ,
+   rrule VARCHAR(255) NOT NULL ,
+   timeStart VARCHAR(128) NOT NULL ,
+   timeEnd VARCHAR(128) NOT NULL ,
+   eventsManagementId INT REFERENCES EventsManagement(eventsManagementId),
+   deleted BOOLEAN NOT NULL ,
+   PRIMARY KEY (triggerScheduleId)
+);
+
+CREATE TABLE IF NOT EXISTS VideoRecorder(
+    recorderId SERIAL NOT NULL UNIQUE,
+    recorderName VARCHAR(255) NOT NULL,
+    recorderSerialNumber VARCHAR(255) NOT NULL,
+    recorderIpAddress VARCHAR(255) NOT NULL,
+    recorderPortNumber INT NOT NULL,
+    recorderUsername VARCHAR(255) NOT NULL,
+    recorderPassword VARCHAR(255) NOT NULL,
+    created TIMESTAMP,
+    deleted BOOLEAN NOT NULL DEFAULT FALSE,
+    PRIMARY KEY (recorderId)
 );
 

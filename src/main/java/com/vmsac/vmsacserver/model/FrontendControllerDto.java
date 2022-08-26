@@ -41,10 +41,12 @@ public class FrontendControllerDto {
 
     private String settingsConfig;
 
+    private List<EventsManagement> eventsManagements;
+
 
     public Controller toController(){
         return new Controller(controllerId,controllerIPStatic,controllerName,controllerIP,pendingIP,
-                controllerMAC,controllerSerialNo,null,null,masterController,
-                pinAssignmentConfig,settingsConfig,false,null);
+                controllerMAC,controllerSerialNo,null, null, null,masterController,
+                pinAssignmentConfig,settingsConfig,false,null, eventsManagements);
     }
 }

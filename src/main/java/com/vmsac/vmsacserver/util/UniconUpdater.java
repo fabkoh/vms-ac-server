@@ -8,8 +8,12 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class UniconUpdater {
@@ -21,9 +25,9 @@ public class UniconUpdater {
     }
 
     @Scheduled(cron = "@monthly")
-    public List<Controller> updateUnicons() {
+    public Map<String, String> updateUnicons() {
         List<Controller> controllers = controllerService.findAllNotDeleted();
-        List<Controller> errors = new ArrayList<Controller>() ;
+        Map<String, String> errors = new HashMap<>();
 
         if (controllers.isEmpty()){
             return errors;
@@ -33,12 +37,19 @@ public class UniconUpdater {
             try {
 
                 controllerService.sendEntranceNameRelationship(controller.getControllerId());
+                System.out.println("EntranceName Done");
                 controllerService.generate(controller.getControllerId());
-                System.out.println("controller" + controller.getControllerId());
+                System.out.println("Generate Done");
+                controllerService.sendEventsManagementToController(controller);
+                System.out.println("sendEventsManagementToController Done");
+
+                controller.setLastSync(LocalDateTime.now(ZoneId.of("GMT+08:00")));
             }
             catch(Exception e){
-                errors.add(controller);
+                errors.put(controller.getControllerName(), controller.getControllerSerialNo());
             }
+
+            controllerService.save(controller);
         });
         return errors;
     }

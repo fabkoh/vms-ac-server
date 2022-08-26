@@ -3,6 +3,8 @@ package com.vmsac.vmsacserver.model;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.vmsac.vmsacserver.model.EventDto.EventEntranceDto;
+import com.vmsac.vmsacserver.model.EventDto.EventPersonDto;
 import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoN;
 import lombok.*;
 
@@ -37,17 +39,24 @@ public class Entrance {
     @Column(name = "used")
     private Boolean used;
 
+    @Column(name = "thirdpartyoption")
+    private String thirdPartyOption;
 
     @JsonIgnore
     @OneToMany(mappedBy = "entrance", fetch = FetchType.LAZY)
     private List<AuthDevice> entranceAuthDevices;
 
+    @OneToMany(mappedBy = "entrance", cascade = CascadeType.ALL)
+    private List<EventsManagement> eventsManagements;
+
     public EntranceDto toDto(){
-        return new EntranceDto(this.entranceId, this.entranceName,
-                this.entranceDesc, this.isActive, this.used, null,this.entranceAuthDevices);
+        return new EntranceDto(this.entranceId, this.entranceName, this.entranceDesc,
+                this.isActive, this.used, thirdPartyOption, null,this.entranceAuthDevices,
+                this.eventsManagements);
     }
     public EntranceOnlyDto toEntranceOnlyDto(){
-        return new EntranceOnlyDto(this.entranceId,this.entranceName,this.entranceDesc, this.isActive,this.used,this.entranceAuthDevices);
+        return new EntranceOnlyDto(this.entranceId, this.entranceName, this.entranceDesc, this.isActive,
+                this.used, this.thirdPartyOption, this.entranceAuthDevices, this.eventsManagements);
     }
 
     @Override
@@ -61,5 +70,16 @@ public class Entrance {
                 ", used=" + used +
                 ", entranceAuthDevices=" + entranceAuthDevices +
                 '}';
+    }
+
+    public EventEntranceDto toEventDto(){
+        return new EventEntranceDto(this.entranceId,this.entranceName,this.deleted);
+    }
+
+    @JsonIgnore
+    public Controller getAssignedController() {
+        if (!entranceAuthDevices.isEmpty())
+            return entranceAuthDevices.get(0).getController();
+        else return null;
     }
 }

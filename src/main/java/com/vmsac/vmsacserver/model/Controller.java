@@ -2,13 +2,19 @@ package com.vmsac.vmsacserver.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.vmsac.vmsacserver.model.EventDto.EventControllerDto;
 import com.vmsac.vmsacserver.model.credential.CredentialDto;
 import lombok.*;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,7 +26,7 @@ public class Controller {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column( name = "controllerid", columnDefinition = "serial")
+    @Column( name = "controllerid")
     private Long controllerId;
 
     @Column( name = "controlleripstatic")
@@ -45,6 +51,9 @@ public class Controller {
     @Column( name = "lastonline")
     private LocalDateTime lastOnline;
 
+    @Column( name = "lastsync")
+    private LocalDateTime lastSync;
+
     @Column( name = "created")
     private LocalDateTime created;
 
@@ -57,12 +66,15 @@ public class Controller {
     @Column( name = "settingsconfig")
     private String settingsConfig;
 
-    @JsonIgnore
     @Column( name = "deleted")
+    @JsonIgnore
     private Boolean deleted;
 
     @OneToMany(mappedBy = "controller")
     private List<AuthDevice> AuthDevices;
+
+    @OneToMany(mappedBy = "controller", cascade = CascadeType.ALL)
+    private List<EventsManagement> eventsManagements;
 
     public UniconControllerDto touniconDto(){
         return new UniconControllerDto(this.controllerId,this.controllerIP,
@@ -75,8 +87,29 @@ public class Controller {
 
                 this.controllerIPStatic,this.controllerMAC,
                 this.controllerSerialNo,this.pendingIP,this.masterController, this.pinAssignmentConfig,
-                this.settingsConfig);
+                this.settingsConfig, this.eventsManagements);
     }
 
+    public EventControllerDto toEventDto(){
+        return new EventControllerDto(this.controllerId,this.controllerName,this.deleted,this.controllerSerialNo);
+    }
+
+    @JsonIgnore
+    public Set<Entrance> getAssignedEntrances() {
+        Set<Entrance> entrances = new HashSet<>();
+        AuthDevices.forEach(ad -> {
+            if (ad.getEntrance() != null) entrances.add(ad.getEntrance());
+        });
+
+        return entrances;
+    }
+
+    @JsonIgnore
+    public Set<EventsManagement> getAllEventsManagement() {
+        Set<EventsManagement> ems = new HashSet<>(eventsManagements);
+        getAssignedEntrances().forEach(e -> ems.addAll(e.getEventsManagements()));
+
+        return ems;
+    }
 
 }

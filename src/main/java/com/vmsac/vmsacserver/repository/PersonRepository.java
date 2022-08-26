@@ -9,6 +9,8 @@ import java.util.Optional;
 
 public interface PersonRepository extends JpaRepository<Person, Long> {
 
+    Boolean existsByPersonId(Long personId);
+
     Optional<Person> findByPersonUidAndDeleted(String personUid,
                                                Boolean deleted);
 

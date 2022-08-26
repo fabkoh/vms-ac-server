@@ -19,4 +19,5 @@ public interface AccessGroupRepository extends JpaRepository<AccessGroup, Long> 
     List<AccessGroup> findByAccessGroupIdInAndDeletedFalse(Set<Long> accessGroupIds);
 
     Optional<AccessGroup> findByAccessGroupIdAndDeletedFalse(Long accessGroupId);
+
 }

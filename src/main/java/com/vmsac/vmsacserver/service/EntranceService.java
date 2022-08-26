@@ -7,6 +7,7 @@ import com.vmsac.vmsacserver.repository.AccessGroupRepository;
 import com.vmsac.vmsacserver.repository.EntranceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -89,7 +90,7 @@ public class EntranceService {
         accessGroupEntranceService.deleteAccessGroupEntranceNtoN(toDelete);
     }
 
-    public List <Entrance> getAvailableEntrances(){
+    public List<Entrance> getAvailableEntrances(){
         return entranceRepository.findByUsedIsFalseAndDeletedIsFalseOrderByEntranceNameAsc();
     }
 
@@ -102,7 +103,7 @@ public class EntranceService {
         }
     }
 
-    public void FreeEntrances(Long controllerId)throws Exception{
+    public void FreeEntrances(Long controllerId) throws Exception{
 
         List <AuthDevice> authdevicelist = authDeviceService.findbyControllerId(controllerId);
 
@@ -119,7 +120,5 @@ public class EntranceService {
                 e.printStackTrace();
             }
         });
-
-
     }
 }

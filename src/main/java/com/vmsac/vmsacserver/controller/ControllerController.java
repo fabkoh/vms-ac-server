@@ -5,6 +5,7 @@ import com.vmsac.vmsacserver.model.authmethod.AuthMethod;
 import com.vmsac.vmsacserver.repository.AuthDeviceRepository;
 import com.vmsac.vmsacserver.repository.AuthMethodRepository;
 import com.vmsac.vmsacserver.repository.ControllerRepository;
+import com.vmsac.vmsacserver.repository.GENConfigsRepository;
 import com.vmsac.vmsacserver.service.AuthDeviceService;
 import com.vmsac.vmsacserver.service.ControllerService;
 import com.vmsac.vmsacserver.service.EntranceService;
@@ -25,6 +26,7 @@ import javax.validation.constraints.Null;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @EnableAsync
 @CrossOrigin(origins = "*")
@@ -53,6 +55,9 @@ public class ControllerController {
     @Autowired
     private AuthMethodRepository authMethodRepository;
 
+    @Autowired
+    private GENConfigsRepository genRepo;
+
     @GetMapping("/controllers")
     public List<Controller> getcontrollers() {
         return controllerService.findAllNotDeleted();
@@ -64,7 +69,14 @@ public class ControllerController {
 
         Optional<Controller> optionalController = controllerService.findById(controllerId);
         if (optionalController.isPresent()) {
-            return ResponseEntity.ok(optionalController.get());
+            Controller con = optionalController.get();
+            // sort auth devices of a controller by Direction ascending : E1_IN will be to the left of E1_OUT in the
+            // auth devices list
+            con.setAuthDevices(con.getAuthDevices().stream()
+                    .sorted((obj1, obj2) -> obj1.getAuthDeviceDirection()
+                            .compareToIgnoreCase(obj2.getAuthDeviceDirection())).collect(Collectors.toList()));
+
+            return ResponseEntity.ok(con);
         }
 
         Map<String, String> errors = new HashMap<>();
@@ -93,7 +105,12 @@ public class ControllerController {
                 return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
             }
 
-            if (controllerService.existsByControllerNameEquals(newFrontendControllerDto.getControllerName())){
+            // check for any different controller with the same name as the currently want-to-update controller
+
+            Optional<Controller> opCon = controllerRepository.findByControllerNameAndDeletedFalse(
+                    newFrontendControllerDto.getControllerName());
+
+            if (opCon.isPresent() && !opCon.get().getControllerId().equals(newFrontendControllerDto.getControllerId())){
                 Map<String, String> errors = new HashMap<>();
                 errors.put("controllerNameError", "Controller with name " + newFrontendControllerDto.getControllerName()+" already exists.");
                 return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
@@ -126,7 +143,8 @@ public class ControllerController {
 
             }
 
-            if (optionalController.get().getPendingIP() != optionalController.get().getControllerIP() && optionalController.get().getPendingIP() != null ){
+            if (optionalController.get().getPendingIP() != null &&
+                    Objects.equals(optionalController.get().getPendingIP(), newFrontendControllerDto.getControllerIP())){
                 Map<String, String> errors = new HashMap<>();
                 errors.put("controllerId", "Controller with Id " +
                         controllerId + " with Serial No " + newFrontendControllerDto.getControllerSerialNo()+" has clashing pending and current IP ");
@@ -200,6 +218,7 @@ public class ControllerController {
             UniconControllerDto created = controllerService.uniconControllerCreate(newUniconControllerDto);
             try {
                 authDeviceService.createAuthDevices(created.toController());
+                controllerService.createGenConfigs(created.toController());
                 getControllerConnection(created.getControllerId());
             }
             catch(Exception e)
@@ -221,6 +240,32 @@ public class ControllerController {
         Map<String, String> errors = new HashMap<>();
         errors.put("authdeviceId", "Auth Device with Id " +
                 authdeviceId + " does not exist");
+
+        return new ResponseEntity<>(errors, HttpStatus.NOT_FOUND);
+    }
+
+    @GetMapping(path = "authdevice/currentAuthMethod/{authdeviceId}")
+    public ResponseEntity<?> GetAuthDeviceCurrentAuthMethod( @PathVariable Long authdeviceId) {
+
+        if (authDeviceService.findbyId(authdeviceId).isPresent()){
+            return new ResponseEntity<>(authDeviceService.findCurrentAuthMethod(authdeviceId),HttpStatus.OK);
+        }
+        Map<String, String> errors = new HashMap<>();
+        errors.put("authdeviceId", "Auth Device with Id " +
+                authdeviceId + " does not exist");
+
+        return new ResponseEntity<>(errors, HttpStatus.NOT_FOUND);
+    }
+
+    @GetMapping(path = "controller/currentAuthMethod/{controllerId}")
+    public ResponseEntity<?> GetControllerCurrentAuthMethod( @PathVariable Long controllerId) {
+
+        if (controllerService.findById(controllerId).isPresent()){
+            return new ResponseEntity<>(authDeviceService.findControllerCurrentAuthMethod(controllerId),HttpStatus.OK);
+        }
+        Map<String, String> errors = new HashMap<>();
+        errors.put("controllerId", "Controller with Id " +
+                controllerId + " does not exist");
 
         return new ResponseEntity<>(errors, HttpStatus.NOT_FOUND);
     }
@@ -302,12 +347,10 @@ public class ControllerController {
         return new ResponseEntity<>(errors, HttpStatus.NOT_FOUND);
     }
 
-    @PutMapping(path = "authdevice/entrance")
+    @PutMapping(path = "/authdevice/entrance")
     public ResponseEntity<?> UpdateAuthDeviceEntrance(
             @RequestParam(name = "entranceid", required = false)
-                    Long entranceid,@Valid @RequestBody List<AuthDevice> newAuthDevices) {
-
-
+                    Long entranceid,@Valid @RequestBody List<AuthDevice> newAuthDevices) throws Exception {
 
         if (newAuthDevices.size() != 2){
             Map<String, String> errors = new HashMap<>();
@@ -321,7 +364,7 @@ public class ControllerController {
             AuthDevice authDevice2 = authDeviceService.findbyId(newAuthDevices.get(1).getAuthDeviceId()).get();
 
             if (entranceid!=null){
-                if (entranceService.findById(entranceid).isEmpty() && entranceid != null){
+                if (entranceService.findById(entranceid).isEmpty()){
                     Map<String, String> errors = new HashMap<>();
                     errors.put("Error", "EntranceId "+entranceid+" does not exist" );
                     return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
@@ -335,7 +378,7 @@ public class ControllerController {
                         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
                     }
                 }
-            }
+           }
 
             if (authDevice1.getController().getControllerId() !=
                     authDevice2.getController().getControllerId()){
@@ -366,21 +409,26 @@ public class ControllerController {
 
                 AuthDevice newSingleAuthDevice = newAuthDevices.get(i);
                 AuthDevice authdevice = authDeviceService.findbyId(newSingleAuthDevice.getAuthDeviceId()).get();
-                entranceService.setEntranceUsed(authdevice.getEntrance(),false);
-                if ( entranceid == null && authdevice.getEntrance() != null){
-                    // set previous entrance to not used
-                    // set current to used
-                    entranceService.setEntranceUsed(entranceService.findById(authdevice.getEntrance().getEntranceId()).get(),false);
-                    updated.add(authDeviceService.AuthDeviceEntranceUpdate(authdevice, null));
-                }
-                else{
-                    entranceService.setEntranceUsed(entranceService.findById(entranceid).get(),true);
-                    updated.add(authDeviceService.AuthDeviceEntranceUpdate(authdevice, entranceService.findById(entranceid).get()));
+
+                if (authdevice.getEntrance() != null) {
+                    entranceService.setEntranceUsed(authdevice.getEntrance(),false);
+                    authDeviceService.AuthDeviceEntranceUpdate(authdevice, null);
                 }
 
+                if (entranceid != null) {
+                    try {
+                        updated.add(authDeviceService.AuthDeviceEntranceUpdate(authdevice, entranceService.findById(entranceid).get()));
+                        entranceService.setEntranceUsed(entranceService.findById(entranceid).get(),true);
+                    } catch (IllegalArgumentException e) {
+                        String[] msg = e.getMessage().split(" ");
+                        return new ResponseEntity<>("Cannot assign this entrance to this auth device because of" +
+                                " conflict between in GEN In/Out configure. Please remove any use of this controller's" +
+                                " " + msg[0] + " or this Entrance's " + msg[1] + ".", HttpStatus.BAD_REQUEST);
+                    }
+                }
             }
 
-            catch(Exception e){
+            catch(Exception e) {
                 return new ResponseEntity<>(e.toString(), HttpStatus.BAD_REQUEST);
                 }
         }
@@ -553,16 +601,26 @@ public class ControllerController {
 
     @PostMapping("/uniconUpdater")
     public ResponseEntity<?> testing() {
-        List<Controller> response = uniconUpdater.updateUnicons();
+        Map<String, String> response = uniconUpdater.updateUnicons();
         System.out.println(response);
         if (response.isEmpty()){
-            return new ResponseEntity<>(HttpStatus.OK);
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }
         else{
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
+    }
 
-
+    @PutMapping("/controller/reset/config")
+    public ResponseEntity<?> resetConfig(@RequestParam("controllerIds") List<Long> controllerIds) {
+        for (Long controllerId : controllerIds) {
+            List<GENConfigs> gens = genRepo.findByController_ControllerId(controllerId);
+            gens.forEach(g -> {
+                g.setStatus(null);
+                genRepo.save(g);
+            });
+        }
+        return ResponseEntity.ok().build();
     }
 
 }

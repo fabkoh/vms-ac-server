@@ -10,6 +10,7 @@ import com.vmsac.vmsacserver.repository.AuthDeviceRepository;
 import com.vmsac.vmsacserver.repository.AuthMethodRepository;
 import com.vmsac.vmsacserver.repository.AuthMethodScheduleRepository;
 import com.vmsac.vmsacserver.repository.ControllerRepository;
+import org.apache.tomcat.jni.Local;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -243,9 +244,9 @@ public class AuthMethodScheduleService {
     //Converts rrule into rruleArray. returns updated list of createDto
     public List<CreateAuthMethodScheduleDto> convertRruleArray(List<CreateAuthMethodScheduleDto> CreateList){
         List<CreateAuthMethodScheduleDto> cleanedList = new ArrayList<>();
-        for(int i=0;i<CreateList.size();i++){ //converting rrule to rruleArray for comparison.
-            CreateAuthMethodScheduleDto temp = CreateList.get(i);
-            temp.setRruleArray(temp.getRrule().substring(36).split(","));
+        for(CreateAuthMethodScheduleDto temp : CreateList) { //converting rrule to rruleArray for comparison.
+            String[] split = temp.getRrule().split("BYDAY=");
+            temp.setRruleArray(split[1].split(","));
             cleanedList.add(temp);
         }
         return cleanedList;
@@ -253,19 +254,32 @@ public class AuthMethodScheduleService {
 
     public List<AuthMethodScheduleDto> convertRruleArrayForExisting(List<AuthMethodScheduleDto> CreateList){
         List<AuthMethodScheduleDto> cleanedList = new ArrayList<>();
-        for(int i=0;i<CreateList.size();i++){ //converting rrule to rruleArray for comparison.
-            AuthMethodScheduleDto temp = CreateList.get(i);
-            temp.setRruleArray(temp.getRrule().substring(36).split(","));
+        for(AuthMethodScheduleDto temp : CreateList) { //converting rrule to rruleArray for comparison.
+            String[] split = temp.getRrule().split("BYDAY=");
+            temp.setRruleArray(split[1].split(","));
             cleanedList.add(temp);
         }
         return cleanedList;
     }
 
     public Boolean compareTime(String timestart1,String timeend1, String timestart2 , String timeend2){
+
+        LocalTime te1  = LocalTime.parse("23:59");
+
+        if (!timeend1.equals("24:00")) {
+            te1 = LocalTime.parse(timeend1);
+        }
+
+        LocalTime te2  = LocalTime.parse("23:59");
+
+        if (!timeend2.equals("24:00")) {
+           te2  = LocalTime.parse(timeend2);
+        }
+
         LocalTime ts1  = LocalTime.parse(timestart1);
         LocalTime ts2  = LocalTime.parse(timestart2);
-        LocalTime te1  = LocalTime.parse(timeend1);
-        LocalTime te2  = LocalTime.parse(timeend2);
+
+
         if(ts1.compareTo(te2)>=0 || ts2.compareTo(te1)>=0){
             System.out.println("no time overlap");
             return true; //no overlap

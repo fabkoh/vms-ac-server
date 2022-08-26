@@ -3,24 +3,19 @@ package com.vmsac.vmsacserver.service;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
-import com.fasterxml.jackson.core.JsonProcessingException;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmsac.vmsacserver.model.*;
 import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoN;
-import com.vmsac.vmsacserver.model.accessgroupschedule.AccessGroupSchedule;
 import com.vmsac.vmsacserver.model.accessgroupschedule.AccessGroupScheduleDto;
 import com.vmsac.vmsacserver.model.authmethodschedule.AuthMethodSchedule;
 import com.vmsac.vmsacserver.model.authmethodschedule.AuthMethodScheduleDto;
 import com.vmsac.vmsacserver.model.credential.CredentialDto;
 import com.vmsac.vmsacserver.model.credentialtype.entranceschedule.EntranceSchedule;
-import com.vmsac.vmsacserver.model.credential.Credential;
 import com.vmsac.vmsacserver.repository.*;
-import io.netty.handler.codec.http.HttpResponseStatus;
 import org.dmfs.rfc5545.DateTime;
-import org.dmfs.rfc5545.recur.InvalidRecurrenceRuleException;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
-import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -28,8 +23,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.client.RestTemplate;
 
 import javax.persistence.EntityManager;
@@ -38,6 +31,7 @@ import java.net.InetAddress;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 
@@ -45,7 +39,7 @@ import java.util.stream.Collectors;
 public class ControllerService {
 
 
-    String pinAssignment = "{'E1_IN_D0': '14', 'E1_IN_D1': '15', 'E1_IN_Buzz': '23', 'E1_IN_Led': '18', 'E1_OUT_D0': '2', 'E1_OUT_D1': '3', 'E1_OUT_Buzz': '17', 'E1_OUT_Led': '4', 'E1_Mag': '6', 'E1_Button': '5','E2_IN_D0': '24', 'E2_IN_D1':'25', 'E2_IN_Buzz': '7', 'E2_IN_Led': '8', 'E2_OUT_D0': '22', 'E2_OUT_D1': '10', 'E2_OUT_Buzz': '11', 'E2_OUT_Led': '9', 'E2_Mag': '26', 'E2_Button': '12', 'Relay_1': '27', 'Relay_2': '13', 'Fire': '26', 'Gen_In_1': '16', 'Gen_Out_1': '', 'Gen_In_2': '20', 'Gen_Out_2': '', 'Gen_In_3': '21', 'Gen_Out_3': ''}";
+    String pinAssignment = "{'E1_IN_D0': '14'}";
     String settingsConfig = "testsettings";
 
 
@@ -66,10 +60,25 @@ public class ControllerService {
     private PersonService personService;
 
     @Autowired
+    private EventsManagementService emService;
+
+    @Autowired
+    private InputEventRepository inputEventRepo;
+
+    @Autowired
+    private OutputEventRepository outputEventRepo;
+
+    @Autowired
     private AccessGroupEntranceNtoNRepository accessGroupEntranceNtoNRepository;
 
     @Autowired
     private ControllerRepository controllerRepository;
+
+    @Autowired
+    private EntranceRepository entranceRepo;
+
+    @Autowired
+    private GENConfigsRepository genRepo;
 
     @PersistenceContext
     EntityManager entityManager;
@@ -108,7 +117,7 @@ public class ControllerService {
         }
 
         return controllerRepository.save(uniconControllerDto.toCreateController(uniconControllerDto.getControllerSerialNo(),
-                LocalDateTime.now(ZoneId.of("GMT+08:00")),status,LocalDateTime.now(ZoneId.of("GMT+08:00")),pinAssignment,settingsConfig,false)).touniconDto();
+                LocalDateTime.now(ZoneId.of("GMT+08:00")), null, status,LocalDateTime.now(ZoneId.of("GMT+08:00")),pinAssignment,settingsConfig,false)).touniconDto();
     }
 
     public UniconControllerDto uniconControllerUpdate(UniconControllerDto uniconControllerDto) throws Exception{
@@ -130,6 +139,7 @@ public class ControllerService {
             toSave.setPendingIP(existingcontroller.getPendingIP());
             toSave.setMasterController(existingcontroller.getMasterController());
             toSave.setCreated(existingcontroller.getCreated());
+            toSave.setLastSync(existingcontroller.getLastSync());
 
             return controllerRepository.save(toSave).touniconDto();
         }
@@ -142,7 +152,7 @@ public class ControllerService {
         controllerRepository.findByControllerSerialNoEqualsAndDeletedIsFalse(newFrontendControllerDto.getControllerSerialNo())
                 .orElseThrow(() -> new RuntimeException("Controller does not exist"));
 
-        Controller existingcontroller = (((controllerRepository.findByControllerSerialNoEqualsAndDeletedIsFalse(newFrontendControllerDto.getControllerSerialNo())).get()));
+        Controller existingcontroller = controllerRepository.findByControllerSerialNoEqualsAndDeletedIsFalse(newFrontendControllerDto.getControllerSerialNo()).get();
 
         if ( (existingcontroller.getControllerId() == newFrontendControllerDto.getControllerId()) ||
                 Objects.isNull(newFrontendControllerDto.getControllerId()) ){
@@ -322,14 +332,22 @@ public class ControllerService {
 
 
             try{
-                jsonbody.put("E1",existingcontroller.getAuthDevices().get(0).getEntrance().getEntranceName());
+                Long entranceId1 = existingcontroller.getAuthDevices().stream()
+                        .filter(ad -> ad.getAuthDeviceDirection().equals("E1_IN"))
+                        .findFirst()
+                        .get().getEntrance().getEntranceId();
+                jsonbody.put("E1", entranceId1);
             }
             catch(Exception e){
                 jsonbody.put("E1","");
             }
 
             try{
-                jsonbody.put("E2",existingcontroller.getAuthDevices().get(2).getEntrance().getEntranceName());
+                Long entranceId2 = existingcontroller.getAuthDevices().stream()
+                        .filter(ad -> ad.getAuthDeviceDirection().equals("E2_IN"))
+                        .findFirst()
+                        .get().getEntrance().getEntranceId();
+                jsonbody.put("E2", entranceId2);
             }
             catch(Exception e){
                 jsonbody.put("E2","");
@@ -341,41 +359,53 @@ public class ControllerService {
             ResponseEntity<String> productCreateResponse =
                     restTemplate.exchange(resourceUrl, HttpMethod.POST, request, String.class);
 
-            if (productCreateResponse.getStatusCodeValue() == 200){
-                ObjectMapper mapper = new ObjectMapper();
-                ControllerConnection connection = mapper.readValue(productCreateResponse.getBody(), ControllerConnection.class);
+            if (productCreateResponse.getStatusCodeValue() == 204){
+//                ObjectMapper mapper = new ObjectMapper();
+//                ControllerConnection connection = mapper.readValue(productCreateResponse.getBody(), ControllerConnection.class);
                 return HttpStatus.OK;
             }
             else{
-                return HttpStatus.BAD_REQUEST;
+                throw new Exception("API call fail");
             }
         }
 
         catch(Exception e){
             System.out.println(e);
         }
-        return HttpStatus.BAD_REQUEST;
+        throw new Exception("An error occurred");
     }
 
-    public HttpStatus generate(Long controllerId)throws Exception{
-//        try {
+    public HttpStatus generate(Long controllerId) throws Exception {
 
+            // find controller object
             Controller existingcontroller = controllerRepository.getById(controllerId);
             String MASTERPASSWORD = "666666";
 
-            List<Map> RulesSet = new ArrayList<Map>(1);
+            List<Object> RulesSet = new ArrayList<>(1);
 
-            for ( int i=0; i<2;i++) {
-                try {
-                    Entrance existingentrance = existingcontroller.getAuthDevices().get(i * 2).getEntrance();
+            // iterate twice, find entrance 1 and 2 related to controller
+            for ( int i=1; i<3; i++) {
+//                try {
+                // find entrance object
+                int finalI = i;
+                Entrance existingentrance = existingcontroller.getAuthDevices().stream()
+                        .filter(ad -> ad.getAuthDeviceDirection().equals("E" + finalI + "_IN"))
+                        .findFirst()
+                        .get().getEntrance();
 
+                if (!(existingentrance == null)) {
+                    // find entrance-schedule object related to entrance
                     List<EntranceSchedule> exisitngEntranceSchedules = entranceScheduleRepository.findAllByEntranceIdAndDeletedFalse(existingentrance.getEntranceId());
 
                     Map<String, Object> entrance = new HashMap();
-                    entrance.put("Entrance", existingentrance.getEntranceName());
+                    entrance.put("Entrance", existingentrance.getEntranceId());
 
-
-                    entrance.put("EntranceSchedule", GetEntranceScheduleObjectWithTime(exisitngEntranceSchedules));
+                    // resolving rrule
+                    try {
+                        entrance.put("EntranceSchedule", GetEntranceScheduleObjectWithTime(exisitngEntranceSchedules));
+                    } catch (Exception e) {
+                        throw new Exception ("ERROR WITH EntranceSchedule: " + e);
+                    }
 
                     Map<String, Object> existingentrancedetails = new HashMap();
                     existingentrancedetails.put("Antipassback", "No");
@@ -396,7 +426,11 @@ public class ControllerService {
 
                     Device1.put("Direction", exisitngDevice1.getAuthDeviceDirection().substring(3));
                     Device1.put("defaultAuthMethod", exisitngDevice1.getDefaultAuthMethod().getAuthMethodDesc());
-                    Device1.put("AuthMethod", GetAuthMethodScheduleObjectWithTime(authMethodScheduleService.findByDeviceId(exisitngDevice1.getAuthDeviceId())));
+                    try {
+                        Device1.put("AuthMethod", GetAuthMethodScheduleObjectWithTime(authMethodScheduleService.findByDeviceId(exisitngDevice1.getAuthDeviceId())));
+                    } catch (Exception e) {
+                        throw new Exception ("ERROR WITH AUTH METHOD SCHEDULE 1: " + e);
+                    }
 
                     Map<String, Object> Device2 = new HashMap();
 
@@ -408,7 +442,11 @@ public class ControllerService {
 
                     Device2.put("Direction", exisitngDevice2.getAuthDeviceDirection().substring(3));
                     Device2.put("defaultAuthMethod", exisitngDevice2.getDefaultAuthMethod().getAuthMethodDesc());
-                    Device2.put("AuthMethod", GetAuthMethodScheduleObjectWithTime(authMethodScheduleService.findByDeviceId(exisitngDevice2.getAuthDeviceId())));
+                    try {
+                        Device2.put("AuthMethod", GetAuthMethodScheduleObjectWithTime(authMethodScheduleService.findByDeviceId(exisitngDevice2.getAuthDeviceId())));
+                    } catch (Exception e) {
+                        throw new Exception("ERROR WITH AUTH METHOD SCHEDULE 2: " + e);
+                    }
 
                     authdevices.put("IN", Device1);
                     authdevices.put("OUT", Device2);
@@ -416,7 +454,7 @@ public class ControllerService {
                     existingentrancedetails.put("AuthenticationDevices", authdevices);
 
                     // for all access group in entrances
-//                accessgroups.put()
+//
                     List<Map> accessGroups = new ArrayList<Map>(1);
 
                     List<AccessGroupEntranceNtoN> listOfAccessGroupsNtoN = accessGroupEntranceNtoNRepository.findAllByEntranceEntranceIdAndDeletedFalse(existingentrance.getEntranceId());
@@ -426,27 +464,50 @@ public class ControllerService {
                         List<Person> ListofPersons = personService.findByAccGrpId((accessGroupEntranceNtoN.getAccessGroup().getAccessGroupId()), false);
                         List<AccessGroupScheduleDto> ListofSchedule = accessGroupScheduleService.findAllByGroupToEntranceIdIn(Collections.singletonList(accessGroupEntranceNtoN.getGroupToEntranceId()));
 
-                        Map<String, Object> oneAccessGroup = new HashMap();
+                        Map<Long, Object> oneAccessGroup = new HashMap();
                         Map<String, Object> personsAndSchedule = new HashMap();
                         List<Map> EditedListofPersons = new ArrayList<Map>(1);
 
                         for (Person person : ListofPersons) {
                             Map<String, Object> eachPerson = new HashMap();
-                            eachPerson.put("Name", person.getPersonFirstName() + " " + person.getPersonLastName());
+                            eachPerson.put("Name", person.getPersonId());
 
                             List<CredentialDto> ListofCred = credentialService.findByPersonId(person.getPersonId());
-                            Map<String, Object> personcredentials = new HashMap();
+                            Map<String, List<Object>> personcredentials = new HashMap();
                             for (CredentialDto credentialDto : ListofCred) {
-                                personcredentials.put(credentialDto.getCredType().getCredTypeName(), credentialDto.getCredUid());
+                                if (credentialDto.getIsValid()) {
+                                    String credType = credentialDto.getCredType().getCredTypeName();
+                                    List<Object> temp = new ArrayList<>();
+
+                                    Map<String, Object> eachCred = new HashMap();
+
+                                    eachCred.put("Value",credentialDto.getCredUid());
+                                    eachCred.put("EndDate",credentialDto.getCredTTL().toString().substring(0,10));
+                                    eachCred.put("IsPerm",credentialDto.getIsPerm());
+
+                                    if (personcredentials.containsKey(credType)) {
+                                        temp = personcredentials.get(credType);
+                                        temp.add(eachCred);
+                                    } else {
+
+                                        temp.add(eachCred);
+                                    }
+                                    personcredentials.put(credType, temp);
+                                }
                             }
+
                             eachPerson.put("Credentials", personcredentials);
                             EditedListofPersons.add(eachPerson);
                         }
 
                         personsAndSchedule.put("Persons", EditedListofPersons);
-                        personsAndSchedule.put("Schedule", GetAccessGroupScheduleObjectWithTime(ListofSchedule));
+                        try {
+                            personsAndSchedule.put("Schedule", GetAccessGroupScheduleObjectWithTime(ListofSchedule));
+                        } catch (Exception e) {
+                            throw new Exception ("ERROR WITH Access Group Schedule: " + e);
+                        }
 
-                        oneAccessGroup.put(accessGroupEntranceNtoN.getAccessGroup().getAccessGroupName(), personsAndSchedule);
+                        oneAccessGroup.put(accessGroupEntranceNtoN.getAccessGroup().getAccessGroupId(), personsAndSchedule);
 
                         accessGroups.add(oneAccessGroup);
                     }
@@ -460,31 +521,111 @@ public class ControllerService {
 
 
                     existingentrancedetails.put("AccessGroups", accessGroups);
+                    entrance.put("ThirdPartyOptions", existingentrance.getThirdPartyOption());
                     entrance.put("EntranceDetails", existingentrancedetails);
-
+                    entrance.put("isActive", existingentrance.getIsActive());
 
                     RulesSet.add(entrance);
-                } catch (Exception e) {
-                    System.out.println(e.toString());
+//                } catch (Exception e) {
+//
+//                    System.out.println("ERROR "+e);
+//                }
+                }else{
+                    System.out.println(existingentrance);
                 }
             }
+        System.out.println("SENDING CREDOCCUR TO CONTROLLER IP "+ existingcontroller.getControllerIP());
 
-                String resourceUrl = "http://"+ existingcontroller.getControllerIP()+":5000/api/credOccur";
-                RestTemplate restTemplate = new RestTemplate();
-                HttpEntity<List> request = new HttpEntity<>
-                        (RulesSet);
+        try{
 
-                ResponseEntity<String> productCreateResponse =
-                        restTemplate.exchange(resourceUrl, HttpMethod.POST, request, String.class);
+            String resourceUrl = "http://"+ existingcontroller.getControllerIP()+":5000/api/credOccur";
+            RestTemplate restTemplate = new RestTemplate();
+            HttpEntity<List> request = new HttpEntity<>(RulesSet);
+//            System.out.println(request);
+            System.out.println("CHECKPOINT CredOccur");
+            ResponseEntity<String> response = restTemplate.exchange(resourceUrl, HttpMethod.POST, request, String.class);
 
-                //call entrancename function
+            if (response.getStatusCodeValue() == 204){
+//                ObjectMapper mapper = new ObjectMapper();
+//                ControllerConnection connection = mapper.readValue(response.getBody(), ControllerConnection.class);
                 return HttpStatus.OK;
+            }
+            else{
+                throw new Exception("API call fail");
+            }
+
+            //call entrancename function
+            }
+        catch (Exception e){
+            throw e;
+        }
 
 //        }
 //        catch(Exception e){
 //            System.out.println(e);
 //        }
+    }
 
+    public ResponseEntity<?> sendEventsManagementToController(Controller controller) throws Exception {
+        System.out.println("SENDING EVENTMANAGEMENT TO CONTROLLER IP "+ controller.getControllerIP().toString());
+        List<EventsManagement> toSend = controller.getEventsManagements();
+        try {
+            Set<Long> entranceIds = new HashSet<>();
+            for (AuthDevice ad : controller.getAuthDevices()) {
+                if (ad.getEntrance() != null)
+                    entranceIds.add(ad.getEntrance().getEntranceId());
+            }
+
+            List<Entrance> entrances = entranceRepo.findByEntranceIdInAndDeletedFalse(entranceIds);
+            entrances.forEach(ent -> toSend.addAll(ent.getEventsManagements()));
+            AtomicBoolean genScheduleError = new AtomicBoolean(false);
+            List<EventsManagementPiDto> controllerEms = toSend.stream()
+                    .map(em -> {
+
+                                Map<String, Object> schedules = new HashMap<>();
+
+                                for (TriggerSchedules ts : em.getTriggerSchedules())
+                                    try {
+
+                                        schedules = getScheduleMap(ts.getRrule(),ts.getTimeStart(),
+                                                ts.getTimeEnd(),  schedules);
+                                    } catch (Exception e) {
+                                        genScheduleError.set(true);
+                                    }
+
+                                return new EventsManagementPiDto(
+                                        em.getEventsManagementId(), em.getEventsManagementName(),
+                                        inputEventRepo.findAllById(em.getInputEventsId()),
+                                        outputEventRepo.findAllById(em.getOutputActionsId()),
+                                        schedules,
+                                        em.getEntrance() == null ? null : EventsManagementPiDto.getEntranceId(em),
+                                        em.getController() == null ? null : EventsManagementPiDto.getControllerId(em)
+                                );
+                            }
+                    ).collect(Collectors.toList());
+
+            if (genScheduleError.get()) {
+                throw new Exception("Schedule generation error");
+            }
+
+            String resourceUrl = "http://" + controller.getControllerIP() + ":5000/api/eventActionTriggers";
+            RestTemplate restTemplate = new RestTemplate();
+            HttpEntity<List> request = new HttpEntity<>(controllerEms);
+            ResponseEntity<String> response = restTemplate.exchange(resourceUrl, HttpMethod.POST, request, String.class);
+
+            if (response.getStatusCodeValue() == 204){
+//                ObjectMapper mapper = new ObjectMapper();
+//                ControllerConnection connection = mapper.readValue(response.getBody(), ControllerConnection.class);
+                return ResponseEntity.ok().build();
+            }
+            else{
+                throw new Exception("API call fail");
+            }
+            //        System.out.println(productCreateResponse.getStatusCode());
+        }
+        catch(Exception e){
+            throw new Exception("An error occurred");
+        }
     }
 
     public void save(Controller existingcontroller) {
@@ -535,12 +676,11 @@ public class ControllerService {
         Controller existingController = controllerRepository.findById(newFrontendControllerDto.getControllerId()).get();
         if (newFrontendControllerDto.getControllerIPStatic() == true){
             existingController.setPendingIP(newFrontendControllerDto.getControllerIP());
+            save(existingController);
         }
         else{
             existingController.setPendingIP(null);
         }
-
-        save(existingController);
 
         String resourceUrl = "http://"+ existingController.getControllerIP()+":5000/api/config";
 
@@ -553,9 +693,14 @@ public class ControllerService {
 
         try{
 
-            ResponseEntity<String> productCreateResponse =
+            ResponseEntity<?> productCreateResponse =
                     restTemplate.exchange(resourceUrl, HttpMethod.POST, request, String.class);
-            return false;
+            if (productCreateResponse.getStatusCodeValue() == 204) {
+                existingController.setControllerIP(existingController.getPendingIP());
+                existingController.setPendingIP(null);
+                save(existingController);
+            }
+            return true;
         }
         catch(Exception e){
             if (newFrontendControllerDto.getControllerIPStatic() == false){
@@ -610,7 +755,7 @@ public class ControllerService {
                     ObjectMapper oMapper = new ObjectMapper();
                     // add to existing schedule
                     Map existingSchedule = oMapper.convertValue(existingAuthMethodAndSchedule.get("Schedule"),Map.class);
-                    authMethodAndSchedule.put("Schedule", GetScheduleMap(rawrrule,starttime,endtime,existingSchedule));
+                    authMethodAndSchedule.put("Schedule", getScheduleMap(rawrrule,starttime,endtime,existingSchedule));
                     authMethodExists =  true;
                     break;
                 }
@@ -619,7 +764,7 @@ public class ControllerService {
             if (!authMethodExists){
                 // add method and schedule
                 authMethodAndSchedule.put("Method", authMethodSchedule.getAuthMethod().getAuthMethodDesc());
-                authMethodAndSchedule.put("Schedule", GetScheduleMap(rawrrule,starttime,endtime,new HashMap<>()));
+                authMethodAndSchedule.put("Schedule", getScheduleMap(rawrrule,starttime,endtime,new HashMap<>()));
             }
 
             AuthMethod.add(authMethodAndSchedule);
@@ -627,6 +772,8 @@ public class ControllerService {
 
         return AuthMethod;
     }
+
+    // takes in a list of entrance schedule and return schedule
 
     public Map GetEntranceScheduleObjectWithTime(List <EntranceSchedule> exisitngEntranceSchedules) throws Exception {
 
@@ -637,7 +784,7 @@ public class ControllerService {
             String rawrrule = singleEntranceSchedule.getRrule();
             String starttime = singleEntranceSchedule.getTimeStart();
             String endtime = singleEntranceSchedule.getTimeEnd();
-            combinedSchedule = GetScheduleMap(rawrrule,starttime,endtime,combinedSchedule);
+            combinedSchedule = getScheduleMap(rawrrule,starttime,endtime,combinedSchedule);
         }
 //        System.out.println(combinedSchedule);
         return combinedSchedule;
@@ -651,14 +798,39 @@ public class ControllerService {
             String rawrrule = singleAccessGroupSchedule.getRrule();
             String starttime = singleAccessGroupSchedule.getTimeStart();
             String endtime = singleAccessGroupSchedule.getTimeEnd();
-            combinedSchedule = GetScheduleMap(rawrrule,starttime,endtime,combinedSchedule);
+            combinedSchedule = getScheduleMap(rawrrule,starttime,endtime,combinedSchedule);
         }
 //        System.out.println(combinedSchedule);
         return combinedSchedule;
     }
 
     // add to existing schedule and return
-    public Map GetScheduleMap(String rawrrule, String starttime, String endtime, Map combinedSchedule) throws Exception {
+    public Map getScheduleMap(String rawrrule, String starttime, String endtime, Map combinedSchedule) throws Exception {
+    // add to existing schedule and return {
+    //    //            "2022-07-15":[
+    //    //                {
+    //    //                    "endtime":"23:59",
+    //    //                    "starttime":"00:00"
+    //    //                },
+    //    //                {
+    //    //                    "endtime":"12:00",
+    //    //                    "starttime":"11:59"
+    //    //                }
+    //    //            ],
+    //    //            "2023-05-30":[
+    //    //                {
+    //    //                    "endtime":"23:57",
+    //    //                    "starttime":"22:56"
+    //    //                },
+    //    //                {
+    //    //                    "endtime":"11:56",
+    //    //                    "starttime":"11:55"
+    //    //                }
+    //    //            ]
+    //    //        }
+
+    // iterate through a list of objects ( schedules ), call GetScheduleMap and keep adding to the combined schedule
+    // can refer to GetEntranceScheduleObjectWithTime for reference
 
         String startdatetime = rawrrule.split("\n")[0].split(":")[1].split("T")[0];
         String rrule = rawrrule.split("\n")[1].split(":")[1];
@@ -698,7 +870,7 @@ public class ControllerService {
         }
 
         RecurrenceRule rule = new RecurrenceRule(rrule);
-        DateTime start = new DateTime(year, month /* 0-based month numbers! */,day);
+        DateTime start = new DateTime(year, month-1 /* 0-based month numbers! */,day);
         RecurrenceRuleIterator it = rule.iterator(start);
 
         int maxInstances = 100; // limit instances for rules that recur forever
@@ -729,11 +901,11 @@ public class ControllerService {
             // do something with nextInstance
             String formattedDate = Integer.toString(nextInstance.getYear());
 
-            if (((Integer.toString(nextInstance.getMonth())).length())==2){
-                formattedDate += "-"+nextInstance.getMonth();
+            if (((Integer.toString(nextInstance.getMonth() + 1)).length())==2){
+                formattedDate += "-"+(nextInstance.getMonth() + 1);
             }
             else{
-                formattedDate += "-0"+nextInstance.getMonth();
+                formattedDate += "-0"+(nextInstance.getMonth() + 1);
             }
 
             if (((Integer.toString(nextInstance.getDayOfMonth())).length())==2){
@@ -763,5 +935,12 @@ public class ControllerService {
             }
         }
         return combinedSchedule;
+    }
+
+    public void createGenConfigs(Controller c) {
+        for (int i = 1; i <= 3; i++) {
+            GENConfigs g = new GENConfigs(null, c, "" + i, null);
+            genRepo.save(g);
+        }
     }
 }
