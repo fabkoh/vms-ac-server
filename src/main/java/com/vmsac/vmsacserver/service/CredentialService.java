@@ -83,6 +83,22 @@ public class CredentialService {
                 .collect(Collectors.toList());
     }
 
+    public List<CredentialDto> findByCredUid(String credUid) {
+        return credentialRepository
+                .findByCredUidContainsAndDeletedFalse(credUid)
+                .stream()
+                .map(Credential::toDto)
+                .collect(Collectors.toList());
+    }
+
+    public List<CredentialDto> findByCredUidAndPersonId(String credUid, Long personId) {
+        return credentialRepository
+                .findByCredUidContainsAndDeletedFalseAndPerson_PersonId(credUid, personId)
+                .stream()
+                .map(Credential::toDto)
+                .collect(Collectors.toList());
+    }
+
     public CredentialDto enableCredentialWithId(Long credentialId) throws Exception{
         Credential cred = credentialRepository.findById(credentialId).orElseThrow(() -> new RuntimeException("Credential does not exist"));
         cred.setIsValid(true);

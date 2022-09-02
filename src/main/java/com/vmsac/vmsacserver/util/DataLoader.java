@@ -62,6 +62,7 @@ public class DataLoader implements CommandLineRunner {
                 AccessGroup.builder()
                         .accessGroupName("Dune")
                         .accessGroupDesc("the characters from dune")
+                        .isActive(true)
                         .deleted(false)
                         .build()
         );
@@ -70,6 +71,7 @@ public class DataLoader implements CommandLineRunner {
                 AccessGroup.builder()
                         .accessGroupName("Not dune")
                         .deleted(false)
+                        .isActive(true)
                         .build()
         );
 
@@ -77,6 +79,7 @@ public class DataLoader implements CommandLineRunner {
                 AccessGroup.builder()
                         .accessGroupName("Empty group")
                         .deleted(false)
+                        .isActive(true)
                         .build()
         );
 

@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS AccessGroups (
   accessGroupId SERIAL NOT NULL UNIQUE,
   accessGroupName VARCHAR(255) NOT NULL,
   accessGroupDesc TEXT,
+  isActive BOOLEAN NOT NULL,
   deleted BOOLEAN NOT NULL,
   PRIMARY KEY (accessGroupId)
 );

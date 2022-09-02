@@ -38,6 +38,9 @@ public class AccessGroup {
     @Column(name = "deleted")
     private Boolean deleted;
 
+    @Column(name = "isactive")
+    private Boolean isActive;
+
 //    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class , property = "personId")
     @JsonIgnore
     @OneToMany(mappedBy = "accessGroup")
@@ -50,13 +53,13 @@ public class AccessGroup {
     public AccessGroupDto toDto(){
         if (this.persons == null) {
             return new AccessGroupDto(this.accessGroupId, this.accessGroupName,
-                    this.accessGroupDesc,null);
+                    this.accessGroupDesc, this.isActive, null);
         }
         return new AccessGroupDto(this.accessGroupId, this.accessGroupName,
-                this.accessGroupDesc,this.persons.stream().map(Person::accDto).collect(Collectors.toList()));
+                this.accessGroupDesc, this.isActive, this.persons.stream().map(Person::accDto).collect(Collectors.toList()));
     }
     public AccessGroupOnlyDto toAccessGroupOnlyDto(){
-        return new AccessGroupOnlyDto(this.accessGroupId,this.accessGroupName,this.accessGroupDesc);
+        return new AccessGroupOnlyDto(this.accessGroupId,this.accessGroupName,this.accessGroupDesc, this.isActive);
     }
 
     @Override
