@@ -23,4 +23,9 @@ public interface CredentialRepository extends JpaRepository<Credential, Long> {
     Optional<Credential> findByCredIdAndDeletedFalse(Long credId);
 
     List<Credential> findAllByDeletedFalse();
+
+    List<Credential> findByCredUidContainsAndDeletedFalse(String credUid);
+
+    List<Credential> findByCredUidContainsAndDeletedFalseAndPerson_PersonId(String credUid, Long personId);
+
 }

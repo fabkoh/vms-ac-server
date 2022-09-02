@@ -25,9 +25,11 @@ public class AccessGroupDto {
 
     private String accessGroupDesc;
 
+    private Boolean isActive;
+
     private List<PersonOnlyDto> persons;
 
     public AccessGroup toAccessGroup(Boolean deleted){
-        return new AccessGroup(accessGroupId,accessGroupName,accessGroupDesc, deleted, null);
+        return new AccessGroup(accessGroupId,accessGroupName,accessGroupDesc, deleted, isActive, null);
     }
 }

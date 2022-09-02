@@ -80,7 +80,6 @@ public class AuthDeviceService {
                 .orElseThrow(() -> new RuntimeException("Auth Device with id "+ authdeviceid+ " does not exist"));
 
         existingAuthDevice.setAuthDeviceName("Auth Device "+existingAuthDevice.getAuthDeviceDirection());
-        existingAuthDevice.setLastOnline(null);
         existingAuthDevice.setMasterpin(Boolean.FALSE);
         existingAuthDevice.setDefaultAuthMethod(defaultAuthMethod);
         //set authMethodSChedules to false
@@ -98,6 +97,7 @@ public class AuthDeviceService {
                 .orElseThrow(() -> new RuntimeException("Auth Device with id "+ authdeviceid+ " does not exist"));
 
         existingAuthDevice.setAuthDeviceName("Auth Device "+existingAuthDevice.getAuthDeviceDirection());
+        existingAuthDevice.setLastOnline(null);
         existingAuthDevice.setMasterpin(Boolean.FALSE);
         existingAuthDevice.setDefaultAuthMethod(defaultAuthMethod);
         //set authMethodSChedules to false

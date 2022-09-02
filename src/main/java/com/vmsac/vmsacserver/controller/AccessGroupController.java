@@ -3,7 +3,7 @@ package com.vmsac.vmsacserver.controller;
 import com.vmsac.vmsacserver.model.*;
 import com.vmsac.vmsacserver.service.AccessGroupService;
 import com.vmsac.vmsacserver.service.PersonService;
-import com.vmsac.vmsacserver.util.UniconUpdater;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,6 +40,30 @@ public class AccessGroupController {
                 accessGroupId + " does not exist");
 
         return new ResponseEntity<>(errors, HttpStatus.NOT_FOUND);
+    }
+
+    @PutMapping("/accessgroup/{accessGroupId}/activate")
+    public ResponseEntity<?> activateAccessGroupWithId(@PathVariable Long accessGroupId) {
+        AccessGroupDto accessGroup;
+        try {
+            accessGroup = accessGroupService.activateAccessGroupWithId(accessGroupId);
+        } catch(Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        return ResponseEntity.ok(accessGroup);
+    }
+
+    @PutMapping("/accessgroup/{accessGroupId}/deactivate")
+    public ResponseEntity<?> deactivateAccessGroupWithId(@PathVariable Long accessGroupId) {
+        AccessGroupDto accessGroup;
+        try {
+            accessGroup = accessGroupService.deactivateAccessGroupWithId(accessGroupId);
+        } catch(Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        return ResponseEntity.ok(accessGroup);
     }
 
     //create an access group
