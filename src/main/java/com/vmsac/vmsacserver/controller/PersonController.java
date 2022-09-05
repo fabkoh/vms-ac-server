@@ -92,7 +92,7 @@ public class PersonController {
             if (newPersonDto.getPersonMobileNumber().equals("+") || newPersonDto.getPersonMobileNumber().equals("+65")) {
                 newPersonDto.setPersonMobileNumber(null);
             }
-            
+
             PersonDto personDto = personService.createNotDeleted(newPersonDto);
 
             return new ResponseEntity<>(personDto,
