@@ -87,11 +87,18 @@ public class PersonController {
             }
             AccessGroup accessGroup = AccessGroupService.findById(accessGroupId).get();
             newPersonDto.setAccessGroup(accessGroup);
+
+            // check if phone number is empty
+            if (newPersonDto.getPersonMobileNumber().equals("+") || newPersonDto.getPersonMobileNumber().equals("+65")) {
+                newPersonDto.setPersonMobileNumber(null);
+            }
+            
             PersonDto personDto = personService.createNotDeleted(newPersonDto);
 
             return new ResponseEntity<>(personDto,
                     HttpStatus.CREATED);
         }
+
         PersonDto personDto = personService.createNotDeleted(newPersonDto);
 
         return new ResponseEntity<>(personDto,
