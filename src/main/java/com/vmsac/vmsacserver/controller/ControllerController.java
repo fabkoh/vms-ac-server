@@ -479,9 +479,13 @@ public class ControllerController {
         String IPaddress = existingcontroller.getControllerIP();
         //api call to get status
         try {
+            System.out.println("---Deleting controller...");
             controllerService.shutdownunicon(IPaddress);
+            System.out.println("--Finished shut down unicon");
             authDeviceService.deleteRelatedAuthDevices(controllerId);
+            System.out.println("--Finished delete auth devices");
             controllerService.deleteControllerWithId(controllerId);
+            System.out.println("--Finished delete controller from the db");
 
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
