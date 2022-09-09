@@ -19,6 +19,4 @@ public interface EntranceScheduleRepository extends JpaRepository<EntranceSchedu
     List<EntranceSchedule> findAllByDeletedFalse();
 
 
-
-
 }

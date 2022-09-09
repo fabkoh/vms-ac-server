@@ -43,6 +43,7 @@ public class AuthMethodScheduleController {
 //        List<AuthMethodScheduleDto> createdDtos;
 //        try{
         ;
+        System.out.println("DEBUG");
         return (authMethodScheduleService.addAll(CreateScheduleList,authDeviceIdList));
 //        }catch (Exception e){
 //            return ResponseEntity.badRequest().build();

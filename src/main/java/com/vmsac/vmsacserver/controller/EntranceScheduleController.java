@@ -3,12 +3,16 @@ package com.vmsac.vmsacserver.controller;
 import com.vmsac.vmsacserver.model.credentialtype.entranceschedule.CreateEntranceScheduleDto;
 import com.vmsac.vmsacserver.model.credentialtype.entranceschedule.EntranceScheduleDto;
 import com.vmsac.vmsacserver.service.EntranceScheduleService;
+import com.vmsac.vmsacserver.service.EntranceService;
 import com.vmsac.vmsacserver.util.UniconUpdater;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -17,6 +21,9 @@ public class EntranceScheduleController {
 
     @Autowired
     EntranceScheduleService entranceScheduleService;
+
+    @Autowired
+    EntranceService entranceService;
 
 
     @GetMapping("/entrance-schedule")
@@ -63,5 +70,23 @@ public class EntranceScheduleController {
         }
 
         return ResponseEntity.noContent().build();
+    }
+
+    // get all current status
+    @GetMapping(path = "entrance-schedule/current")
+    public ResponseEntity<?> GetAllEntrancesCurrentStatus() {
+        return new ResponseEntity<>(entranceScheduleService.GetAllEntrancesCurrentStatus(),HttpStatus.OK);
+
+    }
+
+    // get single current status
+    @GetMapping(path = "entrance-schedule/current/{entranceId}")
+    public ResponseEntity<?> GetEntranceCurrentStatus( @PathVariable Long entranceId) {
+
+        if (entranceService.findById(entranceId).get() != null ) {
+            return new ResponseEntity<>(entranceScheduleService.GetEntranceCurrentStatus(entranceId), HttpStatus.OK);
+        }else{
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 }

@@ -134,9 +134,11 @@ public class AuthMethodScheduleService {
 
         ////start of rrule checker functions////
         if(checkNewScheds(CreateList).size()>0){  //checks for conflicts in new schedules to create
+            System.out.printf(checkNewScheds(CreateList).toString());
             return new ResponseEntity<>(checkNewScheds(CreateList), HttpStatus.CONFLICT);
         }
         if(!compareScheds(CreateList,oldScheduleList).isEmpty()){ //checks for conflicts between new and existing scheds
+            System.out.printf(compareScheds(CreateList,oldScheduleList).toString());
             return new ResponseEntity<>(compareScheds(CreateList,oldScheduleList), HttpStatus.CONFLICT);
         }
         ////end of rrule checker function////
@@ -180,6 +182,7 @@ public class AuthMethodScheduleService {
             }
 //                else{System.out.println("comparerrule returned false,no clashes");}
         }
+            System.out.println(clashedlist);
             return clashedlist; //use this result to determine if got clash or not. if empty then no clash.
     }
 
@@ -206,6 +209,7 @@ public class AuthMethodScheduleService {
                         Map<String,Object> ControllerAuthDevice = new HashMap<>();
                         ControllerAuthDevice.put("controller",controller.getControllerName());
                         ControllerAuthDevice.put("authDevice",device);
+                        ControllerAuthDevice.put("authMethodSchedule",cleanedOldSchedList.get(k));
 
                         //add to error list
                         if(errorList.containsKey(cleanedCreateList.get(j).getAuthMethodScheduleName())){ //if key is used,add to value
@@ -225,6 +229,7 @@ public class AuthMethodScheduleService {
         if(!errorList.isEmpty()){
             returnErrorList.add(errorList);
         }
+        System.out.println(returnErrorList);
         return returnErrorList; //use this result to determine if got clash or not. if empty then no clash.
     }
 
@@ -265,7 +270,7 @@ public class AuthMethodScheduleService {
     public Boolean compareTime(String timestart1,String timeend1, String timestart2 , String timeend2){
 
         LocalTime te1  = LocalTime.parse("23:59");
-
+        // will there be a bug ? since 2400 is all converted to 2359
         if (!timeend1.equals("24:00")) {
             te1 = LocalTime.parse(timeend1);
         }

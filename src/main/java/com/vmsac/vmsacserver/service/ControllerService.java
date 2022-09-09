@@ -393,7 +393,7 @@ public class ControllerService {
                         .findFirst()
                         .get().getEntrance();
 
-                if (!(existingentrance == null)) {
+                if (!(existingentrance == null) && existingentrance.getIsActive() ) {
                     // find entrance-schedule object related to entrance
                     List<EntranceSchedule> exisitngEntranceSchedules = entranceScheduleRepository.findAllByEntranceIdAndDeletedFalse(existingentrance.getEntranceId());
 
@@ -460,7 +460,7 @@ public class ControllerService {
                     List<AccessGroupEntranceNtoN> listOfAccessGroupsNtoN = accessGroupEntranceNtoNRepository.findAllByEntranceEntranceIdAndDeletedFalse(existingentrance.getEntranceId());
 
                     for (AccessGroupEntranceNtoN accessGroupEntranceNtoN : listOfAccessGroupsNtoN) {
-
+                        if ( accessGroupEntranceNtoN.getAccessGroup().getIsActive()){
                         List<Person> ListofPersons = personService.findByAccGrpId((accessGroupEntranceNtoN.getAccessGroup().getAccessGroupId()), false);
                         List<AccessGroupScheduleDto> ListofSchedule = accessGroupScheduleService.findAllByGroupToEntranceIdIn(Collections.singletonList(accessGroupEntranceNtoN.getGroupToEntranceId()));
 
@@ -510,7 +510,7 @@ public class ControllerService {
                         oneAccessGroup.put(accessGroupEntranceNtoN.getAccessGroup().getAccessGroupId(), personsAndSchedule);
 
                         accessGroups.add(oneAccessGroup);
-                    }
+                    }}
 
 
 //                for(User user : listOfUsers) {
@@ -576,7 +576,7 @@ public class ControllerService {
                     entranceIds.add(ad.getEntrance().getEntranceId());
             }
 
-            List<Entrance> entrances = entranceRepo.findByEntranceIdInAndDeletedFalse(entranceIds);
+            List<Entrance> entrances = entranceRepo.findByEntranceIdInAndDeletedFalseAndIsActiveTrue(entranceIds);
             entrances.forEach(ent -> toSend.addAll(ent.getEventsManagements()));
             AtomicBoolean genScheduleError = new AtomicBoolean(false);
             List<EventsManagementPiDto> controllerEms = toSend.stream()
