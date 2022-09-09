@@ -87,9 +87,9 @@ public class EntranceScheduleService {
         entranceScheduleRepository.save(toBeDeleted);
     }
 
-    public Map GetAllEntrancesCurrentStatus(){
+    public Map<Long, Boolean> GetAllEntrancesCurrentStatus(){
         List <Entrance> ListOfEntrance = entranceRepository.findByDeletedIsFalse();
-        Map Status = new HashMap();
+        Map<Long, Boolean> Status = new HashMap();
         if (ListOfEntrance != null){
             for ( Entrance singleEntrance  :  ListOfEntrance){
                 Status.put(singleEntrance.getEntranceId(), GetEntranceCurrentStatus(singleEntrance.getEntranceId()));

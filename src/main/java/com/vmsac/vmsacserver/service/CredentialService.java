@@ -101,11 +101,14 @@ public class CredentialService {
     }
 
     public PersonDto findPersonWithCredUid(String credUid) {
-        Optional<Credential> credOptional = credentialRepository.findByDeletedFalseAndCredUid(credUid);
-        if (!credOptional.isPresent()) {
+        List<Credential> credOptionals = credentialRepository.findByDeletedFalseAndCredUidAndCredType_CredTypeId(credUid, 1L);
+        if (credOptionals.isEmpty()) {
             return null;
         }
-        Credential cred = credOptional.get();
+        if (credOptionals.size() > 1) {
+            return null;
+        }
+        Credential cred = credOptionals.get(0);
 
         // Only allow Card type credentials to be searched
         if (cred.getCredType().getCredTypeId() != 1) {

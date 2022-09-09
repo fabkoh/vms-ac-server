@@ -3,6 +3,7 @@ package com.vmsac.vmsacserver.controller;
 import com.vmsac.vmsacserver.model.accessgroupschedule.AccessGroupScheduleDto;
 import com.vmsac.vmsacserver.model.accessgroupschedule.CreateAccessGroupScheduleDto;
 import com.vmsac.vmsacserver.service.AccessGroupScheduleService;
+import com.vmsac.vmsacserver.service.AccessGroupService;
 import com.vmsac.vmsacserver.util.UniconUpdater;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,6 +21,9 @@ public class AccessGroupScheduleController {
 
     @Autowired
     AccessGroupScheduleService accessGroupScheduleService;
+
+    @Autowired
+    AccessGroupService accessGroupService;
 
 
     // returns access group schedules
@@ -84,4 +88,26 @@ public class AccessGroupScheduleController {
         return ResponseEntity.noContent().build();
     }
 
+    // get all current status
+    @GetMapping(path = "access-group-schedule/current")
+    public ResponseEntity<?> GetAllAccessGroupCurrentStatus() {
+        return new ResponseEntity<>(accessGroupScheduleService.GetAllAccessGroupCurrentStatus(),HttpStatus.OK);
+
+    }
+
+    @GetMapping(path = "access-group-schedule/current-entrance/{entranceId}")
+    public ResponseEntity<?> GetAllAccessGroupCurrentStatusForOneEntrance(@PathVariable Long entranceId) {
+        return new ResponseEntity<>(accessGroupScheduleService.GetAllAccessGroupCurrentStatusForOneEntrance(entranceId),HttpStatus.OK);
+    }
+
+    // get single current status
+    @GetMapping(path = "access-group-schedule/current/{accessGroupId}")
+    public ResponseEntity<?> GetAccessGroupCurrentStatus( @PathVariable Long accessGroupId) {
+
+        if (accessGroupService.findById(accessGroupId).get() != null ) {
+            return new ResponseEntity<>(accessGroupScheduleService.GetAccessGroupCurrentStatus(accessGroupId), HttpStatus.OK);
+        }else{
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
 }
