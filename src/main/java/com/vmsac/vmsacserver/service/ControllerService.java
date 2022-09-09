@@ -17,6 +17,8 @@ import org.dmfs.rfc5545.DateTime;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -191,13 +193,22 @@ public class ControllerService {
     }
 
     public void shutdownunicon(String IPaddress) {
+
+        HttpComponentsClientHttpRequestFactory httpRequestFactory = new HttpComponentsClientHttpRequestFactory();
+        httpRequestFactory.setConnectionRequestTimeout(3000);
+        httpRequestFactory.setConnectTimeout(3000);
+        httpRequestFactory.setReadTimeout(3000);
+
+        System.out.println("---Shutting down unicon");
         RestTemplate restTemplate = new RestTemplate();
+        restTemplate.setRequestFactory(httpRequestFactory);
         String resourceUrl = "http://"+IPaddress+":5000/api/shutdown";
         HttpEntity<String> request = new HttpEntity<String>("");
 
         try{
             ResponseEntity<String> productCreateResponse =
                     restTemplate.exchange(resourceUrl, HttpMethod.POST, request, String.class);
+            System.out.println("--Finished shutting down");
         }
         catch(Exception e){
             return;
