@@ -4,11 +4,13 @@ import com.vmsac.vmsacserver.model.Event;
 import com.vmsac.vmsacserver.service.EventService;
 import com.vmsac.vmsacserver.service.InOutEventService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @CrossOrigin(origins = "*")
@@ -34,8 +36,13 @@ public class EventController {
     }
 
     @GetMapping("events")
-    public ResponseEntity<?> getEvents() {
+    public ResponseEntity<?> getEvents(@RequestParam(value = "queryString", required = false) String queryStr,
+                                       @RequestParam(value = "start", required = false)
+                                       @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
+                                       @RequestParam(value = "end", required = false)
+                                       @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
 
-        return new ResponseEntity<>(eventService.getAllEvents(), HttpStatus.OK);
+        return new ResponseEntity<>(eventService.getEventsByTimeDesc(queryStr, start, end, 500), HttpStatus.OK);
+
     }
 }

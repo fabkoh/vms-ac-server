@@ -2,6 +2,7 @@ package com.vmsac.vmsacserver.repository;
 
 import com.vmsac.vmsacserver.model.Entrance;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,5 +27,8 @@ public interface EntranceRepository extends JpaRepository<Entrance, Long> {
 
     List<Entrance> findByDeletedIsFalse();
 
+    @Query(value = "select * from entrances where upper(entrancename) like upper(concat('%', :name, '%')) " +
+            "and deleted = false", nativeQuery = true)
+    List<Entrance> searchByEntranceName(String name);
 
 }

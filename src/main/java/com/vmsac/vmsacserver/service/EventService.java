@@ -4,14 +4,18 @@ import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.vmsac.vmsacserver.model.*;
-import com.vmsac.vmsacserver.repository.EventActionTypeRepository;
-import com.vmsac.vmsacserver.repository.EventRepository;
+import com.vmsac.vmsacserver.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class EventService {
@@ -23,13 +27,25 @@ public class EventService {
     private PersonService personService;
 
     @Autowired
+    private PersonRepository personRepo;
+
+    @Autowired
     private EntranceService entranceService;
+
+    @Autowired
+    private EntranceRepository entranceRepo;
 
     @Autowired
     private AccessGroupService accessGroupService;
 
     @Autowired
+    private AccessGroupRepository accessGroupRepo;
+
+    @Autowired
     private ControllerService controllerService;
+
+    @Autowired
+    private ControllerRepository controllerRepo;
 
     @Autowired
     private EventActionTypeRepository eventActionTypeRepository;
@@ -114,10 +130,49 @@ public class EventService {
         return success;
     }
 
-    public List<Event> getAllEvents(){
-        List<Event> allEvents = eventRepository.findByDeletedIsFalseOrderByEventTimeDesc();
+    public List<Event> getEventsByTimeDesc(int limit){
+        List<Event> allEvents = eventRepository.findByDeletedIsFalseOrderByEventTimeDesc(PageRequest.of(0, limit));
         return allEvents;
+    }
 
+    public List<Event> getEventsByTimeDesc(String queryString, LocalDateTime start, LocalDateTime end, int limit) {
+        List<Event> result;
+        if (queryString != null && !queryString.equals("")) {
+
+            List<EventActionType> eventTypes = eventActionTypeRepository.searchByEventActionTypeName(queryString);
+            List<Long> eventTypeIds = eventTypes.stream().map(EventActionType::getEventActionTypeId).collect(Collectors.toList());
+
+            List<Entrance> entrances = entranceRepo.searchByEntranceName(queryString);
+            List<Long> entranceIds = entrances.stream().map(Entrance::getEntranceId).collect(Collectors.toList());
+
+            List<Controller> controllers = controllerRepo.searchByControllerName(queryString);
+            List<Long> controllerIds = controllers.stream().map(Controller::getControllerId).collect(Collectors.toList());
+
+            List<Person> persons = personRepo.findAllByQueryString(queryString);
+            List<Long> personIds = persons.stream().map(Person::getPersonId).collect(Collectors.toList());
+
+            List<AccessGroup> accessGroups = accessGroupRepo.searchByAccessGroupName(queryString);
+            List<Long> accessGroupIds = accessGroups.stream().map(AccessGroup::getAccessGroupId).collect(Collectors.toList());
+
+            result = eventRepository.findByQueryString(eventTypeIds, entranceIds, controllerIds, personIds, accessGroupIds);
+        } else
+            result = getEventsByTimeDesc(limit);
+
+        List<Event> resultAfterDatetime = result.stream().filter(e -> {
+            LocalDateTime eventTime = LocalDateTime.parse(e.getEventTime(), DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss"));
+            if (start != null) {
+                if (!(eventTime.equals(start) || eventTime.isAfter(start)))
+                    return false;
+            }
+            if (end != null) {
+                if (!eventTime.isBefore(end))
+                    return false;
+            }
+            return true;
+        })
+                .collect(Collectors.toList());
+
+        return resultAfterDatetime.stream().limit(limit).collect(Collectors.toList());
     }
 //
 //    public MappingJacksonValue filterAllEvents(){

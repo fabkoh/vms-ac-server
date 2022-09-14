@@ -112,6 +112,11 @@ public class PersonController {
     public ResponseEntity<?> updatePerson(
             @Valid @RequestBody PersonDto updatePersonDto) {
 
+        // check if phone number is empty
+        if (updatePersonDto.getPersonMobileNumber().equals("+") || updatePersonDto.getPersonMobileNumber().equals("+65")) {
+            updatePersonDto.setPersonMobileNumber("");
+        }
+
         if(!personService.idInUse(updatePersonDto.getPersonId())) {
             Map<String, String> errors = new HashMap<>();
             errors.put("personId", "Person with Id " +
