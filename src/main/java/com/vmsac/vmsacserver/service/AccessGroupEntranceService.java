@@ -163,6 +163,7 @@ public class AccessGroupEntranceService {
                             "00:00",
                             "23:59",
                             nton.getGroupToEntranceId(),
+                            true,
                             false
                         ))
                         .collect(Collectors.toList())

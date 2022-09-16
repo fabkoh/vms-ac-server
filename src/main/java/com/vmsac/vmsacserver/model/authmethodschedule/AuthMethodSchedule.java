@@ -38,6 +38,9 @@ public class AuthMethodSchedule {
     @Column(name = "timeend")
     private String timeEnd;
 
+    @Column(name = "isactive")
+    private Boolean isActive;
+
     @Column(name="deleted")
     private Boolean deleted;
 
@@ -53,6 +56,6 @@ public class AuthMethodSchedule {
 
 
     public AuthMethodScheduleDto toDto(){
-        return new AuthMethodScheduleDto(authMethodScheduleId,authMethodScheduleName,rrule,null,timeStart,timeEnd,authMethod.toDto());
+        return new AuthMethodScheduleDto(authMethodScheduleId,authMethodScheduleName,rrule,null,timeStart,timeEnd, isActive, authMethod.toDto());
     }
 }

@@ -2,6 +2,7 @@ package com.vmsac.vmsacserver.controller;
 
 import com.vmsac.vmsacserver.model.accessgroupschedule.AccessGroupScheduleDto;
 import com.vmsac.vmsacserver.model.accessgroupschedule.CreateAccessGroupScheduleDto;
+import com.vmsac.vmsacserver.repository.PersonRepository;
 import com.vmsac.vmsacserver.service.AccessGroupScheduleService;
 import com.vmsac.vmsacserver.service.AccessGroupService;
 import com.vmsac.vmsacserver.util.UniconUpdater;
@@ -100,6 +101,10 @@ public class AccessGroupScheduleController {
         return new ResponseEntity<>(accessGroupScheduleService.GetAllAccessGroupCurrentStatusForOneEntrance(entranceId),HttpStatus.OK);
     }
 
+    @GetMapping(path = "access-group-schedule/current-person/{personId}")
+    public ResponseEntity<?> GetAllAccessGroupCurrentStatusForOnePerson(@PathVariable Long personId) {
+        return new ResponseEntity<>(accessGroupScheduleService.GetAllAccessGroupCurrentStatusForOnePerson(personId),HttpStatus.OK);
+    }
     // get single current status
     @GetMapping(path = "access-group-schedule/current/{accessGroupId}")
     public ResponseEntity<?> GetAccessGroupCurrentStatus( @PathVariable Long accessGroupId) {
