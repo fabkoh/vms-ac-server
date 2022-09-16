@@ -26,6 +26,6 @@ public class CreateAccessGroupScheduleDto {
     private Long groupToEntranceId;
 
     public AccessGroupSchedule toAccessGroupSchedule(boolean deleted){
-        return new AccessGroupSchedule(null, accessGroupScheduleName, rrule, timeStart, timeEnd, groupToEntranceId, deleted);
+        return new AccessGroupSchedule(null, accessGroupScheduleName, rrule, timeStart, timeEnd, groupToEntranceId, true, deleted);
     }
 }

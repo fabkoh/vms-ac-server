@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmsac.vmsacserver.model.AccessGroup;
 import com.vmsac.vmsacserver.model.AccessGroupOnlyDto;
 import com.vmsac.vmsacserver.model.Entrance;
+import com.vmsac.vmsacserver.model.Person;
 import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoN;
 import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoNDto;
 import com.vmsac.vmsacserver.model.accessgroupschedule.AccessGroupSchedule;
@@ -13,6 +14,8 @@ import com.vmsac.vmsacserver.model.credentialtype.entranceschedule.EntranceSched
 import com.vmsac.vmsacserver.repository.AccessGroupEntranceNtoNRepository;
 import com.vmsac.vmsacserver.repository.AccessGroupRepository;
 import com.vmsac.vmsacserver.repository.AccessGroupScheduleRepository;
+import com.vmsac.vmsacserver.repository.PersonRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,6 +39,8 @@ public class AccessGroupScheduleService {
     @Autowired
     AccessGroupScheduleRepository accessGroupScheduleRepository;
 
+    @Autowired
+    PersonRepository personRepository;
     @Autowired
     ControllerService controllerService;
 
@@ -179,6 +184,15 @@ public class AccessGroupScheduleService {
         return Status;
     }
 
+    public Boolean GetAllAccessGroupCurrentStatusForOnePerson(Long personId) {
+        Person person = personRepository.findByPersonIdAndDeleted(personId,false).get();
+        if(person != null) {
+            AccessGroup accessGroup = person.getAccessGroup();
+            return GetAccessGroupCurrentStatus(accessGroup.getAccessGroupId());
+        }
+        return false;
+    }
+
     public Map<Long, Boolean> GetAllAccessGroupCurrentStatusForOneEntrance(Long entranceId){
         Map<Long, Boolean> Status = new HashMap();
         List<AccessGroup> ListOfAccessGroups = new ArrayList<>();
@@ -197,6 +211,7 @@ public class AccessGroupScheduleService {
         return Status;
     }
 
+    // will return true if access group is currently being used in schedule and false otherwise
     public Boolean GetAccessGroupCurrentStatus(Long accessGroupId){
         AccessGroup existingAccessGroup = accessGroupRepository.findByAccessGroupIdAndDeletedFalse(accessGroupId).get();
         if (existingAccessGroup != null){

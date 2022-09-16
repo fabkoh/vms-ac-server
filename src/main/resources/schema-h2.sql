@@ -103,6 +103,7 @@ CREATE TABLE IF NOT EXISTS AccessGroupSchedule(
   timeStart VARCHAR(128) NOT NULL,
   timeEnd VARCHAR(128) NOT NULL,
   groupToEntranceId INT REFERENCES AccessGroupsEntranceNtoN (groupToEntranceId),
+  isActive BOOLEAN NOT NULL,
   deleted BOOLEAN NOT NULL,
   PRIMARY KEY (accessGroupScheduleId)
 );

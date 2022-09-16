@@ -191,6 +191,7 @@ public class DataLoader implements CommandLineRunner {
                         .timeStart("00:00")
                         .timeEnd("23:59")
                         .groupToEntranceId(duneMainEntrance.getGroupToEntranceId())
+                        .isActive(true)
                         .deleted(false)
                         .build()
         );
@@ -205,6 +206,7 @@ public class DataLoader implements CommandLineRunner {
                         .timeEnd("17:00")
                         .groupToEntranceId(duneSideEntrance.getGroupToEntranceId())
                         .deleted(false)
+                        .isActive(true)
                         .build()
         );
 
@@ -215,6 +217,7 @@ public class DataLoader implements CommandLineRunner {
                         .timeStart("12:00")
                         .timeEnd("17:00")
                         .groupToEntranceId(duneSideEntrance.getGroupToEntranceId())
+                        .isActive(true)
                         .deleted(false)
                         .build()
         );
@@ -226,6 +229,7 @@ public class DataLoader implements CommandLineRunner {
                         .timeStart("00:00")
                         .timeEnd("23:59")
                         .groupToEntranceId(notDuneMainEntrance.getGroupToEntranceId())
+                        .isActive(true)
                         .deleted(false)
                         .build()
         );

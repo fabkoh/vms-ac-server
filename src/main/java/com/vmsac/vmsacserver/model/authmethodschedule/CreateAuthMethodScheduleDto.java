@@ -36,6 +36,6 @@ public class CreateAuthMethodScheduleDto {
     private AuthDevice authDevice;
 
     public AuthMethodSchedule toAuthMethodSchedule(){
-        return new AuthMethodSchedule(null,authMethodScheduleName,rrule,timeStart,timeEnd,false,authDevice,authMethod);
+        return new AuthMethodSchedule(null,authMethodScheduleName,rrule,timeStart,timeEnd,true, false,authDevice,authMethod);
     }
 }
