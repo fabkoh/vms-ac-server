@@ -98,8 +98,8 @@ public class EntranceController {
         return ResponseEntity.ok(entranceDto);
     }
 
-    @PutMapping("/entrance/unlock/{entranceId}")
-    public ResponseEntity<?> disableEntrance(@PathVariable(name = "entranceId") Long entranceId) {
+    @PutMapping("/entrance/disable/{entranceId}")
+    public ResponseEntity<?> disableEntrance(@PathVariable("entranceId") Long entranceId) {
         EntranceDto entranceDto;
         try {
             entranceDto = entranceService.updateEntranceIsActiveWithId(false, entranceId);
@@ -108,6 +108,22 @@ public class EntranceController {
         }
 
         return ResponseEntity.ok(entranceDto);
+    }
+
+    @GetMapping("/entrance/unlock/{entranceId}")
+    public ResponseEntity<?> unlockEntrance(@PathVariable(name = "entranceId") Long entranceId) {
+        Optional<Entrance> entranceOptional = entranceService.findById(entranceId);
+        if (!entranceOptional.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+        try {
+            Entrance entrance = entranceOptional.get();
+            //TODO: CALL PI TO UNLOCK ENTRANCE
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok().build();
     }
 
     //Update name or description of entrance
