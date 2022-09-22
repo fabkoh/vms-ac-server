@@ -105,8 +105,8 @@ public class EventsManagementController {
     @GetMapping("/event/output/types")
     public ResponseEntity<?> getAllOutputTypes(@RequestParam("forController") Boolean forController) {
 
-        // GEN_OUT_1,2,3; NOTIFICATION
-        final String[] typeNamesForController = {"GEN_OUT_1", "GEN_OUT_2", "GEN_OUT_3", "NOTIFICATION (SMS)", "NOTIFICATION (Email)"};
+        // GEN_OUT_1,2,3; NOTIFICATION (SMS); NOTIFICATION (EMAIL)
+        final String[] typeNamesForController = {"GEN_OUT_1", "GEN_OUT_2", "GEN_OUT_3", "NOTIFICATION (SMS)", "NOTIFICATION (EMAIL)"};
 
         if (forController) {
             return new ResponseEntity<>(outputTypeRepository.findAllByEventActionOutputNameIgnoreCaseIn(
