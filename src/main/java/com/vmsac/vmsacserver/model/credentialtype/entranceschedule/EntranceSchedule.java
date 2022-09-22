@@ -37,7 +37,10 @@ public class EntranceSchedule {
     @Column(name = "deleted")
     private Boolean deleted;
 
+    @Column(name = "isactive")
+    private Boolean isActive;
+
     public EntranceScheduleDto toDto(){
-        return new EntranceScheduleDto(this.entranceScheduleId,this.entranceScheduleName,this.rrule,this.timeStart,this.timeEnd, this.entranceId);
+        return new EntranceScheduleDto(this.entranceScheduleId,this.entranceScheduleName,this.rrule,this.timeStart,this.timeEnd, this.entranceId, this.isActive);
     }
 }

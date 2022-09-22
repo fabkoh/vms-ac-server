@@ -121,6 +121,7 @@ CREATE TABLE IF NOT EXISTS EntranceSchedule(
     timeEnd VARCHAR(128) NOT NULL,
     entranceId INT REFERENCES Entrances (entranceId),
     deleted BOOLEAN NOT NULL,
+    isActive BOOLEAN NOT NULL,
     PRIMARY KEY (entranceScheduleId)
     );
 
@@ -180,6 +181,7 @@ CREATE TABLE IF NOT EXISTS AuthMethodSchedule(
     authDeviceId INT REFERENCES AuthDevice (authDeviceId),
     AuthMethodId INT REFERENCES AuthMethod (authMethodId),
     deleted BOOLEAN NOT NULL,
+    isActive BOOLEAN NOT NULL,
     PRIMARY KEY (authMethodScheduleId)
     );
 

@@ -1,6 +1,8 @@
 package com.vmsac.vmsacserver.controller;
 
+import com.vmsac.vmsacserver.model.authmethodschedule.AuthMethodSchedule;
 import com.vmsac.vmsacserver.model.credentialtype.entranceschedule.CreateEntranceScheduleDto;
+import com.vmsac.vmsacserver.model.credentialtype.entranceschedule.EntranceSchedule;
 import com.vmsac.vmsacserver.model.credentialtype.entranceschedule.EntranceScheduleDto;
 import com.vmsac.vmsacserver.service.EntranceScheduleService;
 import com.vmsac.vmsacserver.service.EntranceService;
@@ -59,6 +61,26 @@ public class EntranceScheduleController {
         }
 
         return ResponseEntity.ok(entranceScheduleDtos);
+    }
+
+    @PutMapping("/entrance-schedule/enable/{scheduleId}")
+    public ResponseEntity<?> enableEntranceSchedule(@PathVariable("scheduleId") Long scheduleId) {
+        EntranceSchedule entranceSchedule = entranceScheduleService.findByScheduleIdAndDeletedFalse(scheduleId);
+        if (entranceSchedule == null) {
+            return ResponseEntity.notFound().build();
+        }
+        entranceSchedule.setIsActive(true);
+        return ResponseEntity.ok(entranceScheduleService.save(entranceSchedule));
+    }
+
+    @PutMapping("/entrance-schedule/disable/{scheduleId}")
+    public ResponseEntity<?> disableEntranceSchedule(@PathVariable("scheduleId") Long scheduleId) {
+        EntranceSchedule entranceSchedule = entranceScheduleService.findByScheduleIdAndDeletedFalse(scheduleId);
+        if (entranceSchedule == null) {
+            return ResponseEntity.notFound().build();
+        }
+        entranceSchedule.setIsActive(false);
+        return ResponseEntity.ok(entranceScheduleService.save(entranceSchedule));
     }
 
     @DeleteMapping("/entrance-schedule/delete/{scheduleId}")

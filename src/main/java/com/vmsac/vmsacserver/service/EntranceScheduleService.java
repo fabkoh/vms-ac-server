@@ -34,6 +34,14 @@ public class EntranceScheduleService {
         return entranceScheduleRepository.findAllByDeletedFalse().stream().map(EntranceSchedule::toDto).collect(Collectors.toList());
     }
 
+    public EntranceSchedule findByScheduleIdAndDeletedFalse(Long entranceScheduleId) {
+        return entranceScheduleRepository.findByEntranceScheduleIdAndDeletedFalse(entranceScheduleId).orElseGet(()-> null);
+    }
+
+    public EntranceSchedule save(EntranceSchedule entranceSchedule){
+        return entranceScheduleRepository.save(entranceSchedule);
+    }
+
     public List<EntranceScheduleDto>findAllByEntranceIdIn(List<Long> entranceIds){
         return entranceScheduleRepository.findAllByEntranceIdInAndDeletedFalse(entranceIds)
                 .stream()

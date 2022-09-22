@@ -243,6 +243,7 @@ public class DataLoader implements CommandLineRunner {
                         .timeEnd("23:59")
                         .entranceId(mainEntrance.getEntranceId())
                         .deleted(false)
+                        .isActive(true)
                         .build()
         );
 
@@ -254,6 +255,7 @@ public class DataLoader implements CommandLineRunner {
                         .timeEnd("12:00")
                         .entranceId(mainEntrance.getEntranceId())
                         .deleted(false)
+                        .isActive(true)
                         .build()
         );
 
