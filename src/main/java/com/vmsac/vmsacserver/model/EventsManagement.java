@@ -2,6 +2,7 @@ package com.vmsac.vmsacserver.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vladmihalcea.hibernate.type.array.ListArrayType;
+import com.vmsac.vmsacserver.model.notification.EventsManagementNotification;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -70,5 +71,8 @@ public class EventsManagement {
 
     @OneToMany(mappedBy = "eventsManagement", cascade = CascadeType.ALL)
     private List<TriggerSchedules> triggerSchedules;
+
+    @OneToMany(mappedBy = "eventsManagement", cascade = CascadeType.ALL)
+    private List<EventsManagementNotification> eventsManagementNotifications;
 
 }

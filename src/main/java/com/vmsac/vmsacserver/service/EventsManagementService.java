@@ -82,7 +82,7 @@ public class EventsManagementService {
                 Controller c = opController.get();
                 EventsManagement em = eventsManagementRepository.save(new EventsManagement(null,
                         dto.getEventsManagementName(), false, inputEventsId,
-                        outputActionsId, c, null, new ArrayList<>()));
+                        outputActionsId, c, null, new ArrayList<>(), new ArrayList<>()));
 
                 for (TriggerSchedules ts : dto.getTriggerSchedules()) {
                     TriggerSchedules newTs = triggerSchedulesRepository.save(new TriggerSchedules(
@@ -113,7 +113,7 @@ public class EventsManagementService {
                 Entrance e = opEntrance.get();
                 EventsManagement em = eventsManagementRepository.save(new EventsManagement(null,
                         dto.getEventsManagementName(), false, inputEventsId,
-                        outputActionsId, null, e, new ArrayList<>()));
+                        outputActionsId, null, e, new ArrayList<>(), new ArrayList<>()));
 
                 for (TriggerSchedules ts : dto.getTriggerSchedules()) {
                     TriggerSchedules newTs = triggerSchedulesRepository.save(new TriggerSchedules(

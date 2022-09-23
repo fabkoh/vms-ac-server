@@ -274,3 +274,40 @@ CREATE TABLE IF NOT EXISTS VideoRecorder(
     PRIMARY KEY (recorderId)
 );
 
+CREATE TABLE IF NOT EXISTS EmailSettings(
+    emailSettingsId SERIAL NOT NULL UNIQUE,
+    username VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    emailPassword VARCHAR(255) NOT NULL,
+    hostAddress VARCHAR(255) NOT NULL,
+    portNumber VARCHAR(255) NOT NULL,
+    enabled BOOLEAN NOT NULL DEFAULT TRUE,
+    PRIMARY KEY (emailSettingsId)
+);
+
+CREATE TABLE IF NOT EXISTS SmsSettings(
+    smsSettingsId SERIAL NOT NULL UNIQUE,
+    smsAPI TEXT NOT NULL,
+    enabled BOOLEAN NOT NULL DEFAULT TRUE,
+    PRIMARY KEY (smsSettingsId)
+);
+
+CREATE TABLE IF NOT EXISTS EventsManagementNotification(
+    eventsManagementNotificationId SERIAL NOT NULL UNIQUE,
+    eventsManagementNotificationType VARCHAR(255) NOT NULL,
+    eventsManagementNotificationRecipients TEXT NOT NULL,
+    eventsManagementNotificationContent TEXT NOT NULL,
+    eventsManagementNotificationTitle VARCHAR(255),
+    deleted BOOLEAN NOT NULL DEFAULT FALSE,
+    eventsManagementId INT REFERENCES EventsManagement(eventsManagementId),
+    PRIMARY KEY (eventsManagementNotificationId)
+);
+
+CREATE TABLE IF NOT EXISTS NotificationLogs(
+    notificationLogsId SERIAL NOT NULL UNIQUE,
+    notificationLogsStatusCode INT NOT NULL,
+    notificationLogsError TEXT NOT NULL,
+    timeSent VARCHAR(255) NOT NULL,
+    eventsManagementNotificationId INT REFERENCES EventsManagementNotification(eventsManagementNotificationId),
+    PRIMARY KEY (notificationLogsId)
+);
