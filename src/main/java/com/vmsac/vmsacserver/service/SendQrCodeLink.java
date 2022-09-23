@@ -36,7 +36,12 @@ public class SendQrCodeLink {
         OutputStream opstream = httpURLConnection.getOutputStream();
         BufferedWriter bfwriter = new BufferedWriter(new OutputStreamWriter(opstream, "UTF-8"));
 
-        String dstring = URLEncoder.encode("apikey", "UTF-8")+"="+URLEncoder.encode("isssecurity", "UTF-8")+"&"+URLEncoder.encode("mobileNumber", "UTF-8")+"="+URLEncoder.encode(visitorNumber, "UTF-8") +"&"+URLEncoder.encode("smsMessage", "UTF-8")+"="+URLEncoder.encode(message, "UTF-8");
+        String dstring = URLEncoder.encode("apikey", "UTF-8")+"="+
+                URLEncoder.encode("isssecurity", "UTF-8")+"&"+
+                URLEncoder.encode("mobileNumber", "UTF-8")+"="+
+                URLEncoder.encode(visitorNumber, "UTF-8") +"&"+
+                URLEncoder.encode("smsMessage", "UTF-8")+"="+
+                URLEncoder.encode(message, "UTF-8");
 
         bfwriter.write(dstring);
         bfwriter.flush();
