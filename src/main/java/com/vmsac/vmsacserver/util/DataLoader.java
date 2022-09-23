@@ -243,6 +243,7 @@ public class DataLoader implements CommandLineRunner {
                         .timeEnd("23:59")
                         .entranceId(mainEntrance.getEntranceId())
                         .deleted(false)
+                        .isActive(true)
                         .build()
         );
 
@@ -254,6 +255,7 @@ public class DataLoader implements CommandLineRunner {
                         .timeEnd("12:00")
                         .entranceId(mainEntrance.getEntranceId())
                         .deleted(false)
+                        .isActive(true)
                         .build()
         );
 
@@ -335,7 +337,7 @@ public class DataLoader implements CommandLineRunner {
 //        );
 
         controllerController.createOrUpdateController(
-                new UniconControllerDto(null,"192.168.1.155",true,"495162159654","5e86805e2bafd54f66cc95c3")
+                new UniconControllerDto(null,"192.168.1.155",true,"495162159654","5e86805e2bafd54f66cc95c")
         );
     }
 }

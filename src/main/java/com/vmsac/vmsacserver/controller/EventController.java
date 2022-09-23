@@ -1,6 +1,7 @@
 package com.vmsac.vmsacserver.controller;
 
 import com.vmsac.vmsacserver.model.Event;
+import com.vmsac.vmsacserver.repository.EventRepository;
 import com.vmsac.vmsacserver.service.EventService;
 import com.vmsac.vmsacserver.service.InOutEventService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -20,6 +22,9 @@ public class EventController {
 
     @Autowired
     private EventService eventService;
+
+    @Autowired
+    private EventRepository eventRepo;
 
     @PostMapping("unicon/events")
     public ResponseEntity<?> createEvents(
@@ -35,14 +40,20 @@ public class EventController {
         // else, save all excepts for errors and return 422
     }
 
+    @GetMapping("events/count")
+    public ResponseEntity<Long> countTotalEvents() {
+        return new ResponseEntity<>(eventRepo.count(), HttpStatus.OK);
+    }
+
     @GetMapping("events")
-    public ResponseEntity<?> getEvents(@RequestParam(value = "queryString", required = false) String queryStr,
+    public ResponseEntity<?> getEvents(@RequestParam(value = "batchNo", required = false) Integer batchNo,
+                                       @RequestParam(value = "queryString", required = false) String queryStr,
                                        @RequestParam(value = "start", required = false)
                                        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
                                        @RequestParam(value = "end", required = false)
                                        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
 
-        return new ResponseEntity<>(eventService.getEventsByTimeDesc(queryStr, start, end, 500), HttpStatus.OK);
+        return new ResponseEntity<>(eventService.getEventsByTimeDesc(queryStr, start, end, batchNo, 500), HttpStatus.OK);
 
     }
 }

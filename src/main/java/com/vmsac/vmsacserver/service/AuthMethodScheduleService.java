@@ -2,6 +2,8 @@ package com.vmsac.vmsacserver.service;
 
 import com.vmsac.vmsacserver.model.AuthDevice;
 import com.vmsac.vmsacserver.model.Controller;
+import com.vmsac.vmsacserver.model.accessgroupschedule.AccessGroupSchedule;
+import com.vmsac.vmsacserver.model.accessgroupschedule.AccessGroupScheduleDto;
 import com.vmsac.vmsacserver.model.authmethod.AuthMethod;
 import com.vmsac.vmsacserver.model.authmethodschedule.AuthMethodSchedule;
 import com.vmsac.vmsacserver.model.authmethodschedule.AuthMethodScheduleDto;
@@ -33,6 +35,14 @@ public class AuthMethodScheduleService {
     AuthDeviceRepository authDeviceRepository;
     @Autowired
     ControllerRepository controllerRepository;
+
+    public AuthMethodSchedule findByScheduleIdAndDeletedFalse(Long authMethodScheduleId) {
+        return authMethodScheduleRepository.findByAuthMethodScheduleIdAndDeletedFalse(authMethodScheduleId).orElseGet(()-> null);
+    }
+
+    public AuthMethodSchedule save(AuthMethodSchedule authMethodSchedule){
+        return authMethodScheduleRepository.save(authMethodSchedule);
+    }
 
     public List<AuthMethodScheduleDto> findByDeviceId(Long authDeviceId) {
         return authMethodScheduleRepository.findByAuthDevice_AuthDeviceIdAndDeletedFalse(authDeviceId)

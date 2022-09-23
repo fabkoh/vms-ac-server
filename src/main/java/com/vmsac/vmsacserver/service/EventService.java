@@ -6,14 +6,18 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.vmsac.vmsacserver.model.*;
 import com.vmsac.vmsacserver.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.stereotype.Service;
 
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -130,12 +134,12 @@ public class EventService {
         return success;
     }
 
-    public List<Event> getEventsByTimeDesc(int limit){
-        List<Event> allEvents = eventRepository.findByDeletedIsFalseOrderByEventTimeDesc(PageRequest.of(0, limit));
+    public List<Event> getEventsByTimeDesc(int pageNo, int pageSize){
+        List<Event> allEvents = eventRepository.findByDeletedIsFalseOrderByEventTimeDesc(PageRequest.of(pageNo, pageSize));
         return allEvents;
     }
 
-    public List<Event> getEventsByTimeDesc(String queryString, LocalDateTime start, LocalDateTime end, int limit) {
+    public List<Event> getEventsByTimeDesc(String queryString, LocalDateTime start, LocalDateTime end, int pageNo, int pageSize) {
         List<Event> result;
         if (queryString != null && !queryString.equals("")) {
 
@@ -154,25 +158,29 @@ public class EventService {
             List<AccessGroup> accessGroups = accessGroupRepo.searchByAccessGroupName(queryString);
             List<Long> accessGroupIds = accessGroups.stream().map(AccessGroup::getAccessGroupId).collect(Collectors.toList());
 
-            result = eventRepository.findByQueryString(eventTypeIds, entranceIds, controllerIds, personIds, accessGroupIds);
+            Timestamp startTimestamp = Objects.isNull(start) ? Timestamp.valueOf("1970-01-01 00:00:00") : Timestamp.valueOf(start);
+            Timestamp endTimestamp = Objects.isNull(end) ? Timestamp.valueOf("2050-01-01 00:00:00") : Timestamp.valueOf(end);
+
+            result = eventRepository.findByQueryString(eventTypeIds, entranceIds, controllerIds, personIds, accessGroupIds,
+                    startTimestamp, endTimestamp, PageRequest.of(pageNo, pageSize));
         } else
-            result = getEventsByTimeDesc(limit);
+            result = getEventsByTimeDesc(pageNo, pageSize);
 
-        List<Event> resultAfterDatetime = result.stream().filter(e -> {
-            LocalDateTime eventTime = LocalDateTime.parse(e.getEventTime(), DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss"));
-            if (start != null) {
-                if (!(eventTime.equals(start) || eventTime.isAfter(start)))
-                    return false;
-            }
-            if (end != null) {
-                if (!eventTime.isBefore(end))
-                    return false;
-            }
-            return true;
-        })
-                .collect(Collectors.toList());
+//        List<Event> resultAfterDatetime = result.stream().filter(e -> {
+//            LocalDateTime eventTime = LocalDateTime.parse(e.getEventTime(), DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss"));
+//            if (start != null) {
+//                if (!(eventTime.equals(start) || eventTime.isAfter(start)))
+//                    return false;
+//            }
+//            if (end != null) {
+//                if (!eventTime.isBefore(end))
+//                    return false;
+//            }
+//            return true;
+//        })
+//                .collect(Collectors.toList());
 
-        return resultAfterDatetime.stream().limit(limit).collect(Collectors.toList());
+        return result;
     }
 //
 //    public MappingJacksonValue filterAllEvents(){

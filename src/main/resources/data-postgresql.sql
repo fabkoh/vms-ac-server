@@ -82,7 +82,8 @@ INSERT INTO EventActionOutputType VALUES ('3','GEN_OUT_3', true, null);
 INSERT INTO EventActionOutputType VALUES ('4','UNLOCK DOOR', false, null);
 INSERT INTO EventActionOutputType VALUES ('5','BUZZER', true, null);
 INSERT INTO EventActionOutputType VALUES ('6','LED', true, null);
-INSERT INTO EventActionOutputType VALUES ('7','NOTIFICATION', false, null);
+INSERT INTO EventActionOutputType VALUES ('7','NOTIFICATION (SMS)', false, null);
+INSERT INTO EventActionOutputType VALUES ('8','NOTIFICATION (EMAIL)', false, null);
 
 INSERT INTO EventActionType VALUES ('1','Authenticated Scans', false);
 INSERT INTO EventActionType VALUES ('2','Masterpassword used', false);

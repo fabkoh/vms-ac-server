@@ -1,5 +1,8 @@
 package com.vmsac.vmsacserver.controller;
 
+import com.vmsac.vmsacserver.model.AccessGroup;
+import com.vmsac.vmsacserver.model.EntranceDto;
+import com.vmsac.vmsacserver.model.accessgroupschedule.AccessGroupSchedule;
 import com.vmsac.vmsacserver.model.accessgroupschedule.AccessGroupScheduleDto;
 import com.vmsac.vmsacserver.model.accessgroupschedule.CreateAccessGroupScheduleDto;
 import com.vmsac.vmsacserver.repository.PersonRepository;
@@ -87,6 +90,28 @@ public class AccessGroupScheduleController {
         }
 
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/access-group-schedule/enable/{scheduleId}")
+    public ResponseEntity<?> enableAccessGroupSchedule(@PathVariable("scheduleId") Long scheduleId) {
+        Optional<AccessGroupSchedule> accessGroupScheduleOptional= accessGroupScheduleService.findById(scheduleId);
+        if (!accessGroupScheduleOptional.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+        AccessGroupSchedule accessGroupSchedule = accessGroupScheduleOptional.get();
+        accessGroupSchedule.setIsActive(true);
+        return ResponseEntity.ok(accessGroupScheduleService.save(accessGroupSchedule.toDto()));
+    }
+
+    @PutMapping("/access-group-schedule/disable/{scheduleId}")
+    public ResponseEntity<?> disableAccessGroupSchedule(@PathVariable("scheduleId") Long scheduleId) {
+        Optional<AccessGroupSchedule> accessGroupScheduleOptional= accessGroupScheduleService.findById(scheduleId);
+        if (!accessGroupScheduleOptional.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+        AccessGroupSchedule accessGroupSchedule = accessGroupScheduleOptional.get();
+        accessGroupSchedule.setIsActive(false);
+        return ResponseEntity.ok(accessGroupScheduleService.save(accessGroupSchedule.toDto()));
     }
 
     // get all current status
