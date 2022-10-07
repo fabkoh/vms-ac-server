@@ -429,7 +429,7 @@ public class EventsManagementController {
         }
 
         if (errorEvMs.isEmpty())
-            return new ResponseEntity<>(eventsManagements.stream().map(em -> {return eventsManagementService.toDto(em);})
+            return new ResponseEntity<>(eventsManagements.stream().map(em -> { return eventsManagementService.toDto(em);})
                     .collect(Collectors.toList()), HttpStatus.CREATED);
         else return new ResponseEntity<>(returnErrorList, HttpStatus.CONFLICT);
     }
@@ -502,7 +502,9 @@ public class EventsManagementController {
         if(eventsManagementFound.isEmpty()){
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>(eventsManagementFound.get(),HttpStatus.OK);
+        EventsManagement found_ems = eventsManagementFound.get();
+        return new ResponseEntity<>(
+                eventsManagementService.toDto(found_ems),HttpStatus.OK);
     }
 }
 

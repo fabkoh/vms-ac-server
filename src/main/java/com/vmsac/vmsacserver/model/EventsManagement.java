@@ -2,6 +2,8 @@ package com.vmsac.vmsacserver.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vladmihalcea.hibernate.type.array.ListArrayType;
+import com.vmsac.vmsacserver.model.EventDto.EventControllerDto;
+import com.vmsac.vmsacserver.model.EventDto.EventEntranceDto;
 import com.vmsac.vmsacserver.model.notification.EventsManagementNotification;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,6 +13,7 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.Where;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
@@ -76,4 +79,19 @@ public class EventsManagement {
     @OneToMany(mappedBy = "eventsManagement", cascade = CascadeType.ALL)
     private List<EventsManagementNotification> eventsManagementNotifications;
 
+
+    public EventsManagementDto toDto(List<InputEvent> inputevents,
+                                     List<OutputEvent> outputevents,
+                                     EventEntranceDto entranceDto,
+                                     EventControllerDto controllerDto){
+        return new EventsManagementDto(
+                this.eventsManagementId,
+                this.eventsManagementName,
+                inputevents,
+                outputevents,
+                this.triggerSchedules,
+                entranceDto,
+                controllerDto,
+                this.eventsManagementNotifications);
+    }
 }

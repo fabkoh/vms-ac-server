@@ -294,7 +294,7 @@ CREATE TABLE IF NOT EXISTS SmsSettings(
 
 CREATE TABLE IF NOT EXISTS EventsManagementNotification(
     eventsManagementNotificationId SERIAL NOT NULL UNIQUE,
-    eventsManagementNotificationType VARCHAR(255) NOT NULL,
+    eventsManagementNotificationType VARCHAR(255),
     eventsManagementNotificationRecipients TEXT NOT NULL,
     eventsManagementNotificationContent TEXT NOT NULL,
     eventsManagementNotificationTitle VARCHAR(255),

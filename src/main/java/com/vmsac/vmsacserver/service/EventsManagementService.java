@@ -43,6 +43,9 @@ public class EventsManagementService {
     @Autowired
     GENConfigsRepository genRepo;
 
+    @Autowired
+    EventsManagementNotificationRepository eventsManagementNotificationRepository;
+
     public List<Long> createInputEvents(List<InputEvent> dto, Long controllerId) throws NotFoundException {
         List<Long> inputEventsId = new ArrayList<>();
         for (InputEvent input : dto) {
@@ -231,6 +234,7 @@ public class EventsManagementService {
                 outputEventRepository.findAllById(em.getOutputActionsId()),
                 em.getTriggerSchedules(),
                 entrance,
-                controller);
+                controller,
+                em.getEventsManagementNotifications());
     }
 }
