@@ -499,12 +499,9 @@ public class EventsManagementController {
     @GetMapping("eventsmanagement/{emId}")
     public ResponseEntity<?> getIndividualEventsManagement(@PathVariable Long emId) {
         Optional<EventsManagement> eventsManagementFound = eventsManagementRepository.findByDeletedFalseAndEventsManagementId(emId);
-        System.out.println("123");
         if(eventsManagementFound.isEmpty()){
-            System.out.println("456");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-
         return new ResponseEntity<>(eventsManagementFound.get(),HttpStatus.OK);
     }
 }
