@@ -3,6 +3,7 @@ package com.vmsac.vmsacserver.service;
 import com.vmsac.vmsacserver.model.*;
 import com.vmsac.vmsacserver.model.EventDto.EventControllerDto;
 import com.vmsac.vmsacserver.model.EventDto.EventEntranceDto;
+import com.vmsac.vmsacserver.model.notification.EventsManagementNotification;
 import com.vmsac.vmsacserver.repository.*;
 import javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,9 @@ public class EventsManagementService {
 
     @Autowired
     InOutEventService inOutEventService;
+
+    @Autowired
+    EventsManagementNotificationService eventsManagementNotificationService;
 
     @Autowired
     GENConfigsRepository genRepo;
@@ -91,6 +95,16 @@ public class EventsManagementService {
 
                     em.getTriggerSchedules().add(newTs);
                 }
+                if (dto.getEventsManagementEmail() != null) {
+                    EventsManagementEmailCreateDto eventManagementEmail = dto.getEventsManagementEmail();
+                    EventsManagementNotification newEventManagementNotificationEmail = eventManagementEmail.toEventManagementNotification(false, em);
+                    eventsManagementNotificationService.save(newEventManagementNotificationEmail);
+                }
+                if (dto.getEventsManagementSMS() != null) {
+                    EventsManagementSMSCreateDto eventManagementSMS = dto.getEventsManagementSMS();
+                    EventsManagementNotification newEventManagementNotificationSMS = eventManagementSMS.toEventManagementNotification(false, em);
+                    eventsManagementNotificationService.save(newEventManagementNotificationSMS);
+                }
                 resultEms.add(em);
                 c.getEventsManagements().add(em);
             }
@@ -121,6 +135,17 @@ public class EventsManagementService {
                             ts.getTimeEnd(), false, em));
 
                     em.getTriggerSchedules().add(newTs);
+                }
+
+                if (dto.getEventsManagementEmail() != null) {
+                    EventsManagementEmailCreateDto eventManagementEmail = dto.getEventsManagementEmail();
+                    EventsManagementNotification newEventManagementNotificationEmail = eventManagementEmail.toEventManagementNotification(false, em);
+                    eventsManagementNotificationService.save(newEventManagementNotificationEmail);
+                }
+                if (dto.getEventsManagementSMS() != null) {
+                    EventsManagementSMSCreateDto eventManagementSMS = dto.getEventsManagementSMS();
+                    EventsManagementNotification newEventManagementNotificationSMS = eventManagementSMS.toEventManagementNotification(false, em);
+                    eventsManagementNotificationService.save(newEventManagementNotificationSMS);
                 }
                 resultEms.add(em);
                 e.getEventsManagements().add(em);

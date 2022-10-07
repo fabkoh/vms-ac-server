@@ -1,9 +1,11 @@
 package com.vmsac.vmsacserver.controller;
 
 import com.vmsac.vmsacserver.model.*;
+import com.vmsac.vmsacserver.model.notification.EventsManagementNotification;
 import com.vmsac.vmsacserver.repository.*;
 import com.vmsac.vmsacserver.service.AuthDeviceService;
 import com.vmsac.vmsacserver.service.ControllerService;
+import com.vmsac.vmsacserver.service.EventsManagementNotificationService;
 import com.vmsac.vmsacserver.service.InOutEventService;
 import com.vmsac.vmsacserver.service.EventsManagementService;
 import com.vmsac.vmsacserver.service.TriggerSchedulesService;
@@ -67,6 +69,9 @@ public class EventsManagementController {
     InOutEventService inOutEventService;
 
     @Autowired
+    EventsManagementNotificationService eventsManagementNotificationService;
+
+    @Autowired
     FieldsModifier fieldsModifier;
 
     @Autowired
@@ -128,7 +133,7 @@ public class EventsManagementController {
 
     // GET EventsManagement
     @GetMapping("eventsmanagement")
-    public ResponseEntity<?> getAllEventsMangement() {
+    public ResponseEntity<?> getAllEventsManagement() {
         List<EventsManagement> ems = new ArrayList<>();
 
         controllerRepository.findByDeletedIsFalseOrderByCreatedDesc().forEach(controller -> {
@@ -142,6 +147,32 @@ public class EventsManagementController {
         return new ResponseEntity<>(ems.stream()
                 .map(em -> eventsManagementService.toDto(em))
                 .collect(Collectors.toList()), HttpStatus.OK);
+    }
+
+    // Get EventsManagementNotifications for a single events management
+    @GetMapping("eventsmanagement/notifications/{eventsManagementId}")
+    public ResponseEntity<?> getEventsManagementNotifications(@PathVariable Long eventsManagementId) {
+        List<EventsManagementNotification> notifs = eventsManagementNotificationService.findByEventsManagementIdNotDeleted(eventsManagementId);
+
+        return new ResponseEntity<>(notifs.stream().collect(Collectors.toList()), HttpStatus.OK);
+    }
+
+    @GetMapping("eventsmanagement/notifications") // map of emIds to list of EM notifications
+    public ResponseEntity<?> getAllEventsManagementNotifications() {
+        List<EventsManagementNotification> notifs = eventsManagementNotificationService.findAllNotDeleted();
+        Map<Long, List<EventsManagementNotification>> emsToNotifs = new HashMap<>();
+        for (int i = 0; i < notifs.size(); i++) {
+            EventsManagementNotification notif = notifs.get(i);
+            if (emsToNotifs.containsKey(notif.getEventsManagement().getEventsManagementId())) {
+                List<EventsManagementNotification> notifList = emsToNotifs.get(notif.getEventsManagement().getEventsManagementId());
+                notifList.add(notif);
+            } else {
+                List<EventsManagementNotification> newNotifList = new ArrayList<>();
+                newNotifList.add(notif);
+                emsToNotifs.put(notif.getEventsManagement().getEventsManagementId(), newNotifList);
+            }
+        }
+        return new ResponseEntity<>(emsToNotifs, HttpStatus.OK);
     }
 
     // GET EventsManagement Entrance
