@@ -25,7 +25,7 @@ public class EventsManagementNotification {
     private Long eventsManagementNotificationId;
 
     @Column(name = "eventsManagementnotificationtype")
-    private String eventsManagementNotificationType;
+    private String eventsManagementNotificationType; // SMS, EMAIL
 
     @Column(name = "eventsmanagementnotificationrecipients")
     private String eventsManagementNotificationRecipients;
