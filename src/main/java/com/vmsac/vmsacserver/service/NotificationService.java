@@ -1,5 +1,6 @@
 package com.vmsac.vmsacserver.service;
 
+import com.vmsac.vmsacserver.model.*;
 import com.vmsac.vmsacserver.model.notification.EmailSettings;
 import com.vmsac.vmsacserver.model.notification.NotificationLogs;
 import com.vmsac.vmsacserver.model.notification.SmsSettings;
@@ -8,10 +9,16 @@ import com.vmsac.vmsacserver.repository.EventsManagementNotificationRepository;
 import com.vmsac.vmsacserver.repository.NotificationLogsRepository;
 import com.vmsac.vmsacserver.repository.SmsSettingsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.Email;
 import java.util.List;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 public class NotificationService {
@@ -99,7 +106,5 @@ public class NotificationService {
     public List<NotificationLogs> allNotificationLogs(){
         return notificationLogsRepository.findAll();
     }
-
-
 
 }
