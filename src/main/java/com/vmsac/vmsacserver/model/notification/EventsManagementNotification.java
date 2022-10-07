@@ -41,9 +41,9 @@ public class EventsManagementNotification {
 
     @ManyToOne(cascade = CascadeType.REFRESH)
     @JoinColumn(name = "eventsmanagementid")
-    @JsonIgnore
     private EventsManagement eventsManagement;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "eventsManagementNotification", cascade = CascadeType.ALL)
     private List<NotificationLogs> notificationLogs;
 }

@@ -33,7 +33,6 @@ public class NotificationLogs {
 
     @ManyToOne(cascade = CascadeType.REFRESH)
     @JoinColumn(name = "eventsmanagementnotificationid")
-    @JsonIgnore
     private EventsManagementNotification eventsManagementNotification;
 
 }

@@ -72,6 +72,7 @@ public class EventsManagement {
     @OneToMany(mappedBy = "eventsManagement", cascade = CascadeType.ALL)
     private List<TriggerSchedules> triggerSchedules;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "eventsManagement", cascade = CascadeType.ALL)
     private List<EventsManagementNotification> eventsManagementNotifications;
 

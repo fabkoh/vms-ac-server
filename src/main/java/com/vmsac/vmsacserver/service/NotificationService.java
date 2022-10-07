@@ -1,6 +1,7 @@
 package com.vmsac.vmsacserver.service;
 
 import com.vmsac.vmsacserver.model.notification.EmailSettings;
+import com.vmsac.vmsacserver.model.notification.NotificationLogs;
 import com.vmsac.vmsacserver.model.notification.SmsSettings;
 import com.vmsac.vmsacserver.repository.EmailSettingsRepository;
 import com.vmsac.vmsacserver.repository.EventsManagementNotificationRepository;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.Email;
+import java.util.List;
 
 @Service
 public class NotificationService {
@@ -92,6 +94,10 @@ public class NotificationService {
         currentEmailSettings.setHostAddress("DefaultHostAddress");
         currentEmailSettings.setPortNumber("DefaultPortNumber");
         return emailSettingsRepository.save(currentEmailSettings);
+    }
+
+    public List<NotificationLogs> allNotificationLogs(){
+        return notificationLogsRepository.findAll();
     }
 
 

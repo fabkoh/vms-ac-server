@@ -91,5 +91,15 @@ public class NotificationController {
         }
     }
 
+    // all notification logs
+    @GetMapping("/notification/logs/all")
+    public ResponseEntity<?> AllNotificationLogs() {
+        try{
+            return new ResponseEntity<>(notificationService.allNotificationLogs(),HttpStatus.OK);
+        }catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
 
 }
