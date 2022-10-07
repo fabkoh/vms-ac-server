@@ -22,7 +22,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class EventService {
+public class   EventService {
 
     @Autowired
     private EventRepository eventRepository;
