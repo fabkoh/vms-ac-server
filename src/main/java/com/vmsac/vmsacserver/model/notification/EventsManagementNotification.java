@@ -46,4 +46,9 @@ public class EventsManagementNotification {
     @JsonIgnore
     @OneToMany(mappedBy = "eventsManagementNotification", cascade = CascadeType.ALL)
     private List<NotificationLogs> notificationLogs;
+
+    @Override
+    public String toString() {
+        return String.format("Events management notification id %s, type: %s, content: %s, recipient: %s", eventsManagementNotificationId, eventsManagementNotificationType, eventsManagementNotificationContent, eventsManagementNotificationRecipients);
+    }
 }

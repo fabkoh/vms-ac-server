@@ -103,8 +103,10 @@ public class EventsManagementService {
                     EventsManagementNotification newEventManagementNotificationEmail = eventManagementEmail.toEventManagementNotification(false, em);
                     eventsManagementNotificationService.save(newEventManagementNotificationEmail);
                 }
+
                 if (dto.getEventsManagementSMS() != null) {
                     EventsManagementSMSCreateDto eventManagementSMS = dto.getEventsManagementSMS();
+                    System.out.println(eventManagementSMS);
                     EventsManagementNotification newEventManagementNotificationSMS = eventManagementSMS.toEventManagementNotification(false, em);
                     eventsManagementNotificationService.save(newEventManagementNotificationSMS);
                 }
