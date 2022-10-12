@@ -7,6 +7,13 @@ import javax.validation.constraints.NotNull;
 
 import com.vmsac.vmsacserver.model.notification.EventsManagementNotification;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class EventsManagementEmailCreateDto {
     @NotNull
     @NotBlank

@@ -7,6 +7,13 @@ import javax.validation.constraints.NotNull;
 
 import com.vmsac.vmsacserver.model.notification.EventsManagementNotification;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class EventsManagementSMSCreateDto {
     @NotNull
     @NotBlank
@@ -14,8 +21,14 @@ public class EventsManagementSMSCreateDto {
 
     private String eventsManagementSMSContent;
 
+    @Override
+    public String toString() {
+        return String.format("eventsManagementSMSRecipients: %s, eventsManagementSMSContent: %s", eventsManagementSMSRecipients, eventsManagementSMSContent);
+    }
+
     public EventsManagementNotification toEventManagementNotification(Boolean deleted, EventsManagement eventsManagement) {
-        return new EventsManagementNotification(null, "SMS", eventsManagementSMSRecipients, eventsManagementSMSContent,
+        EventsManagementNotification eventsManagementNotification = new EventsManagementNotification(null, "SMS", eventsManagementSMSRecipients, eventsManagementSMSContent,
                 "", deleted, eventsManagement, new ArrayList<>());
+        return eventsManagementNotification;
     }
 }
