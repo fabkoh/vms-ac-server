@@ -46,6 +46,10 @@ public class EventsManagementService {
     @Autowired
     EventsManagementNotificationRepository eventsManagementNotificationRepository;
 
+    public Optional<EventsManagement> getEventsManagementById(Long eventsManagementId) {
+        return eventsManagementRepository.findByDeletedFalseAndEventsManagementId(eventsManagementId);
+    }
+
     public List<Long> createInputEvents(List<InputEvent> dto, Long controllerId) throws NotFoundException {
         List<Long> inputEventsId = new ArrayList<>();
         for (InputEvent input : dto) {

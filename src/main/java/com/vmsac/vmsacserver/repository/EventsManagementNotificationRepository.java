@@ -10,4 +10,5 @@ public interface EventsManagementNotificationRepository extends JpaRepository<Ev
     List<EventsManagementNotification> findByDeletedFalse();
     List<EventsManagementNotification> findByEventsManagement_EventsManagementIdAndDeletedFalse(Long eventsManagementId);
     Optional<EventsManagementNotification> findByEventsManagementNotificationIdAndDeletedFalse(Long eventsManagementNotificationId);
+    Optional<EventsManagementNotification> findByDeletedFalseAndEventsManagementNotificationTypeAndEventsManagement_EventsManagementId(String eventsManagementNotificationType, Long eventsManagementId);
 }
