@@ -51,6 +51,13 @@ public class AuthMethodScheduleService {
                 .collect(Collectors.toList());
     }
 
+    public List<AuthMethodScheduleDto> findByDeviceIdAndIsActive(Long authDeviceId) {
+        return authMethodScheduleRepository.findByIsActiveTrueAndDeletedFalseAndAuthDevice_AuthDeviceId(authDeviceId)
+                .stream()
+                .map(AuthMethodSchedule::toDto)
+                .collect(Collectors.toList());
+    }
+
     public ResponseEntity<?> deleteSched(Long authMethodSchedId){
         if(authMethodScheduleRepository.findByAuthMethodScheduleIdAndDeletedFalse(authMethodSchedId).isEmpty()){
             return new ResponseEntity<>("authMethodSchedule not found",HttpStatus.NOT_FOUND);

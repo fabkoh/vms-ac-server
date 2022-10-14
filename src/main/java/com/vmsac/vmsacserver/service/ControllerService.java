@@ -406,7 +406,7 @@ public class ControllerService {
 
                 if (!(existingentrance == null) && existingentrance.getIsActive() ) {
                     // find entrance-schedule object related to entrance
-                    List<EntranceSchedule> exisitngEntranceSchedules = entranceScheduleRepository.findAllByEntranceIdAndDeletedFalse(existingentrance.getEntranceId());
+                    List<EntranceSchedule> exisitngEntranceSchedules = entranceScheduleRepository.findByEntranceIdAndDeletedFalseAndIsActiveTrue(existingentrance.getEntranceId());
 
                     Map<String, Object> entrance = new HashMap();
                     entrance.put("Entrance", existingentrance.getEntranceId());
@@ -438,7 +438,7 @@ public class ControllerService {
                     Device1.put("Direction", exisitngDevice1.getAuthDeviceDirection().substring(3));
                     Device1.put("defaultAuthMethod", exisitngDevice1.getDefaultAuthMethod().getAuthMethodDesc());
                     try {
-                        Device1.put("AuthMethod", GetAuthMethodScheduleObjectWithTime(authMethodScheduleService.findByDeviceId(exisitngDevice1.getAuthDeviceId())));
+                        Device1.put("AuthMethod", GetAuthMethodScheduleObjectWithTime(authMethodScheduleService.findByDeviceIdAndIsActive(exisitngDevice1.getAuthDeviceId())));
                     } catch (Exception e) {
                         throw new Exception ("ERROR WITH AUTH METHOD SCHEDULE 1: " + e);
                     }
@@ -454,7 +454,7 @@ public class ControllerService {
                     Device2.put("Direction", exisitngDevice2.getAuthDeviceDirection().substring(3));
                     Device2.put("defaultAuthMethod", exisitngDevice2.getDefaultAuthMethod().getAuthMethodDesc());
                     try {
-                        Device2.put("AuthMethod", GetAuthMethodScheduleObjectWithTime(authMethodScheduleService.findByDeviceId(exisitngDevice2.getAuthDeviceId())));
+                        Device2.put("AuthMethod", GetAuthMethodScheduleObjectWithTime(authMethodScheduleService.findByDeviceIdAndIsActive(exisitngDevice2.getAuthDeviceId())));
                     } catch (Exception e) {
                         throw new Exception("ERROR WITH AUTH METHOD SCHEDULE 2: " + e);
                     }
@@ -473,7 +473,7 @@ public class ControllerService {
                     for (AccessGroupEntranceNtoN accessGroupEntranceNtoN : listOfAccessGroupsNtoN) {
                         if ( accessGroupEntranceNtoN.getAccessGroup().getIsActive()){
                         List<Person> ListofPersons = personService.findByAccGrpId((accessGroupEntranceNtoN.getAccessGroup().getAccessGroupId()), false);
-                        List<AccessGroupScheduleDto> ListofSchedule = accessGroupScheduleService.findAllByGroupToEntranceIdIn(Collections.singletonList(accessGroupEntranceNtoN.getGroupToEntranceId()));
+                        List<AccessGroupScheduleDto> ListofSchedule = accessGroupScheduleService.findAllByGroupToEntranceIdInAndIsActiveTrue(Collections.singletonList(accessGroupEntranceNtoN.getGroupToEntranceId()));
 
                         Map<Long, Object> oneAccessGroup = new HashMap();
                         Map<String, Object> personsAndSchedule = new HashMap();

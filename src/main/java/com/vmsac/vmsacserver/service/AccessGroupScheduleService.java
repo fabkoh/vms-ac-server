@@ -173,6 +173,14 @@ public class AccessGroupScheduleService {
                 .map(AccessGroupSchedule::toDto)
                 .collect(Collectors.toList());
     }
+
+    public List<AccessGroupScheduleDto> findAllByGroupToEntranceIdInAndIsActiveTrue(List<Long> groupToEntranceIds) {
+        return accessGroupScheduleRepository.findByGroupToEntranceIdInAndDeletedFalseAndIsActiveTrue(groupToEntranceIds)
+                .stream()
+                .map(AccessGroupSchedule::toDto)
+                .collect(Collectors.toList());
+    }
+
     public Map<Long, Boolean> GetAllAccessGroupCurrentStatus(){
         List <AccessGroup> ListOfAccessGroups = accessGroupRepository.findByDeleted(false);
         Map<Long, Boolean> Status = new HashMap();

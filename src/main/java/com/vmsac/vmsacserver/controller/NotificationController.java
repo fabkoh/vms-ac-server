@@ -9,12 +9,10 @@ import com.vmsac.vmsacserver.service.EventsManagementNotificationService;
 import com.vmsac.vmsacserver.service.EventsManagementService;
 import com.vmsac.vmsacserver.service.NotificationService;
 
-import org.dmfs.rfc5545.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -23,6 +21,7 @@ import javax.validation.Valid;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
@@ -178,8 +177,8 @@ public class NotificationController {
         } catch (Exception e) {
             // do nothing
         }
-        notificationLogs = new NotificationLogs(null, 400, "Email failed to send", DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mmX")
-                .withZone(ZoneOffset.UTC)
+        notificationLogs = new NotificationLogs(null, 400, "Email failed to send", DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss")
+                .withZone(ZoneId.of("GMT+08:00"))
                 .format(Instant.now()),notification);
         notificationService.save(notificationLogs);
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
