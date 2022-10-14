@@ -88,6 +88,7 @@ public class NotificationService {
         currentEmailSettings.setEmail(newchanges.getEmail());
         currentEmailSettings.setHostAddress(newchanges.getHostAddress());
         currentEmailSettings.setPortNumber(newchanges.getPortNumber());
+        currentEmailSettings.setCustom(true);
 //        System.out.println(currentEmailSettings);
         return emailSettingsRepository.save(currentEmailSettings);
     }
