@@ -2,6 +2,7 @@ package com.vmsac.vmsacserver.service;
 
 import com.vmsac.vmsacserver.model.*;
 import com.vmsac.vmsacserver.model.notification.EmailSettings;
+import com.vmsac.vmsacserver.model.notification.EventsManagementNotification;
 import com.vmsac.vmsacserver.model.notification.NotificationLogs;
 import com.vmsac.vmsacserver.model.notification.SmsSettings;
 import com.vmsac.vmsacserver.repository.EmailSettingsRepository;
@@ -34,6 +35,10 @@ public class NotificationService {
 
     @Autowired
     EventsManagementNotificationRepository eventsManagementNotificationRepository;
+
+    public NotificationLogs save(NotificationLogs notificationLogs){
+        return notificationLogsRepository.save(notificationLogs);
+    }
 
     public SmsSettings getSmsSettings(){
         return smsSettingsRepository.findAll().get(0);

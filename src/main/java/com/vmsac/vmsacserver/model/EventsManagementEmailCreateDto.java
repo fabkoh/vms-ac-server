@@ -24,7 +24,7 @@ public class EventsManagementEmailCreateDto {
     private String eventsManagementEmailTitle;
 
     public EventsManagementNotification toEventManagementNotification(Boolean deleted, EventsManagement eventsManagement) {
-        return new EventsManagementNotification(null, "SMS", eventsManagementEmailRecipients, eventsManagementEmailContent,
+        return new EventsManagementNotification(null, "EMAIL", eventsManagementEmailRecipients, eventsManagementEmailContent,
                 eventsManagementEmailTitle, deleted, eventsManagement, new ArrayList<>());
     }
 }

@@ -22,6 +22,14 @@ public class EventsManagementNotificationService {
         return eventsManagementNotificationRepository.findByEventsManagement_EventsManagementIdAndDeletedFalse(eventsManagementId);
     }
 
+    public Optional<EventsManagementNotification> findEmailByEventsManagementIdNotDeleted(Long eventsManagementId) {
+        return eventsManagementNotificationRepository.findByDeletedFalseAndEventsManagementNotificationTypeAndEventsManagement_EventsManagementId("EMAIL", eventsManagementId);
+    }
+
+    public Optional<EventsManagementNotification> findSMSByEventsManagementIdNotDeleted(Long eventsManagementId) {
+        return eventsManagementNotificationRepository.findByDeletedFalseAndEventsManagementNotificationTypeAndEventsManagement_EventsManagementId("SMS", eventsManagementId);
+    }
+
     public Optional<EventsManagementNotification> findByIdNotDeleted(Long Id){
         return eventsManagementNotificationRepository.findByEventsManagementNotificationIdAndDeletedFalse(Id);
     }
