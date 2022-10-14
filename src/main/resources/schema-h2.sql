@@ -282,6 +282,7 @@ CREATE TABLE IF NOT EXISTS EmailSettings(
     hostAddress VARCHAR(255) NOT NULL,
     portNumber VARCHAR(255) NOT NULL,
     enabled BOOLEAN NOT NULL DEFAULT TRUE,
+    custom BOOLEAN NOT NULL DEFAULT FALSE,
     PRIMARY KEY (emailSettingsId)
 );
 

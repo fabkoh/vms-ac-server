@@ -100,6 +100,7 @@ public class NotificationService {
         currentEmailSettings.setEmail("DefaultEmail");
         currentEmailSettings.setHostAddress("DefaultHostAddress");
         currentEmailSettings.setPortNumber("DefaultPortNumber");
+        currentEmailSettings.setCustom(false);
         return emailSettingsRepository.save(currentEmailSettings);
     }
 

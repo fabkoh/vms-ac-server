@@ -1,6 +1,7 @@
 package com.vmsac.vmsacserver.util;
 
 import com.vmsac.vmsacserver.model.notification.EmailSettings;
+import com.vmsac.vmsacserver.model.notification.NotificationLogs;
 import com.vmsac.vmsacserver.model.notification.SmsSettings;
 import com.vmsac.vmsacserver.repository.EmailSettingsRepository;
 import com.vmsac.vmsacserver.repository.EventsManagementNotificationRepository;
@@ -44,8 +45,16 @@ public class NotificationLoader implements CommandLineRunner {
                 .hostAddress("TestingHostAddress")
                 .portNumber("8080")
                 .enabled(true)
+                .custom(true)
                 .build());
 
+        notificationLogsRepository.save(NotificationLogs.builder()
+                .notificationLogsStatusCode(200)
+                .notificationLogsError("TestingError")
+                .timeSent("TestTime")
+                .build());
     }
+
+
 
 }

@@ -38,4 +38,7 @@ public class EmailSettings {
     @Column(name = "enabled")
     private Boolean enabled;
 
+    @Column(name = "custom")
+    private Boolean custom;
+
 }
