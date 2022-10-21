@@ -149,7 +149,7 @@ public class NotificationController {
             return new ResponseEntity<>("Default settings are used", HttpStatus.OK);
         }
         try {
-            notificationService.sendSMTPSSLEmail("inthenetworld@yahoo.com", "Test message", "test");
+            notificationService.sendSMTPTLSEmail("inthenetworld@yahoo.com", "Test message", "test");
         } catch (Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
@@ -183,7 +183,7 @@ public class NotificationController {
         if (emailSettings.getCustom()) {
             try {
                 // only send to the first one
-                notificationService.sendSMTPSSLEmail(notification.getEventsManagementNotificationRecipients().split(",")[0], notification.getEventsManagementNotificationTitle(), notification.getEventsManagementNotificationContent());
+                notificationService.sendSMTPTLSEmail(notification.getEventsManagementNotificationRecipients().split(",")[0], notification.getEventsManagementNotificationTitle(), notification.getEventsManagementNotificationContent());
                 // notificationService.sendSMTPTLSEmail(notification.getEventsManagementNotificationRecipients().split(",")[0], notification.getEventsManagementNotificationTitle(), notification.getEventsManagementNotificationContent());
             } catch (Exception e) {
                 NotificationLogs notificationLogs = new NotificationLogs(null, 400, e.getMessage(), DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss")
