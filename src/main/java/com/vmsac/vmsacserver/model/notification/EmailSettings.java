@@ -35,6 +35,9 @@ public class EmailSettings {
     @Column(name = "portnumber")
     private String portNumber;
 
+    @Column(name = "istls")
+    private Boolean isTLS;
+
     @Column(name = "enabled")
     private Boolean enabled;
 

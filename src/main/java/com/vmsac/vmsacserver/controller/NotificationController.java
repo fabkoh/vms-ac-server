@@ -141,15 +141,18 @@ public class NotificationController {
         });
     }
 
-    @GetMapping("notification/testSMTP")
-    public ResponseEntity<?> testEmail() {
-        EmailSettings emailSettings = notificationService.getEmailSettings();
-        if (!emailSettings.getCustom()) {
+    @PostMapping("notification/testSMTP")
+    public ResponseEntity<?> testEmail(@RequestBody @Valid EmailSettings newChanges) {
+        if (!newChanges.getCustom()) {
             // always return ok when using default email
             return new ResponseEntity<>("Default settings are used", HttpStatus.OK);
         }
         try {
-            notificationService.sendSMTPTLSEmail("inthenetworld@yahoo.com", "Test message", "test");
+            if (newChanges.getIsTLS()) {
+                notificationService.sendSMTPTLSEmail("inthenetworld@yahoo.com", "Test message", "test", newChanges);
+            } else {
+                notificationService.sendSMTPSSLEmail("inthenetworld@yahoo.com", "Test message", "test", newChanges);
+            }
         } catch (Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
@@ -183,8 +186,11 @@ public class NotificationController {
         if (emailSettings.getCustom()) {
             try {
                 // only send to the first one
-                notificationService.sendSMTPTLSEmail(notification.getEventsManagementNotificationRecipients().split(",")[0], notification.getEventsManagementNotificationTitle(), notification.getEventsManagementNotificationContent());
-                // notificationService.sendSMTPTLSEmail(notification.getEventsManagementNotificationRecipients().split(",")[0], notification.getEventsManagementNotificationTitle(), notification.getEventsManagementNotificationContent());
+                if (emailSettings.getIsTLS()) {
+                    notificationService.sendSMTPTLSEmail(notification.getEventsManagementNotificationRecipients().split(",")[0], notification.getEventsManagementNotificationTitle(), notification.getEventsManagementNotificationContent(), emailSettings);
+                } else {
+                    notificationService.sendSMTPSSLEmail(notification.getEventsManagementNotificationRecipients().split(",")[0], notification.getEventsManagementNotificationTitle(), notification.getEventsManagementNotificationContent(), emailSettings);
+                }
             } catch (Exception e) {
                 NotificationLogs notificationLogs = new NotificationLogs(null, 400, e.getMessage(), DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss")
                         .withZone(ZoneId.of("GMT+08:00"))

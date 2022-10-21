@@ -46,6 +46,7 @@ public class NotificationLoader implements CommandLineRunner {
                 .portNumber("8080")
                 .enabled(true)
                 .custom(true)
+                .isTLS(false)
                 .build());
 
         notificationLogsRepository.save(NotificationLogs.builder()

@@ -70,17 +70,16 @@ public class NotificationService {
 
     }
 
-    public void sendSMTPTLSEmail(String recipient, String subject, String body) throws Exception {
+    public void sendSMTPTLSEmail(String recipient, String subject, String body, EmailSettings emailSettings) throws Exception {
         // at this point this should only be called when we want to use custom, so no need to check isCustom
-        EmailSettings currentEmailSettings = emailSettingsRepository.findAll().get(0);
 
-        final String fromEmail = currentEmailSettings.getEmail();
-        final String password = currentEmailSettings.getEmailPassword();
+        final String fromEmail = emailSettings.getEmail();
+        final String password = emailSettings.getEmailPassword();
 
         System.out.println("TLSEmail Start");
         Properties props = new Properties();
-        props.put("mail.smtp.host", currentEmailSettings.getHostAddress()); //SMTP Host
-        props.put("mail.smtp.port", currentEmailSettings.getPortNumber()); //TLS Port
+        props.put("mail.smtp.host", emailSettings.getHostAddress()); //SMTP Host
+        props.put("mail.smtp.port", emailSettings.getPortNumber()); //TLS Port
         props.put("mail.smtp.auth", "true"); //enable authentication
         props.put("mail.smtp.starttls.enable", "true"); //enable STARTTLS
 
@@ -100,21 +99,21 @@ public class NotificationService {
         }
     }
 
-    public void sendSMTPSSLEmail(String recipient, String subject, String body) throws Exception {
+    public void sendSMTPSSLEmail(String recipient, String subject, String body, EmailSettings emailSettings) throws Exception {
         // at this point this should only be called when we want to use custom, so no need to check isCustom
-        EmailSettings currentEmailSettings = emailSettingsRepository.findAll().get(0);
 
-        final String fromEmail = currentEmailSettings.getEmail();
-        final String password = currentEmailSettings.getEmailPassword();
+        final String fromEmail = emailSettings.getEmail();
+        final String password = emailSettings.getEmailPassword();
 
         System.out.println("SSLEmail Start");
         Properties props = new Properties();
-        props.put("mail.smtp.host", "smtp.gmail.com"); //SMTP Host
-        props.put("mail.smtp.socketFactory.port", "465"); //SSL Port
+        props.put("mail.smtp.host", emailSettings.getHostAddress()); //SMTP Host
+        // props.put("mail.smtp.socketFactory.port", "465"); //SSL Port
+        props.put("mail.smtp.socketFactory.port", emailSettings.getPortNumber());
         props.put("mail.smtp.socketFactory.class",
                 "javax.net.ssl.SSLSocketFactory"); //SSL Factory Class
         props.put("mail.smtp.auth", "true"); //Enabling SMTP Authentication
-        props.put("mail.smtp.port", "465"); //SMTP Port
+        props.put("mail.smtp.port", emailSettings.getPortNumber()); //SMTP Port
 
         Authenticator auth = new Authenticator() {
             //override the getPasswordAuthentication method
@@ -123,7 +122,7 @@ public class NotificationService {
             }
         };
 
-        Session session = Session.getDefaultInstance(props, auth);
+        Session session = Session.getInstance(props, auth);
         System.out.println("Session created");
         try {
             EmailUtil.sendEmail(session, recipient,subject, body);
@@ -162,6 +161,7 @@ public class NotificationService {
         currentEmailSettings.setHostAddress(newchanges.getHostAddress());
         currentEmailSettings.setPortNumber(newchanges.getPortNumber());
         currentEmailSettings.setCustom(true);
+        currentEmailSettings.setIsTLS(newchanges.getIsTLS());
 //        System.out.println(currentEmailSettings);
         return emailSettingsRepository.save(currentEmailSettings);
     }
@@ -179,6 +179,7 @@ public class NotificationService {
         currentEmailSettings.setEmail("DefaultEmail");
         currentEmailSettings.setHostAddress("DefaultHostAddress");
         currentEmailSettings.setPortNumber("DefaultPortNumber");
+        currentEmailSettings.setIsTLS(false);
         currentEmailSettings.setCustom(false);
         return emailSettingsRepository.save(currentEmailSettings);
     }
