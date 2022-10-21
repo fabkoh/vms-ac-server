@@ -257,7 +257,7 @@ public class NotificationController {
                                                  @RequestParam(value = "end", required = false)
                                                      @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
         try{
-            return new ResponseEntity<>(notificationService.allNotificationLogs(),HttpStatus.OK);
+            return new ResponseEntity<>(notificationService.getNotificationLogsByTimeDesc(queryStr, start, end, batchNo, 500),HttpStatus.OK);
         }catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }

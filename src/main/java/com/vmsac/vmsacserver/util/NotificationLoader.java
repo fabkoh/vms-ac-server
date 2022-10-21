@@ -50,9 +50,9 @@ public class NotificationLoader implements CommandLineRunner {
                 .build());
 
         notificationLogsRepository.save(NotificationLogs.builder()
-                .notificationLogsStatusCode(200)
+                .notificationLogsStatusCode(400)
                 .notificationLogsError("TestingError")
-                .timeSent("TestTime")
+                .timeSent("10-22-2022 03:50:39")
                 .build());
     }
 

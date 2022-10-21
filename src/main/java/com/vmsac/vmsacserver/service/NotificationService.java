@@ -188,4 +188,27 @@ public class NotificationService {
         return notificationLogsRepository.findAll();
     }
 
+    public List<NotificationLogs> getEventsByTimeDesc(int pageNo, int pageSize){
+        List<NotificationLogs> allLogs = notificationLogsRepository.findByOrderByTimeSentDesc(PageRequest.of(pageNo, pageSize));
+        return allLogs;
+    }
+
+
+    public List<NotificationLogs> getNotificationLogsByTimeDesc(String queryString, LocalDateTime start, LocalDateTime end, int pageNo, int pageSize) {
+        List<NotificationLogs> result;
+        if (queryString != null && !queryString.equals("")) {
+            List<EventsManagementNotification> notifications = eventsManagementNotificationRepository.searchByEventsManagementNameOrTypeOrRecipients(queryString, queryString, queryString);
+            List<Long> notificationsIds = notifications.stream().map(EventsManagementNotification::getEventsManagementNotificationId).collect(Collectors.toList());
+            System.out.println(notificationsIds);
+            Timestamp startTimestamp = Objects.isNull(start) ? Timestamp.valueOf("1970-01-01 00:00:00") : Timestamp.valueOf(start);
+            Timestamp endTimestamp = Objects.isNull(end) ? Timestamp.valueOf("2050-01-01 00:00:00") : Timestamp.valueOf(end);
+
+            result = notificationLogsRepository.findByQueryString(notificationsIds,
+                    startTimestamp, endTimestamp, PageRequest.of(pageNo, pageSize));
+        } else
+            result = getEventsByTimeDesc(pageNo, pageSize);
+
+        return result;
+    }
+
 }
