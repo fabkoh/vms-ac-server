@@ -162,7 +162,7 @@ public class NotificationController {
     // all notification logs
     @GetMapping("/notification/sendEmail/{eventsManagementId}")
     public ResponseEntity<?> sendEmail(@PathVariable Long eventsManagementId) {
-        // TODO: Loop through the recipients in event management when recipient addition is available
+        // TODO: Loop through the recipients in event management when recipient addition is available for send mail api
         Optional<EventsManagement> eventsManagementOptional = eventsManagementService.getEventsManagementById(eventsManagementId);
         if (eventsManagementOptional.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -184,20 +184,33 @@ public class NotificationController {
         }
 
         if (emailSettings.getCustom()) {
-            try {
-                // only send to the first one
-                if (emailSettings.getIsTLS()) {
-                    notificationService.sendSMTPTLSEmail(notification.getEventsManagementNotificationRecipients().split(",")[0], notification.getEventsManagementNotificationTitle(), notification.getEventsManagementNotificationContent(), emailSettings);
-                } else {
-                    notificationService.sendSMTPSSLEmail(notification.getEventsManagementNotificationRecipients().split(",")[0], notification.getEventsManagementNotificationTitle(), notification.getEventsManagementNotificationContent(), emailSettings);
+            String[] recipients;
+            recipients = notification.getEventsManagementNotificationRecipients().split(",");
+            boolean hasAnyError = false;
+            for (int i = 0; i < recipients.length; i++) {
+                try {
+                    // only send to the first one
+                    if (emailSettings.getIsTLS()) {
+                        notificationService.sendSMTPTLSEmail(recipients[i], notification.getEventsManagementNotificationTitle(), notification.getEventsManagementNotificationContent(), emailSettings);
+                    } else {
+                        notificationService.sendSMTPSSLEmail(recipients[i], notification.getEventsManagementNotificationTitle(), notification.getEventsManagementNotificationContent(), emailSettings);
+                    }
+                    NotificationLogs notificationLogs = new NotificationLogs(null, 200, "", DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mmX")
+                            .withZone(ZoneOffset.UTC)
+                            .format(Instant.now()),notification);
+                    notificationService.save(notificationLogs);
+                } catch (Exception e) {
+                    NotificationLogs notificationLogs = new NotificationLogs(null, 400, e.getMessage(), DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss")
+                            .withZone(ZoneId.of("GMT+08:00"))
+                            .format(Instant.now()),notification);
+                    notificationService.save(notificationLogs);
+                    hasAnyError = true;
                 }
-            } catch (Exception e) {
-                NotificationLogs notificationLogs = new NotificationLogs(null, 400, e.getMessage(), DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss")
-                        .withZone(ZoneId.of("GMT+08:00"))
-                        .format(Instant.now()),notification);
-                notificationService.save(notificationLogs);
+            }
+            if (hasAnyError) {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
+            return new ResponseEntity<>(HttpStatus.OK);
         }
 
         String uri = String.format("%s/%s", notification.getEventsManagementNotificationTitle(), notification.getEventsManagementNotificationContent());
