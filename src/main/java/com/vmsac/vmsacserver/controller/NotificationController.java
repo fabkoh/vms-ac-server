@@ -141,6 +141,21 @@ public class NotificationController {
         });
     }
 
+    @GetMapping("notification/testSMTP")
+    public ResponseEntity<?> testEmail() {
+        EmailSettings emailSettings = notificationService.getEmailSettings();
+        if (!emailSettings.getCustom()) {
+            // always return ok when using default email
+            return new ResponseEntity<>("Default settings are used", HttpStatus.OK);
+        }
+        try {
+            notificationService.sendSMTPSSLEmail("inthenetworld@yahoo.com", "Test message", "test");
+        } catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>("SMTP email is valid and ready to go", HttpStatus.OK);
+    }
+
     // all notification logs
     @GetMapping("/notification/sendEmail/{eventsManagementId}")
     public ResponseEntity<?> sendEmail(@PathVariable Long eventsManagementId) {
@@ -163,6 +178,20 @@ public class NotificationController {
                     .format(Instant.now()),notification);
             notificationService.save(notificationLogs);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        if (emailSettings.getCustom()) {
+            try {
+                // only send to the first one
+                notificationService.sendSMTPSSLEmail(notification.getEventsManagementNotificationRecipients().split(",")[0], notification.getEventsManagementNotificationTitle(), notification.getEventsManagementNotificationContent());
+                // notificationService.sendSMTPTLSEmail(notification.getEventsManagementNotificationRecipients().split(",")[0], notification.getEventsManagementNotificationTitle(), notification.getEventsManagementNotificationContent());
+            } catch (Exception e) {
+                NotificationLogs notificationLogs = new NotificationLogs(null, 400, e.getMessage(), DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss")
+                        .withZone(ZoneId.of("GMT+08:00"))
+                        .format(Instant.now()),notification);
+                notificationService.save(notificationLogs);
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
         }
 
         String uri = String.format("%s/%s", notification.getEventsManagementNotificationTitle(), notification.getEventsManagementNotificationContent());

@@ -9,12 +9,18 @@ import com.vmsac.vmsacserver.repository.EmailSettingsRepository;
 import com.vmsac.vmsacserver.repository.EventsManagementNotificationRepository;
 import com.vmsac.vmsacserver.repository.NotificationLogsRepository;
 import com.vmsac.vmsacserver.repository.SmsSettingsRepository;
+import com.vmsac.vmsacserver.util.EmailUtil;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.Email;
 import java.util.List;
+import java.util.Properties;
+import javax.mail.Authenticator;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -57,6 +63,73 @@ public class NotificationService {
 
         } catch (Exception e) {
             return false;
+        }
+    }
+
+    public void sendDefaultEmail() throws Exception{
+
+    }
+
+    public void sendSMTPTLSEmail(String recipient, String subject, String body) throws Exception {
+        // at this point this should only be called when we want to use custom, so no need to check isCustom
+        EmailSettings currentEmailSettings = emailSettingsRepository.findAll().get(0);
+
+        final String fromEmail = currentEmailSettings.getEmail();
+        final String password = currentEmailSettings.getEmailPassword();
+
+        System.out.println("TLSEmail Start");
+        Properties props = new Properties();
+        props.put("mail.smtp.host", currentEmailSettings.getHostAddress()); //SMTP Host
+        props.put("mail.smtp.port", currentEmailSettings.getPortNumber()); //TLS Port
+        props.put("mail.smtp.auth", "true"); //enable authentication
+        props.put("mail.smtp.starttls.enable", "true"); //enable STARTTLS
+
+        //create Authenticator object to pass in Session.getInstance argument
+        Authenticator auth = new Authenticator() {
+            //override the getPasswordAuthentication method
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(fromEmail, password);
+            }
+        };
+        Session session = Session.getInstance(props, auth);
+        try {
+            EmailUtil.sendEmail(session, recipient,subject, body);
+        }
+        catch (Exception e) {
+            throw e;
+        }
+    }
+
+    public void sendSMTPSSLEmail(String recipient, String subject, String body) throws Exception {
+        // at this point this should only be called when we want to use custom, so no need to check isCustom
+        EmailSettings currentEmailSettings = emailSettingsRepository.findAll().get(0);
+
+        final String fromEmail = currentEmailSettings.getEmail();
+        final String password = currentEmailSettings.getEmailPassword();
+
+        System.out.println("SSLEmail Start");
+        Properties props = new Properties();
+        props.put("mail.smtp.host", "smtp.gmail.com"); //SMTP Host
+        props.put("mail.smtp.socketFactory.port", "465"); //SSL Port
+        props.put("mail.smtp.socketFactory.class",
+                "javax.net.ssl.SSLSocketFactory"); //SSL Factory Class
+        props.put("mail.smtp.auth", "true"); //Enabling SMTP Authentication
+        props.put("mail.smtp.port", "465"); //SMTP Port
+
+        Authenticator auth = new Authenticator() {
+            //override the getPasswordAuthentication method
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(fromEmail, password);
+            }
+        };
+
+        Session session = Session.getDefaultInstance(props, auth);
+        System.out.println("Session created");
+        try {
+            EmailUtil.sendEmail(session, recipient,subject, body);
+        }
+        catch (Exception e) {
+            throw e;
         }
     }
 
