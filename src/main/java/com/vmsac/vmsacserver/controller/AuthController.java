@@ -17,6 +17,7 @@ import com.vmsac.vmsacserver.security.jwt.JwtUtils;
 import com.vmsac.vmsacserver.security.services.RefreshTokenService;
 import com.vmsac.vmsacserver.security.services.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,6 +27,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -127,7 +129,11 @@ public class AuthController {
                 .map(refreshTokenService::verifyExpiration)
                 .map(RefreshToken::getUser)
                 .map(user -> {
-                    String token = jwtUtils.generateTokenFromEmail(user.getEmail());
+                    ArrayList role_names = new ArrayList<>();
+                    for(Role ele: user.getRoles()){
+                        role_names.add(ele.getName().toString());
+                    }
+                    String token = jwtUtils.generateTokenFromEmail(user.getEmail(),role_names);
                     return ResponseEntity.ok(new TokenRefreshResponse(token, requestRefreshToken));
                 })
                 .orElseThrow(() -> new TokenRefreshException(requestRefreshToken,
@@ -140,6 +146,19 @@ public class AuthController {
         Long userId = userDetails.getId();
         refreshTokenService.deleteByUserId(userId);
         return ResponseEntity.ok(new MessageResponse("Log out successful!"));
+    }
+
+    @GetMapping("/profile")
+    public ResponseEntity<?> getProfile() {
+        try {
+            UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            return new ResponseEntity<>(userDetails, HttpStatus.OK);
+
+        }
+        catch(Exception e) {
+            return new ResponseEntity<>(e.toString(), HttpStatus.NOT_FOUND);
+        }
+
     }
 
 }
