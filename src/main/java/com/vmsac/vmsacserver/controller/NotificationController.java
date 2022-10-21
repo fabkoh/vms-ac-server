@@ -5,12 +5,14 @@ import com.vmsac.vmsacserver.model.notification.EmailSettings;
 import com.vmsac.vmsacserver.model.notification.EventsManagementNotification;
 import com.vmsac.vmsacserver.model.notification.NotificationLogs;
 import com.vmsac.vmsacserver.model.notification.SmsSettings;
+import com.vmsac.vmsacserver.repository.NotificationLogsRepository;
 import com.vmsac.vmsacserver.service.EventsManagementNotificationService;
 import com.vmsac.vmsacserver.service.EventsManagementService;
 import com.vmsac.vmsacserver.service.NotificationService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +23,7 @@ import javax.validation.Valid;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -36,6 +39,9 @@ public class NotificationController {
 
     @Autowired
     NotificationService notificationService;
+
+    @Autowired
+    NotificationLogsRepository notificationLogsRepository;
 
     @Autowired
     EventsManagementNotificationService eventsManagementNotificationService;
@@ -138,6 +144,7 @@ public class NotificationController {
     // all notification logs
     @GetMapping("/notification/sendEmail/{eventsManagementId}")
     public ResponseEntity<?> sendEmail(@PathVariable Long eventsManagementId) {
+        // TODO: Loop through the recipients in event management when recipient addition is available
         Optional<EventsManagement> eventsManagementOptional = eventsManagementService.getEventsManagementById(eventsManagementId);
         if (eventsManagementOptional.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -149,6 +156,15 @@ public class NotificationController {
         }
 
         EventsManagementNotification notification = notificationOptional.get();
+        EmailSettings emailSettings = notificationService.getEmailSettings();
+        if (!emailSettings.getEnabled()) {
+            NotificationLogs notificationLogs = new NotificationLogs(null, 400, "Email is disabled", DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss")
+                    .withZone(ZoneId.of("GMT+08:00"))
+                    .format(Instant.now()),notification);
+            notificationService.save(notificationLogs);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
         String uri = String.format("%s/%s", notification.getEventsManagementNotificationTitle(), notification.getEventsManagementNotificationContent());
         AtomicBoolean hasError = new AtomicBoolean(false);
         NotificationLogs notificationLogs;
@@ -186,12 +202,22 @@ public class NotificationController {
 
     // all notification logs
     @GetMapping("/notification/logs/all")
-    public ResponseEntity<?> AllNotificationLogs() {
+    public ResponseEntity<?> AllNotificationLogs(@RequestParam(value = "batchNo", required = false) Integer batchNo,
+                                                 @RequestParam(value = "queryString", required = false) String queryStr,
+                                                 @RequestParam(value = "start", required = false)
+                                                     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
+                                                 @RequestParam(value = "end", required = false)
+                                                     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
         try{
             return new ResponseEntity<>(notificationService.allNotificationLogs(),HttpStatus.OK);
         }catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @GetMapping("/notification/logs/count")
+    public ResponseEntity<Long> countTotalEvents() {
+        return new ResponseEntity<>(notificationLogsRepository.count(), HttpStatus.OK);
     }
 
 }
