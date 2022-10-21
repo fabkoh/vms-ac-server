@@ -10,7 +10,12 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.security.Key;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 @Component
 public class JwtUtils {
     private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
@@ -27,12 +32,18 @@ public class JwtUtils {
     }
 
     public String generateJwtToken(UserDetailsImpl userPrincipal) {
-        return generateTokenFromEmail(userPrincipal.getUsername());
+
+        ArrayList role_names = (ArrayList) userPrincipal.getAuthorities().stream().map(item -> item.getAuthority())
+                .collect(Collectors.toList());
+
+        return generateTokenFromEmail(userPrincipal.getUsername(), role_names);
     }
 
-    public String generateTokenFromEmail(String email) {
-        return Jwts.builder().setSubject(email).setIssuedAt(new Date())
-                .setExpiration(new Date((new Date()).getTime() + 60000)).signWith(jwtSecret)
+    public String generateTokenFromEmail(String email, ArrayList role_names) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("roles", role_names);
+        return Jwts.builder().setClaims(claims).setSubject(email).setIssuedAt(new Date())
+                .setExpiration(new Date((new Date()).getTime() + jwtTokenDurationMs)).signWith(jwtSecret)
                 .compact();
     }
 
