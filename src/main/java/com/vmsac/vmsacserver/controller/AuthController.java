@@ -27,10 +27,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -125,27 +122,41 @@ public class AuthController {
     @PostMapping("/refreshtoken")
     public ResponseEntity<?> refreshtoken(@Valid @RequestBody TokenRefreshRequest request) {
         String requestRefreshToken = request.getRefreshToken();
-        return refreshTokenService.findByToken(requestRefreshToken)
-                .map(refreshTokenService::verifyExpiration)
-                .map(RefreshToken::getUser)
-                .map(user -> {
-                    ArrayList role_names = new ArrayList<>();
-                    for(Role ele: user.getRoles()){
-                        role_names.add(ele.getName().toString());
-                    }
-                    String token = jwtUtils.generateTokenFromEmail(user.getEmail(),role_names);
-                    return ResponseEntity.ok(new TokenRefreshResponse(token, requestRefreshToken));
-                })
-                .orElseThrow(() -> new TokenRefreshException(requestRefreshToken,
-                        "Refresh token is not in database!"));
+        try {
+            return refreshTokenService.findByToken(requestRefreshToken)
+                    .map(refreshTokenService::verifyExpiration)
+                    .map(RefreshToken::getUser)
+                    .map(user -> {
+                        ArrayList role_names = new ArrayList<>();
+                        for (Role ele : user.getRoles()) {
+                            role_names.add(ele.getName().toString());
+                        }
+                        String token = jwtUtils.generateTokenFromEmail(user.getEmail(), role_names);
+                        return ResponseEntity.ok(new TokenRefreshResponse(token, requestRefreshToken));
+                    })
+                    .orElseThrow(() -> new TokenRefreshException(requestRefreshToken,
+                            "Refresh token is not in database!"));
+        }
+        catch (Exception e) {
+            Map<String, String> map = new HashMap<String, String>();
+            map.put("message", e.getMessage());
+            return new ResponseEntity<>(map,HttpStatus.BAD_REQUEST);
+        }
     }
 
     @PostMapping("/signout")
     public ResponseEntity<?> logoutUser() {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Long userId = userDetails.getId();
-        refreshTokenService.deleteByUserId(userId);
-        return ResponseEntity.ok(new MessageResponse("Log out successful!"));
+        try {
+            UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            Long userId = userDetails.getId();
+            refreshTokenService.deleteByUserId(userId);
+            return ResponseEntity.ok(new MessageResponse("Log out successful!"));
+        }
+        catch(Exception e) {
+            Map<String, String> map = new HashMap<String, String>();
+            map.put("message", "Unable to Logout");
+            return new ResponseEntity<>(map,HttpStatus.BAD_REQUEST);
+        }
     }
 
     @GetMapping("/profile")
@@ -156,7 +167,9 @@ public class AuthController {
 
         }
         catch(Exception e) {
-            return new ResponseEntity<>(e.toString(), HttpStatus.NOT_FOUND);
+            Map<String, String> map = new HashMap<String, String>();
+            map.put("message", "User Not Found");
+            return new ResponseEntity<>(map,HttpStatus.NOT_FOUND);
         }
 
     }
