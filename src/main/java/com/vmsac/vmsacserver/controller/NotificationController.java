@@ -182,6 +182,8 @@ public class NotificationController {
             notificationService.save(notificationLogs);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
+        String content = notification.getEventsManagementNotificationContent() + " on " + LocalDateTime.now().format(dtf) + ".";
 
         if (emailSettings.getCustom()) {
             String[] recipients;
@@ -191,12 +193,12 @@ public class NotificationController {
                 try {
                     // only send to the first one
                     if (emailSettings.getIsTLS()) {
-                        notificationService.sendSMTPTLSEmail(recipients[i], notification.getEventsManagementNotificationTitle(), notification.getEventsManagementNotificationContent(), emailSettings);
+                        notificationService.sendSMTPTLSEmail(recipients[i], notification.getEventsManagementNotificationTitle(), content, emailSettings);
                     } else {
-                        notificationService.sendSMTPSSLEmail(recipients[i], notification.getEventsManagementNotificationTitle(), notification.getEventsManagementNotificationContent(), emailSettings);
+                        notificationService.sendSMTPSSLEmail(recipients[i], notification.getEventsManagementNotificationTitle(), content, emailSettings);
                     }
-                    NotificationLogs notificationLogs = new NotificationLogs(null, 200, "", DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mmX")
-                            .withZone(ZoneOffset.UTC)
+                    NotificationLogs notificationLogs = new NotificationLogs(null, 200, "", DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss")
+                            .withZone(ZoneId.of("GMT+08:00"))
                             .format(Instant.now()),notification);
                     notificationService.save(notificationLogs);
                 } catch (Exception e) {
@@ -213,7 +215,7 @@ public class NotificationController {
             return new ResponseEntity<>(HttpStatus.OK);
         }
 
-        String uri = String.format("%s/%s", notification.getEventsManagementNotificationTitle(), notification.getEventsManagementNotificationContent());
+        String uri = String.format("%s/%s", notification.getEventsManagementNotificationTitle(), content);
         AtomicBoolean hasError = new AtomicBoolean(false);
         NotificationLogs notificationLogs;
         try {
@@ -232,8 +234,8 @@ public class NotificationController {
                     .block(Duration.ofMillis(5000));
             if (!hasError.get()) {
                 // saving the time in UTC
-                notificationLogs = new NotificationLogs(null, 200, "", DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mmX")
-                        .withZone(ZoneOffset.UTC)
+                notificationLogs = new NotificationLogs(null, 200, "", DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss")
+                        .withZone(ZoneId.of("GMT+08:00"))
                         .format(Instant.now()),notification);
                 notificationService.save(notificationLogs);
                 return new ResponseEntity<>(HttpStatus.OK);

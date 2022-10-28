@@ -27,7 +27,14 @@ public class EventsManagementSMSCreateDto {
     }
 
     public EventsManagementNotification toEventManagementNotification(Boolean deleted, EventsManagement eventsManagement) {
-        EventsManagementNotification eventsManagementNotification = new EventsManagementNotification(null, "SMS", eventsManagementSMSRecipients, eventsManagementSMSContent,
+        String name = "";
+        if (eventsManagement.getEntrance() != null) {
+            name = eventsManagement.getEntrance().getEntranceName();
+        } else if (eventsManagement.getController() != null) {
+            name = eventsManagement.getController().getControllerName();
+        }
+        String content = "Event Management " + eventsManagement.getEventsManagementName() +  " at " + name + " " + eventsManagementSMSContent;
+        EventsManagementNotification eventsManagementNotification = new EventsManagementNotification(null, "SMS", eventsManagementSMSRecipients, content,
                 "", deleted, eventsManagement, new ArrayList<>());
         return eventsManagementNotification;
     }

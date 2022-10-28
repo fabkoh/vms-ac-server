@@ -24,7 +24,14 @@ public class EventsManagementEmailCreateDto {
     private String eventsManagementEmailTitle;
 
     public EventsManagementNotification toEventManagementNotification(Boolean deleted, EventsManagement eventsManagement) {
-        return new EventsManagementNotification(null, "EMAIL", eventsManagementEmailRecipients, eventsManagementEmailContent,
+        String name = "";
+        if (eventsManagement.getEntrance() != null) {
+            name = eventsManagement.getEntrance().getEntranceName();
+        } else if (eventsManagement.getController() != null) {
+            name = eventsManagement.getController().getControllerName();
+        }
+        String content = "Event Management " + eventsManagement.getEventsManagementName() +  " at " + name + " " + eventsManagementEmailContent;
+        return new EventsManagementNotification(null, "EMAIL", eventsManagementEmailRecipients, content,
                 eventsManagementEmailTitle, deleted, eventsManagement, new ArrayList<>());
     }
 }

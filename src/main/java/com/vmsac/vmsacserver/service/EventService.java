@@ -141,7 +141,7 @@ public class   EventService {
 
     public List<Event> getEventsByTimeDesc(String queryString, LocalDateTime start, LocalDateTime end, int pageNo, int pageSize) {
         List<Event> result;
-        if (queryString != null && !queryString.equals("")) {
+        if ((queryString != null && !queryString.equals("")) || !Objects.isNull(start) || !Objects.isNull(end)) {
 
             List<EventActionType> eventTypes = eventActionTypeRepository.searchByEventActionTypeName(queryString);
             List<Long> eventTypeIds = eventTypes.stream().map(EventActionType::getEventActionTypeId).collect(Collectors.toList());
