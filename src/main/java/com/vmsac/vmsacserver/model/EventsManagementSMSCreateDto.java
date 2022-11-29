@@ -21,6 +21,8 @@ public class EventsManagementSMSCreateDto {
 
     private String eventsManagementSMSContent;
 
+    private Boolean useDefaultSMS;
+
     @Override
     public String toString() {
         return String.format("eventsManagementSMSRecipients: %s, eventsManagementSMSContent: %s", eventsManagementSMSRecipients, eventsManagementSMSContent);
@@ -33,7 +35,11 @@ public class EventsManagementSMSCreateDto {
         } else if (eventsManagement.getController() != null) {
             name = eventsManagement.getController().getControllerName();
         }
-        String content = "Event Management " + eventsManagement.getEventsManagementName() +  " at " + name + " " + eventsManagementSMSContent;
+        String defaultContent = "Event Management " + eventsManagement.getEventsManagementName() +  " at " + name + " " + eventsManagementSMSContent;
+        String content = eventsManagementSMSContent;
+        if (useDefaultSMS) {
+            content = defaultContent;
+        }
         EventsManagementNotification eventsManagementNotification = new EventsManagementNotification(null, "SMS", eventsManagementSMSRecipients, content,
                 "", deleted, eventsManagement, new ArrayList<>());
         return eventsManagementNotification;
