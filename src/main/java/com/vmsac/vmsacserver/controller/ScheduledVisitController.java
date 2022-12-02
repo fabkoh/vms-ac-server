@@ -5,13 +5,12 @@ import com.vmsac.vmsacserver.model.Visitor;
 import com.vmsac.vmsacserver.model.ScheduledVisit;
 import com.vmsac.vmsacserver.repository.ScheduledVisitRepository;
 import com.vmsac.vmsacserver.repository.VisitorRepository;
-import com.vmsac.vmsacserver.service.QrCodeGenerator;
-import com.vmsac.vmsacserver.service.RetrieveQrId;
-import com.vmsac.vmsacserver.service.SendQrCodeLink;
+import com.vmsac.vmsacserver.security.service.QrCodeGenerator;
+import com.vmsac.vmsacserver.security.service.RetrieveQrId;
+import com.vmsac.vmsacserver.security.service.SendQrCodeLink;
 import com.vmsac.vmsacserver.util.HashQRId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,10 +19,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 
 import javax.validation.Valid;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import org.apache.commons.io.IOUtils;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -31,9 +27,7 @@ import java.nio.file.Paths;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 @CrossOrigin(origins = "*")
 @RestController

@@ -16,6 +16,7 @@ import com.vmsac.vmsacserver.repository.UserRepository;
 import com.vmsac.vmsacserver.security.jwt.JwtUtils;
 import com.vmsac.vmsacserver.security.services.RefreshTokenService;
 import com.vmsac.vmsacserver.security.services.UserDetailsImpl;
+import com.vmsac.vmsacserver.security.services.UserDetailsList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,6 +40,9 @@ public class AuthController {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    UserRepository user;
 
     @Autowired
     RoleRepository roleRepository;
@@ -72,6 +76,55 @@ public class AuthController {
         return ResponseEntity.ok(new JwtResponse(jwt, refreshToken.getToken(), userDetails.getId(),
                 userDetails.getEmail(), roles));
     }
+
+    // allow user to view all the lower tier accs
+    @GetMapping("/accounts")
+    public ResponseEntity<?> listOfAccounts() {
+        try {
+            UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if (userDetails.getAuthorities().stream().anyMatch(i -> (i.toString().equals("ROLE_SYSTEM_ADMIN")))){
+                Map<String,List<UserDetailsList>> newList = new HashMap<>();
+                newList.put("User-Admin",UserDetailsList.userToUserDetailsList(userRepository.findByRoles_IdOrderByIdAsc(1)));
+                newList.put("Tech-Admin",UserDetailsList.userToUserDetailsList(userRepository.findByRoles_IdOrderByIdAsc(3)));
+                return new ResponseEntity<>(newList, HttpStatus.OK);
+            }else if (userDetails.getAuthorities().stream().anyMatch(i -> (i.toString().equals("ROLE_TECH_ADMIN")))){
+                Map<String,List<UserDetailsList>> newList = new HashMap<>();
+                newList.put("User-Admin",UserDetailsList.userToUserDetailsList(userRepository.findByRoles_IdOrderByIdAsc(1)));
+                return new ResponseEntity<>(newList, HttpStatus.OK);
+            }else{
+                return new ResponseEntity<>(HttpStatus.OK);
+            }
+
+
+        }
+        catch(Exception e) {
+            Map<String, String> map = new HashMap<String, String>();
+            map.put("message", "User Not Found");
+            return new ResponseEntity<>(map,HttpStatus.NOT_FOUND);
+        }
+
+    }
+
+//    @PostMapping("/delete")
+//    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+//
+//        Authentication authentication = authenticationManager
+//                .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+//
+//        SecurityContextHolder.getContext().setAuthentication(authentication);
+//
+//        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+//
+//        String jwt = jwtUtils.generateJwtToken(userDetails);
+//
+//        List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
+//                .collect(Collectors.toList());
+//
+//        RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getEmail());
+//
+//        return ResponseEntity.ok(new JwtResponse(jwt, refreshToken.getToken(), userDetails.getId(),
+//                userDetails.getEmail(), roles));
+//    }
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {

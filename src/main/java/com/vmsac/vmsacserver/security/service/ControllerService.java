@@ -1,4 +1,4 @@
-package com.vmsac.vmsacserver.service;
+package com.vmsac.vmsacserver.security.service;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -17,8 +17,6 @@ import org.dmfs.rfc5545.DateTime;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;

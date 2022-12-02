@@ -1,16 +1,14 @@
-package com.vmsac.vmsacserver.service;
+package com.vmsac.vmsacserver.security.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmsac.vmsacserver.model.AccessGroup;
 import com.vmsac.vmsacserver.model.AccessGroupOnlyDto;
-import com.vmsac.vmsacserver.model.Entrance;
 import com.vmsac.vmsacserver.model.Person;
 import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoN;
 import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoNDto;
 import com.vmsac.vmsacserver.model.accessgroupschedule.AccessGroupSchedule;
 import com.vmsac.vmsacserver.model.accessgroupschedule.AccessGroupScheduleDto;
 import com.vmsac.vmsacserver.model.accessgroupschedule.CreateAccessGroupScheduleDto;
-import com.vmsac.vmsacserver.model.credentialtype.entranceschedule.EntranceSchedule;
 import com.vmsac.vmsacserver.repository.AccessGroupEntranceNtoNRepository;
 import com.vmsac.vmsacserver.repository.AccessGroupRepository;
 import com.vmsac.vmsacserver.repository.AccessGroupScheduleRepository;

@@ -1,4 +1,4 @@
-package com.vmsac.vmsacserver.service;
+package com.vmsac.vmsacserver.security.service;
 
 import com.vmsac.vmsacserver.model.Person;
 import com.vmsac.vmsacserver.model.PersonDto;

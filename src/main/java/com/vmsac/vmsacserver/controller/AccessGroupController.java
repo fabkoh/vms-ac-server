@@ -1,8 +1,8 @@
 package com.vmsac.vmsacserver.controller;
 
 import com.vmsac.vmsacserver.model.*;
-import com.vmsac.vmsacserver.service.AccessGroupService;
-import com.vmsac.vmsacserver.service.PersonService;
+import com.vmsac.vmsacserver.security.service.AccessGroupService;
+import com.vmsac.vmsacserver.security.service.PersonService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

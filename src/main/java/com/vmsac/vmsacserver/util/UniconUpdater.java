@@ -2,17 +2,13 @@ package com.vmsac.vmsacserver.util;
 
 import com.vmsac.vmsacserver.model.Controller;
 import com.vmsac.vmsacserver.model.ControllerConnection;
-import com.vmsac.vmsacserver.service.ControllerService;
+import com.vmsac.vmsacserver.security.service.ControllerService;
 import javassist.NotFoundException;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

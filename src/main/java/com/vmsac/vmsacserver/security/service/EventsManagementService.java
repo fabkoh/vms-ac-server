@@ -1,4 +1,4 @@
-package com.vmsac.vmsacserver.service;
+package com.vmsac.vmsacserver.security.service;
 
 import com.vmsac.vmsacserver.model.*;
 import com.vmsac.vmsacserver.model.EventDto.EventControllerDto;
@@ -8,10 +8,8 @@ import com.vmsac.vmsacserver.repository.*;
 import javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class EventsManagementService {

@@ -2,8 +2,7 @@ package com.vmsac.vmsacserver.controller;
 
 import com.vmsac.vmsacserver.model.Event;
 import com.vmsac.vmsacserver.repository.EventRepository;
-import com.vmsac.vmsacserver.service.EventService;
-import com.vmsac.vmsacserver.service.InOutEventService;
+import com.vmsac.vmsacserver.security.service.EventService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 
 @CrossOrigin(origins = "*")
 @RestController

@@ -1,20 +1,15 @@
 package com.vmsac.vmsacserver.controller;
 
-import com.vmsac.vmsacserver.model.AccessGroup;
-import com.vmsac.vmsacserver.model.EntranceDto;
 import com.vmsac.vmsacserver.model.accessgroupschedule.AccessGroupSchedule;
 import com.vmsac.vmsacserver.model.accessgroupschedule.AccessGroupScheduleDto;
 import com.vmsac.vmsacserver.model.accessgroupschedule.CreateAccessGroupScheduleDto;
-import com.vmsac.vmsacserver.repository.PersonRepository;
-import com.vmsac.vmsacserver.service.AccessGroupScheduleService;
-import com.vmsac.vmsacserver.service.AccessGroupService;
-import com.vmsac.vmsacserver.util.UniconUpdater;
+import com.vmsac.vmsacserver.security.service.AccessGroupScheduleService;
+import com.vmsac.vmsacserver.security.service.AccessGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
