@@ -127,7 +127,12 @@
 			<artifactId>spring-security-test</artifactId>
 			<version>5.7.3</version>
 		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>javax.mail</groupId>
+            <artifactId>mail</artifactId>
+            <version>1.5.0-b01</version>
+        </dependency>
+    </dependencies>
 
 	<build>
 		<plugins>

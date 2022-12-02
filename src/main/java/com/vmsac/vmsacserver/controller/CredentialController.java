@@ -59,6 +59,7 @@ public class CredentialController {
 
     @PostMapping("/credential/check")
     public ResponseEntity<?> checkCredential(@RequestBody CreateCredentialDto createCred) {
+        System.out.println(createCred);
         if (createCred.getCredTypeId() != 4) {
             if (credentialService.uidInUse(createCred.getCredUid(), createCred.getCredId())) {
                 Map<Long, String> errors = new HashMap<>();
