@@ -1,4 +1,4 @@
-package com.vmsac.vmsacserver.security.service;
+package com.vmsac.vmsacserver.service;
 
 import com.fasterxml.jackson.databind.util.JSONPObject;
 import com.vmsac.vmsacserver.model.ScheduledVisit;

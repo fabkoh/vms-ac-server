@@ -2,9 +2,9 @@ package com.vmsac.vmsacserver.controller;
 
 import com.vmsac.vmsacserver.model.*;
 import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoNDto;
-import com.vmsac.vmsacserver.security.service.AccessGroupEntranceService;
-import com.vmsac.vmsacserver.security.service.EntranceService;
-import com.vmsac.vmsacserver.security.service.AccessGroupService;
+import com.vmsac.vmsacserver.service.AccessGroupEntranceService;
+import com.vmsac.vmsacserver.service.EntranceService;
+import com.vmsac.vmsacserver.service.AccessGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

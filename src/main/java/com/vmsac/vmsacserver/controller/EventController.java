@@ -2,7 +2,7 @@ package com.vmsac.vmsacserver.controller;
 
 import com.vmsac.vmsacserver.model.Event;
 import com.vmsac.vmsacserver.repository.EventRepository;
-import com.vmsac.vmsacserver.security.service.EventService;
+import com.vmsac.vmsacserver.service.EventService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;

@@ -1,4 +1,4 @@
-package com.vmsac.vmsacserver.security.service;
+package com.vmsac.vmsacserver.service;
 
 import java.util.HashMap;
 import java.util.List;

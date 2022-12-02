@@ -1,4 +1,4 @@
-package com.vmsac.vmsacserver.security.service;
+package com.vmsac.vmsacserver.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmsac.vmsacserver.model.AccessGroup;

@@ -1,7 +1,7 @@
 package com.vmsac.vmsacserver.controller;
 
 import com.vmsac.vmsacserver.model.credentialtype.CredentialType;
-import com.vmsac.vmsacserver.security.service.CredentialTypeService;
+import com.vmsac.vmsacserver.service.CredentialTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;

@@ -2,7 +2,7 @@ package com.vmsac.vmsacserver.util;
 
 import com.vmsac.vmsacserver.model.Controller;
 import com.vmsac.vmsacserver.model.ControllerConnection;
-import com.vmsac.vmsacserver.security.service.ControllerService;
+import com.vmsac.vmsacserver.service.ControllerService;
 import javassist.NotFoundException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;

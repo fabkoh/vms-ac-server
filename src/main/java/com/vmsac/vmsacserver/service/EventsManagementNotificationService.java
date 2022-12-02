@@ -1,4 +1,4 @@
-package com.vmsac.vmsacserver.security.service;
+package com.vmsac.vmsacserver.service;
 
 import java.util.List;
 import java.util.Optional;

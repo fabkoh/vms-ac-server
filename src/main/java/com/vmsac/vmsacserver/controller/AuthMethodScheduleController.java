@@ -3,8 +3,8 @@ package com.vmsac.vmsacserver.controller;
 
 import com.vmsac.vmsacserver.model.authmethodschedule.AuthMethodSchedule;
 import com.vmsac.vmsacserver.model.authmethodschedule.CreateAuthMethodScheduleDto;
-import com.vmsac.vmsacserver.security.service.AuthDeviceService;
-import com.vmsac.vmsacserver.security.service.AuthMethodScheduleService;
+import com.vmsac.vmsacserver.service.AuthDeviceService;
+import com.vmsac.vmsacserver.service.AuthMethodScheduleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -1,7 +1,7 @@
 package com.vmsac.vmsacserver.controller;
 
 import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoNDto;
-import com.vmsac.vmsacserver.security.service.AccessGroupEntranceService;
+import com.vmsac.vmsacserver.service.AccessGroupEntranceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

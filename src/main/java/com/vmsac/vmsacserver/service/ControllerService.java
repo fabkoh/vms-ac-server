@@ -1,4 +1,4 @@
-package com.vmsac.vmsacserver.security.service;
+package com.vmsac.vmsacserver.service;
 
 import java.time.LocalDate;
 import java.util.HashMap;

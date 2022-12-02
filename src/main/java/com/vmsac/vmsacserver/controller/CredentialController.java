@@ -4,7 +4,7 @@ import com.vmsac.vmsacserver.model.PersonDto;
 import com.vmsac.vmsacserver.model.credential.CreateCredentialDto;
 import com.vmsac.vmsacserver.model.credential.CredentialDto;
 import com.vmsac.vmsacserver.model.credential.EditCredentialDto;
-import com.vmsac.vmsacserver.security.service.CredentialService;
+import com.vmsac.vmsacserver.service.CredentialService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -6,9 +6,9 @@ import com.vmsac.vmsacserver.model.notification.EventsManagementNotification;
 import com.vmsac.vmsacserver.model.notification.NotificationLogs;
 import com.vmsac.vmsacserver.model.notification.SmsSettings;
 import com.vmsac.vmsacserver.repository.NotificationLogsRepository;
-import com.vmsac.vmsacserver.security.service.EventsManagementNotificationService;
-import com.vmsac.vmsacserver.security.service.EventsManagementService;
-import com.vmsac.vmsacserver.security.service.NotificationService;
+import com.vmsac.vmsacserver.service.EventsManagementNotificationService;
+import com.vmsac.vmsacserver.service.EventsManagementService;
+import com.vmsac.vmsacserver.service.NotificationService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

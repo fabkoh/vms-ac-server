@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.vmsac.vmsacserver.model.videorecorder.VideoRecorder;
 import com.vmsac.vmsacserver.model.videorecorder.VideoRecorderDto;
-import com.vmsac.vmsacserver.security.service.VideoRecorderService;
+import com.vmsac.vmsacserver.service.VideoRecorderService;
 
 @CrossOrigin(origins = "*")
 @RestController
