@@ -31,7 +31,7 @@ public class RefreshTokenService {
     public RefreshToken createRefreshToken(String email) {
         RefreshToken refreshToken = new RefreshToken();
 
-        refreshToken.setUser(userRepository.findByEmail(email).get());
+        refreshToken.setUser(userRepository.findByDeletedFalseAndEmail(email).get());
         refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenDurationMs));
         refreshToken.setToken(UUID.randomUUID().toString());
 

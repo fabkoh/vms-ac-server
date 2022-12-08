@@ -1,10 +1,7 @@
 package com.vmsac.vmsacserver.controller;
 
 import com.vmsac.vmsacserver.exception.TokenRefreshException;
-import com.vmsac.vmsacserver.model.ERole;
-import com.vmsac.vmsacserver.model.RefreshToken;
-import com.vmsac.vmsacserver.model.Role;
-import com.vmsac.vmsacserver.model.User;
+import com.vmsac.vmsacserver.model.*;
 import com.vmsac.vmsacserver.payload.request.LoginRequest;
 import com.vmsac.vmsacserver.payload.request.SignupRequest;
 import com.vmsac.vmsacserver.payload.request.TokenRefreshRequest;
@@ -17,9 +14,11 @@ import com.vmsac.vmsacserver.security.jwt.JwtUtils;
 import com.vmsac.vmsacserver.security.services.RefreshTokenService;
 import com.vmsac.vmsacserver.security.services.UserDetailsImpl;
 import com.vmsac.vmsacserver.security.services.UserDetailsList;
+import com.vmsac.vmsacserver.security.services.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -42,7 +41,7 @@ public class AuthController {
     UserRepository userRepository;
 
     @Autowired
-    UserRepository user;
+    UserDetailsServiceImpl userDetailsService;
 
     @Autowired
     RoleRepository roleRepository;
@@ -73,6 +72,14 @@ public class AuthController {
 
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getEmail());
 
+        if (userRepository.findById(userDetails.getId()).isPresent()){
+            if(userRepository.findById(userDetails.getId()).get().getDeleted()){
+                Map<String, String> map = new HashMap<String, String>();
+                map.put("message", "User Not Found");
+                return new ResponseEntity<>(map, HttpStatus.NOT_FOUND);
+            }
+        }
+
         return ResponseEntity.ok(new JwtResponse(jwt, refreshToken.getToken(), userDetails.getId(),
                 userDetails.getEmail(), roles));
     }
@@ -84,17 +91,149 @@ public class AuthController {
             UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             if (userDetails.getAuthorities().stream().anyMatch(i -> (i.toString().equals("ROLE_SYSTEM_ADMIN")))){
                 Map<String,List<UserDetailsList>> newList = new HashMap<>();
-                newList.put("User-Admin",UserDetailsList.userToUserDetailsList(userRepository.findByRoles_IdOrderByIdAsc(1)));
-                newList.put("Tech-Admin",UserDetailsList.userToUserDetailsList(userRepository.findByRoles_IdOrderByIdAsc(3)));
+                newList.put("User-Admin",UserDetailsList.userToUserDetailsList(userRepository.findByDeletedFalseAndRoles_IdOrderByIdAsc(1)));
+                newList.put("Tech-Admin",UserDetailsList.userToUserDetailsList(userRepository.findByDeletedFalseAndRoles_IdOrderByIdAsc(3)));
                 return new ResponseEntity<>(newList, HttpStatus.OK);
             }else if (userDetails.getAuthorities().stream().anyMatch(i -> (i.toString().equals("ROLE_TECH_ADMIN")))){
                 Map<String,List<UserDetailsList>> newList = new HashMap<>();
-                newList.put("User-Admin",UserDetailsList.userToUserDetailsList(userRepository.findByRoles_IdOrderByIdAsc(1)));
+                newList.put("User-Admin",UserDetailsList.userToUserDetailsList(userRepository.findByDeletedFalseAndRoles_IdOrderByIdAsc(1)));
                 return new ResponseEntity<>(newList, HttpStatus.OK);
             }else{
                 return new ResponseEntity<>(HttpStatus.OK);
             }
+        }
+        catch(Exception e) {
+            Map<String, String> map = new HashMap<String, String>();
+            map.put("message", "User Not Found");
+            return new ResponseEntity<>(map, HttpStatus.NOT_FOUND);
+        }
+    }
 
+    // dummy password
+    @PutMapping("/edit")
+    public ResponseEntity<?> editUser(@Valid @RequestBody User user) {
+        try {
+            UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            Long userId = userDetails.getId();
+            User user_to_edit = userRepository.findById(userId).get();
+            if (!userRepository.findByDeletedFalseAndEmail(user.getEmail()).isEmpty() &&
+                    !(userRepository.findByDeletedFalseAndEmail(user.getEmail()).get().getId().equals(userId))) {
+                return ResponseEntity.badRequest().body(new MessageResponse("Error: Email is already in use!"));
+            }
+            if (!userDetails.getId().equals(userId)){
+                return ResponseEntity.badRequest().body(new MessageResponse("Error: Not allowed to edit user"));
+            }
+            user_to_edit.setEmail(user.getEmail());
+            user_to_edit.setMobile(user.getMobile());
+            user_to_edit.setFirstName(user.getFirstName());
+            user_to_edit.setLastName(user.getLastName());
+            userRepository.saveAndFlush(user_to_edit);
+
+
+            UserDetailsImpl userDetailsReturn = (UserDetailsImpl) userDetailsService.loadUserByUsername(
+                    user_to_edit.getEmail());
+            String jwt = jwtUtils.generateJwtToken(userDetailsReturn);
+
+            List<String> roles = userDetailsReturn.getAuthorities().stream().map(item -> item.getAuthority())
+                    .collect(Collectors.toList());
+
+            RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetailsReturn.getEmail());
+
+            return ResponseEntity.ok(new JwtResponse(jwt, refreshToken.getToken(), userDetailsReturn.getId(),
+                    userDetailsReturn.getEmail(), roles));
+
+        }catch(Exception e) {
+            Map<String, String> map = new HashMap<String, String>();
+            map.put("message", "User Not Found");
+            return new ResponseEntity<>(map, HttpStatus.NOT_FOUND);
+        }
+
+        //dsfsdf get password instead of loginreq, allow user to edit all, create one more for chagning password
+
+    }
+
+    @PutMapping("/changingPassword")
+    public ResponseEntity<?> changingPassword(@Valid @RequestBody UserPassword userPassword) {
+        try {
+            UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            Long userId = userDetails.getId();
+            User user_to_edit = userRepository.findById(userId).get();
+            Authentication authentication = authenticationManager
+                    .authenticate(new UsernamePasswordAuthenticationToken(user_to_edit.getEmail(), userPassword.getOldpassword()));
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            user_to_edit.setPassword(encoder.encode(userPassword.getNewpassword()));
+            userRepository.saveAndFlush(user_to_edit);
+
+            UserDetailsImpl userDetailsReturn = (UserDetailsImpl) userDetailsService.loadUserByUsername(
+                    user_to_edit.getEmail());
+            String jwt = jwtUtils.generateJwtToken(userDetailsReturn);
+
+            List<String> roles = userDetailsReturn.getAuthorities().stream().map(item -> item.getAuthority())
+                    .collect(Collectors.toList());
+
+            RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetailsReturn.getEmail());
+
+            return ResponseEntity.ok(new JwtResponse(jwt, refreshToken.getToken(), userDetailsReturn.getId(),
+                    userDetailsReturn.getEmail(), roles));
+
+        }catch(Exception e) {
+            System.out.println(e);
+            Map<String, String> map = new HashMap<String, String>();
+            map.put("message", "User Not Found");
+            return new ResponseEntity<>(map, HttpStatus.NOT_FOUND);
+        }
+
+        //dsfsdf get password instead of loginreq, allow user to edit all, create one more for chagning password
+
+    }
+
+    @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN') or hasRole('ROLE_TECH_ADMIN')")
+    @DeleteMapping("/deleteUserAdmin/{id}")
+    public ResponseEntity<?> deleteUserAdmin(@PathVariable Long id) {
+
+        try {
+            User user = userRepository.findById(id).get();
+            System.out.println(user.getEmail());
+            if (!user.getRoles().contains(roleRepository.findByName(ERole.ROLE_USER_ADMIN).get())) {
+                Map<String, String> map = new HashMap<String, String>();
+                map.put("message", "User Not Found");
+                return new ResponseEntity<>(map,HttpStatus.NOT_FOUND);
+            }
+            refreshTokenService.deleteByUserId(user.getId());
+            user.setDeleted(true);
+            userRepository.save(user);
+            System.out.println("deleted");
+            return new ResponseEntity<>(HttpStatus.OK);
+
+        }
+        catch(Exception e) {
+            System.out.println(e.toString());
+            Map<String, String> map = new HashMap<String, String>();
+            map.put("message", "User Not Found");
+            return new ResponseEntity<>(map,HttpStatus.NOT_FOUND);
+        }
+    }
+
+    // check if still logged in, if so, return
+    @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN')")
+    @DeleteMapping("/deleteTechAdmin/{id}")
+    public ResponseEntity<?> deleteTechAdmin(@PathVariable Long id) {
+
+        try {
+            User user = userRepository.findById(id).get();
+            if (!(user.getRoles().contains(roleRepository.findByName(ERole.ROLE_USER_ADMIN).get()) ||
+                    user.getRoles().contains(roleRepository.findByName(ERole.ROLE_TECH_ADMIN).get()))) {
+                Map<String, String> map = new HashMap<String, String>();
+                map.put("message", "User Not Found");
+                return new ResponseEntity<>(map,HttpStatus.NOT_FOUND);
+            }
+            refreshTokenService.deleteByUserId(user.getId());
+            user.setDeleted(true);
+            userRepository.save(user);
+            System.out.println("deleted");
+            return new ResponseEntity<>(HttpStatus.OK);
 
         }
         catch(Exception e) {
@@ -102,34 +241,12 @@ public class AuthController {
             map.put("message", "User Not Found");
             return new ResponseEntity<>(map,HttpStatus.NOT_FOUND);
         }
-
     }
-
-//    @PostMapping("/delete")
-//    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
-//
-//        Authentication authentication = authenticationManager
-//                .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
-//
-//        SecurityContextHolder.getContext().setAuthentication(authentication);
-//
-//        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-//
-//        String jwt = jwtUtils.generateJwtToken(userDetails);
-//
-//        List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
-//                .collect(Collectors.toList());
-//
-//        RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getEmail());
-//
-//        return ResponseEntity.ok(new JwtResponse(jwt, refreshToken.getToken(), userDetails.getId(),
-//                userDetails.getEmail(), roles));
-//    }
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
 
-        if (userRepository.existsByEmail(signUpRequest.getEmail())) {
+        if (userRepository.existsByDeletedFalseAndEmail(signUpRequest.getEmail())) {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: Email is already in use!"));
         }
 
@@ -165,7 +282,7 @@ public class AuthController {
         }
 
         User user = new User(signUpRequest.getEmail(),
-                encoder.encode(signUpRequest.getPassword()), signUpRequest.getFirstName(), signUpRequest.getLastName(), signUpRequest.getMobile());
+                encoder.encode(signUpRequest.getPassword()), signUpRequest.getFirstName(), signUpRequest.getLastName(), signUpRequest.getMobile(),false);
         user.setRoles(roles);
         userRepository.save(user);
 

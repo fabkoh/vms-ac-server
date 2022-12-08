@@ -8,10 +8,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(	name = "users",
-        uniqueConstraints = {
-                @UniqueConstraint(columnNames = "email")
-        })
+@Table(	name = "users")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,6 +35,8 @@ public class User {
     @Size(max = 120)
     private String password;
 
+    private Boolean deleted;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(	name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -47,12 +46,13 @@ public class User {
     public User() {
     }
 
-    public User(String email, String password, String firstName, String lastName, String mobile) {
+    public User(String email, String password, String firstName, String lastName, String mobile,Boolean deleted) {
         this.email = email;
         this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
         this.mobile = mobile;
+        this.deleted = deleted;
     }
 
     public void setFirstName(String firstName) { this.firstName = firstName; }
@@ -85,6 +85,14 @@ public class User {
 
     public String getPassword() {
         return password;
+    }
+
+    public Boolean getDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
     }
 
     public void setPassword(String password) {
