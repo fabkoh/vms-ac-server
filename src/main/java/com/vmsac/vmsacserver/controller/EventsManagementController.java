@@ -212,7 +212,7 @@ public class EventsManagementController {
                 .collect(Collectors.toList()), HttpStatus.OK);
     }
 
-    // PUT EventsManagement
+
     @PutMapping("eventsmanagement/{emId}")
     public ResponseEntity<?> putEventsMangement(@RequestBody @Valid EventsManagement dto,
                                                 @PathVariable Long emId) {
@@ -480,21 +480,6 @@ public class EventsManagementController {
         return new ResponseEntity<>(triggerSchedulesRepository.findAll(), HttpStatus.OK);
     }
 
-    // PUT TriggerSchedules
-    @PutMapping("/triggerschedules/{tsId}")
-    public ResponseEntity<?> putTriggerSchedules(@RequestBody @Valid TriggerSchedules dto,
-                                              @PathVariable Long tsId) {
-       if (triggerSchedulesRepository.existsById(tsId)) {
-            TriggerSchedules ts = triggerSchedulesRepository.findByDeletedFalseAndAndTriggerScheduleId(tsId).get();
-            // set the 2 attributes that were ignored in JSON
-            dto.setDeleted(ts.getDeleted());
-            dto.setEventsManagement(ts.getEventsManagement());
-
-            return new ResponseEntity<>(triggerSchedulesRepository.save(dto), HttpStatus.OK);
-       }
-       return ResponseEntity.notFound().build();
-    }
-
     // GET Individual Event Management
     @GetMapping("eventsmanagement/{emId}")
     public ResponseEntity<?> getIndividualEventsManagement(@PathVariable Long emId) {
@@ -506,6 +491,7 @@ public class EventsManagementController {
         return new ResponseEntity<>(
                 eventsManagementService.toDto(found_ems),HttpStatus.OK);
     }
+
 }
 
 

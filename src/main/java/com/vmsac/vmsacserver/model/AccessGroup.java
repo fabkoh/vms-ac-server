@@ -1,12 +1,7 @@
 package com.vmsac.vmsacserver.model;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import com.fasterxml.jackson.annotation.ObjectIdGenerator;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.vmsac.vmsacserver.model.EventDto.EventAccessGroupDto;
-import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoN;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -41,7 +36,7 @@ public class AccessGroup {
     @Column(name = "isactive")
     private Boolean isActive;
 
-//    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class , property = "personId")
+    //@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class , property = "personId")
     @JsonIgnore
     @OneToMany(mappedBy = "accessGroup")
     private List<Person> persons;

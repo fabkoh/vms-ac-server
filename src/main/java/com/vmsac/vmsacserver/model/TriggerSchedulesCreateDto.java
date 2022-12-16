@@ -5,11 +5,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.Column;
-import javax.persistence.ElementCollection;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
-import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -53,21 +51,17 @@ public class TriggerSchedulesCreateDto {
     @Column(name = "rruleinterval")
     private int rruleinterval;
 
-    @ElementCollection(targetClass=Integer.class)
     @Column(name = "byweekday")
-    private List<Integer> byweekday;
+    private Integer[] byweekday;
 
-    @ElementCollection(targetClass=Integer.class)
     @Column(name = "bymonthday")
-    private List<Integer> bymonthday;
+    private Integer[] bymonthday;
 
-    @ElementCollection(targetClass=Integer.class)
     @Column(name = "bysetpos")
-    private List<Integer> bysetpos;
+    private Integer[] bysetpos;
 
-    @ElementCollection(targetClass=Integer.class)
-    @Column(name = "bymonth")
-    private List<Integer> bymonth;
+    @Column(name = "bymonthh")
+    private Integer[] bymonthh;
 
     @Column(name = "allday")
     private Boolean allDay;

@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS ScheduledVisit (
 CREATE TABLE IF NOT EXISTS AccessGroups (
   accessGroupId SERIAL NOT NULL UNIQUE,
   accessGroupName VARCHAR(255) NOT NULL,
-  accessGroupDesc TEXT,
+  accessGroupDesc VARCHAR(255),
   isActive BOOLEAN NOT NULL,
   deleted BOOLEAN NOT NULL,
   PRIMARY KEY (accessGroupId)
@@ -132,8 +132,8 @@ CREATE TABLE IF NOT EXISTS Controller(
   lastSync TIMESTAMP,
   created TIMESTAMP,
   masterController Boolean,
-  pinAssignmentConfig VARCHAR(MAX) NOT NULL,
-  settingsConfig VARCHAR(MAX) NOT NULL,
+  pinAssignmentConfig VARCHAR(255) NOT NULL,
+  settingsConfig VARCHAR(255) NOT NULL,
   deleted BOOLEAN NOT NULL,
   PRIMARY KEY (controllerId)
 );
@@ -243,8 +243,8 @@ CREATE TABLE IF NOT EXISTS EventsManagement(
    eventsManagementId SERIAL NOT NULL UNIQUE ,
    eventsManagementName VARCHAR(255) NOT NULL ,
    deleted BOOLEAN NOT NULL ,
-   inputEventsId ARRAY  ,
-   outputActionsId ARRAY ,
+   inputEventsId integer[],
+   outputActionsId integer[],
    entranceId INT REFERENCES Entrances(entranceId),
    controllerId INT REFERENCES Controller(controllerId),
    PRIMARY KEY (eventsManagementId)
@@ -263,10 +263,10 @@ CREATE TABLE IF NOT EXISTS TriggerSchedules(
    count INT,
    repeatToggle BOOLEAN,
    rruleinterval INT,
-   byweekday ARRAY,
-   bymonthday ARRAY,
-   bysetpos ARRAY,
-   bymonth ARRAY,
+   byweekday integer[],
+   bymonthday integer[],
+   bysetpos integer[],
+   bymonth integer[],
    allDay BOOLEAN,
    endOfDay BOOLEAN,
    PRIMARY KEY (triggerScheduleId)
