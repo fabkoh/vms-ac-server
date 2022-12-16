@@ -13,13 +13,11 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.Where;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
 import java.util.List;
 
 @NoArgsConstructor
@@ -78,6 +76,7 @@ public class EventsManagement {
     @JsonIgnore
     @OneToMany(mappedBy = "eventsManagement", cascade = CascadeType.ALL)
     private List<EventsManagementNotification> eventsManagementNotifications;
+
 
 
     public EventsManagementDto toDto(List<InputEvent> inputevents,

@@ -2,7 +2,6 @@ package com.vmsac.vmsacserver.model.notification;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vmsac.vmsacserver.model.EventsManagement;
-import com.vmsac.vmsacserver.model.TriggerSchedules;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -37,7 +36,7 @@ public class EventsManagementNotification {
     private String eventsManagementNotificationTitle;
 
     @Column(name = "deleted")
-    private Boolean deleted;
+    private Boolean deleted = false;
 
     @ManyToOne(cascade = CascadeType.REFRESH)
     @JoinColumn(name = "eventsmanagementid")

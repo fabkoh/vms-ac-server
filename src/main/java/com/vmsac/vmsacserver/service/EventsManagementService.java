@@ -96,7 +96,9 @@ public class EventsManagementService {
                 for (TriggerSchedules ts : dto.getTriggerSchedules()) {
                     TriggerSchedules newTs = triggerSchedulesRepository.save(new TriggerSchedules(
                             null, ts.getTriggerName(), ts.getRrule(), ts.getTimeStart(),
-                            ts.getTimeEnd(), false, em));
+                            ts.getTimeEnd(), false, em,ts.getDtstart(),ts.getUntil(),ts.getCount(),
+                            ts.getRepeatToggle(), ts.getRruleinterval(),ts.getByweekday(),ts.getBymonthday(),
+                            ts.getBysetpos(),ts.getBymonth(),ts.getAllDay(),ts.getEndOfDay()));
 
                     em.getTriggerSchedules().add(newTs);
                 }
@@ -139,7 +141,9 @@ public class EventsManagementService {
                 for (TriggerSchedules ts : dto.getTriggerSchedules()) {
                     TriggerSchedules newTs = triggerSchedulesRepository.save(new TriggerSchedules(
                             null, ts.getTriggerName(), ts.getRrule(), ts.getTimeStart(),
-                            ts.getTimeEnd(), false, em));
+                            ts.getTimeEnd(), false, em,ts.getDtstart(),ts.getUntil(),ts.getCount(),
+                            ts.getRepeatToggle(), ts.getRruleinterval(),ts.getByweekday(),ts.getBymonthday(),
+                            ts.getBysetpos(),ts.getBymonth(),ts.getAllDay(),ts.getEndOfDay()));
 
                     em.getTriggerSchedules().add(newTs);
                 }

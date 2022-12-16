@@ -258,6 +258,17 @@ CREATE TABLE IF NOT EXISTS TriggerSchedules(
    timeEnd VARCHAR(128) NOT NULL ,
    eventsManagementId INT REFERENCES EventsManagement(eventsManagementId),
    deleted BOOLEAN NOT NULL ,
+   dstart VARCHAR(255),
+   until VARCHAR(255),
+   count INT,
+   repeatToggle BOOLEAN,
+   rruleinterval INT,
+   byweekday INT,
+   bymonthday INT,
+   bysetpos INT,
+   bymonth INT,
+   allDay BOOLEAN,
+   endOfDay BOOLEAN,
    PRIMARY KEY (triggerScheduleId)
 );
 

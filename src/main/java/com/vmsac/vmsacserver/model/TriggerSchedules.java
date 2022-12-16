@@ -11,7 +11,6 @@ import org.hibernate.annotations.Where;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import java.time.LocalTime;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -54,4 +53,40 @@ public class TriggerSchedules {
     @JoinColumn(name = "eventsmanagementid")
     @JsonIgnore
     private EventsManagement eventsManagement;
+
+    // added to store rrule object
+    @Column(name = "dstart")
+    @NotNull
+    private String dtstart;
+
+    @Column(name = "until")
+    private String until;
+
+    @Column(name = "count")
+    private int count;
+
+    @Column(name = "repeattoggle")
+    private Boolean repeatToggle;
+
+    @Column(name = "rruleinterval")
+    private int rruleinterval;
+
+    @Column(name = "byweekday")
+    private int byweekday;
+
+    @Column(name = "bymonthday")
+    private int bymonthday;
+
+    @Column(name = "bysetpos")
+    private int bysetpos;
+
+    @Column(name = "bymonth")
+    private int bymonth;
+
+    @Column(name = "allday")
+    private Boolean allDay;
+
+    @Column(name = "endofday")
+    private Boolean endOfDay;
+
 }

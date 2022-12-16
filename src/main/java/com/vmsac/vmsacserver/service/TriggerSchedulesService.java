@@ -9,8 +9,6 @@ import com.vmsac.vmsacserver.util.DateTimeParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 @Service
@@ -35,7 +33,10 @@ public class TriggerSchedulesService {
         if (opEm.isPresent()) {
             return Optional.of(triggerSchedulesRepository.save(
                     new TriggerSchedules(null, dto.getTriggerName(),
-                            dto.getRrule(), dto.getTimeStart(), dto.getTimeEnd(), false, opEm.get())
+                            dto.getRrule(), dto.getTimeStart(), dto.getTimeEnd(), false, opEm.get(),
+                            dto.getDtstart(),dto.getUntil(),dto.getCount(),dto.getRepeatToggle(),
+                            dto.getInterval(),dto.getByweekday(),dto.getBymonthday(),
+                            dto.getBysetpos(),dto.getBymonth(),dto.getAllDay(),dto.getEndOfDay())
                     )
             );
         }

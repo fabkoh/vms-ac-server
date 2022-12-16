@@ -1,15 +1,13 @@
 package com.vmsac.vmsacserver.model;
 
-import java.util.ArrayList;
-
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-
 import com.vmsac.vmsacserver.model.notification.EventsManagementNotification;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
 
 @Data
 @NoArgsConstructor
