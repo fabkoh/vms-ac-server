@@ -35,7 +35,7 @@ public class TriggerSchedulesService {
                     new TriggerSchedules(null, dto.getTriggerName(),
                             dto.getRrule(), dto.getTimeStart(), dto.getTimeEnd(), false, opEm.get(),
                             dto.getDtstart(),dto.getUntil(),dto.getCount(),dto.getRepeatToggle(),
-                            dto.getInterval(),dto.getByweekday(),dto.getBymonthday(),
+                            dto.getRruleinterval(),dto.getByweekday(),dto.getBymonthday(),
                             dto.getBysetpos(),dto.getBymonth(),dto.getAllDay(),dto.getEndOfDay())
                     )
             );

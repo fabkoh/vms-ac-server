@@ -8,6 +8,7 @@ import javax.persistence.Column;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -45,27 +46,27 @@ public class TriggerSchedulesCreateDto {
     @Column(name = "count")
     private int count;
 
-    @Column(name = "repeatToggle")
+    @Column(name = "repeattoggle")
     private Boolean repeatToggle;
 
-    @Column(name = "interval")
-    private int interval;
+    @Column(name = "rruleinterval")
+    private int rruleinterval;
 
     @Column(name = "byweekday")
-    private int byweekday;
+    private List<Integer> byweekday;
 
     @Column(name = "bymonthday")
-    private int bymonthday;
+    private List<Integer> bymonthday;
 
     @Column(name = "bysetpos")
-    private int bysetpos;
+    private List<Integer> bysetpos;
 
     @Column(name = "bymonth")
-    private int bymonth;
+    private List<Integer> bymonth;
 
-    @Column(name = "allDay")
+    @Column(name = "allday")
     private Boolean allDay;
 
-    @Column(name = "endOfDay")
+    @Column(name = "endofday")
     private Boolean endOfDay;
 }

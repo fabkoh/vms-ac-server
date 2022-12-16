@@ -11,6 +11,7 @@ import org.hibernate.annotations.Where;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -72,16 +73,16 @@ public class TriggerSchedules {
     private int rruleinterval;
 
     @Column(name = "byweekday")
-    private int byweekday;
+    private List<Integer> byweekday;
 
     @Column(name = "bymonthday")
-    private int bymonthday;
+    private List<Integer> bymonthday;
 
     @Column(name = "bysetpos")
-    private int bysetpos;
+    private List<Integer> bysetpos;
 
     @Column(name = "bymonth")
-    private int bymonth;
+    private List<Integer> bymonth;
 
     @Column(name = "allday")
     private Boolean allDay;
