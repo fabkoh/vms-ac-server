@@ -135,15 +135,17 @@ public class EventsManagementController {
     @GetMapping("eventsmanagement")
     public ResponseEntity<?> getAllEventsManagement() {
         List<EventsManagement> ems = new ArrayList<>();
-
+        System.out.println("checkpoint 1");
         controllerRepository.findByDeletedIsFalseOrderByCreatedDesc().forEach(controller -> {
             ems.addAll(controller.getEventsManagements());
         });
-
+        System.out.println("checkpoint 2");
         entranceRepo.findByDeleted(false).forEach(entrance -> {
+            System.out.println(entrance.getEventsManagements());
             ems.addAll(entrance.getEventsManagements());
         });
-
+        System.out.println("checkpoint 3");
+        //System.out.println(ems);
         return new ResponseEntity<>(ems.stream()
                 .map(em -> eventsManagementService.toDto(em))
                 .collect(Collectors.toList()), HttpStatus.OK);
@@ -219,6 +221,11 @@ public class EventsManagementController {
         if (eventsManagementRepository.existsByDeletedFalseAndEventsManagementId(emId)) {
             EventsManagement em = eventsManagementRepository.findByDeletedFalseAndEventsManagementId(emId).get();
             // set the attributes that were ignored in JSON
+            // check valid GEN IN/OUT
+            // 1. set to current inputs outputs to null
+            // 2. same check  checkValidEm
+            // 3a. if pass, save new ems
+            // 3b. if fail, retain old ems
             dto.setDeleted(em.getDeleted());
             dto.setController(em.getController());
             dto.setEntrance(em.getEntrance());
@@ -418,10 +425,11 @@ public class EventsManagementController {
 
             List<Long> thisControllerIds = new ArrayList<>(controllerIds);
             List<Long> thisEntranceIds = new ArrayList<>(entranceIds);
-
+            //System.out.println("check valid starting");
             checkValidEm(dto, errorEvMs, errorList, returnErrorList, controllerIds, entranceIds, thisControllerIds, thisEntranceIds);
-
+            //System.out.println("check add all starting");
             eventsManagements.addAll(eventsManagementService.create(dto, thisControllerIds, thisEntranceIds));
+            //System.out.println("check add completed");
         }
 
         if(!errorList.isEmpty()){

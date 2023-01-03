@@ -302,6 +302,7 @@ public class AuthController {
                             role_names.add(ele.getName().toString());
                         }
                         String token = jwtUtils.generateTokenFromEmail(user.getEmail(), role_names);
+
                         return ResponseEntity.ok(new TokenRefreshResponse(token, requestRefreshToken));
                     })
                     .orElseThrow(() -> new TokenRefreshException(requestRefreshToken,

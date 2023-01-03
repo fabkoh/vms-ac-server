@@ -44,7 +44,7 @@ public class VmsAcServerApplication {
 		repository.saveAllAndFlush(roles);
 
 		Set<Role> chosen = new HashSet<>();
-		roles.add(repository.findByName(ERole.ROLE_SYSTEM_ADMIN).get());
+		chosen.add(repository.findByName(ERole.ROLE_SYSTEM_ADMIN).get());
 		User user = new User();
 		user.setFirstName("ISS");
 		user.setLastName("Admin");

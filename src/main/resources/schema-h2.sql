@@ -239,37 +239,37 @@ CREATE TABLE IF NOT EXISTS OutputEvent(
     PRIMARY KEY (outputEventId)
 );
 
-CREATE TABLE IF NOT EXISTS EventsManagement(
-   eventsManagementId SERIAL NOT NULL UNIQUE ,
-   eventsManagementName VARCHAR(255) NOT NULL ,
-   deleted BOOLEAN NOT NULL ,
-   inputEventsId ARRAY  ,
-   outputActionsId ARRAY ,
-   entranceId INT REFERENCES Entrances(entranceId),
-   controllerId INT REFERENCES Controller(controllerId),
-   PRIMARY KEY (eventsManagementId)
-);
-
 CREATE TABLE IF NOT EXISTS TriggerSchedules(
    triggerScheduleId SERIAL NOT NULL UNIQUE ,
    triggerName VARCHAR(255) NOT NULL ,
    rrule VARCHAR(255) NOT NULL ,
    timeStart VARCHAR(128) NOT NULL ,
    timeEnd VARCHAR(128) NOT NULL ,
-   eventsManagementId INT REFERENCES EventsManagement(eventsManagementId),
    deleted BOOLEAN NOT NULL ,
    dstart VARCHAR(255),
    until VARCHAR(255),
    count INT,
    repeatToggle BOOLEAN,
    rruleinterval INT,
-   byweekday INT,
-   bymonthday INT,
-   bysetpos INT,
-   bymonth INT,
+   byweekday ARRAY,
+   bymonthday ARRAY,
+   bysetpos ARRAY,
+   bymonth ARRAY,
    allDay BOOLEAN,
    endOfDay BOOLEAN,
    PRIMARY KEY (triggerScheduleId)
+);
+
+CREATE TABLE IF NOT EXISTS EventsManagement(
+   eventsManagementId SERIAL NOT NULL UNIQUE ,
+   eventsManagementName VARCHAR(255) NOT NULL ,
+   deleted BOOLEAN NOT NULL ,
+   inputEventsId ARRAY  ,
+   outputActionsId ARRAY ,
+   triggerSchedulesId ARRAY,
+   entranceId INT REFERENCES Entrances(entranceId),
+   controllerId INT REFERENCES Controller(controllerId),
+   PRIMARY KEY (eventsManagementId)
 );
 
 CREATE TABLE IF NOT EXISTS VideoRecorder(

@@ -60,6 +60,11 @@ public class EventsManagement {
     @NotEmpty
     private List<Long> outputActionsId;
 
+    @Type( type = "list-array" )
+    @Column(name = "triggerschedulesid")
+    private List<Long> triggerSchedulesid;
+
+
     @ManyToOne(cascade = CascadeType.REFRESH)
     @JoinColumn(name = "controllerid")
     @JsonIgnore
@@ -70,9 +75,6 @@ public class EventsManagement {
     @JsonIgnore
     private Entrance entrance;
 
-    @OneToMany(mappedBy = "eventsManagement", cascade = CascadeType.ALL)
-    private List<TriggerSchedules> triggerSchedules;
-
     @JsonIgnore
     @OneToMany(mappedBy = "eventsManagement", cascade = CascadeType.ALL)
     private List<EventsManagementNotification> eventsManagementNotifications;
@@ -81,6 +83,7 @@ public class EventsManagement {
 
     public EventsManagementDto toDto(List<InputEvent> inputevents,
                                      List<OutputEvent> outputevents,
+                                     List<TriggerSchedules> triggerschedules,
                                      EventEntranceDto entranceDto,
                                      EventControllerDto controllerDto){
         return new EventsManagementDto(
@@ -88,7 +91,7 @@ public class EventsManagement {
                 this.eventsManagementName,
                 inputevents,
                 outputevents,
-                this.triggerSchedules,
+                triggerschedules,
                 entranceDto,
                 controllerDto,
                 this.eventsManagementNotifications);

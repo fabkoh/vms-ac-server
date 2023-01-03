@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS ScheduledVisit (
 CREATE TABLE IF NOT EXISTS AccessGroups (
   accessGroupId SERIAL NOT NULL UNIQUE,
   accessGroupName VARCHAR(255) NOT NULL,
-  accessGroupDesc VARCHAR(255),
+  accessGroupDesc TEXT,
   isActive BOOLEAN NOT NULL,
   deleted BOOLEAN NOT NULL,
   PRIMARY KEY (accessGroupId)
@@ -239,37 +239,37 @@ CREATE TABLE IF NOT EXISTS OutputEvent(
     PRIMARY KEY (outputEventId)
 );
 
-CREATE TABLE IF NOT EXISTS EventsManagement(
-   eventsManagementId SERIAL NOT NULL UNIQUE ,
-   eventsManagementName VARCHAR(255) NOT NULL ,
-   deleted BOOLEAN NOT NULL ,
-   inputEventsId integer[],
-   outputActionsId integer[],
-   entranceId INT REFERENCES Entrances(entranceId),
-   controllerId INT REFERENCES Controller(controllerId),
-   PRIMARY KEY (eventsManagementId)
-);
-
 CREATE TABLE IF NOT EXISTS TriggerSchedules(
    triggerScheduleId SERIAL NOT NULL UNIQUE ,
    triggerName VARCHAR(255) NOT NULL ,
    rrule VARCHAR(255) NOT NULL ,
    timeStart VARCHAR(128) NOT NULL ,
    timeEnd VARCHAR(128) NOT NULL ,
-   eventsManagementId INT REFERENCES EventsManagement(eventsManagementId),
    deleted BOOLEAN NOT NULL ,
    dstart VARCHAR(255),
    until VARCHAR(255),
    count INT,
    repeatToggle BOOLEAN,
    rruleinterval INT,
-   byweekday integer[],
-   bymonthday integer[],
-   bysetpos integer[],
-   bymonth integer[],
+   byweekday ARRAY[integer],
+   bymonthday ARRAY[integer],
+   bysetpos ARRAY[integer],
+   bymonth ARRAY[integer],
    allDay BOOLEAN,
    endOfDay BOOLEAN,
    PRIMARY KEY (triggerScheduleId)
+);
+
+CREATE TABLE IF NOT EXISTS EventsManagement(
+   eventsManagementId SERIAL NOT NULL UNIQUE ,
+   eventsManagementName VARCHAR(255) NOT NULL ,
+   deleted BOOLEAN NOT NULL ,
+   inputEventsId ARRAY  ,
+   outputActionsId ARRAY ,
+   triggerSchedulesId ARRAY,
+   entranceId INT REFERENCES Entrances(entranceId),
+   controllerId INT REFERENCES Controller(controllerId),
+   PRIMARY KEY (eventsManagementId)
 );
 
 CREATE TABLE IF NOT EXISTS VideoRecorder(

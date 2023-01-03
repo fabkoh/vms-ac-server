@@ -15,9 +15,7 @@ public class UserDetailsList implements UserDetails {
 
         private Long id;
 
-
         private String firstName;
-
 
         private String lastName;
 

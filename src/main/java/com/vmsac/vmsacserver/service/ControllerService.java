@@ -1,9 +1,5 @@
 package com.vmsac.vmsacserver.service;
 
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmsac.vmsacserver.model.*;
 import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoN;
@@ -28,6 +24,7 @@ import org.springframework.web.client.RestTemplate;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.net.InetAddress;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
@@ -79,6 +76,9 @@ public class ControllerService {
 
     @Autowired
     private GENConfigsRepository genRepo;
+
+    @Autowired
+    private TriggerSchedulesRepository triggerSchedulesRepository;
 
     @PersistenceContext
     EntityManager entityManager;
@@ -593,7 +593,7 @@ public class ControllerService {
 
                                 Map<String, Object> schedules = new HashMap<>();
 
-                                for (TriggerSchedules ts : em.getTriggerSchedules())
+                                for (TriggerSchedules ts :triggerSchedulesRepository.findAllById(em.getTriggerSchedulesid()))
                                     try {
 
                                         schedules = getScheduleMap(ts.getRrule(),ts.getTimeStart(),
