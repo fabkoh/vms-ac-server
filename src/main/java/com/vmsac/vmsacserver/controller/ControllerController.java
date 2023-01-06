@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -196,15 +197,23 @@ public class ControllerController {
     }
 
     // @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN') or hasRole('ROLE_TECH_ADMIN')")
+    @PreAuthorize("permitAll()")
     @PostMapping(path = "unicon/controller")
     public ResponseEntity<?> createOrUpdateController(
-            @Valid @RequestBody UniconControllerDto newUniconControllerDto) {
+            @Valid @RequestBody UniconControllerDto newUniconControllerDto, HttpServletRequest request) {
         Optional<Controller> optionalController = controllerService.findBySerialNo(newUniconControllerDto.getControllerSerialNo());
 
         if (optionalController.isPresent()) {
             try {
-                return new ResponseEntity<>(controllerService.uniconControllerUpdate(newUniconControllerDto), HttpStatus.OK);
-            }//update
+                // check if current IP is incoming IP
+                String clientIpAddress = request.getRemoteAddr();
+                System.out.println(clientIpAddress);
+                if (clientIpAddress.equals(optionalController.get().getControllerIP())) {
+                    return new ResponseEntity<>(controllerService.uniconControllerUpdate(newUniconControllerDto), HttpStatus.OK);
+                    }else{
+                    return ResponseEntity.badRequest().build();
+                }
+                }//update
             catch(Exception e){
                 return ResponseEntity.badRequest().build();
             }

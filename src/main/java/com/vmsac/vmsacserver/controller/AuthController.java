@@ -196,7 +196,7 @@ public class AuthController {
         try {
             User user = userRepository.findById(id).get();
             System.out.println(user.getEmail());
-            if (!user.getRoles().contains(roleRepository.findByName(ERole.ROLE_USER_ADMIN).get())) {
+            if (!user.getRoles().contains(roleRepository.findByRoleName(ERole.ROLE_USER_ADMIN).get())) {
                 Map<String, String> map = new HashMap<String, String>();
                 map.put("message", "User Not Found");
                 return new ResponseEntity<>(map,HttpStatus.NOT_FOUND);
@@ -223,8 +223,8 @@ public class AuthController {
 
         try {
             User user = userRepository.findById(id).get();
-            if (!(user.getRoles().contains(roleRepository.findByName(ERole.ROLE_USER_ADMIN).get()) ||
-                    user.getRoles().contains(roleRepository.findByName(ERole.ROLE_TECH_ADMIN).get()))) {
+            if (!(user.getRoles().contains(roleRepository.findByRoleName(ERole.ROLE_USER_ADMIN).get()) ||
+                    user.getRoles().contains(roleRepository.findByRoleName(ERole.ROLE_TECH_ADMIN).get()))) {
                 Map<String, String> map = new HashMap<String, String>();
                 map.put("message", "User Not Found");
                 return new ResponseEntity<>(map,HttpStatus.NOT_FOUND);
@@ -255,26 +255,26 @@ public class AuthController {
         Set<Role> roles = new HashSet<>();
 
         if (strRoles == null) {
-            Role userAdminRole = roleRepository.findByName(ERole.ROLE_USER_ADMIN)
+            Role userAdminRole = roleRepository.findByRoleName(ERole.ROLE_USER_ADMIN)
                     .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
             roles.add(userAdminRole);
         } else {
             strRoles.forEach(role -> {
                 switch (role) {
                     case "Tech-Admin":
-                        Role techAdminRole = roleRepository.findByName(ERole.ROLE_TECH_ADMIN)
+                        Role techAdminRole = roleRepository.findByRoleName(ERole.ROLE_TECH_ADMIN)
                                 .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
                         roles.add(techAdminRole);
 
                         break;
                     case "System-Admin":
-                        Role systemAdminRole = roleRepository.findByName(ERole.ROLE_SYSTEM_ADMIN)
+                        Role systemAdminRole = roleRepository.findByRoleName(ERole.ROLE_SYSTEM_ADMIN)
                                 .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
                         roles.add(systemAdminRole);
 
                         break;
                     default:
-                        Role userAdminRole = roleRepository.findByName(ERole.ROLE_USER_ADMIN)
+                        Role userAdminRole = roleRepository.findByRoleName(ERole.ROLE_USER_ADMIN)
                                 .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
                         roles.add(userAdminRole);
                 }
@@ -299,7 +299,7 @@ public class AuthController {
                     .map(user -> {
                         ArrayList role_names = new ArrayList<>();
                         for (Role ele : user.getRoles()) {
-                            role_names.add(ele.getName().toString());
+                            role_names.add(ele.getRoleName().toString());
                         }
                         String token = jwtUtils.generateTokenFromEmail(user.getEmail(), role_names);
 

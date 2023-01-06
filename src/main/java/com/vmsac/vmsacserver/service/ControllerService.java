@@ -140,7 +140,6 @@ public class ControllerService {
             toSave.setMasterController(existingcontroller.getMasterController());
             toSave.setCreated(existingcontroller.getCreated());
             toSave.setLastSync(existingcontroller.getLastSync());
-
             return controllerRepository.save(toSave).touniconDto();
         }
         throw new RuntimeException("Controller Id clashes");

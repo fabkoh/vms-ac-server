@@ -60,6 +60,8 @@ public class WebSecurityConfig {
                 .authorizeRequests().antMatchers("/api/auth/**").permitAll()
                 .antMatchers("/api/test/**").permitAll()
                 .antMatchers("/h2-console/**").permitAll()
+                .antMatchers("/api/unicon/controller/**").permitAll()  // <-- add this line
+                .antMatchers("/api/unicon/events/**").permitAll()  // <-- add this line
                 .anyRequest().authenticated();
 
         http.authenticationProvider(authenticationProvider());

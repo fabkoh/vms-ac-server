@@ -251,10 +251,10 @@ CREATE TABLE IF NOT EXISTS TriggerSchedules(
    count INT,
    repeatToggle BOOLEAN,
    rruleinterval INT,
-   byweekday ARRAY[integer],
-   bymonthday ARRAY[integer],
-   bysetpos ARRAY[integer],
-   bymonth ARRAY[integer],
+   byweekday integer[],
+   bymonthday integer[],
+   bysetpos integer[],
+   bymonth integer[],
    allDay BOOLEAN,
    endOfDay BOOLEAN,
    PRIMARY KEY (triggerScheduleId)
@@ -264,9 +264,9 @@ CREATE TABLE IF NOT EXISTS EventsManagement(
    eventsManagementId SERIAL NOT NULL UNIQUE ,
    eventsManagementName VARCHAR(255) NOT NULL ,
    deleted BOOLEAN NOT NULL ,
-   inputEventsId ARRAY  ,
-   outputActionsId ARRAY ,
-   triggerSchedulesId ARRAY,
+   inputEventsId integer[]  ,
+   outputActionsId integer[] ,
+   triggerSchedulesId integer[],
    entranceId INT REFERENCES Entrances(entranceId),
    controllerId INT REFERENCES Controller(controllerId),
    PRIMARY KEY (eventsManagementId)
@@ -323,4 +323,9 @@ CREATE TABLE IF NOT EXISTS NotificationLogs(
     timeSent VARCHAR(255) NOT NULL,
     eventsManagementNotificationId INT REFERENCES EventsManagementNotification(eventsManagementNotificationId),
     PRIMARY KEY (notificationLogsId)
+);
+
+CREATE TABLE IF NOT EXISTS Roles(
+    rolesId SERIAL NOT NULL UNIQUE,
+    roleName VARCHAR(255)
 );

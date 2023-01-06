@@ -3,12 +3,15 @@ package com.vmsac.vmsacserver.controller;
 import com.vmsac.vmsacserver.model.Event;
 import com.vmsac.vmsacserver.repository.EventRepository;
 import com.vmsac.vmsacserver.service.EventService;
+import com.vmsac.vmsacserver.util.IPaddressWhitelisting;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,10 +27,17 @@ public class EventController {
     @Autowired
     private EventRepository eventRepo;
 
+    @Autowired
+    private IPaddressWhitelisting iPaddressWhitelisting;
+
+    @PreAuthorize("permitAll()")
     @PostMapping("unicon/events")
     public ResponseEntity<?> createEvents(
-            @Valid @RequestBody List<Event> ListOfEvents ) {
-
+            @Valid @RequestBody List<Event> ListOfEvents, HttpServletRequest request ) {
+        String clientIpAddress = request.getRemoteAddr();
+        if (!iPaddressWhitelisting.exisitingIPaddressVerification((clientIpAddress))){
+            return  new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
         if (eventService.createEvents(ListOfEvents)){
             return  new ResponseEntity<>(HttpStatus.OK);
         }

@@ -1,6 +1,5 @@
 package com.vmsac.vmsacserver.repository;
 
-import com.vmsac.vmsacserver.model.AuthDevice;
 import com.vmsac.vmsacserver.model.Controller;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -27,4 +26,16 @@ public interface ControllerRepository extends JpaRepository<Controller, Long>{
     @Query(value = "select * from controller where upper(controllername) like upper(concat('%', :name, '%')) " +
             "or controllerserialno like concat('%', :name, '%') and deleted = false", nativeQuery = true)
     List<Controller> searchByControllerName(String name);
+
+    boolean existsByPendingIPAndDeletedFalse(String pendingIP);
+
+    boolean existsByControllerIPAndDeletedFalse(String controllerIP);
+
+
+
+
+
+
+
+
 }

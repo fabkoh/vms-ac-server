@@ -1,15 +1,12 @@
 package com.vmsac.vmsacserver.util;
 
 import com.vmsac.vmsacserver.controller.ControllerController;
-import com.vmsac.vmsacserver.model.*;
+import com.vmsac.vmsacserver.model.AccessGroup;
+import com.vmsac.vmsacserver.model.Entrance;
+import com.vmsac.vmsacserver.model.Person;
 import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoN;
 import com.vmsac.vmsacserver.model.accessgroupschedule.AccessGroupSchedule;
-
 import com.vmsac.vmsacserver.model.credentialtype.entranceschedule.EntranceSchedule;
-
-import com.vmsac.vmsacserver.model.credential.Credential;
-import com.vmsac.vmsacserver.model.credentialtype.CredentialType;
-
 import com.vmsac.vmsacserver.repository.*;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
@@ -336,8 +333,6 @@ public class DataLoader implements CommandLineRunner {
 //                        .build()
 //        );
 
-        controllerController.createOrUpdateController(
-                new UniconControllerDto(null,"192.168.1.155",true,"495162159654","5e86805e2bafd54f66cc95c")
-        );
+
     }
 }
