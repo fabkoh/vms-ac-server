@@ -672,6 +672,36 @@ public class ControllerService {
         return false;
     }
 
+    public Boolean unlockEntrance(Entrance entrance) throws Exception{
+        HttpComponentsClientHttpRequestFactory httpRequestFactory = new HttpComponentsClientHttpRequestFactory();
+        httpRequestFactory.setConnectionRequestTimeout(3000);
+        httpRequestFactory.setConnectTimeout(3000);
+        httpRequestFactory.setReadTimeout(3000);
+
+        RestTemplate restTemplate = new RestTemplate(httpRequestFactory);
+
+        try{
+            Optional<Controller> existingController = controllerRepository.findByAuthDevices_Entrance_EntranceIdAndDeletedFalse(
+                    entrance.getEntranceId());
+
+            if (existingController.isEmpty()){
+                return false;
+            }
+
+            String resourceUrl = "http://"+ existingController.get().getControllerIP()+":5000/api/unlock/entrance/"+
+                    entrance.getEntranceId();
+
+            ResponseEntity<?> productCreateResponse =
+                    restTemplate.exchange(resourceUrl, HttpMethod.GET, null, String.class);
+            if (productCreateResponse.getStatusCodeValue() == 200) {
+                return true;
+            }
+        }catch (Exception e){
+            return false;
+        }
+        return false;
+    }
+
     public Boolean UpdateUniconIP(FrontendControllerDto newFrontendControllerDto) throws Exception {
 
         HttpComponentsClientHttpRequestFactory httpRequestFactory = new HttpComponentsClientHttpRequestFactory();

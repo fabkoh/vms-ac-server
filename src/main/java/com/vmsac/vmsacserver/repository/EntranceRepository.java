@@ -27,6 +27,10 @@ public interface EntranceRepository extends JpaRepository<Entrance, Long> {
 
     List<Entrance> findByDeletedIsFalse();
 
+
+
+
+
     @Query(value = "select * from entrances where upper(entrancename) like upper(concat('%', :name, '%')) " +
             "and deleted = false", nativeQuery = true)
     List<Entrance> searchByEntranceName(String name);

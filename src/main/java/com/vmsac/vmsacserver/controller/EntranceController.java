@@ -3,6 +3,7 @@ package com.vmsac.vmsacserver.controller;
 import com.vmsac.vmsacserver.model.*;
 import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoNDto;
 import com.vmsac.vmsacserver.service.AccessGroupEntranceService;
+import com.vmsac.vmsacserver.service.ControllerService;
 import com.vmsac.vmsacserver.service.EntranceService;
 import com.vmsac.vmsacserver.service.AccessGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,8 @@ public class EntranceController {
     EntranceService entranceService;
     @Autowired
     AccessGroupEntranceService accessGroupEntranceService;
-
+    @Autowired
+    ControllerService controllerService;
 
     //returns all entrances
     @GetMapping("/entrances")
@@ -114,12 +116,14 @@ public class EntranceController {
         }
         try {
             Entrance entrance = entranceOptional.get();
+            if (controllerService.unlockEntrance(entrance)){
+                return ResponseEntity.ok().build();
+            }
             //TODO: CALL PI TO UNLOCK ENTRANCE
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
         }
-
-        return ResponseEntity.ok().build();
+        return ResponseEntity.badRequest().build();
     }
 
     //Update name or description of entrance

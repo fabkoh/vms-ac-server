@@ -105,7 +105,7 @@ public class EntranceScheduleService {
     public Boolean GetEntranceCurrentStatus(Long entranceId){
         Entrance existingEntrance = entranceRepository.findByEntranceIdAndDeletedFalse(entranceId).get();
         if (existingEntrance != null){
-            List<EntranceSchedule> ListOfExistingEntranceSch = entranceScheduleRepository.findAllByEntranceIdAndDeletedFalse(entranceId);
+            List<EntranceSchedule> ListOfExistingEntranceSch = entranceScheduleRepository.findByEntranceScheduleIdAndDeletedFalseAndIsActiveTrue(entranceId);
             try{
                 Map datetime = controllerService.GetEntranceScheduleObjectWithTime(ListOfExistingEntranceSch);
                 DateTimeFormatter datef = DateTimeFormatter.ofPattern("yyyy-MM-dd");

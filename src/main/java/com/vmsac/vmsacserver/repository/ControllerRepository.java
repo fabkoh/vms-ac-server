@@ -31,6 +31,8 @@ public interface ControllerRepository extends JpaRepository<Controller, Long>{
 
     boolean existsByControllerIPAndDeletedFalse(String controllerIP);
 
+    Optional<Controller> findByAuthDevices_Entrance_EntranceIdAndDeletedFalse(Long entranceId);
+
 
 
 

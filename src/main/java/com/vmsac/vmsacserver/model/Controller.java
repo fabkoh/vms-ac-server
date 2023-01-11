@@ -1,17 +1,14 @@
 package com.vmsac.vmsacserver.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.vmsac.vmsacserver.model.EventDto.EventControllerDto;
-import com.vmsac.vmsacserver.model.credential.CredentialDto;
-import lombok.*;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -71,7 +68,7 @@ public class Controller {
     private Boolean deleted;
 
     @OneToMany(mappedBy = "controller")
-    private List<AuthDevice> AuthDevices;
+    private List<AuthDevice> authDevices;
 
     @OneToMany(mappedBy = "controller", cascade = CascadeType.ALL)
     private List<EventsManagement> eventsManagements;
@@ -97,7 +94,7 @@ public class Controller {
     @JsonIgnore
     public Set<Entrance> getAssignedEntrances() {
         Set<Entrance> entrances = new HashSet<>();
-        AuthDevices.forEach(ad -> {
+        authDevices.forEach(ad -> {
             if (ad.getEntrance() != null) entrances.add(ad.getEntrance());
         });
 

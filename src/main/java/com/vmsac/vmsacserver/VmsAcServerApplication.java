@@ -34,29 +34,32 @@ public class VmsAcServerApplication {
 	@Autowired
 	PasswordEncoder encoder;
 
+
 	@PostConstruct
 	public void initRoles() {
-		List<Role> roles = Stream.of(
-				new Role(ERole.ROLE_USER_ADMIN),
-				new Role(ERole.ROLE_SYSTEM_ADMIN),
-				new Role(ERole.ROLE_TECH_ADMIN)
-		).collect(Collectors.toList());
-		repository.saveAllAndFlush(roles);
 
-		Set<Role> chosen = new HashSet<>();
-		chosen.add(repository.findByRoleName(ERole.ROLE_SYSTEM_ADMIN).get());
-		User user = new User();
-		user.setFirstName("ISS");
-		user.setLastName("Admin");
-		user.setEmail("ISSAdmin@isssecurity.sg");
-		user.setPassword(encoder.encode("ISSAdmin"));
-		user.setRoles(chosen);
-		user.setDeleted(false);
-		user.setMobile("12345678");
-		userRepository.save(user);
+		if(repository.findAll().isEmpty()) {
+			System.out.println("123458");
+			List<Role> roles = Stream.of(
+					new Role(ERole.ROLE_USER_ADMIN),
+					new Role(ERole.ROLE_SYSTEM_ADMIN),
+					new Role(ERole.ROLE_TECH_ADMIN)
+			).collect(Collectors.toList());
+			repository.saveAllAndFlush(roles);
+			System.out.println("123459");
+			Set<Role> chosen = new HashSet<>();
+			chosen.add(repository.findByRoleName(ERole.ROLE_SYSTEM_ADMIN).get());
+			User user = new User();
+			user.setFirstName("ISS");
+			user.setLastName("Admin");
+			user.setEmail("ISSAdmin@isssecurity.sg");
+			user.setPassword(encoder.encode("ISSAdmin"));
+			user.setRoles(chosen);
+			user.setDeleted(false);
+			user.setMobile("12345678");
+			userRepository.save(user);
+		}
 	}
-
-
 	public static void main(String[] args) {
 		SpringApplication.run(VmsAcServerApplication.class, args);
 	}
