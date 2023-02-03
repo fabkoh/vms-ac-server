@@ -61,7 +61,11 @@ public class WebSecurityConfig {
                 .antMatchers("/api/test/**").permitAll()
                 .antMatchers("/h2-console/**").permitAll()
                 .antMatchers("/api/unicon/controller/**").permitAll()  // <-- add this line
-                .antMatchers("/api/unicon/events/**").permitAll()  // <-- add this line
+                .antMatchers("/api/unicon/events").permitAll()  // <-- add this line
+                .antMatchers("/swagger-ui/**").permitAll()
+                .antMatchers("/v3/api-docs/**").permitAll()
+                .antMatchers("/**")
+                .access("hasIpAddress('127.0.0.1') or hasIpAddress('::1') or isAuthenticated()")
                 .anyRequest().authenticated();
 
         http.authenticationProvider(authenticationProvider());
