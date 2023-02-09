@@ -7,19 +7,23 @@ import com.vmsac.vmsacserver.model.credential.CredentialDto;
 import com.vmsac.vmsacserver.service.AccessGroupService;
 import com.vmsac.vmsacserver.service.CredentialService;
 import com.vmsac.vmsacserver.service.PersonService;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.util.*;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -42,7 +46,7 @@ public class PersonController {
     public ResponseEntity<?> getPerson(@PathVariable Long personId) {
         Optional<Person> optionalPerson = personService.findByIdInUse(personId);
 
-        if(optionalPerson.isPresent()) {
+        if (optionalPerson.isPresent()) {
             return ResponseEntity.ok(optionalPerson.get().toDto());
         }
 
@@ -60,29 +64,30 @@ public class PersonController {
 
     @GetMapping("/person/uid/{id}/{uid}")
     public Boolean uidInUse(@PathVariable("uid") String uid,
-    @PathVariable("id") Long id) {
+                            @PathVariable("id") Long id) {
         return personService.uidInUse(uid, id);
     }
+
     // checks if uid is in use
     @PostMapping(path = "/person")
     public ResponseEntity<?> createPerson(
             @Valid @RequestBody CreatePersonDto newPersonDto) {
 
-        if(newPersonDto.getPersonUid() == null || newPersonDto.getPersonUid().isBlank()) {
+        if (newPersonDto.getPersonUid() == null || newPersonDto.getPersonUid().isBlank()) {
             newPersonDto.setPersonUid(personService.generateUid());
-        }else if (personService.uidInUse(newPersonDto.getPersonUid())) {
+        } else if (personService.uidInUse(newPersonDto.getPersonUid())) {
             Map<String, String> errors = new HashMap<>();
             errors.put("personUid", "Person UID " +
                     newPersonDto.getPersonUid() + " in use");
             return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
         }
-        if (newPersonDto.getAccessGroup() != null){
+        if (newPersonDto.getAccessGroup() != null) {
             Long accessGroupId = newPersonDto.getAccessGroup().getAccessGroupId();
-            if(AccessGroupService.findById(accessGroupId).isEmpty()){
+            if (AccessGroupService.findById(accessGroupId).isEmpty()) {
                 Map<Long, String> errors = new HashMap<>();
                 errors.put(accessGroupId, "accessGroupId " +
                         accessGroupId + " does not exist");
-                return new ResponseEntity<>(errors,HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>(errors, HttpStatus.NOT_FOUND);
             }
             AccessGroup accessGroup = AccessGroupService.findById(accessGroupId).get();
             newPersonDto.setAccessGroup(accessGroup);
@@ -116,27 +121,26 @@ public class PersonController {
             updatePersonDto.setPersonMobileNumber("");
         }
 
-        if(!personService.idInUse(updatePersonDto.getPersonId())) {
+        if (!personService.idInUse(updatePersonDto.getPersonId())) {
             Map<String, String> errors = new HashMap<>();
             errors.put("personId", "Person with Id " +
                     updatePersonDto.getPersonId() + " does not exist");
             return new ResponseEntity<>(errors, HttpStatus.NOT_FOUND);
         }
 
-        if(personService.uidInUse(
+        if (personService.uidInUse(
                 updatePersonDto.getPersonUid(), updatePersonDto.getPersonId())) {
             Map<String, String> errors = new HashMap<>();
             errors.put("personUid", "Person UID " +
                     updatePersonDto.getPersonUid() + " is already in use");
             return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
-        }
-        else if (updatePersonDto.getAccessGroup() != null){
+        } else if (updatePersonDto.getAccessGroup() != null) {
             Long accessGroupId = updatePersonDto.getAccessGroup().getAccessGroupId();
-            if(!AccessGroupService.findById(accessGroupId).isPresent()){
+            if (!AccessGroupService.findById(accessGroupId).isPresent()) {
                 Map<Long, String> errors = new HashMap<>();
                 errors.put(accessGroupId, "accessGroupId " +
                         accessGroupId + " does not exist");
-                return new ResponseEntity<>(errors,HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>(errors, HttpStatus.NOT_FOUND);
             }
             AccessGroup accessGroup = AccessGroupService.findById(accessGroupId).get();
             updatePersonDto.setAccessGroup(accessGroup.toAccessGroupOnlyDto());
@@ -157,7 +161,7 @@ public class PersonController {
         Optional<Person> optionalPerson =
                 personService.findByIdInUse(personId);
 
-        if(optionalPerson.isEmpty()) {
+        if (optionalPerson.isEmpty()) {
             Map<String, String> errors = new HashMap<>();
             errors.put("personId",
                     "Person with ID " + personId + " does not exist");
@@ -203,4 +207,50 @@ public class PersonController {
         });
         return errors;
     }
+
+    //    @RestController
+//    @RequestMapping("api/person/importcsv")
+//    public class FileUploadController {
+//
+//        @PostMapping
+//        public ResponseEntity<String> handleFileUpload(@RequestParam("file") MultipartFile file) {
+//            // Read the contents of the CSV file
+//            List<String[]> rows = new ArrayList<>();
+//            try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
+//                String line;
+//                while ((line = reader.readLine()) != null) {
+//                    rows.add(line.split(","));
+//                }
+//            } catch (IOException e) {
+//                throw new RuntimeException(e);
+//            }
+//            System.out.println(rows);
+//
+//            // Do something with the contents of the file (e.g. store in a database)
+//
+//            return ResponseEntity.ok("File uploaded successfully");
+//        }
+//    }
+//
+    @CrossOrigin
+    @RestController
+    public class FileUploadController {
+        @PostMapping("/api/person/importcsv")
+        public void handleFileUpload(@RequestParam("file") MultipartFile file) throws IOException {
+            // Check if the file is empty
+            if (file.isEmpty()) {
+                throw new IllegalArgumentException("File is empty");
+            }
+
+            // Read the file and print the information
+            try (Reader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
+                Iterable<CSVRecord> records = CSVFormat.DEFAULT.withFirstRecordAsHeader().parse(reader);
+                for (CSVRecord record : records) {
+                    System.out.println("Record: " + record.toMap());
+                }
+            }
+        }
+    }
+
+
 }
