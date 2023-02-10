@@ -8,6 +8,7 @@ import com.vmsac.vmsacserver.service.AccessGroupService;
 import com.vmsac.vmsacserver.service.CredentialService;
 import com.vmsac.vmsacserver.service.PersonService;
 import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,17 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.*;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+import org.supercsv.io.CsvListReader;
+import org.supercsv.prefs.CsvPreference;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -234,7 +246,10 @@ public class PersonController {
 //
     @CrossOrigin
     @RestController
+
     public class FileUploadController {
+        private final String[] expectedHeader = {"firstName", "lastName", "uid", "mobileNumber", "email", "accessGroup", "credentialType", "credentialExpiry", "credentialPin"};
+
         @PostMapping("/api/person/importcsv")
         public void handleFileUpload(@RequestParam("file") MultipartFile file) throws IOException {
             // Check if the file is empty
@@ -242,12 +257,34 @@ public class PersonController {
                 throw new IllegalArgumentException("File is empty");
             }
 
-            // Read the file and print the information
             try (Reader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
-                Iterable<CSVRecord> records = CSVFormat.DEFAULT.withFirstRecordAsHeader().parse(reader);
-                for (CSVRecord record : records) {
-                    System.out.println("Record: " + record.toMap());
+                CsvListReader csvReader = new CsvListReader(reader, CsvPreference.STANDARD_PREFERENCE);
+                String[] header = csvReader.getHeader(true);
+                // Do something with the header values
+
+                String[] expectedHeader = {"\uFEFFFirst Name", "Last Name", "UID", "Email", "Mobile Number", "Credential type", "Credential pin", "Credential Expiry (YYYY-MM-DD HOUR-MIN-SEC)"};
+                if (header.length != expectedHeader.length) {
+                    throw new IllegalArgumentException("Header length does not match the expected header length");
                 }
+
+
+                for (int i = 0; i < header.length; i++) {
+                    if (!header[i].trim().equalsIgnoreCase(expectedHeader[i].trim())) {
+                        throw new IllegalArgumentException(header[i] + " Header values do not match the expected header values " + expectedHeader[i]);
+                    }
+                }
+
+                System.out.println("NO ERRORS!!!");
+
+//                for (int i = 0; i < header.length; i++) {
+//                    System.out.println(header[i]);
+//                    System.out.println(expectedHeader[i]);
+//                    if (!header[i].equals(expectedHeader[i])) {
+//                        throw new IllegalArgumentException(header[i]+" Header values do not match the expected header values "+expectedHeader[i]);
+//                    }
+//                }
+
+                // Continue processing the file if the header matches the expected header
             }
         }
     }
