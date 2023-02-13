@@ -1,6 +1,9 @@
 package com.vmsac.vmsacserver.controller;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.opencsv.exceptions.CsvValidationException;
 import com.vmsac.vmsacserver.model.*;
 
 import com.vmsac.vmsacserver.model.credential.CredentialDto;
@@ -10,6 +13,7 @@ import com.vmsac.vmsacserver.service.PersonService;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,10 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.*;
 import java.util.*;
 
 import java.io.BufferedReader;
@@ -35,7 +36,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.supercsv.io.CsvListReader;
+import org.supercsv.io.ICsvListReader;
 import org.supercsv.prefs.CsvPreference;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -267,27 +275,34 @@ public class PersonController {
                     throw new IllegalArgumentException("Header length does not match the expected header length");
                 }
 
-
                 for (int i = 0; i < header.length; i++) {
                     if (!header[i].trim().equalsIgnoreCase(expectedHeader[i].trim())) {
-                        throw new IllegalArgumentException(header[i] + " Header values do not match the expected header values " + expectedHeader[i]);
+                        throw new IllegalArgumentException(header[i] + " Header value does not match the expected header value " + expectedHeader[i]);
                     }
                 }
 
                 System.out.println("NO ERRORS!!!");
 
-//                for (int i = 0; i < header.length; i++) {
-//                    System.out.println(header[i]);
-//                    System.out.println(expectedHeader[i]);
-//                    if (!header[i].equals(expectedHeader[i])) {
-//                        throw new IllegalArgumentException(header[i]+" Header values do not match the expected header values "+expectedHeader[i]);
-//                    }
-//                }
+//                Convert csv file to json with empty strings as null
 
-                // Continue processing the file if the header matches the expected header
+                try {
+                    CsvToJson csvToJson = new CsvToJson();
+                    String jsonResult = csvToJson.convert(file);
+                    System.out.println("Result: " + jsonResult);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (CsvValidationException e) {
+                    throw new RuntimeException(e);
+                } catch (JSONException e) {
+                    throw new RuntimeException(e);
+                }
+
             }
         }
     }
 
 
+
+
 }
+
