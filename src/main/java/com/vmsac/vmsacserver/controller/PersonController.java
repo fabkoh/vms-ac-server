@@ -57,6 +57,7 @@ public class PersonController {
     @Autowired
     CredentialService credentialService;
 
+
     @GetMapping("/persons")
     public List<PersonDto> getPersons() {
         return personService.findAllNotDeleted();
@@ -252,6 +253,8 @@ public class PersonController {
 //        }
 //    }
 //
+    private String jsonResult = null;
+
     @CrossOrigin
     @RestController
 
@@ -287,7 +290,7 @@ public class PersonController {
 
                 try {
                     CsvToJson csvToJson = new CsvToJson();
-                    String jsonResult = csvToJson.convert(file);
+                    jsonResult = csvToJson.convert(file);
                     System.out.println("Result: " + jsonResult);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -296,13 +299,17 @@ public class PersonController {
                 } catch (JSONException e) {
                     throw new RuntimeException(e);
                 }
-
             }
         }
     }
 
-
-
-
+    @GetMapping("/person/importcsv/json")
+    public String getJson() {
+        if (jsonResult == null) {
+            throw new RuntimeException("JSON data not available");
+        }
+        System.out.println("Json get activated");
+        return jsonResult;
+    }
 }
 
