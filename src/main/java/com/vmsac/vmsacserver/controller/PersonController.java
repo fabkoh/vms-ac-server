@@ -14,6 +14,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -314,14 +315,28 @@ public class PersonController {
 
     @CrossOrigin
     @PostMapping("person/importcsv/greenData")
-    public void postGreenData(@RequestBody String stringData) throws IOException {
+    public void postGreenData(@RequestBody String stringData) throws IOException, JSONException {
         ObjectMapper mapper = new ObjectMapper();
         Object[] dataArray = mapper.readValue("[" + stringData + "]", Object[].class);
 
         for (Object obj : dataArray) {
-            System.out.println(obj);
+            String jsonStr = obj.toString();
+            jsonStr = jsonStr.replaceAll("\uFEFF", "");  // remove BOM
+            JSONObject jsonObj = new JSONObject(jsonStr);
+            CreatePersonDto newPersonDto = new CreatePersonDto();
+            newPersonDto.setPersonFirstName(jsonObj.getString("First Name"));
+//            newPersonDto.setLastName(newPerson.getLastName());
+//            newPersonDto.setEmail(newPerson.getEmail());
+//            newPersonDto.setMobileNumber(newPerson.getMobileNumber());
+//            newPersonDto.setColor(newPerson.getColor());
 
+            // Call the createNotDeleted() function to create a new person
+//            PersonDto newPerson = personService.createNotDeleted(newPersonDto);
+
+            // Print the newly created person
+            System.out.println(newPersonDto);
         }
     }
 }
+
 

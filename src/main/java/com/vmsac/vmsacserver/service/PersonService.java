@@ -1,5 +1,6 @@
 package com.vmsac.vmsacserver.service;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.vmsac.vmsacserver.model.CreatePersonDto;
 import com.vmsac.vmsacserver.model.Person;
 import com.vmsac.vmsacserver.model.PersonOnlyDto;
@@ -13,6 +14,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
+
 
 @Service
 public class PersonService {
