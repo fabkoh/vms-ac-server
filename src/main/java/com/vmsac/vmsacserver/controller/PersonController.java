@@ -311,5 +311,17 @@ public class PersonController {
         System.out.println("Json get activated");
         return jsonResult;
     }
+
+    @CrossOrigin
+    @PostMapping("person/importcsv/greenData")
+    public void postGreenData(@RequestBody String stringData) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        Object[] dataArray = mapper.readValue("[" + stringData + "]", Object[].class);
+
+        for (Object obj : dataArray) {
+            System.out.println(obj);
+
+        }
+    }
 }
 
