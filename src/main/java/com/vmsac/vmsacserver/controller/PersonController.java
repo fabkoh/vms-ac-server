@@ -1,6 +1,7 @@
 package com.vmsac.vmsacserver.controller;
 
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.opencsv.exceptions.CsvValidationException;
@@ -260,8 +261,6 @@ public class PersonController {
     @RestController
 
     public class FileUploadController {
-        private final String[] expectedHeader = {"firstName", "lastName", "uid", "mobileNumber", "email", "accessGroup", "credentialType", "credentialExpiry", "credentialPin"};
-
         @PostMapping("/api/person/importcsv")
         public void handleFileUpload(@RequestParam("file") MultipartFile file) throws IOException {
             // Check if the file is empty
@@ -316,25 +315,38 @@ public class PersonController {
     @CrossOrigin
     @PostMapping("person/importcsv/greenData")
     public void postGreenData(@RequestBody String stringData) throws IOException, JSONException {
-        ObjectMapper mapper = new ObjectMapper();
-        Object[] dataArray = mapper.readValue("[" + stringData + "]", Object[].class);
+        System.out.println(stringData);
+        String jsonString = "{\"0\":{\"credentialType\":\"Card\",\"personUid\":\"\",\"credentialPin\":\"12345\",\"Color\":\"green\",\"personEmail\":\"paul@atreides.com\",\"personLastName\":\"Atreides\",\"credentialExpiry\":\"20230302T00:00:00\",\"personFirstName\":\"Paul\",\"personMobileNumber\":\"+11001001000\"},\"1\":{\"credentialType\":\"\",\"personUid\":\"\",\"credentialPin\":\"\",\"Color\":\"green\",\"personEmail\":\"\",\"personLastName\":\"Smith\",\"credentialExpiry\":\"\",\"personFirstName\":\"John\",\"personMobileNumber\":\"+6598765432\"}}";
 
-        for (Object obj : dataArray) {
-            String jsonStr = obj.toString();
-            jsonStr = jsonStr.replaceAll("\uFEFF", "");  // remove BOM
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode jsonNode = objectMapper.readTree(jsonString);
+
+        for (JsonNode node : jsonNode) {
+            System.out.println(node);
+
+            String jsonStr = node.toString();
             JSONObject jsonObj = new JSONObject(jsonStr);
+
             CreatePersonDto newPersonDto = new CreatePersonDto();
-            newPersonDto.setPersonFirstName(jsonObj.getString("First Name"));
-//            newPersonDto.setLastName(newPerson.getLastName());
-//            newPersonDto.setEmail(newPerson.getEmail());
-//            newPersonDto.setMobileNumber(newPerson.getMobileNumber());
-//            newPersonDto.setColor(newPerson.getColor());
+            newPersonDto.setPersonFirstName(node.get("personFirstName").asText());
+            newPersonDto.setPersonLastName(node.get("personLastName").asText());
+            newPersonDto.setPersonEmail(node.get("personEmail").asText());
+            newPersonDto.setPersonMobileNumber(node.get("personMobileNumber").asText());
+            newPersonDto.setPersonUid(node.get("personUid").asText());
 
-            // Call the createNotDeleted() function to create a new person
-//            PersonDto newPerson = personService.createNotDeleted(newPersonDto);
+            if (newPersonDto.getPersonUid() == null || newPersonDto.getPersonUid().isBlank()) {
+                newPersonDto.setPersonUid(personService.generateUid());
+            } else if (personService.uidInUse(newPersonDto.getPersonUid())) {
+                Map<String, String> errors = new HashMap<>();
+                errors.put("personUid", "Person UID " +
+                        newPersonDto.getPersonUid() + " in use");
+            }
+// Call the createNotDeleted() function to create a new person
+            PersonDto newPerson = personService.createNotDeleted(newPersonDto);
 
-            // Print the newly created person
-            System.out.println(newPersonDto);
+// Print the newly created person
+            System.out.println(newPerson);
+
         }
     }
 }
