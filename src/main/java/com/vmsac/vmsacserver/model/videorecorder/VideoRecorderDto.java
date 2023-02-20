@@ -1,12 +1,12 @@
 package com.vmsac.vmsacserver.model.videorecorder;
 
-import java.io.Serializable;
-import java.time.LocalDateTime;
-
-import javax.validation.constraints.NotBlank;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
+
+import javax.persistence.Column;
+import javax.validation.constraints.NotBlank;
+import java.io.Serializable;
+import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @Data
@@ -20,11 +20,17 @@ public class VideoRecorderDto implements Serializable {
     @NotBlank(message = "Recorder serial number must not be blank")
     private String recorderSerialNumber;
 
-    @NotBlank(message = "Recorder IP address must not be blank")
-    private String recorderIpAddress;
+    @NotBlank(message = "Recorder Public IP address must not be blank")
+    private String recorderPublicIp;
+
+    @NotBlank(message = "Recorder Private port number must not be blank")
+    private String recorderPrivateIp;
 
     @NotBlank(message = "Recorder port number must not be blank")
     private Integer recorderPortNumber;
+
+    @Column( name = "recorderiwsport", nullable = false, unique = true)
+    private Integer recorderIWSPort;
 
     @NotBlank(message = "Recorder username must not be blank")
     private String recorderUsername;
@@ -37,10 +43,13 @@ public class VideoRecorderDto implements Serializable {
     private Boolean deleted;
 
     public VideoRecorder toCreateVideoRecorder(Boolean deleted) {
-        return new VideoRecorder(recorderName, recorderSerialNumber, recorderIpAddress, recorderPortNumber, recorderUsername, recorderPassword, deleted);
+        return new VideoRecorder(recorderName, recorderSerialNumber, recorderPublicIp, recorderPrivateIp,
+                recorderPortNumber, recorderIWSPort, recorderUsername, recorderPassword, deleted);
     }
 
     public VideoRecorder toUpdateVideoRecorder(Boolean deleted) {
-        return new VideoRecorder(recorderId, recorderName, recorderSerialNumber, recorderIpAddress, recorderPortNumber, recorderUsername, recorderPassword, deleted);
+        return new VideoRecorder(recorderId, recorderName, recorderSerialNumber,
+                recorderPublicIp, recorderPrivateIp, recorderPortNumber, recorderIWSPort,
+                recorderUsername, recorderPassword, deleted);
     }
 }

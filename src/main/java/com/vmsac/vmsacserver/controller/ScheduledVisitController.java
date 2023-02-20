@@ -52,9 +52,9 @@ public class ScheduledVisitController{
     @Autowired
     private HashQRId hashQRId;
 
-    @Autowired
-    @Value("${dev.qrcode.image.path}")
-    String qrFilePath;
+//    @Autowired
+//    @Value("${dev.qrcode.image.path}")
+//    String qrFilePath;
 
     public ScheduledVisitController() {
 

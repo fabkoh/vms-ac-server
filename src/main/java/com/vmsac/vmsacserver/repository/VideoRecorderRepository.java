@@ -1,11 +1,10 @@
 package com.vmsac.vmsacserver.repository;
 
-import java.util.List;
-import java.util.Optional;
-
+import com.vmsac.vmsacserver.model.videorecorder.VideoRecorder;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.vmsac.vmsacserver.model.videorecorder.VideoRecorder;
+import java.util.List;
+import java.util.Optional;
 
 public interface VideoRecorderRepository extends JpaRepository<VideoRecorder, Long> {
     List<VideoRecorder> findByDeletedIsFalseOrderByCreatedDesc();
@@ -14,11 +13,13 @@ public interface VideoRecorderRepository extends JpaRepository<VideoRecorder, Lo
 
     Optional<VideoRecorder> findByRecorderSerialNumberEqualsAndDeletedIsFalse(String recorderSerialNumber);
 
-    boolean existsByRecorderIpAddressEqualsAndDeletedIsFalse(String recorderIpAddress);
-
     boolean existsByRecorderSerialNumberEqualsAndDeletedIsFalse(String recorderSerialNumber);
 
     boolean existsByRecorderNameEqualsAndDeletedIsFalse(String recorderName);
 
+    boolean existsByRecorderPrivateIpEqualsAndDeletedIsFalse(String recorderPrivateIp);
+
     boolean existsByRecorderPortNumberEqualsAndDeletedIsFalse(Integer recorderPortNumber);
+
+    boolean existsByRecorderIWSPortEqualsAndDeletedIsFalse(Integer recorderIWSPort);
 }
