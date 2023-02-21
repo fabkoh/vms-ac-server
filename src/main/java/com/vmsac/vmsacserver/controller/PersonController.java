@@ -3,7 +3,6 @@ package com.vmsac.vmsacserver.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.opencsv.exceptions.CsvValidationException;
 import com.vmsac.vmsacserver.model.*;
 
@@ -11,10 +10,8 @@ import com.vmsac.vmsacserver.model.credential.CreateCredentialDto;
 import com.vmsac.vmsacserver.model.credential.CredentialDto;
 import com.vmsac.vmsacserver.service.AccessGroupService;
 import com.vmsac.vmsacserver.service.CredentialService;
+import com.vmsac.vmsacserver.util.CsvToJson;
 import com.vmsac.vmsacserver.service.PersonService;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +24,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 
-import java.io.*;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -38,15 +34,9 @@ import java.io.Reader;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
 import org.supercsv.io.CsvListReader;
-import org.supercsv.io.ICsvListReader;
 import org.supercsv.prefs.CsvPreference;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 @CrossOrigin(origins = "*")
@@ -291,7 +281,7 @@ public class PersonController {
 //                Convert csv file to json with empty strings as null
 
                 try {
-                    CsvToJson csvToJson = new CsvToJson();
+                    CsvToJson csvToJson = new CsvToJson(credentialService, personService);
                     jsonResult = csvToJson.convert(file);
                     System.out.println("Result: " + jsonResult);
                 } catch (IOException e) {
