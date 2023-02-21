@@ -51,9 +51,10 @@ public class CsvToJson {
                     jsonObject.put(header[i].trim(), nextLine[i]);
                 }
 
-                if ((jsonObject.has("personFirstName"))
-                        && (jsonObject.has("personLastName"))
-                        && (jsonObject.has("personMobileNumber"))) {
+                if ((jsonObject.has("personFirstName") && !jsonObject.isNull("personFirstName") && !jsonObject.getString("personFirstName").isEmpty())
+                        && (jsonObject.has("personLastName") && !jsonObject.isNull("personLastName") && !jsonObject.getString("personLastName").isEmpty())
+                        && (jsonObject.has("personMobileNumber") && !jsonObject.isNull("personMobileNumber") && !jsonObject.getString("personMobileNumber").isEmpty())
+                ) {
                     System.out.println(jsonObject + " Is valid");
                     jsonObject.put("Color", "green");
                 } else {

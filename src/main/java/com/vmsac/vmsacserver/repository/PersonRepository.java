@@ -22,7 +22,7 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
 
     List<Person> findByAccessGroupAccessGroupIdAndDeleted(Long accessGroupId,Boolean deleted);
 
-    List<Person> findByPersonMobileNumber(String personMobileNumber);
+    Optional<Person> findByPersonMobileNumber(String personMobileNumber);
 
     List<Person> findByPersonEmail(String personEmail);
 

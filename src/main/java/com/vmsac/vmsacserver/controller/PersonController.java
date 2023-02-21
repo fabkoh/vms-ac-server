@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.opencsv.exceptions.CsvValidationException;
 import com.vmsac.vmsacserver.model.*;
 
+import com.vmsac.vmsacserver.model.credential.CreateCredentialDto;
 import com.vmsac.vmsacserver.model.credential.CredentialDto;
 import com.vmsac.vmsacserver.service.AccessGroupService;
 import com.vmsac.vmsacserver.service.CredentialService;
@@ -27,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.validation.Valid;
 
 import java.io.*;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import java.io.BufferedReader;
@@ -314,12 +316,11 @@ public class PersonController {
 
     @CrossOrigin
     @PostMapping("person/importcsv/greenData")
-    public void postGreenData(@RequestBody String stringData) throws IOException, JSONException {
+    public void postGreenData(@RequestBody String stringData) throws Exception {
         System.out.println(stringData);
-        String jsonString = "{\"0\":{\"credentialType\":\"Card\",\"personUid\":\"\",\"credentialPin\":\"12345\",\"Color\":\"green\",\"personEmail\":\"paul@atreides.com\",\"personLastName\":\"Atreides\",\"credentialExpiry\":\"20230302T00:00:00\",\"personFirstName\":\"Paul\",\"personMobileNumber\":\"+11001001000\"},\"1\":{\"credentialType\":\"\",\"personUid\":\"\",\"credentialPin\":\"\",\"Color\":\"green\",\"personEmail\":\"\",\"personLastName\":\"Smith\",\"credentialExpiry\":\"\",\"personFirstName\":\"John\",\"personMobileNumber\":\"+6598765432\"}}";
 
         ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode jsonNode = objectMapper.readTree(jsonString);
+        JsonNode jsonNode = objectMapper.readTree(stringData);
 
         for (JsonNode node : jsonNode) {
             System.out.println(node);
@@ -334,21 +335,61 @@ public class PersonController {
             newPersonDto.setPersonMobileNumber(node.get("personMobileNumber").asText());
             newPersonDto.setPersonUid(node.get("personUid").asText());
 
-            if (newPersonDto.getPersonUid() == null || newPersonDto.getPersonUid().isBlank()) {
+            if (newPersonDto.getPersonUid() == null || newPersonDto.getPersonUid().isBlank() || personService.uidInUse(newPersonDto.getPersonUid())) {
                 newPersonDto.setPersonUid(personService.generateUid());
-            } else if (personService.uidInUse(newPersonDto.getPersonUid())) {
-                Map<String, String> errors = new HashMap<>();
-                errors.put("personUid", "Person UID " +
-                        newPersonDto.getPersonUid() + " in use");
             }
+
 // Call the createNotDeleted() function to create a new person
-            PersonDto newPerson = personService.createNotDeleted(newPersonDto);
+
+             personService.createNotDeleted(newPersonDto);
+
 
 // Print the newly created person
-            System.out.println(newPerson);
+            System.out.println(newPersonDto);
 
+            Optional<Person> person = personService.findByUid(String.valueOf(newPersonDto.getPersonUid()));
+            System.out.println(person.isEmpty());
+            System.out.println(person.get());
+
+            if (!node.get("credentialPin").asText().isEmpty()
+                    && !node.get("credentialExpiry").asText().isEmpty()
+                    && !node.get("credentialType").asText().isEmpty()
+            ) {
+                CreateCredentialDto newCredential = new CreateCredentialDto();
+                newCredential.setCredUid(node.get("credentialPin").asText());
+                newCredential.setCredTTL(LocalDateTime.parse(node.get("credentialExpiry").asText()));
+
+                long credType = 1;
+                if (node.get("credentialType").asText().equals("Card") ) {
+                    credType = 1;
+                } else if
+                (node.get("credentialType").asText().equals("Face") ) {
+                    credType = 2;
+                } else if
+                (node.get("credentialType").asText().equals("Fingerprint") ) {
+                    credType = 3;
+                } else if
+                (node.get("credentialType").asText().equals("Pin")) {
+                    credType = 4;
+                }
+                newCredential.setCredTypeId(credType);
+                newCredential.setValid(Boolean.TRUE);
+                newCredential.setPerm(Boolean.FALSE);
+                newCredential.setIsValid(Boolean.TRUE);
+                if (!person.isEmpty()) {
+                    newCredential.setPersonId(person.get().getPersonId());
+                }
+
+                System.out.println(newCredential);
+
+                try {
+                    credentialService.createCredential(newCredential);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
+
+
 }
-
-

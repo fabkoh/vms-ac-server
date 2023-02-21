@@ -35,6 +35,9 @@ public class PersonService {
     public Optional<Person> findByIdInUse(Long personId) {
         return personRepository.findByPersonIdAndDeleted(personId, false);
     }
+    public Optional<Person> findByPersonMobileNumber(String personMobileNumber ) {
+        return personRepository.findByPersonMobileNumber( personMobileNumber);
+    }
 
     public List<Person> findByAccGrpId(Long id, Boolean deleted){
         return personRepository.findByAccessGroupAccessGroupIdAndDeleted(id,deleted);
@@ -52,6 +55,11 @@ public class PersonService {
                 .findByPersonUidAndDeleted(uid, false);
         return personOptional.isPresent() &&
                 !Objects.equals(personOptional.get().getPersonId(), personId);
+    }
+
+    public Optional<Person> findByUid(String uid){
+        return personRepository
+                .findByPersonUidAndDeleted(uid, false);
     }
 
     public Boolean mobileNumberInUse(String personMobileNumber) {
