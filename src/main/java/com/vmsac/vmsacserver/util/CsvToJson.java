@@ -25,7 +25,7 @@ import com.opencsv.CSVReaderBuilder;
 
 @Component
 public class CsvToJson {
-    final
+     final
     CredentialService credentialService;
     final
     PersonService personService;
@@ -99,8 +99,10 @@ public class CsvToJson {
         }
 
 //        check for unique pin not in db
-        if (jsonObject.has("credentialPin")
-                && jsonObject.has("credentialType")) {
+        if (!jsonObject.getString("credentialPin").isEmpty()
+                && !jsonObject.getString("credentialType").isEmpty()
+                && !jsonObject.getString("credentialExpiry").isEmpty()
+        ) {
             System.out.println("pin check");
             String credentialPin = jsonObject.getString("credentialPin");
             String credentialType = jsonObject.getString("credentialType");
@@ -116,7 +118,7 @@ public class CsvToJson {
         }
 
 //        check for unique mobile not in db
-        if (jsonObject.has("personMobileNumber")) {
+        if (!jsonObject.getString("personMobileNumber").isEmpty()) {
             System.out.println("mobile check");
             String mobile = jsonObject.getString("personMobileNumber");
             if (!personService.findByPersonMobileNumber(mobile).isEmpty()
