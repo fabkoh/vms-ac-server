@@ -1,6 +1,5 @@
 package com.vmsac.vmsacserver.service;
 
-import com.vmsac.vmsacserver.model.*;
 import com.vmsac.vmsacserver.model.notification.EmailSettings;
 import com.vmsac.vmsacserver.model.notification.EventsManagementNotification;
 import com.vmsac.vmsacserver.model.notification.NotificationLogs;
@@ -9,26 +8,27 @@ import com.vmsac.vmsacserver.repository.EmailSettingsRepository;
 import com.vmsac.vmsacserver.repository.EventsManagementNotificationRepository;
 import com.vmsac.vmsacserver.repository.NotificationLogsRepository;
 import com.vmsac.vmsacserver.repository.SmsSettingsRepository;
-import com.vmsac.vmsacserver.util.EmailUtil;
+import com.vmsac.vmsacserver.util.mapper.EmailUtil;
 
+import com.vmsac.vmsacserver.util.mapper.EmailDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import javax.validation.constraints.Email;
 import java.util.List;
 import java.util.Properties;
-import javax.mail.Authenticator;
-import javax.mail.PasswordAuthentication;
-import javax.mail.Session;
+import javax.mail.*;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
 public class NotificationService {
+    @Autowired
+    EmailUtil emailUtil;
 
     @Autowired
     SmsSettingsRepository smsSettingsRepository;
@@ -42,20 +42,20 @@ public class NotificationService {
     @Autowired
     EventsManagementNotificationRepository eventsManagementNotificationRepository;
 
-    public NotificationLogs save(NotificationLogs notificationLogs){
+    public NotificationLogs save(NotificationLogs notificationLogs) {
         return notificationLogsRepository.save(notificationLogs);
     }
 
-    public SmsSettings getSmsSettings(){
+    public SmsSettings getSmsSettings() {
         return smsSettingsRepository.findAll().get(0);
     }
 
-    public EmailSettings getEmailSettings(){
+    public EmailSettings getEmailSettings() {
         return emailSettingsRepository.findAll().get(0);
     }
 
-    public Boolean changeSmsEnablement(){
-        try{
+    public Boolean changeSmsEnablement() {
+        try {
             SmsSettings currentSmsSettings = smsSettingsRepository.findAll().get(0);
             currentSmsSettings.setEnabled(!currentSmsSettings.getEnabled());
             smsSettingsRepository.save(currentSmsSettings);
@@ -66,7 +66,7 @@ public class NotificationService {
         }
     }
 
-    public void sendDefaultEmail() throws Exception{
+    public void sendDefaultEmail() throws Exception {
 
     }
 
@@ -75,26 +75,45 @@ public class NotificationService {
 
         final String fromEmail = emailSettings.getEmail();
         final String password = emailSettings.getEmailPassword();
+        final EmailDetails emailDetails = new EmailDetails();
+
+        emailDetails.setRecipient(emailSettings.getEmail());
+        emailDetails.setMsgBody("Test");
+        emailDetails.setSubject("Test Subject");
 
         System.out.println("TLSEmail Start");
         Properties props = new Properties();
-        props.put("mail.smtp.host", emailSettings.getHostAddress()); //SMTP Host
-        props.put("mail.smtp.port", emailSettings.getPortNumber()); //TLS Port
-        props.put("mail.smtp.auth", "true"); //enable authentication
-        props.put("mail.smtp.starttls.enable", "true"); //enable STARTTLS
 
-        //create Authenticator object to pass in Session.getInstance argument
-        Authenticator auth = new Authenticator() {
-            //override the getPasswordAuthentication method
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(fromEmail, password);
-            }
-        };
-        Session session = Session.getInstance(props, auth);
+// Setup mail server
+        props.setProperty("mail.smtp.host", emailSettings.getHostAddress());
+
+// mail username and password
+        props.setProperty("mail.user", emailSettings.getUsername());
+        props.setProperty("mail.password", emailSettings.getEmailPassword());
+        props.put("mail.transport.protocol", "smtp");
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.debug", "true");
+        props.put("mail.smtp.host", "smtp.gmail.com");
+        props.put("mail.smtp.port", "587");
+        props.put("mail.smtp.ssl.protocols", "TLSv1.2");
+
+
+        System.out.println(props.getProperty("mail.password"));
+        Session session = Session.getDefaultInstance(props,
+                new javax.mail.Authenticator(){
+                    protected PasswordAuthentication getPasswordAuthentication() {
+                        return new PasswordAuthentication(
+                                fromEmail, password);// Specify the Username and the PassWord
+                    }
+                });
+
         try {
-            EmailUtil.sendEmail(session, recipient,subject, body);
-        }
-        catch (Exception e) {
+            emailUtil.sendEmail(session, recipient, subject, body);
+
+//
+        } catch (Exception e) {
+            e.printStackTrace();
             throw e;
         }
     }
@@ -107,13 +126,30 @@ public class NotificationService {
 
         System.out.println("SSLEmail Start");
         Properties props = new Properties();
-        props.put("mail.smtp.host", emailSettings.getHostAddress()); //SMTP Host
-        // props.put("mail.smtp.socketFactory.port", "465"); //SSL Port
-        props.put("mail.smtp.socketFactory.port", emailSettings.getPortNumber());
-        props.put("mail.smtp.socketFactory.class",
-                "javax.net.ssl.SSLSocketFactory"); //SSL Factory Class
-        props.put("mail.smtp.auth", "true"); //Enabling SMTP Authentication
-        props.put("mail.smtp.port", emailSettings.getPortNumber()); //SMTP Port
+
+// Setup mail server
+        props.setProperty("mail.smtp.host", emailSettings.getHostAddress());
+
+// mail username and password
+        props.setProperty("mail.user", emailSettings.getUsername());
+        props.setProperty("mail.password", emailSettings.getEmailPassword());
+        props.put("mail.transport.protocol", "smtp");
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.debug", "true");
+        props.put("mail.smtp.host", "smtp.gmail.com");
+        props.put("mail.smtp.port", emailSettings.getPortNumber());
+        props.put("mail.smtp.ssl.protocols", "SSLv1.2");
+
+
+        System.out.println(props.getProperty("mail.password"));
+        Session session = Session.getDefaultInstance(props,
+                new javax.mail.Authenticator(){
+                    protected PasswordAuthentication getPasswordAuthentication() {
+                        return new PasswordAuthentication(
+                                fromEmail, password);// Specify the Username and the PassWord
+                    }
+                });
 
         Authenticator auth = new Authenticator() {
             //override the getPasswordAuthentication method
@@ -122,18 +158,17 @@ public class NotificationService {
             }
         };
 
-        Session session = Session.getInstance(props, auth);
         System.out.println("Session created");
         try {
-            EmailUtil.sendEmail(session, recipient,subject, body);
-        }
-        catch (Exception e) {
+//            emailUtil.sendSimpleMail(emailDetails);
+            EmailUtil.sendEmail(session, recipient, subject, body);
+        } catch (Exception e) {
             throw e;
         }
     }
 
-    public Boolean changeEmailEnablement(){
-        try{
+    public Boolean changeEmailEnablement() {
+        try {
             EmailSettings currentEmailSettings = emailSettingsRepository.findAll().get(0);
             currentEmailSettings.setEnabled(!currentEmailSettings.getEnabled());
             emailSettingsRepository.save(currentEmailSettings);
@@ -144,7 +179,7 @@ public class NotificationService {
         }
     }
 
-    public SmsSettings changeSmsSettings(SmsSettings newchanges){
+    public SmsSettings changeSmsSettings(SmsSettings newchanges) {
 //        System.out.println(newchanges);
         SmsSettings currentSmsSettings = smsSettingsRepository.findAll().get(0);
         currentSmsSettings.setSmsAPI(newchanges.getSmsAPI());
@@ -152,7 +187,7 @@ public class NotificationService {
         return smsSettingsRepository.save(currentSmsSettings);
     }
 
-    public EmailSettings changeEmailSettings(EmailSettings newchanges){
+    public EmailSettings changeEmailSettings(EmailSettings newchanges) {
 //        System.out.println(newchanges);
         EmailSettings currentEmailSettings = emailSettingsRepository.findAll().get(0);
         currentEmailSettings.setUsername(newchanges.getUsername());
@@ -166,13 +201,13 @@ public class NotificationService {
         return emailSettingsRepository.save(currentEmailSettings);
     }
 
-    public SmsSettings smsBackToDefault(){
+    public SmsSettings smsBackToDefault() {
         SmsSettings currentSmsSettings = smsSettingsRepository.findAll().get(0);
         currentSmsSettings.setSmsAPI("BackToDefaultAPI");
         return smsSettingsRepository.save(currentSmsSettings);
     }
 
-    public EmailSettings emailBackToDefault(){
+    public EmailSettings emailBackToDefault() {
         EmailSettings currentEmailSettings = emailSettingsRepository.findAll().get(0);
         currentEmailSettings.setUsername("DefaultName");
         currentEmailSettings.setEmailPassword("DefaultPassword");
@@ -184,11 +219,11 @@ public class NotificationService {
         return emailSettingsRepository.save(currentEmailSettings);
     }
 
-    public List<NotificationLogs> allNotificationLogs(){
+    public List<NotificationLogs> allNotificationLogs() {
         return notificationLogsRepository.findAll();
     }
 
-    public List<NotificationLogs> getEventsByTimeDesc(int pageNo, int pageSize){
+    public List<NotificationLogs> getEventsByTimeDesc(int pageNo, int pageSize) {
         List<NotificationLogs> allLogs = notificationLogsRepository.findByOrderByTimeSentDesc(PageRequest.of(pageNo, pageSize));
         return allLogs;
     }

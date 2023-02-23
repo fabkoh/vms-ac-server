@@ -39,11 +39,11 @@ public class NotificationLoader implements CommandLineRunner {
                 .build());
 
         emailSettingsRepository.save(EmailSettings.builder()
-                .username("Lee Yong Ning")
-                .email("yongning.lee@iss.security.sg")
-                .emailPassword("TestingPassword")
-                .hostAddress("TestingHostAddress")
-                .portNumber("8080")
+                .username("Zephan Wong Kai En")
+                .email("zephan.wong@isssecurity.sg")
+                .emailPassword("avdfhveswyonpuwq")
+                .hostAddress("smtp.gmail.com")
+                .portNumber("465")
                 .enabled(true)
                 .custom(true)
                 .isTLS(false)

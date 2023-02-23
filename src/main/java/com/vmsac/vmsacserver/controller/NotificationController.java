@@ -142,15 +142,16 @@ public class NotificationController {
 
     @PostMapping("notification/testSMTP")
     public ResponseEntity<?> testEmail(@RequestBody @Valid EmailSettings newChanges) {
+        System.out.println(newChanges);
         if (!newChanges.getCustom()) {
             // always return ok when using default email
             return new ResponseEntity<>("Default settings are used", HttpStatus.OK);
         }
         try {
             if (newChanges.getIsTLS()) {
-                notificationService.sendSMTPTLSEmail("inthenetworld@yahoo.com", "Test message", "test", newChanges);
+                notificationService.sendSMTPTLSEmail(newChanges.getEmail(), "Test message", "test", newChanges);
             } else {
-                notificationService.sendSMTPSSLEmail("inthenetworld@yahoo.com", "Test message", "test", newChanges);
+                notificationService.sendSMTPSSLEmail(newChanges.getEmail(), "Test message", "test", newChanges);
             }
         } catch (Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);

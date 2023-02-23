@@ -101,5 +101,5 @@ INSERT INTO EventActionType VALUES ('13','Valid PIN used', false);
 INSERT INTO EventActionType VALUES ('14','Invalid PIN used', false);
 
 INSERT INTO smssettings (smsapi, enabled) VALUES ('ThisIsTheTestingApi', true);
-INSERT INTO emailsettings (username, email, emailpassword, hostaddress, portnumber, enabled, custom, istls) VALUES ('Lee Yong Ning', 'yongning.lee@iss.security.sg', 'TestingPassword', 'TestingHostAddress', '8080', true, true, false);
+INSERT INTO emailsettings (username, email, emailpassword, hostaddress, portnumber, enabled, custom, istls) VALUES ('Lee Yong Ning', 'zephan.wong@isssecurity.sg', 'TestingPassword', 'zephan.wong@isssecurity.sg', '8080', true, true, false);
 INSERT INTO notificationlogs (notificationlogsstatuscode, notificationlogserror, timesent) VALUES (400, 'TestingError', '10-22-2022 03:50:39');

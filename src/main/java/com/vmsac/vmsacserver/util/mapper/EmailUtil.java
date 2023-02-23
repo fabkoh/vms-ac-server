@@ -1,6 +1,14 @@
-package com.vmsac.vmsacserver.util;
+package com.vmsac.vmsacserver.util.mapper;
 
+import com.vmsac.vmsacserver.util.mapper.EmailDetails;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.stereotype.Service;
+
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.Date;
 
 import javax.activation.DataHandler;
@@ -17,44 +25,78 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
-public class EmailUtil {
+
+@Service
+public class EmailUtil implements EmailService{
     /**
      * Utility method to send simple HTML email
      * @param session
-     * @param toEmail
+     * @param recipient
      * @param subject
      * @param body
      */
-    public static void sendEmail(Session session, String toEmail, String subject, String body) throws Exception{
+    private static JavaMailSender javaMailSender = null;
+
+    public EmailUtil(JavaMailSender javaMailSender) {
+        this.javaMailSender = javaMailSender;
+    }
+
+    public static void sendEmail(Session session, String recipient, String subject, String body) throws Exception{
         try
         {
-            MimeMessage msg = new MimeMessage(session);
-            //set message headers
-            msg.addHeader("Content-type", "text/HTML; charset=UTF-8");
-            msg.addHeader("format", "flowed");
-            msg.addHeader("Content-Transfer-Encoding", "8bit");
+            MimeMessage message = new MimeMessage(session);
 
-            msg.setFrom(new InternetAddress("no_reply@etlas.com", "NoReply-Etlas"));
+            // header field of the header.
+            message.setFrom(new InternetAddress(recipient));
+            message.addRecipient(Message.RecipientType.TO,
+                    new InternetAddress(recipient));
+            message.setSubject("Testing subject");
+            message.setText("Hello, This is a test email from etlas ");
 
-            msg.setReplyTo(InternetAddress.parse("no_reply@etlas.com", false));
+            // Send message
+            Transport transport = session.getTransport("smtp");
+            transport.connect();
+            transport.sendMessage(message, message.getAllRecipients());
+            transport.close();
 
-            msg.setSubject(subject, "UTF-8");
+            System.out.println("Email sent successfully");
 
-            msg.setText(body, "UTF-8");
-
-            msg.setSentDate(new Date());
-
-            msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail, false));
-            System.out.println("Message is ready");
-            Transport.send(msg);
-
-            System.out.println("Email Sent Successfully!!");
         }
         catch (Exception e) {
+            e.printStackTrace();
            throw e;
         }
     }
 
+    // Method 1
+    // To send a simple email
+    public String sendSimpleMail(EmailDetails details)
+    {
+
+        // Try block to check for exceptions
+        try {
+
+            // Creating a simple mail message
+            SimpleMailMessage mailMessage
+                    = new SimpleMailMessage();
+
+            // Setting up necessary details
+            mailMessage.setFrom("zephan.wong@isssecurity.sg");
+            mailMessage.setTo(details.getRecipient());
+            mailMessage.setText(details.getMsgBody());
+            mailMessage.setSubject(details.getSubject());
+
+            // Sending the mail
+            javaMailSender.send(mailMessage);
+            return "Mail Sent Successfully...";
+        }
+
+        // Catch block to handle the exceptions
+        catch (Exception e) {
+            e.printStackTrace();
+            return "Error while Sending Mail";
+        }
+    }
     public static void sendAttachmentEmail(Session session, String toEmail, String subject, String body){
         try{
             MimeMessage msg = new MimeMessage(session);
