@@ -1,14 +1,9 @@
 package com.vmsac.vmsacserver.util.mapper;
 
-import com.vmsac.vmsacserver.util.mapper.EmailDetails;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
 import java.util.Date;
 
 import javax.activation.DataHandler;
@@ -27,31 +22,37 @@ import javax.mail.internet.MimeMultipart;
 
 
 @Service
-public class EmailUtil implements EmailService{
-    /**
-     * Utility method to send simple HTML email
-     * @param session
-     * @param recipient
-     * @param subject
-     * @param body
-     */
+public class EmailUtil {
+    //    /**
+//     * Utility method to send simple HTML email
+//     * @param session
+//     * @param recipient
+//     * @param subject
+//     * @param body
+//     */
+//    @Bean
+//    public JavaMailSender javaMailSender() {
+//        JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+//        // set mailSender properties as needed
+//        return mailSender;
+//    }
     private static JavaMailSender javaMailSender = null;
 
     public EmailUtil(JavaMailSender javaMailSender) {
         this.javaMailSender = javaMailSender;
     }
 
-    public static void sendEmail(Session session, String recipient, String subject, String body) throws Exception{
-        try
-        {
+    public static void sendEmail(
+            Session session, String recipient, String subject, String body, String fromEmail, String username) throws Exception {
+        try {
             MimeMessage message = new MimeMessage(session);
 
             // header field of the header.
-            message.setFrom(new InternetAddress(recipient));
+            message.setFrom(new InternetAddress(fromEmail));
             message.addRecipient(Message.RecipientType.TO,
                     new InternetAddress(recipient));
-            message.setSubject("Testing subject");
-            message.setText("Hello, This is a test email from etlas ");
+            message.setSubject("Etlas Test");
+            message.setText("Hello " + username + ", \n\nThis is a test email from etlas. Please do not reply to this email.");
 
             // Send message
             Transport transport = session.getTransport("smtp");
@@ -61,44 +62,16 @@ public class EmailUtil implements EmailService{
 
             System.out.println("Email sent successfully");
 
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
-           throw e;
+            throw e;
         }
     }
 
-    // Method 1
-    // To send a simple email
-    public String sendSimpleMail(EmailDetails details)
-    {
 
-        // Try block to check for exceptions
+
+    public static void sendAttachmentEmail(Session session, String toEmail, String subject, String body) {
         try {
-
-            // Creating a simple mail message
-            SimpleMailMessage mailMessage
-                    = new SimpleMailMessage();
-
-            // Setting up necessary details
-            mailMessage.setFrom("zephan.wong@isssecurity.sg");
-            mailMessage.setTo(details.getRecipient());
-            mailMessage.setText(details.getMsgBody());
-            mailMessage.setSubject(details.getSubject());
-
-            // Sending the mail
-            javaMailSender.send(mailMessage);
-            return "Mail Sent Successfully...";
-        }
-
-        // Catch block to handle the exceptions
-        catch (Exception e) {
-            e.printStackTrace();
-            return "Error while Sending Mail";
-        }
-    }
-    public static void sendAttachmentEmail(Session session, String toEmail, String subject, String body){
-        try{
             MimeMessage msg = new MimeMessage(session);
             msg.addHeader("Content-type", "text/HTML; charset=UTF-8");
             msg.addHeader("format", "flowed");
@@ -140,15 +113,15 @@ public class EmailUtil implements EmailService{
             // Send message
             Transport.send(msg);
             System.out.println("EMail Sent Successfully with attachment!!");
-        }catch (MessagingException e) {
+        } catch (MessagingException e) {
             e.printStackTrace();
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
     }
 
-    public static void sendImageEmail(Session session, String toEmail, String subject, String body){
-        try{
+    public static void sendImageEmail(Session session, String toEmail, String subject, String body) {
+        try {
             MimeMessage msg = new MimeMessage(session);
             msg.addHeader("Content-type", "text/HTML; charset=UTF-8");
             msg.addHeader("format", "flowed");
@@ -197,7 +170,7 @@ public class EmailUtil implements EmailService{
             // Send message
             Transport.send(msg);
             System.out.println("EMail Sent Successfully with image!!");
-        }catch (MessagingException e) {
+        } catch (MessagingException e) {
             e.printStackTrace();
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();

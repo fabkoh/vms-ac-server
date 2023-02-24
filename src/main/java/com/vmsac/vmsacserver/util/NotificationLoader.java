@@ -40,8 +40,10 @@ public class NotificationLoader implements CommandLineRunner {
 
         emailSettingsRepository.save(EmailSettings.builder()
                 .username("Zephan Wong Kai En")
-                .email("zephan.wong@isssecurity.sg")
-                .emailPassword("avdfhveswyonpuwq")
+                .email("bickybong@gmail.com")
+                .emailPassword("ztcilxsbkesqjrje")
+//                .email("zephan.wong@isssecurity.sg")
+//                .emailPassword("avdfhveswyonpuwq")
                 .hostAddress("smtp.gmail.com")
                 .portNumber("465")
                 .enabled(true)

@@ -10,7 +10,6 @@ import com.vmsac.vmsacserver.repository.NotificationLogsRepository;
 import com.vmsac.vmsacserver.repository.SmsSettingsRepository;
 import com.vmsac.vmsacserver.util.mapper.EmailUtil;
 
-import com.vmsac.vmsacserver.util.mapper.EmailDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -18,8 +17,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Properties;
 import javax.mail.*;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
+import javax.net.ssl.SSLContext;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -73,34 +71,29 @@ public class NotificationService {
     public void sendSMTPTLSEmail(String recipient, String subject, String body, EmailSettings emailSettings) throws Exception {
         // at this point this should only be called when we want to use custom, so no need to check isCustom
 
-        final String fromEmail = emailSettings.getEmail();
-        final String password = emailSettings.getEmailPassword();
-        final EmailDetails emailDetails = new EmailDetails();
-
-        emailDetails.setRecipient(emailSettings.getEmail());
-        emailDetails.setMsgBody("Test");
-        emailDetails.setSubject("Test Subject");
+        final String fromEmail = "zephan.wong@isssecurity.sg";
+        final String password = "avdfhveswyonpuwq";
+        final String username = emailSettings.getUsername();
+        final String host = "smtp.gmail.com";
+        final String port   = "587";
+//        final String userPassword = emailSettings.getEmailPassword();
 
         System.out.println("TLSEmail Start");
-        Properties props = new Properties();
+
+        Properties TSLprops = new Properties();
 
 // Setup mail server
-        props.setProperty("mail.smtp.host", emailSettings.getHostAddress());
+        TSLprops.setProperty("mail.smtp.host", emailSettings.getHostAddress());
 
 // mail username and password
-        props.setProperty("mail.user", emailSettings.getUsername());
-        props.setProperty("mail.password", emailSettings.getEmailPassword());
-        props.put("mail.transport.protocol", "smtp");
-        props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.starttls.enable", "true");
-        props.put("mail.debug", "true");
-        props.put("mail.smtp.host", "smtp.gmail.com");
-        props.put("mail.smtp.port", "587");
-        props.put("mail.smtp.ssl.protocols", "TLSv1.2");
+        TSLprops.put("mail.smtp.auth", "true");
+        TSLprops.put("mail.smtp.starttls.enable", "true");
+        TSLprops.put("mail.debug", "true");
+        TSLprops.put("mail.smtp.host", host);
+        TSLprops.put("mail.smtp.port",port);
+        TSLprops.put("mail.smtp.ssl.protocols", "TLSv1.2");
 
-
-        System.out.println(props.getProperty("mail.password"));
-        Session session = Session.getDefaultInstance(props,
+        Session TSLsession = Session.getInstance(TSLprops,
                 new javax.mail.Authenticator(){
                     protected PasswordAuthentication getPasswordAuthentication() {
                         return new PasswordAuthentication(
@@ -109,7 +102,8 @@ public class NotificationService {
                 });
 
         try {
-            emailUtil.sendEmail(session, recipient, subject, body);
+            emailUtil.sendEmail(TSLsession, recipient, subject, body, fromEmail, username);
+            System.out.println("TSL email sent");
 
 //
         } catch (Exception e) {
@@ -121,49 +115,49 @@ public class NotificationService {
     public void sendSMTPSSLEmail(String recipient, String subject, String body, EmailSettings emailSettings) throws Exception {
         // at this point this should only be called when we want to use custom, so no need to check isCustom
 
-        final String fromEmail = emailSettings.getEmail();
-        final String password = emailSettings.getEmailPassword();
+        final String fromEmail = "zephan.wong@isssecurity.sg";
+        final String password = "avdfhveswyonpuwq";
+        final String username = emailSettings.getUsername();
+        final String host = "smtp.gmail.com";
+        final String port   = "465";
+//        final String userPassword = emailSettings.getEmailPassword();
+//        final String port   = emailSettings.getPortNumber();
+
 
         System.out.println("SSLEmail Start");
+
+        SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
+        sslContext.init(null, null, null);
+
+        SSLContext.setDefault(sslContext);
+
+        String[] enabledCipherSuites = { "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256" };
+
         Properties props = new Properties();
-
-// Setup mail server
-        props.setProperty("mail.smtp.host", emailSettings.getHostAddress());
-
-// mail username and password
-        props.setProperty("mail.user", emailSettings.getUsername());
-        props.setProperty("mail.password", emailSettings.getEmailPassword());
-        props.put("mail.transport.protocol", "smtp");
+        props.put("mail.smtp.host", host);
+        props.put("mail.smtp.port", port);
+        props.put("mail.smtp.ssl.enable", "true");
+        props.put("mail.smtp.ssl.socketFactory", sslContext.getSocketFactory());
+        props.put("mail.smtp.ssl.protocols", "TLSv1.2");
+        props.put("mail.smtp.ssl.ciphersuites", enabledCipherSuites);
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.socketFactory.port", port);
+        props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
         props.put("mail.debug", "true");
-        props.put("mail.smtp.host", "smtp.gmail.com");
-        props.put("mail.smtp.port", emailSettings.getPortNumber());
-        props.put("mail.smtp.ssl.protocols", "SSLv1.2");
 
-
-        System.out.println(props.getProperty("mail.password"));
-        Session session = Session.getDefaultInstance(props,
-                new javax.mail.Authenticator(){
+        Session session = Session.getInstance(props,
+                new javax.mail.Authenticator() {
                     protected PasswordAuthentication getPasswordAuthentication() {
-                        return new PasswordAuthentication(
-                                fromEmail, password);// Specify the Username and the PassWord
+                        return new PasswordAuthentication(fromEmail, password);
                     }
                 });
 
-        Authenticator auth = new Authenticator() {
-            //override the getPasswordAuthentication method
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(fromEmail, password);
-            }
-        };
-
-        System.out.println("Session created");
         try {
-//            emailUtil.sendSimpleMail(emailDetails);
-            EmailUtil.sendEmail(session, recipient, subject, body);
-        } catch (Exception e) {
-            throw e;
+            emailUtil.sendEmail(session, recipient, subject, body, fromEmail, username);
+            System.out.println("SSL email sent");
+        } catch (MessagingException e) {
+            throw new RuntimeException(e);
         }
     }
 
