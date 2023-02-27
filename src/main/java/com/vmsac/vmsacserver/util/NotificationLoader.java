@@ -41,7 +41,7 @@ public class NotificationLoader implements CommandLineRunner {
         emailSettingsRepository.save(EmailSettings.builder()
                 .username("Zephan Wong Kai En")
                 .email("bickybong@gmail.com")
-                .emailPassword("ztcilxsbkesqjrje")
+                .emailPassword("")
 //                .email("zephan.wong@isssecurity.sg")
 //                .emailPassword("avdfhveswyonpuwq")
                 .hostAddress("smtp.gmail.com")

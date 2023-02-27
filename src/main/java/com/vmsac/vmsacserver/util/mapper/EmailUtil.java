@@ -1,24 +1,22 @@
 package com.vmsac.vmsacserver.util.mapper;
 
+import com.vmsac.vmsacserver.model.notification.EmailSettings;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
+import java.util.Properties;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.activation.FileDataSource;
-import javax.mail.BodyPart;
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.Multipart;
-import javax.mail.Session;
-import javax.mail.Transport;
+import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import javax.net.ssl.SSLContext;
 
 
 @Service
@@ -38,12 +36,97 @@ public class EmailUtil {
 //    }
     private static JavaMailSender javaMailSender = null;
 
+    static final String fromEmail = "zephan.wong@isssecurity.sg";
+    static final String password = "avdfhveswyonpuwq";
+    static final String host = "smtp.gmail.com";
+
+
     public EmailUtil(JavaMailSender javaMailSender) {
         this.javaMailSender = javaMailSender;
     }
 
+
+    public static void TLSEmail(String recipient, String subject,  String text,
+                                String username) throws Exception {
+        System.out.println("TLSEmail Start");
+        final String port = "587";
+
+        Properties TSLprops = new Properties();
+
+// Setup mail server
+        TSLprops.setProperty("mail.smtp.host", host);
+
+// mail username and password
+        TSLprops.put("mail.smtp.auth", "true");
+        TSLprops.put("mail.smtp.starttls.enable", "true");
+        TSLprops.put("mail.debug", "true");
+        TSLprops.put("mail.smtp.host", host);
+        TSLprops.put("mail.smtp.port", port);
+        TSLprops.put("mail.smtp.ssl.protocols", "TLSv1.2");
+
+        Session TSLsession = Session.getInstance(TSLprops,
+                new javax.mail.Authenticator() {
+                    protected PasswordAuthentication getPasswordAuthentication() {
+                        return new PasswordAuthentication(
+                                fromEmail, password);// Specify the Username and the PassWord
+                    }
+                });
+
+        try {
+            sendEmail(TSLsession, recipient, subject, text, fromEmail, username);
+            System.out.println("TLS email sent");
+
+//
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    public static void SSLEmail(String recipient, String subject,  String text,
+                                String username) throws Exception {
+
+        System.out.println("SSLEmail Start");
+        final String port = "465";
+
+        SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
+        sslContext.init(null, null, null);
+
+        SSLContext.setDefault(sslContext);
+
+        String[] enabledCipherSuites = {"TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256"};
+
+        Properties props = new Properties();
+        props.put("mail.smtp.host", host);
+        props.put("mail.smtp.port", port);
+        props.put("mail.smtp.ssl.enable", "true");
+        props.put("mail.smtp.ssl.socketFactory", sslContext.getSocketFactory());
+        props.put("mail.smtp.ssl.protocols", "TLSv1.2");
+        props.put("mail.smtp.ssl.ciphersuites", enabledCipherSuites);
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.socketFactory.port", port);
+        props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+        props.put("mail.debug", "true");
+
+        Session session = Session.getInstance(props,
+                new javax.mail.Authenticator() {
+                    protected PasswordAuthentication getPasswordAuthentication() {
+                        return new PasswordAuthentication(fromEmail, password);
+                    }
+                });
+
+        try {
+            sendEmail(session, recipient, subject, text, fromEmail, username);
+            System.out.println("SSL email sent");
+        } catch (MessagingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
     public static void sendEmail(
-            Session session, String recipient, String subject, String body, String fromEmail, String username) throws Exception {
+            Session session, String recipient, String subject, String text, String fromEmail, String username) throws Exception {
         try {
             MimeMessage message = new MimeMessage(session);
 
@@ -51,8 +134,8 @@ public class EmailUtil {
             message.setFrom(new InternetAddress(fromEmail));
             message.addRecipient(Message.RecipientType.TO,
                     new InternetAddress(recipient));
-            message.setSubject("Etlas Test");
-            message.setText("Hello " + username + ", \n\nThis is a test email from etlas. Please do not reply to this email.");
+            message.setSubject(subject);
+            message.setText(text);
 
             // Send message
             Transport transport = session.getTransport("smtp");
@@ -67,7 +150,6 @@ public class EmailUtil {
             throw e;
         }
     }
-
 
 
     public static void sendAttachmentEmail(Session session, String toEmail, String subject, String body) {

@@ -71,94 +71,25 @@ public class NotificationService {
     public void sendSMTPTLSEmail(String recipient, String subject, String body, EmailSettings emailSettings) throws Exception {
         // at this point this should only be called when we want to use custom, so no need to check isCustom
 
-        final String fromEmail = "zephan.wong@isssecurity.sg";
-        final String password = "avdfhveswyonpuwq";
         final String username = emailSettings.getUsername();
-        final String host = "smtp.gmail.com";
-        final String port   = "587";
-//        final String userPassword = emailSettings.getEmailPassword();
+        final String text = "Hello " + username + ", \n\nThis is a TLS test email from etlas. Please do not reply to this email.";
+        final String emailSubject = "TLS Etlas Test";
 
-        System.out.println("TLSEmail Start");
-
-        Properties TSLprops = new Properties();
-
-// Setup mail server
-        TSLprops.setProperty("mail.smtp.host", emailSettings.getHostAddress());
-
-// mail username and password
-        TSLprops.put("mail.smtp.auth", "true");
-        TSLprops.put("mail.smtp.starttls.enable", "true");
-        TSLprops.put("mail.debug", "true");
-        TSLprops.put("mail.smtp.host", host);
-        TSLprops.put("mail.smtp.port",port);
-        TSLprops.put("mail.smtp.ssl.protocols", "TLSv1.2");
-
-        Session TSLsession = Session.getInstance(TSLprops,
-                new javax.mail.Authenticator(){
-                    protected PasswordAuthentication getPasswordAuthentication() {
-                        return new PasswordAuthentication(
-                                fromEmail, password);// Specify the Username and the PassWord
-                    }
-                });
-
-        try {
-            emailUtil.sendEmail(TSLsession, recipient, subject, body, fromEmail, username);
-            System.out.println("TSL email sent");
-
-//
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
-        }
+        emailUtil.TLSEmail(recipient, emailSubject, text,
+                username);
     }
 
     public void sendSMTPSSLEmail(String recipient, String subject, String body, EmailSettings emailSettings) throws Exception {
         // at this point this should only be called when we want to use custom, so no need to check isCustom
 
-        final String fromEmail = "zephan.wong@isssecurity.sg";
-        final String password = "avdfhveswyonpuwq";
         final String username = emailSettings.getUsername();
-        final String host = "smtp.gmail.com";
-        final String port   = "465";
-//        final String userPassword = emailSettings.getEmailPassword();
-//        final String port   = emailSettings.getPortNumber();
+        final String text = "Hello " + username + ", \n\nThis is a SSL test email from etlas. Please do not reply to this email.";
+        final String emailSubject = "SSL Etlas Test";
+
+        emailUtil.SSLEmail(recipient, emailSubject, text,
+                username);
 
 
-        System.out.println("SSLEmail Start");
-
-        SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
-        sslContext.init(null, null, null);
-
-        SSLContext.setDefault(sslContext);
-
-        String[] enabledCipherSuites = { "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256" };
-
-        Properties props = new Properties();
-        props.put("mail.smtp.host", host);
-        props.put("mail.smtp.port", port);
-        props.put("mail.smtp.ssl.enable", "true");
-        props.put("mail.smtp.ssl.socketFactory", sslContext.getSocketFactory());
-        props.put("mail.smtp.ssl.protocols", "TLSv1.2");
-        props.put("mail.smtp.ssl.ciphersuites", enabledCipherSuites);
-        props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.starttls.enable", "true");
-        props.put("mail.smtp.socketFactory.port", port);
-        props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-        props.put("mail.debug", "true");
-
-        Session session = Session.getInstance(props,
-                new javax.mail.Authenticator() {
-                    protected PasswordAuthentication getPasswordAuthentication() {
-                        return new PasswordAuthentication(fromEmail, password);
-                    }
-                });
-
-        try {
-            emailUtil.sendEmail(session, recipient, subject, body, fromEmail, username);
-            System.out.println("SSL email sent");
-        } catch (MessagingException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public Boolean changeEmailEnablement() {
