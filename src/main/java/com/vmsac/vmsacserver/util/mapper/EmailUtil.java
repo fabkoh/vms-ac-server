@@ -1,6 +1,8 @@
 package com.vmsac.vmsacserver.util.mapper;
 
 import com.vmsac.vmsacserver.model.notification.EmailSettings;
+import com.vmsac.vmsacserver.repository.EmailSettingsRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
@@ -35,18 +37,21 @@ public class EmailUtil {
 //        return mailSender;
 //    }
     private static JavaMailSender javaMailSender = null;
+    static
+    EmailSettingsRepository emailSettingsRepository = null;
 
     static final String fromEmail = "zephan.wong@isssecurity.sg";
     static final String password = "avdfhveswyonpuwq";
     static final String host = "smtp.gmail.com";
 
 
-    public EmailUtil(JavaMailSender javaMailSender) {
+    public EmailUtil(JavaMailSender javaMailSender, EmailSettingsRepository emailSettingsRepository) {
         this.javaMailSender = javaMailSender;
+        this.emailSettingsRepository = emailSettingsRepository;
     }
 
 
-    public static void TLSEmail(String recipient, String subject,  String text,
+    public static void TLSEmail(String recipient, String subject, String text,
                                 String username) throws Exception {
         System.out.println("TLSEmail Start");
         final String port = "587";
@@ -83,7 +88,7 @@ public class EmailUtil {
         }
     }
 
-    public static void SSLEmail(String recipient, String subject,  String text,
+    public static void SSLEmail(String recipient, String subject, String text,
                                 String username) throws Exception {
 
         System.out.println("SSLEmail Start");
@@ -127,7 +132,12 @@ public class EmailUtil {
 
     public static void sendEmail(
             Session session, String recipient, String subject, String text, String fromEmail, String username) throws Exception {
+
         try {
+            EmailSettings currentEmailSettings = emailSettingsRepository.findAll().get(0);
+            if (!currentEmailSettings.getEnabled()) {
+                throw new RuntimeException();
+            }
             MimeMessage message = new MimeMessage(session);
 
             // header field of the header.
