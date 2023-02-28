@@ -149,9 +149,9 @@ public class NotificationController {
         }
         try {
             if (newChanges.getIsTLS()) {
-                notificationService.sendSMTPTLSEmail(newChanges.getEmail(), "Test message", "test", newChanges);
+                notificationService.sendSMTPTLSEmail(newChanges.getEmail(), newChanges.getRecipentUser(), newChanges.getRecipentEmail(), newChanges);
             } else {
-                notificationService.sendSMTPSSLEmail(newChanges.getEmail(), "Test message", "test", newChanges);
+                notificationService.sendSMTPSSLEmail(newChanges.getEmail(), newChanges.getRecipentUser(), newChanges.getRecipentEmail(), newChanges);
             }
         } catch (Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);

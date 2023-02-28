@@ -40,10 +40,6 @@ public class EmailUtil {
     static
     EmailSettingsRepository emailSettingsRepository = null;
 
-    static final String fromEmail = "zephan.wong@isssecurity.sg";
-    static final String password = "avdfhveswyonpuwq";
-    static final String host = "smtp.gmail.com";
-
 
     public EmailUtil(JavaMailSender javaMailSender, EmailSettingsRepository emailSettingsRepository) {
         this.javaMailSender = javaMailSender;
@@ -51,10 +47,13 @@ public class EmailUtil {
     }
 
 
-    public static void TLSEmail(String recipient, String subject, String text,
-                                String username) throws Exception {
+    public static void TLSEmail(String recipentEmail, String subject, String text,
+                                EmailSettings emailSettings) throws Exception {
         System.out.println("TLSEmail Start");
-        final String port = "587";
+        final String port = emailSettings.getPortNumber();
+        final String host = emailSettings.getHostAddress();
+        final String fromEmail = emailSettings.getEmail();
+        final String password = emailSettings.getEmailPassword();
 
         Properties TSLprops = new Properties();
 
@@ -78,7 +77,7 @@ public class EmailUtil {
                 });
 
         try {
-            sendEmail(TSLsession, recipient, subject, text, fromEmail, username);
+            sendEmail(TSLsession, recipentEmail, subject, text, fromEmail);
             System.out.println("TLS email sent");
 
 //
@@ -88,11 +87,15 @@ public class EmailUtil {
         }
     }
 
-    public static void SSLEmail(String recipient, String subject, String text,
-                                String username) throws Exception {
+    public static void SSLEmail(String recipentEmail, String subject, String text,
+                                EmailSettings emailSettings) throws Exception {
+
+        final String port = emailSettings.getPortNumber();
+        final String host = emailSettings.getHostAddress();
+        final String fromEmail = emailSettings.getEmail();
+        final String password = emailSettings.getEmailPassword();
 
         System.out.println("SSLEmail Start");
-        final String port = "465";
 
         SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
         sslContext.init(null, null, null);
@@ -122,7 +125,7 @@ public class EmailUtil {
                 });
 
         try {
-            sendEmail(session, recipient, subject, text, fromEmail, username);
+            sendEmail(session, recipentEmail, subject, text, fromEmail);
             System.out.println("SSL email sent");
         } catch (MessagingException e) {
             throw new RuntimeException(e);
@@ -131,7 +134,7 @@ public class EmailUtil {
 
 
     public static void sendEmail(
-            Session session, String recipient, String subject, String text, String fromEmail, String username) throws Exception {
+            Session session, String recipentEmail, String subject, String text, String fromEmail) throws Exception {
 
         try {
             EmailSettings currentEmailSettings = emailSettingsRepository.findAll().get(0);
@@ -143,7 +146,7 @@ public class EmailUtil {
             // header field of the header.
             message.setFrom(new InternetAddress(fromEmail));
             message.addRecipient(Message.RecipientType.TO,
-                    new InternetAddress(recipient));
+                    new InternetAddress(recipentEmail));
             message.setSubject(subject);
             message.setText(text);
 
