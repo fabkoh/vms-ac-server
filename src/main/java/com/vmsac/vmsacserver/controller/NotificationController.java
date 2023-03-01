@@ -1,15 +1,14 @@
 package com.vmsac.vmsacserver.controller;
 
 import com.vmsac.vmsacserver.model.EventsManagement;
-import com.vmsac.vmsacserver.model.notification.EmailSettings;
-import com.vmsac.vmsacserver.model.notification.EventsManagementNotification;
-import com.vmsac.vmsacserver.model.notification.NotificationLogs;
-import com.vmsac.vmsacserver.model.notification.SmsSettings;
+import com.vmsac.vmsacserver.model.notification.*;
 import com.vmsac.vmsacserver.repository.NotificationLogsRepository;
 import com.vmsac.vmsacserver.service.EventsManagementNotificationService;
 import com.vmsac.vmsacserver.service.EventsManagementService;
 import com.vmsac.vmsacserver.service.NotificationService;
 
+import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -70,9 +69,9 @@ public class NotificationController {
     // flip enablement status
     @PostMapping("/notification/sms/enablement")
     public ResponseEntity<?> changeSmsEnablement() {
-        if (notificationService.changeSmsEnablement()){
+        if (notificationService.changeSmsEnablement()) {
             return new ResponseEntity<>(HttpStatus.OK);
-        }else {
+        } else {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
@@ -80,9 +79,9 @@ public class NotificationController {
     // flip enablement status
     @PostMapping("/notification/email/enablement")
     public ResponseEntity<?> changeEmailEnablement() {
-        if (notificationService.changeEmailEnablement()){
+        if (notificationService.changeEmailEnablement()) {
             return new ResponseEntity<>(HttpStatus.OK);
-        }else {
+        } else {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
@@ -90,9 +89,9 @@ public class NotificationController {
     // change sms api
     @PutMapping("/notification/sms")
     public ResponseEntity<?> changeSmsSettings(@RequestBody @Valid SmsSettings newChanges) {
-        try{
-            return new ResponseEntity<>(notificationService.changeSmsSettings(newChanges),HttpStatus.OK);
-        }catch (Exception e) {
+        try {
+            return new ResponseEntity<>(notificationService.changeSmsSettings(newChanges), HttpStatus.OK);
+        } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
@@ -100,9 +99,9 @@ public class NotificationController {
     // change email username, email, password, portnumber, hostAddress
     @PutMapping("/notification/email")
     public ResponseEntity<?> changeEmailSettings(@RequestBody @Valid EmailSettings newChanges) {
-        try{
-            return new ResponseEntity<>(notificationService.changeEmailSettings(newChanges),HttpStatus.OK);
-        }catch (Exception e) {
+        try {
+            return new ResponseEntity<>(notificationService.changeEmailSettings(newChanges), HttpStatus.OK);
+        } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
@@ -110,9 +109,9 @@ public class NotificationController {
     // sms back to default
     @PostMapping("/notification/sms/backToDefault")
     public ResponseEntity<?> smsBackToDefault() {
-        try{
-            return new ResponseEntity<>(notificationService.smsBackToDefault(),HttpStatus.OK);
-        }catch (Exception e) {
+        try {
+            return new ResponseEntity<>(notificationService.smsBackToDefault(), HttpStatus.OK);
+        } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
@@ -120,21 +119,21 @@ public class NotificationController {
     // email back to default
     @PostMapping("/notification/email/backToDefault")
     public ResponseEntity<?> emailBackToDefault() {
-        try{
-            return new ResponseEntity<>(notificationService.emailBackToDefault(),HttpStatus.OK);
-        }catch (Exception e) {
+        try {
+            return new ResponseEntity<>(notificationService.emailBackToDefault(), HttpStatus.OK);
+        } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 
     public static ExchangeFilterFunction errorHandlingFilter() {
         return ExchangeFilterFunction.ofResponseProcessor(clientResponse -> {
-            if(clientResponse.statusCode()!=null && (clientResponse.statusCode().is5xxServerError() || clientResponse.statusCode().is4xxClientError()) ) {
+            if (clientResponse.statusCode() != null && (clientResponse.statusCode().is5xxServerError() || clientResponse.statusCode().is4xxClientError())) {
                 return clientResponse.bodyToMono(String.class)
                         .flatMap(errorBody -> {
                             return Mono.error(new RuntimeException(errorBody + clientResponse.statusCode()));
                         });
-            }else {
+            } else {
                 return Mono.just(clientResponse);
             }
         });
@@ -153,7 +152,7 @@ public class NotificationController {
             } else {
                 notificationService.sendSMTPSSLEmail(newChanges.getEmail(), newChanges.getRecipentUser(), newChanges.getRecipentEmail(), newChanges);
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
         return new ResponseEntity<>("SMTP email is valid and ready to go", HttpStatus.OK);
@@ -178,7 +177,7 @@ public class NotificationController {
         if (!emailSettings.getEnabled()) {
             NotificationLogs notificationLogs = new NotificationLogs(null, 400, "Email is disabled", DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss")
                     .withZone(ZoneId.of("GMT+08:00"))
-                    .format(Instant.now()),notification);
+                    .format(Instant.now()), notification);
             notificationService.save(notificationLogs);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
@@ -199,12 +198,12 @@ public class NotificationController {
                     }
                     NotificationLogs notificationLogs = new NotificationLogs(null, 200, "", DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss")
                             .withZone(ZoneId.of("GMT+08:00"))
-                            .format(Instant.now()),notification);
+                            .format(Instant.now()), notification);
                     notificationService.save(notificationLogs);
                 } catch (Exception e) {
                     NotificationLogs notificationLogs = new NotificationLogs(null, 400, e.getMessage(), DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss")
                             .withZone(ZoneId.of("GMT+08:00"))
-                            .format(Instant.now()),notification);
+                            .format(Instant.now()), notification);
                     notificationService.save(notificationLogs);
                     hasAnyError = true;
                 }
@@ -236,7 +235,7 @@ public class NotificationController {
                 // saving the time in UTC
                 notificationLogs = new NotificationLogs(null, 200, "", DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss")
                         .withZone(ZoneId.of("GMT+08:00"))
-                        .format(Instant.now()),notification);
+                        .format(Instant.now()), notification);
                 notificationService.save(notificationLogs);
                 return new ResponseEntity<>(HttpStatus.OK);
             }
@@ -245,7 +244,7 @@ public class NotificationController {
         }
         notificationLogs = new NotificationLogs(null, 400, "Email failed to send", DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss")
                 .withZone(ZoneId.of("GMT+08:00"))
-                .format(Instant.now()),notification);
+                .format(Instant.now()), notification);
         notificationService.save(notificationLogs);
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
@@ -255,12 +254,12 @@ public class NotificationController {
     public ResponseEntity<?> AllNotificationLogs(@RequestParam(value = "batchNo", required = false) Integer batchNo,
                                                  @RequestParam(value = "queryString", required = false) String queryStr,
                                                  @RequestParam(value = "start", required = false)
-                                                     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
+                                                 @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
                                                  @RequestParam(value = "end", required = false)
-                                                     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
-        try{
-            return new ResponseEntity<>(notificationService.getNotificationLogsByTimeDesc(queryStr, start, end, batchNo, 500),HttpStatus.OK);
-        }catch (Exception e) {
+                                                 @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
+        try {
+            return new ResponseEntity<>(notificationService.getNotificationLogsByTimeDesc(queryStr, start, end, batchNo, 500), HttpStatus.OK);
+        } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
@@ -268,6 +267,17 @@ public class NotificationController {
     @GetMapping("/notification/logs/count")
     public ResponseEntity<Long> countTotalEvents() {
         return new ResponseEntity<>(notificationLogsRepository.count(), HttpStatus.OK);
+    }
+
+    // flip enablement status
+    @PostMapping("/notification/sms/test")
+    public ResponseEntity<?> testSMS(@RequestBody SmsSettings smsSettings) {
+        System.out.println(smsSettings);
+
+        String mobilenumber = smsSettings.getRecipentSMS();
+        String message = "This is a Etlas test SMS";
+        NotificationService.sendSMS(mobilenumber, message);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 }

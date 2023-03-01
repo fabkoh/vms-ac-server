@@ -79,7 +79,6 @@ public class EmailUtil {
         try {
             sendEmail(TSLsession, recipentEmail, subject, text, fromEmail);
             System.out.println("TLS email sent");
-
 //
         } catch (Exception e) {
             e.printStackTrace();

@@ -11,8 +11,10 @@ import com.vmsac.vmsacserver.repository.SmsSettingsRepository;
 import com.vmsac.vmsacserver.util.mapper.EmailUtil;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Properties;
@@ -92,7 +94,6 @@ public class NotificationService {
 
         emailUtil.SSLEmail(recipentEmail, emailSubject, text,
                 emailSettings);
-
 
     }
 
@@ -175,6 +176,21 @@ public class NotificationService {
             result = getEventsByTimeDesc(pageNo, pageSize);
 
         return result;
+    }
+
+    public static void sendSMS(
+            String mobilenumber,
+            String message) {
+        String apikey = "isssecurity";
+        String url = "https://api.inthenetworld.com/sms/send/{apikey}/{mobilenumber}/{message}";
+        RestTemplate restTemplate = new RestTemplateBuilder().build();
+        try {
+            String responseBody = restTemplate.getForObject(url, String.class, apikey, mobilenumber, message);
+            System.out.println(responseBody);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
     }
 
 }
