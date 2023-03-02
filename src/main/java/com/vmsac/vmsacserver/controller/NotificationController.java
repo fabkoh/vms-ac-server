@@ -273,11 +273,15 @@ public class NotificationController {
     @PostMapping("/notification/sms/test")
     public ResponseEntity<?> testSMS(@RequestBody SmsSettings smsSettings) {
         System.out.println(smsSettings);
-
         String mobilenumber = smsSettings.getRecipentSMS();
         String message = "This is a Etlas test SMS";
-        NotificationService.sendSMS(mobilenumber, message);
+        NotificationService.sendSMS(mobilenumber, message, notificationService);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("/notification/sms/credits")
+    public ResponseEntity<?> getSmsCredits() {
+        return new ResponseEntity<>(notificationService.getSmsCredits(), HttpStatus.OK);
     }
 
 }

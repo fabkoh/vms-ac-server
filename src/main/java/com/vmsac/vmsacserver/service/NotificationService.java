@@ -47,6 +47,8 @@ public class NotificationService {
     }
 
     public SmsSettings getSmsSettings() {
+        SmsSettings smsSettings = smsSettingsRepository.findAll().get(0);
+        System.out.println(smsSettings);
         return smsSettingsRepository.findAll().get(0);
     }
 
@@ -180,17 +182,33 @@ public class NotificationService {
 
     public static void sendSMS(
             String mobilenumber,
-            String message) {
+            String message,
+            NotificationService notificationService) {
+        SmsSettings smsSettings = notificationService.getSmsSettings();
+        if (!smsSettings.getEnabled()) {
+            throw new RuntimeException("SMS settings are not enabled");
+        }
+        // use smsSettings object here
+
         String apikey = "isssecurity";
         String url = "https://api.inthenetworld.com/sms/send/{apikey}/{mobilenumber}/{message}";
         RestTemplate restTemplate = new RestTemplateBuilder().build();
         try {
             String responseBody = restTemplate.getForObject(url, String.class, apikey, mobilenumber, message);
             System.out.println(responseBody);
-        } catch (Exception e) {
+        } catch (
+                Exception e) {
             e.printStackTrace();
             throw e;
         }
+    }
+
+    public static String getSmsCredits() {
+        String url = "https://api.inthenetworld.com/sms/getQuota/isssecurity";
+        RestTemplate restTemplate = new RestTemplateBuilder().build();
+        String responseBody = restTemplate.getForObject(url, String.class);
+        System.out.println(responseBody);
+        return responseBody;
     }
 
 }
