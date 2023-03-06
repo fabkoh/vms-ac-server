@@ -184,6 +184,7 @@ public class EventsManagementService {
             }
         }
         System.out.println("trigger sch bp 5");
+        System.out.println(resultEms);
         eventsManagementRepository.saveAllAndFlush(resultEms);
         return resultEms;
     }

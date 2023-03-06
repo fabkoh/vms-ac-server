@@ -62,6 +62,8 @@ public class WebSecurityConfig {
                 .antMatchers("/h2-console/**").permitAll()
                 .antMatchers("/api/unicon/controller/**").permitAll()  // <-- add this line
                 .antMatchers("/api/unicon/events").permitAll()  // <-- add this line
+                .antMatchers("/api/notification/eventsSMTP").permitAll()  // <-- add this line
+                .antMatchers("/api/notification/eventsSMS").permitAll()  // <-- add this line
                 .antMatchers("/swagger-ui/**").permitAll()
                 .antMatchers("/v3/api-docs/**").permitAll()
                 .antMatchers("/**")
