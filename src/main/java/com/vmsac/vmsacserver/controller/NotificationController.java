@@ -157,48 +157,7 @@ public class NotificationController {
         }
         return new ResponseEntity<>("SMTP email is valid and ready to go", HttpStatus.OK);
     }
-    @PostMapping("notification/eventsSMTP")
-    public ResponseEntity<?> eventsSMTP(@RequestBody @Valid EventsManagement newChanges) {
-        Long eventsManagementId = newChanges.getEventsManagementId();
-        Optional<EventsManagementNotification> eventsManagementNotification = eventsManagementNotificationService.findEmailByEventsManagementIdNotDeleted(eventsManagementId);
-        if(!eventsManagementNotification.isEmpty()) {
-            String message = eventsManagementNotification.get().getEventsManagementNotificationContent();
-            String recipents = eventsManagementNotification.get().getEventsManagementNotificationRecipients();
-            System.out.println(eventsManagementNotification.get());
-        }
-//        if (!newChanges.getCustom()) {
-//            // always return ok when using default email
-//            return new ResponseEntity<>("Default settings are used", HttpStatus.OK);
-//        }
-//        try {
-//            if (newChanges.getIsTLS()) {
-//                notificationService.sendSMTPTLSEmail(newChanges.getEmail(), newChanges.getRecipentUser(), newChanges.getRecipentEmail(), newChanges);
-//            } else {
-//                notificationService.sendSMTPSSLEmail(newChanges.getEmail(), newChanges.getRecipentUser(), newChanges.getRecipentEmail(), newChanges);
-//            }
-//        } catch (Exception e) {
-//            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-//        }
-        return new ResponseEntity<>("SMTP email is valid and ready to go", HttpStatus.OK);
-    }
-@PostMapping("notification/eventsSMS")
-    public ResponseEntity<?> eventsSMS(@RequestBody @Valid EventsManagement newChanges) {
-        System.out.println(newChanges);
-//        if (!newChanges.getCustom()) {
-//            // always return ok when using default email
-//            return new ResponseEntity<>("Default settings are used", HttpStatus.OK);
-//        }
-//        try {
-//            if (newChanges.getIsTLS()) {
-//                notificationService.sendSMTPTLSEmail(newChanges.getEmail(), newChanges.getRecipentUser(), newChanges.getRecipentEmail(), newChanges);
-//            } else {
-//                notificationService.sendSMTPSSLEmail(newChanges.getEmail(), newChanges.getRecipentUser(), newChanges.getRecipentEmail(), newChanges);
-//            }
-//        } catch (Exception e) {
-//            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-//        }
-        return new ResponseEntity<>("SMTP email is valid and ready to go", HttpStatus.OK);
-    }
+
 
     // all notification logs
     @GetMapping("/notification/sendEmail/{eventsManagementId}")
