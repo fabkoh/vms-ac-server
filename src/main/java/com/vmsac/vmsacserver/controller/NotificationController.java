@@ -142,15 +142,18 @@ public class NotificationController {
     @PostMapping("notification/testSMTP")
     public ResponseEntity<?> testEmail(@RequestBody @Valid EmailSettings newChanges) {
         System.out.println(newChanges);
+        final String text = "Hello " + newChanges.getRecipentUser() + ", \n\nThis is a TLS test email from etlas. Please do not reply to this email.";
+        final String emailSubject = "TLS Etlas Test";
         if (!newChanges.getCustom()) {
             // always return ok when using default email
             return new ResponseEntity<>("Default settings are used", HttpStatus.OK);
         }
         try {
+
             if (newChanges.getIsTLS()) {
-                notificationService.sendSMTPTLSEmail(newChanges.getEmail(), newChanges.getRecipentUser(), newChanges.getRecipentEmail(), newChanges);
+                notificationService.sendSMTPTLSEmail(text, emailSubject, newChanges.getRecipentEmail(), newChanges);
             } else {
-                notificationService.sendSMTPSSLEmail(newChanges.getEmail(), newChanges.getRecipentUser(), newChanges.getRecipentEmail(), newChanges);
+                notificationService.sendSMTPSSLEmail(text, emailSubject, newChanges.getRecipentEmail(), newChanges);
             }
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
@@ -160,95 +163,95 @@ public class NotificationController {
 
 
     // all notification logs
-    @GetMapping("/notification/sendEmail/{eventsManagementId}")
-    public ResponseEntity<?> sendEmail(@PathVariable Long eventsManagementId) {
-        // TODO: Loop through the recipients in event management when recipient addition is available for send mail api
-        Optional<EventsManagement> eventsManagementOptional = eventsManagementService.getEventsManagementById(eventsManagementId);
-        if (eventsManagementOptional.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-        EventsManagement eventsManagement = eventsManagementOptional.get();
-        Optional<EventsManagementNotification> notificationOptional = eventsManagementNotificationService.findEmailByEventsManagementIdNotDeleted(eventsManagement.getEventsManagementId());
-        if (notificationOptional.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-
-        EventsManagementNotification notification = notificationOptional.get();
-        EmailSettings emailSettings = notificationService.getEmailSettings();
-        if (!emailSettings.getEnabled()) {
-            NotificationLogs notificationLogs = new NotificationLogs(null, 400, "Email is disabled", DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss")
-                    .withZone(ZoneId.of("GMT+08:00"))
-                    .format(Instant.now()), notification);
-            notificationService.save(notificationLogs);
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
-        String content = notification.getEventsManagementNotificationContent() + " on " + LocalDateTime.now().format(dtf) + ".";
-
-        if (emailSettings.getCustom()) {
-            String[] recipients;
-            recipients = notification.getEventsManagementNotificationRecipients().split(",");
-            boolean hasAnyError = false;
-            for (int i = 0; i < recipients.length; i++) {
-                try {
-                    // only send to the first one
-                    if (emailSettings.getIsTLS()) {
-                        notificationService.sendSMTPTLSEmail(recipients[i], notification.getEventsManagementNotificationTitle(), content, emailSettings);
-                    } else {
-                        notificationService.sendSMTPSSLEmail(recipients[i], notification.getEventsManagementNotificationTitle(), content, emailSettings);
-                    }
-                    NotificationLogs notificationLogs = new NotificationLogs(null, 200, "", DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss")
-                            .withZone(ZoneId.of("GMT+08:00"))
-                            .format(Instant.now()), notification);
-                    notificationService.save(notificationLogs);
-                } catch (Exception e) {
-                    NotificationLogs notificationLogs = new NotificationLogs(null, 400, e.getMessage(), DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss")
-                            .withZone(ZoneId.of("GMT+08:00"))
-                            .format(Instant.now()), notification);
-                    notificationService.save(notificationLogs);
-                    hasAnyError = true;
-                }
-            }
-            if (hasAnyError) {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
-            return new ResponseEntity<>(HttpStatus.OK);
-        }
-
-        String uri = String.format("%s/%s", notification.getEventsManagementNotificationTitle(), content);
-        AtomicBoolean hasError = new AtomicBoolean(false);
-        NotificationLogs notificationLogs;
-        try {
-            String clientResponse = client.get().uri(uri).retrieve()
-                    .onStatus(
-                            HttpStatus.INTERNAL_SERVER_ERROR::equals,
-                            response -> {
-                                return response.bodyToMono(String.class).map(Exception::new);
-                            })
-                    .onStatus(
-                            HttpStatus.BAD_REQUEST::equals,
-                            response -> {
-                                return response.bodyToMono(String.class).map(Exception::new);
-                            })
-                    .bodyToMono(String.class)
-                    .block(Duration.ofMillis(5000));
-            if (!hasError.get()) {
-                // saving the time in UTC
-                notificationLogs = new NotificationLogs(null, 200, "", DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss")
-                        .withZone(ZoneId.of("GMT+08:00"))
-                        .format(Instant.now()), notification);
-                notificationService.save(notificationLogs);
-                return new ResponseEntity<>(HttpStatus.OK);
-            }
-        } catch (Exception e) {
-            // do nothing
-        }
-        notificationLogs = new NotificationLogs(null, 400, "Email failed to send", DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss")
-                .withZone(ZoneId.of("GMT+08:00"))
-                .format(Instant.now()), notification);
-        notificationService.save(notificationLogs);
-        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-    }
+//    @GetMapping("/notification/sendEmail/{eventsManagementId}")
+//    public ResponseEntity<?> sendEmail(@PathVariable Long eventsManagementId) {
+//        // TODO: Loop through the recipients in event management when recipient addition is available for send mail api
+//        Optional<EventsManagement> eventsManagementOptional = eventsManagementService.getEventsManagementById(eventsManagementId);
+//        if (eventsManagementOptional.isEmpty()) {
+//            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+//        }
+//        EventsManagement eventsManagement = eventsManagementOptional.get();
+//        Optional<EventsManagementNotification> notificationOptional = eventsManagementNotificationService.findEmailByEventsManagementIdNotDeleted(eventsManagement.getEventsManagementId());
+//        if (notificationOptional.isEmpty()) {
+//            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+//        }
+//
+//        EventsManagementNotification notification = notificationOptional.get();
+//        EmailSettings emailSettings = notificationService.getEmailSettings();
+//        if (!emailSettings.getEnabled()) {
+//            NotificationLogs notificationLogs = new NotificationLogs(null, 400, "Email is disabled", DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss")
+//                    .withZone(ZoneId.of("GMT+08:00"))
+//                    .format(Instant.now()), notification);
+//            notificationService.save(notificationLogs);
+//            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+//        }
+//        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
+//        String content = notification.getEventsManagementNotificationContent() + " on " + LocalDateTime.now().format(dtf) + ".";
+//
+//        if (emailSettings.getCustom()) {
+//            String[] recipients;
+//            recipients = notification.getEventsManagementNotificationRecipients().split(",");
+//            boolean hasAnyError = false;
+//            for (int i = 0; i < recipients.length; i++) {
+//                try {
+//                    // only send to the first one
+//                    if (emailSettings.getIsTLS()) {
+//                        notificationService.sendSMTPTLSEmail(recipients[i], notification.getEventsManagementNotificationTitle(), content, emailSettings);
+//                    } else {
+//                        notificationService.sendSMTPSSLEmail(recipients[i], notification.getEventsManagementNotificationTitle(), content, emailSettings);
+//                    }
+//                    NotificationLogs notificationLogs = new NotificationLogs(null, 200, "", DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss")
+//                            .withZone(ZoneId.of("GMT+08:00"))
+//                            .format(Instant.now()), notification);
+//                    notificationService.save(notificationLogs);
+//                } catch (Exception e) {
+//                    NotificationLogs notificationLogs = new NotificationLogs(null, 400, e.getMessage(), DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss")
+//                            .withZone(ZoneId.of("GMT+08:00"))
+//                            .format(Instant.now()), notification);
+//                    notificationService.save(notificationLogs);
+//                    hasAnyError = true;
+//                }
+//            }
+//            if (hasAnyError) {
+//                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+//            }
+//            return new ResponseEntity<>(HttpStatus.OK);
+//        }
+//
+//        String uri = String.format("%s/%s", notification.getEventsManagementNotificationTitle(), content);
+//        AtomicBoolean hasError = new AtomicBoolean(false);
+//        NotificationLogs notificationLogs;
+//        try {
+//            String clientResponse = client.get().uri(uri).retrieve()
+//                    .onStatus(
+//                            HttpStatus.INTERNAL_SERVER_ERROR::equals,
+//                            response -> {
+//                                return response.bodyToMono(String.class).map(Exception::new);
+//                            })
+//                    .onStatus(
+//                            HttpStatus.BAD_REQUEST::equals,
+//                            response -> {
+//                                return response.bodyToMono(String.class).map(Exception::new);
+//                            })
+//                    .bodyToMono(String.class)
+//                    .block(Duration.ofMillis(5000));
+//            if (!hasError.get()) {
+//                // saving the time in UTC
+//                notificationLogs = new NotificationLogs(null, 200, "", DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss")
+//                        .withZone(ZoneId.of("GMT+08:00"))
+//                        .format(Instant.now()), notification);
+//                notificationService.save(notificationLogs);
+//                return new ResponseEntity<>(HttpStatus.OK);
+//            }
+//        } catch (Exception e) {
+//            // do nothing
+//        }
+//        notificationLogs = new NotificationLogs(null, 400, "Email failed to send", DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss")
+//                .withZone(ZoneId.of("GMT+08:00"))
+//                .format(Instant.now()), notification);
+//        notificationService.save(notificationLogs);
+//        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+//    }
 
     // all notification logs
     @GetMapping("/notification/logs/all")

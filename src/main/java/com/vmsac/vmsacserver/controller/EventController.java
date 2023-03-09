@@ -2,11 +2,15 @@ package com.vmsac.vmsacserver.controller;
 
 import com.vmsac.vmsacserver.model.Event;
 import com.vmsac.vmsacserver.model.EventsManagement;
+import com.vmsac.vmsacserver.model.notification.EmailSettings;
 import com.vmsac.vmsacserver.model.notification.EventsManagementNotification;
+import com.vmsac.vmsacserver.repository.EmailSettingsRepository;
 import com.vmsac.vmsacserver.repository.EventRepository;
+import com.vmsac.vmsacserver.service.EmailSettingNotificationService;
 import com.vmsac.vmsacserver.service.EventService;
 import com.vmsac.vmsacserver.util.IPaddressWhitelisting;
 import com.vmsac.vmsacserver.service.EventsManagementNotificationService;
+import com.vmsac.vmsacserver.service.NotificationService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -18,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,6 +30,9 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api")
 public class EventController {
+
+    @Autowired
+    NotificationService notificationService;
 
     @Autowired
     private EventService eventService;
@@ -37,6 +45,8 @@ public class EventController {
 
     @Autowired
     EventsManagementNotificationService eventsManagementNotificationService;
+    @Autowired
+    EmailSettingNotificationService emailSettingNotificationService;
 
     @PreAuthorize("permitAll()")
     @PostMapping("unicon/events")
@@ -73,28 +83,34 @@ public class EventController {
     }
 
     @PostMapping("events/eventsSMTP")
-    public ResponseEntity<?> eventsSMTP(@RequestBody @Valid EventsManagement newChanges) {
+    public ResponseEntity<?> eventsSMTP(@RequestBody @Valid EventsManagement newChanges) throws Exception {
         Long eventsManagementId = newChanges.getEventsManagementId();
         Optional<EventsManagementNotification> eventsManagementNotification = eventsManagementNotificationService.findEmailByEventsManagementIdNotDeleted(eventsManagementId);
-        System.out.println(newChanges);
         if (!eventsManagementNotification.isEmpty()) {
-            String message = eventsManagementNotification.get().getEventsManagementNotificationContent();
-            String recipents = eventsManagementNotification.get().getEventsManagementNotificationRecipients();
+            List<EmailSettings> emailSettings = emailSettingNotificationService.findAll();
+            EmailSettings emailSettings1 = emailSettings.get(0);
+            Boolean isTLS = emailSettings1.getIsTLS();
+            EventsManagementNotification eventsManagementNotification1 = eventsManagementNotification.get();
+            String message = eventsManagementNotification1.getEventsManagementNotificationContent();
+            String emails = eventsManagementNotification1.getEventsManagementNotificationRecipients();
+            String subject = "Event Management triggered";
+            String[] emailArray = emails.split(",");
+            List<String> emailList = Arrays.asList(emailArray);
+            for (String recipents : emailList) {
+                System.out.println(recipents);
+                try {
+                    if (isTLS) {
+                        notificationService.sendSMTPTLSEmail(message, subject, recipents, emailSettings1);
+                    } else {
+                        notificationService.sendSMTPSSLEmail(message, subject, recipents, emailSettings1);
+                    }
+                } catch (Exception e) {
+                    return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+                }
+            }
+            return new ResponseEntity<>("SMTP email sent", HttpStatus.OK);
         }
-//        if (!newChanges.getCustom()) {
-//            // always return ok when using default email
-//            return new ResponseEntity<>("Default settings are used", HttpStatus.OK);
-//        }
-//        try {
-//            if (newChanges.getIsTLS()) {
-//                notificationService.sendSMTPTLSEmail(newChanges.getEmail(), newChanges.getRecipentUser(), newChanges.getRecipentEmail(), newChanges);
-//            } else {
-//                notificationService.sendSMTPSSLEmail(newChanges.getEmail(), newChanges.getRecipentUser(), newChanges.getRecipentEmail(), newChanges);
-//            }
-//        } catch (Exception e) {
-//            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-//        }
-        return new ResponseEntity<>("SMTP email is valid and ready to go", HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
     @PostMapping("events/eventsSMS")

@@ -72,27 +72,23 @@ public class NotificationService {
 
     }
 
-    public void sendSMTPTLSEmail(String recipient, String recipentUser, String recipentEmail, EmailSettings emailSettings) throws Exception {
+    public void sendSMTPTLSEmail( String text, String emailSubject, String recipentEmail, EmailSettings emailSettings) throws Exception {
         // at this point this should only be called when we want to use custom, so no need to check isCustom
 //        check if email settings is enabled
 
 
-        final String text = "Hello " + recipentUser + ", \n\nThis is a TLS test email from etlas. Please do not reply to this email.";
-        final String emailSubject = "TLS Etlas Test";
 
         emailUtil.TLSEmail(recipentEmail, emailSubject, text,
                 emailSettings);
     }
 
-    public void sendSMTPSSLEmail(String recipient, String recipentUser, String recipentEmail, EmailSettings emailSettings) throws Exception {
+    public void sendSMTPSSLEmail(String text, String emailSubject, String recipentEmail, EmailSettings emailSettings) throws Exception {
         // at this point this should only be called when we want to use custom, so no need to check isCustom
 //        EmailSettings currentEmailSettings = emailSettingsRepository.findAll().get(0);
 //        if(!currentEmailSettings.getEnabled()){
 //            throw new RuntimeException();
 //        }
 
-        final String text = "Hello " + recipentUser + ", \n\nThis is a SSL test email from etlas. Please do not reply to this email.";
-        final String emailSubject = "SSL Etlas Test";
 
         emailUtil.SSLEmail(recipentEmail, emailSubject, text,
                 emailSettings);
@@ -210,5 +206,7 @@ public class NotificationService {
         System.out.println(responseBody);
         return responseBody;
     }
+
+
 
 }
