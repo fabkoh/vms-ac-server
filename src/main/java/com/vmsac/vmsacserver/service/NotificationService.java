@@ -10,12 +10,20 @@ import com.vmsac.vmsacserver.repository.NotificationLogsRepository;
 import com.vmsac.vmsacserver.repository.SmsSettingsRepository;
 import com.vmsac.vmsacserver.util.mapper.EmailUtil;
 
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.TrustAllStrategy;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.ssl.SSLContextBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Properties;
 import javax.mail.*;
@@ -179,7 +187,13 @@ public class NotificationService {
     public static void sendSMS(
             String mobilenumber,
             String message,
-            NotificationService notificationService) {
+            NotificationService notificationService) throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+        RestTemplate restTemplate = new RestTemplate();
+
+        HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
+        requestFactory.setHttpClient(HttpClientBuilder.create().setSSLContext(new SSLContextBuilder().loadTrustMaterial(null, TrustAllStrategy.INSTANCE).build()).setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build());
+        restTemplate.setRequestFactory(requestFactory);
+
         SmsSettings smsSettings = notificationService.getSmsSettings();
         if (!smsSettings.getEnabled()) {
             throw new RuntimeException("SMS settings are not enabled");
@@ -188,7 +202,7 @@ public class NotificationService {
 
         String apikey = "isssecurity";
         String url = "https://api.inthenetworld.com/sms/send/{apikey}/{mobilenumber}/{message}";
-        RestTemplate restTemplate = new RestTemplateBuilder().build();
+//        RestTemplate restTemplate = new RestTemplateBuilder().build();
         try {
             String responseBody = restTemplate.getForObject(url, String.class, apikey, mobilenumber, message);
             System.out.println(responseBody);

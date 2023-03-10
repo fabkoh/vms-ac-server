@@ -93,7 +93,7 @@ public class EventController {
             EventsManagementNotification eventsManagementNotification1 = eventsManagementNotification.get();
             String message = eventsManagementNotification1.getEventsManagementNotificationContent();
             String emails = eventsManagementNotification1.getEventsManagementNotificationRecipients();
-            String subject = "Event Management triggered";
+            String subject = eventsManagementNotification1.getEventsManagementNotificationTitle();
             String[] emailArray = emails.split(",");
             List<String> emailList = Arrays.asList(emailArray);
             for (String recipents : emailList) {
@@ -116,19 +116,25 @@ public class EventController {
     @PostMapping("events/eventsSMS")
     public ResponseEntity<?> eventsSMS(@RequestBody @Valid EventsManagement newChanges) {
         System.out.println(newChanges);
-//        if (!newChanges.getCustom()) {
-//            // always return ok when using default email
-//            return new ResponseEntity<>("Default settings are used", HttpStatus.OK);
-//        }
-//        try {
-//            if (newChanges.getIsTLS()) {
-//                notificationService.sendSMTPTLSEmail(newChanges.getEmail(), newChanges.getRecipentUser(), newChanges.getRecipentEmail(), newChanges);
-//            } else {
-//                notificationService.sendSMTPSSLEmail(newChanges.getEmail(), newChanges.getRecipentUser(), newChanges.getRecipentEmail(), newChanges);
-//            }
-//        } catch (Exception e) {
-//            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-//        }
-        return new ResponseEntity<>("SMTP email is valid and ready to go", HttpStatus.OK);
+        Long eventsManagementId = newChanges.getEventsManagementId();
+        Optional<EventsManagementNotification> eventsManagementNotification = eventsManagementNotificationService.findSMSByEventsManagementIdNotDeleted(eventsManagementId);
+        System.out.println(eventsManagementNotification);
+        if (!eventsManagementNotification.isEmpty()) {
+            EventsManagementNotification eventsManagementNotification1 = eventsManagementNotification.get();
+            String message = eventsManagementNotification1.getEventsManagementNotificationContent();
+            String mobiles = eventsManagementNotification1.getEventsManagementNotificationRecipients();
+            String[] mobileArray = mobiles.split(",");
+            List<String> mobileList = Arrays.asList(mobileArray);
+            for (String mobile : mobileList) {
+                System.out.println(mobile);
+                try {
+                    notificationService.sendSMS(mobile, message, notificationService);
+                } catch (Exception e) {
+                    return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+                }
+            }
+            return new ResponseEntity<>("SMS sent", HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 }

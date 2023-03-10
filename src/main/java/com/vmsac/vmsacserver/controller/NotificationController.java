@@ -20,6 +20,9 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import javax.validation.Valid;
 
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -275,7 +278,7 @@ public class NotificationController {
 
     // flip enablement status
     @PostMapping("/notification/sms/test")
-    public ResponseEntity<?> testSMS(@RequestBody SmsSettings smsSettings) {
+    public ResponseEntity<?> testSMS(@RequestBody SmsSettings smsSettings) throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
         System.out.println(smsSettings);
         String mobilenumber = smsSettings.getRecipentSMS();
         String message = "This is a Etlas test SMS";
