@@ -108,6 +108,17 @@ public class NotificationController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
+//    // change email username, email, password, portnumber, hostAddress
+//    @PutMapping("/notification/sms")
+//    public ResponseEntity<?> changeSMSSettings(@RequestBody @Valid SmsSettings newChanges) {
+//        try {
+//            System.out.println(newChanges);
+//            return new ResponseEntity<>( HttpStatus.OK);
+////            return new ResponseEntity<>(notificationService.changeEmailSettings(newChanges), HttpStatus.OK);
+//        } catch (Exception e) {
+//            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+//        }
+//    }
 
     // sms back to default
     @PostMapping("/notification/sms/backToDefault")

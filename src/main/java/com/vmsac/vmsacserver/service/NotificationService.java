@@ -116,7 +116,7 @@ public class NotificationService {
     }
 
     public SmsSettings changeSmsSettings(SmsSettings newchanges) {
-//        System.out.println(newchanges);
+        System.out.println(newchanges);
         SmsSettings currentSmsSettings = smsSettingsRepository.findAll().get(0);
         currentSmsSettings.setSmsAPI(newchanges.getSmsAPI());
 //        System.out.println(currentSmsSettings);
