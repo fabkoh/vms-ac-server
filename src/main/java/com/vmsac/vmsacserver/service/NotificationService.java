@@ -200,9 +200,10 @@ public class NotificationService {
         }
         // use smsSettings object here
 
-        String apikey = "isssecurity";
+        String apikey = smsSettings.getSmsAPI();
+        System.out.println(apikey);
+        System.out.println(message);
         String url = "https://api.inthenetworld.com/sms/send/{apikey}/{mobilenumber}/{message}";
-//        RestTemplate restTemplate = new RestTemplateBuilder().build();
         try {
             String responseBody = restTemplate.getForObject(url, String.class, apikey, mobilenumber, message);
             System.out.println(responseBody);

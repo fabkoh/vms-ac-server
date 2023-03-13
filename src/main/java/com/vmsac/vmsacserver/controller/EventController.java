@@ -127,6 +127,7 @@ public class EventController {
             List<String> mobileList = Arrays.asList(mobileArray);
             for (String mobile : mobileList) {
                 System.out.println(mobile);
+                System.out.println(message);
                 try {
                     notificationService.sendSMS(mobile, message, notificationService);
                 } catch (Exception e) {
