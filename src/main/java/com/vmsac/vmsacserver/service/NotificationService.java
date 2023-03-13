@@ -213,9 +213,15 @@ public class NotificationService {
         }
     }
 
-    public static String getSmsCredits() {
+    public static String getSmsCredits() throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+        RestTemplate restTemplate = new RestTemplate();
+
+        HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
+        requestFactory.setHttpClient(HttpClientBuilder.create().setSSLContext(new SSLContextBuilder().loadTrustMaterial(null, TrustAllStrategy.INSTANCE).build()).setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build());
+        restTemplate.setRequestFactory(requestFactory);
+
         String url = "https://api.inthenetworld.com/sms/getQuota/isssecurity";
-        RestTemplate restTemplate = new RestTemplateBuilder().build();
+//        RestTemplate restTemplate = new RestTemplateBuilder().build();
         String responseBody = restTemplate.getForObject(url, String.class);
         System.out.println(responseBody);
         return responseBody;

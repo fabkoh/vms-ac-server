@@ -145,8 +145,7 @@ public class NotificationController {
     @PostMapping("notification/testSMTP")
     public ResponseEntity<?> testEmail(@RequestBody @Valid EmailSettings newChanges) {
         System.out.println(newChanges);
-        final String text = "Hello " + newChanges.getRecipentUser() + ", \n\nThis is a TLS test email from etlas. Please do not reply to this email.";
-        final String emailSubject = "TLS Etlas Test";
+
         if (!newChanges.getCustom()) {
             // always return ok when using default email
             return new ResponseEntity<>("Default settings are used", HttpStatus.OK);
@@ -154,8 +153,12 @@ public class NotificationController {
         try {
 
             if (newChanges.getIsTLS()) {
+                final String text = "Hello " + newChanges.getRecipentUser() + ", \n\nThis is a TLS test email from etlas. Please do not reply to this email.";
+                final String emailSubject = "TLS Etlas Test";
                 notificationService.sendSMTPTLSEmail(text, emailSubject, newChanges.getRecipentEmail(), newChanges);
             } else {
+                final String text = "Hello " + newChanges.getRecipentUser() + ", \n\nThis is a SSL test email from etlas. Please do not reply to this email.";
+                final String emailSubject = "SSL Etlas Test";
                 notificationService.sendSMTPSSLEmail(text, emailSubject, newChanges.getRecipentEmail(), newChanges);
             }
         } catch (Exception e) {
@@ -287,7 +290,7 @@ public class NotificationController {
     }
 
     @GetMapping("/notification/sms/credits")
-    public ResponseEntity<?> getSmsCredits() {
+    public ResponseEntity<?> getSmsCredits() throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
         return new ResponseEntity<>(notificationService.getSmsCredits(), HttpStatus.OK);
     }
 
