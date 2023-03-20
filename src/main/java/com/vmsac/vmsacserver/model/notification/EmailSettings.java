@@ -43,5 +43,9 @@ public class EmailSettings {
 
     @Column(name = "custom")
     private Boolean custom;
+    @Column(name = "recipentUser")
+    private String recipentUser;
+    @Column(name = "recipentEmail")
+    private String recipentEmail;
 
 }

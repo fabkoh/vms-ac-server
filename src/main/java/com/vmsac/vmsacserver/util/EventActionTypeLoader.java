@@ -12,6 +12,8 @@ import org.springframework.stereotype.Component;
 public class EventActionTypeLoader implements CommandLineRunner {
     private final EventActionTypeRepository eventActionTypeRepository;
 
+
+
     public EventActionTypeLoader(EventActionTypeRepository eventActionTypeRepository) {
         this.eventActionTypeRepository = eventActionTypeRepository;
     }

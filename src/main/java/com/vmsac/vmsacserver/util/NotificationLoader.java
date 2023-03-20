@@ -36,19 +36,19 @@ public class NotificationLoader implements CommandLineRunner {
 
     private void loadData(){
         smsSettingsRepository.save(SmsSettings.builder()
-                .smsAPI("ThisIsTheTestingApi")
+                .smsAPI("isssecurity")
                 .enabled(true)
                 .build());
 
         emailSettingsRepository.save(EmailSettings.builder()
-                .username("Lee Yong Ning")
-                .email("yongning.lee@iss.security.sg")
-                .emailPassword("TestingPassword")
-                .hostAddress("TestingHostAddress")
-                .portNumber("8080")
+                .username("Zephan Wong Kai En")
+                .email("zephan.wong@isssecurity.sg")
+                .emailPassword("avdfhveswyonpuwq")
+                .hostAddress("smtp.gmail.com")
+                .portNumber("587")
                 .enabled(true)
                 .custom(true)
-                .isTLS(false)
+                .isTLS(true)
                 .build());
 
         notificationLogsRepository.save(NotificationLogs.builder()

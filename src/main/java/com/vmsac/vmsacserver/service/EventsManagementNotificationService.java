@@ -18,6 +18,10 @@ public class EventsManagementNotificationService {
         return eventsManagementNotificationRepository.findByDeletedFalse();
     }
 
+    public List<EventsManagementNotification> findAll() {
+        return eventsManagementNotificationRepository.findAll();
+    }
+
     public List<EventsManagementNotification> findByEventsManagementIdNotDeleted(Long eventsManagementId) {
         return eventsManagementNotificationRepository.findByEventsManagement_EventsManagementIdAndDeletedFalse(eventsManagementId);
     }

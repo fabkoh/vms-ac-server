@@ -26,6 +26,8 @@ public class SmsSettings {
 
     @Column(name = "enabled")
     private Boolean enabled;
+    @Column(name = "recipentSMS")
+    private String recipentSMS;
 
 }
 

@@ -500,6 +500,8 @@ public class EventsManagementController {
                 eventsManagementService.toDto(found_ems),HttpStatus.OK);
     }
 
+
+
 }
 
 

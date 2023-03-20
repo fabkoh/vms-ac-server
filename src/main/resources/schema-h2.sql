@@ -290,13 +290,15 @@ CREATE TABLE IF NOT EXISTS VideoRecorder(
 CREATE TABLE IF NOT EXISTS EmailSettings(
     emailSettingsId SERIAL NOT NULL UNIQUE,
     username VARCHAR(255) NOT NULL,
-    email VARCHAR(255) NOT NULL,
     emailPassword VARCHAR(255) NOT NULL,
     hostAddress VARCHAR(255) NOT NULL,
     portNumber VARCHAR(255) NOT NULL,
     enabled BOOLEAN NOT NULL DEFAULT TRUE,
     custom BOOLEAN NOT NULL DEFAULT FALSE,
     isTLS BOOLEAN NOT NULL DEFAULT FALSE,
+    email VARCHAR(255) NOT NULL,
+    recipentUsername VARCHAR(255) ,
+    recipentEmail VARCHAR(255) ,
     PRIMARY KEY (emailSettingsId)
 );
 
