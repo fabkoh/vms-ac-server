@@ -17,7 +17,6 @@ public class VideoRecorderDto implements Serializable {
     @NotBlank(message = "Recorder name must not be blank")
     private String recorderName;
 
-    @NotBlank(message = "Recorder serial number must not be blank")
     private String recorderSerialNumber;
 
     @NotBlank(message = "Recorder Public IP address must not be blank")

@@ -56,7 +56,7 @@ public class VideoRecorder {
     @Column( name ="recordername", nullable = false)
     private String recorderName;
 
-    @Column( name = "recorderserialnumber", nullable = false, unique = true)
+    @Column( name = "recorderserialnumber")
     private String recorderSerialNumber;
 
     @Column( name = "recorderpublicip", nullable = false, unique = true)

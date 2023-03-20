@@ -41,6 +41,9 @@ public class VideoRecorderController {
     //create a recorder
     @PostMapping("/videorecorder")
     public ResponseEntity<?> createVideoRecorder(@RequestBody VideoRecorderDto newVideoRecorder) {
+//        return new ResponseEntity<>(videoRecorderService.save(newVideoRecorder.toCreateVideoRecorder(false))
+//                , HttpStatus.CREATED);
+
         Map<String, String> errors = videoRecorderService.isNotValidVideoRecorderCreation(
                 newVideoRecorder.getRecorderName(),
                 newVideoRecorder.getRecorderPrivateIp(),
@@ -55,6 +58,10 @@ public class VideoRecorderController {
         VideoRecorder videoRecorder;
         try {
             videoRecorder = videoRecorderService.save(newVideoRecorder.toCreateVideoRecorder(false));
+            if (videoRecorder == null){
+                return new ResponseEntity<>("error opening ports, please enable UPNP",
+                        HttpStatus.BAD_REQUEST);
+            }
         } catch(Exception e) {
             return ResponseEntity.badRequest().build();
         }

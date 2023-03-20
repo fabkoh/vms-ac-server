@@ -32,11 +32,21 @@ public class VideoRecorderService {
 
     public VideoRecorder save(VideoRecorder videoRecorder){
         return videoRecorderRepository.save(videoRecorder);
+//        if (openUPNPports(videoRecorder.getRecorderPrivateIp(),
+//                80, videoRecorder.getRecorderPortNumber()) &&
+//                openUPNPports(videoRecorder.getRecorderPrivateIp(),
+//                        7681, videoRecorder.getRecorderIWSPort())){
+//            return videoRecorderRepository.save(videoRecorder);
+//        }
+//        return null;
     }
 
-    public void delete(Long id){
+    public void delete(Long id) throws Exception{
         VideoRecorder deleted = videoRecorderRepository.findByRecorderIdEqualsAndDeletedIsFalse(id)
                 .orElseThrow(() -> new RuntimeException("Recorder with id "+ id + " does not exist"));
+        if (!(deleteUPNPports(deleted.getRecorderIWSPort()) && deleteUPNPports(deleted.getRecorderPortNumber()))){
+            throw new Exception("Unable to disable UPNP");
+        }
         deleted.setDeleted(true);
 
         videoRecorderRepository.save(deleted);
@@ -79,6 +89,14 @@ public class VideoRecorderService {
 
         if (videoRecorderRepository.existsByRecorderIWSPortEqualsAndDeletedIsFalse(recorderIWSPort)) {
             errors.put("recorderIWSPort", "Recorder IWS port " + recorderIWSPort + " in use");
+        }
+
+        if (!checkIfPortAvailable(publicIP,recorderIWSPort)) {
+            errors.put("recorderIWSPort", "Recorder IWS port " + recorderIWSPort + " in use");
+        }
+
+        if (!checkIfPortAvailable(publicIP,portNumber)) {
+            errors.put("recorderIWSPort", "Recorder port number " + portNumber + " in use");
         }
         return errors;
     }

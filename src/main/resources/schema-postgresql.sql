@@ -276,7 +276,7 @@ CREATE TABLE IF NOT EXISTS EventsManagement(
 CREATE TABLE IF NOT EXISTS VideoRecorder(
     recorderId SERIAL NOT NULL UNIQUE,
     recorderName VARCHAR(255) NOT NULL,
-    recorderSerialNumber VARCHAR(255) NOT NULL,
+    recorderSerialNumber VARCHAR(255),
     recorderPublicIp VARCHAR(255) NOT NULL,
     recorderPrivateIp VARCHAR(255) NOT NULL,
     recorderPortNumber INT NOT NULL,
