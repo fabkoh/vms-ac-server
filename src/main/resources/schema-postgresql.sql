@@ -288,16 +288,19 @@ CREATE TABLE IF NOT EXISTS VideoRecorder(
     PRIMARY KEY (recorderId)
 );
 
+
 CREATE TABLE IF NOT EXISTS EmailSettings(
     emailSettingsId SERIAL NOT NULL UNIQUE,
     username VARCHAR(255) NOT NULL,
-    email VARCHAR(255) NOT NULL,
     emailPassword VARCHAR(255) NOT NULL,
     hostAddress VARCHAR(255) NOT NULL,
     portNumber VARCHAR(255) NOT NULL,
     enabled BOOLEAN NOT NULL DEFAULT TRUE,
     custom BOOLEAN NOT NULL DEFAULT FALSE,
     isTLS BOOLEAN NOT NULL DEFAULT FALSE,
+    email VARCHAR(255) NOT NULL,
+    recipentUsername VARCHAR(255) ,
+    recipentEmail VARCHAR(255) ,
     PRIMARY KEY (emailSettingsId)
 );
 
@@ -466,6 +469,6 @@ INSERT INTO EventActionType VALUES ('13','Valid PIN used', false);
 INSERT INTO EventActionType VALUES ('14','Invalid PIN used', false);
 
 INSERT INTO smssettings (smsapi, enabled) VALUES ('isssecurity', true);
-INSERT INTO emailsettings (username, email, emailpassword, hostaddress, portnumber, enabled, custom, istls) VALUES ('Lee Yong Ning', 'zephan.wong@isssecurity.sg', 'TestingPassword', 'zephan.wong@isssecurity.sg', '8080', true, true, false);
+INSERT INTO emailsettings (username, email, emailpassword, hostaddress, portnumber, enabled, custom, istls) VALUES ('Zephan Wong Kai En', 'zephan.wong@isssecurity.sg', 'avdfhveswyonpuwq', 'smtp.gmail.com', '587', true, true, true);
 INSERT INTO notificationlogs (notificationlogsstatuscode, notificationlogserror, timesent) VALUES (400, 'TestingError', '10-22-2022 03:50:39');
-
+INSERT INTO videorecorder (recorderiwsport, recordername, recorderpassword, recorderportnumber, recorderprivateip, recorderpublicip, recorderserialnumber, recorderusername, deleted, created) VALUES('7681', 'testing', 'ISSNVRTest01', '8085','192.168.1.172','118.201.255.164','DS-7616NI-I21620210923CCRRG74241239WCVU','admin',false,'2023-03-16 11:26:39.641753')
