@@ -297,8 +297,8 @@ CREATE TABLE IF NOT EXISTS EmailSettings(
     custom BOOLEAN NOT NULL DEFAULT FALSE,
     isTLS BOOLEAN NOT NULL DEFAULT FALSE,
     email VARCHAR(255) NOT NULL,
-    recipentUsername VARCHAR(255) ,
-    recipentEmail VARCHAR(255) ,
+    recipent_User VARCHAR(255) ,
+    recipent_Email VARCHAR(255) ,
     PRIMARY KEY (emailSettingsId)
 );
 
@@ -306,6 +306,7 @@ CREATE TABLE IF NOT EXISTS SmsSettings(
     smsSettingsId SERIAL NOT NULL UNIQUE,
     smsAPI TEXT NOT NULL,
     enabled BOOLEAN NOT NULL DEFAULT TRUE,
+     recipentsms VARCHAR(255),
     PRIMARY KEY (smsSettingsId)
 );
 
