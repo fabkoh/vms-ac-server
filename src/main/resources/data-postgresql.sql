@@ -101,10 +101,10 @@ INSERT INTO EventActionType VALUES ('12','GEN_IN_3 detected', false) ON CONFLICT
 INSERT INTO EventActionType VALUES ('13','Valid PIN used', false) ON CONFLICT DO NOTHING;
 INSERT INTO EventActionType VALUES ('14','Invalid PIN used', false) ON CONFLICT DO NOTHING;
 
-INSERT INTO smssettings (smsapi, enabled) VALUES ('isssecurity', true) ON CONFLICT DO NOTHING;
-INSERT INTO emailsettings (username, email, emailpassword, hostaddress, portnumber, enabled, custom, istls) VALUES ('Zephan Wong Kai En', 'zephan.wong@isssecurity.sg', 'avdfhveswyonpuwq', 'smtp.gmail.com', '587', true, true, true) ON CONFLICT DO NOTHING;
-INSERT INTO notificationlogs (notificationlogsstatuscode, notificationlogserror, timesent) VALUES (400, 'TestingError', '10-22-2022 03:50:39') ON CONFLICT DO NOTHING;
-INSERT INTO videorecorder (recorderiwsport, recordername, recorderpassword, recorderportnumber, recorderprivateip, recorderpublicip, recorderserialnumber, recorderusername, deleted, created) VALUES('7681', 'testing', 'ISSNVRTest01', '8085','192.168.1.172','118.201.255.164','DS-7616NI-I21620210923CCRRG74241239WCVU','admin',false,'2023-03-16 11:26:39.641753') ON CONFLICT DO NOTHING;
+INSERT INTO smssettings (smsSettingsId, smsapi, enabled) VALUES (1, 'isssecurity', true) ON CONFLICT DO NOTHING;
+INSERT INTO emailsettings (emailSettingsId, username, email, emailpassword, hostaddress, portnumber, enabled, custom, istls) VALUES (1, 'Zephan Wong Kai En', 'zephan.wong@isssecurity.sg', 'avdfhveswyonpuwq', 'smtp.gmail.com', '587', true, true, true) ON CONFLICT DO NOTHING;
+INSERT INTO notificationlogs (notificationLogsId, notificationlogsstatuscode, notificationlogserror, timesent) VALUES (1,400, 'TestingError', '10-22-2022 03:50:39') ON CONFLICT DO NOTHING;
+INSERT INTO videorecorder (recorderId, recorderiwsport, recordername, recorderpassword, recorderportnumber, recorderprivateip, recorderpublicip, recorderserialnumber, recorderusername, deleted, created) VALUES(1,'7681', 'testing', 'ISSNVRTest01', '8085','192.168.1.172','118.201.255.164','DS-7616NI-I21620210923CCRRG74241239WCVU','admin',false,'2023-03-16 11:26:39.641753') ON CONFLICT DO NOTHING;
 
 
 --INSERT INTO credentialType VALUES ('1','Card','RFID Card',false);
