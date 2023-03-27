@@ -269,9 +269,9 @@ CREATE TABLE IF NOT EXISTS EventsManagement(
    eventsManagementId SERIAL NOT NULL UNIQUE ,
    eventsManagementName VARCHAR(255) NOT NULL ,
    deleted BOOLEAN NOT NULL ,
-   inputEventsId integer[]  ,
-   outputActionsId integer[] ,
-   triggerSchedulesId integer[],
+   inputEventsId BIGINT []  ,
+   outputActionsId BIGINT[] ,
+   triggerSchedulesId BIGINT[],
    entranceId INT REFERENCES Entrances(entranceId),
    controllerId INT REFERENCES Controller(controllerId),
    PRIMARY KEY (eventsManagementId)

@@ -31,14 +31,14 @@ public class VideoRecorderService {
     }
 
     public VideoRecorder save(VideoRecorder videoRecorder){
-        return videoRecorderRepository.save(videoRecorder);
-//        if (openUPNPports(videoRecorder.getRecorderPrivateIp(),
-//                80, videoRecorder.getRecorderPortNumber()) &&
-//                openUPNPports(videoRecorder.getRecorderPrivateIp(),
-//                        7681, videoRecorder.getRecorderIWSPort())){
-//            return videoRecorderRepository.save(videoRecorder);
-//        }
-//        return null;
+        //return videoRecorderRepository.save(videoRecorder);
+        if (openUPNPports(videoRecorder.getRecorderPrivateIp(),
+                80, videoRecorder.getRecorderPortNumber()) &&
+                openUPNPports(videoRecorder.getRecorderPrivateIp(),
+                        7681, videoRecorder.getRecorderIWSPort())){
+            return videoRecorderRepository.save(videoRecorder);
+        }
+        return null;
     }
 
     public void delete(Long id) throws Exception{
