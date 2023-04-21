@@ -57,7 +57,7 @@ public class AuthController {
 
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
-
+        System.out.println("Sign in start");
         Authentication authentication = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
 
@@ -69,11 +69,12 @@ public class AuthController {
 
         List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
                 .collect(Collectors.toList());
+        System.out.println(roles);
 
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getEmail());
 
-        if (userRepository.findById(userDetails.getId()).isPresent()){
-            if(userRepository.findById(userDetails.getId()).get().getDeleted()){
+        if (userRepository.findById(userDetails.getId()).isPresent()) {
+            if (userRepository.findById(userDetails.getId()).get().getDeleted()) {
                 Map<String, String> map = new HashMap<String, String>();
                 map.put("message", "User Not Found");
                 return new ResponseEntity<>(map, HttpStatus.NOT_FOUND);
@@ -89,20 +90,19 @@ public class AuthController {
     public ResponseEntity<?> listOfAccounts() {
         try {
             UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            if (userDetails.getAuthorities().stream().anyMatch(i -> (i.toString().equals("ROLE_SYSTEM_ADMIN")))){
-                Map<String,List<UserDetailsList>> newList = new HashMap<>();
-                newList.put("User-Admin",UserDetailsList.userToUserDetailsList(userRepository.findByDeletedFalseAndRoles_IdOrderByIdAsc(1)));
-                newList.put("Tech-Admin",UserDetailsList.userToUserDetailsList(userRepository.findByDeletedFalseAndRoles_IdOrderByIdAsc(3)));
+            if (userDetails.getAuthorities().stream().anyMatch(i -> (i.toString().equals("ROLE_SYSTEM_ADMIN")))) {
+                Map<String, List<UserDetailsList>> newList = new HashMap<>();
+                newList.put("User-Admin", UserDetailsList.userToUserDetailsList(userRepository.findByDeletedFalseAndRoles_IdOrderByIdAsc(1)));
+                newList.put("Tech-Admin", UserDetailsList.userToUserDetailsList(userRepository.findByDeletedFalseAndRoles_IdOrderByIdAsc(3)));
                 return new ResponseEntity<>(newList, HttpStatus.OK);
-            }else if (userDetails.getAuthorities().stream().anyMatch(i -> (i.toString().equals("ROLE_TECH_ADMIN")))){
-                Map<String,List<UserDetailsList>> newList = new HashMap<>();
-                newList.put("User-Admin",UserDetailsList.userToUserDetailsList(userRepository.findByDeletedFalseAndRoles_IdOrderByIdAsc(1)));
+            } else if (userDetails.getAuthorities().stream().anyMatch(i -> (i.toString().equals("ROLE_TECH_ADMIN")))) {
+                Map<String, List<UserDetailsList>> newList = new HashMap<>();
+                newList.put("User-Admin", UserDetailsList.userToUserDetailsList(userRepository.findByDeletedFalseAndRoles_IdOrderByIdAsc(1)));
                 return new ResponseEntity<>(newList, HttpStatus.OK);
-            }else{
+            } else {
                 return new ResponseEntity<>(HttpStatus.OK);
             }
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             Map<String, String> map = new HashMap<String, String>();
             map.put("message", "User Not Found");
             return new ResponseEntity<>(map, HttpStatus.NOT_FOUND);
@@ -120,7 +120,7 @@ public class AuthController {
                     !(userRepository.findByDeletedFalseAndEmail(user.getEmail()).get().getId().equals(userId))) {
                 return ResponseEntity.badRequest().body(new MessageResponse("Error: Email is already in use!"));
             }
-            if (!userDetails.getId().equals(userId)){
+            if (!userDetails.getId().equals(userId)) {
                 return ResponseEntity.badRequest().body(new MessageResponse("Error: Not allowed to edit user"));
             }
             user_to_edit.setEmail(user.getEmail());
@@ -142,7 +142,7 @@ public class AuthController {
             return ResponseEntity.ok(new JwtResponse(jwt, refreshToken.getToken(), userDetailsReturn.getId(),
                     userDetailsReturn.getEmail(), roles));
 
-        }catch(Exception e) {
+        } catch (Exception e) {
             Map<String, String> map = new HashMap<String, String>();
             map.put("message", "User Not Found");
             return new ResponseEntity<>(map, HttpStatus.NOT_FOUND);
@@ -178,7 +178,7 @@ public class AuthController {
             return ResponseEntity.ok(new JwtResponse(jwt, refreshToken.getToken(), userDetailsReturn.getId(),
                     userDetailsReturn.getEmail(), roles));
 
-        }catch(Exception e) {
+        } catch (Exception e) {
             System.out.println(e);
             Map<String, String> map = new HashMap<String, String>();
             map.put("message", "User Not Found");
@@ -199,7 +199,7 @@ public class AuthController {
             if (!user.getRoles().contains(roleRepository.findByRoleName(ERole.ROLE_USER_ADMIN).get())) {
                 Map<String, String> map = new HashMap<String, String>();
                 map.put("message", "User Not Found");
-                return new ResponseEntity<>(map,HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>(map, HttpStatus.NOT_FOUND);
             }
             refreshTokenService.deleteByUserId(user.getId());
             user.setDeleted(true);
@@ -207,12 +207,11 @@ public class AuthController {
             System.out.println("deleted");
             return new ResponseEntity<>(HttpStatus.OK);
 
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             System.out.println(e.toString());
             Map<String, String> map = new HashMap<String, String>();
             map.put("message", "User Not Found");
-            return new ResponseEntity<>(map,HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(map, HttpStatus.NOT_FOUND);
         }
     }
 
@@ -227,7 +226,7 @@ public class AuthController {
                     user.getRoles().contains(roleRepository.findByRoleName(ERole.ROLE_TECH_ADMIN).get()))) {
                 Map<String, String> map = new HashMap<String, String>();
                 map.put("message", "User Not Found");
-                return new ResponseEntity<>(map,HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>(map, HttpStatus.NOT_FOUND);
             }
             refreshTokenService.deleteByUserId(user.getId());
             user.setDeleted(true);
@@ -235,11 +234,10 @@ public class AuthController {
             System.out.println("deleted");
             return new ResponseEntity<>(HttpStatus.OK);
 
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             Map<String, String> map = new HashMap<String, String>();
             map.put("message", "User Not Found");
-            return new ResponseEntity<>(map,HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(map, HttpStatus.NOT_FOUND);
         }
     }
 
@@ -282,7 +280,7 @@ public class AuthController {
         }
 
         User user = new User(signUpRequest.getEmail(),
-                encoder.encode(signUpRequest.getPassword()), signUpRequest.getFirstName(), signUpRequest.getLastName(), signUpRequest.getMobile(),false);
+                encoder.encode(signUpRequest.getPassword()), signUpRequest.getFirstName(), signUpRequest.getLastName(), signUpRequest.getMobile(), false);
         user.setRoles(roles);
         userRepository.save(user);
 
@@ -307,11 +305,10 @@ public class AuthController {
                     })
                     .orElseThrow(() -> new TokenRefreshException(requestRefreshToken,
                             "Refresh token is not in database!"));
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             Map<String, String> map = new HashMap<String, String>();
             map.put("message", e.getMessage());
-            return new ResponseEntity<>(map,HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(map, HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -322,11 +319,10 @@ public class AuthController {
             Long userId = userDetails.getId();
             refreshTokenService.deleteByUserId(userId);
             return ResponseEntity.ok(new MessageResponse("Log out successful!"));
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             Map<String, String> map = new HashMap<String, String>();
             map.put("message", "Unable to Logout");
-            return new ResponseEntity<>(map,HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(map, HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -336,11 +332,10 @@ public class AuthController {
             UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             return new ResponseEntity<>(userDetails, HttpStatus.OK);
 
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             Map<String, String> map = new HashMap<String, String>();
             map.put("message", "User Not Found");
-            return new ResponseEntity<>(map,HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(map, HttpStatus.NOT_FOUND);
         }
 
     }
