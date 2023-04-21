@@ -66,6 +66,7 @@ public class NotificationLoader implements CommandLineRunner {
                 .recorderPublicIp("118.201.255.164")
                 .recorderSerialNumber("DS-7616NI-I21620210923CCRRG74241239WCVU")
                 .recorderUsername("admin")
+                .autoPortForwarding(true)
                 .deleted(false)
                 .created(LocalDateTime.now())
                 .build());

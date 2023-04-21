@@ -17,9 +17,11 @@ public interface VideoRecorderRepository extends JpaRepository<VideoRecorder, Lo
 
     boolean existsByRecorderNameEqualsAndDeletedIsFalse(String recorderName);
 
-    boolean existsByRecorderPrivateIpEqualsAndDeletedIsFalse(String recorderPrivateIp);
+    boolean existsByRecorderPrivateIpAndDeletedAndRecorderPublicIp(String recorderPrivateIp, Boolean deleted, String recorderPublicIp);
 
-    boolean existsByRecorderPortNumberEqualsAndDeletedIsFalse(Integer recorderPortNumber);
+    boolean existsByRecorderPortNumberAndDeletedAndRecorderPublicIp(Integer recorderPortNumber, Boolean deleted, String recorderPublicIp);
 
-    boolean existsByRecorderIWSPortEqualsAndDeletedIsFalse(Integer recorderIWSPort);
+    boolean existsByRecorderIWSPortAndDeletedAndRecorderPublicIp(Integer recorderIWSPort, Boolean deleted, String recorderPublicIp);
+
+
 }

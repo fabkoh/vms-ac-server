@@ -281,13 +281,14 @@ CREATE TABLE IF NOT EXISTS VideoRecorder(
     recorderId SERIAL NOT NULL UNIQUE,
     recorderName VARCHAR(255) NOT NULL,
     recorderSerialNumber VARCHAR(255),
-    recorderPublicIp VARCHAR(255) NOT NULL,
+    recorderPublicIp VARCHAR(255),
     recorderPrivateIp VARCHAR(255) NOT NULL,
-    recorderPortNumber INT NOT NULL,
-    recorderIWSPort INT NOT NULL,
+    recorderPortNumber INT,
+    recorderIWSPort INT,
     recorderUsername VARCHAR(255) NOT NULL,
     recorderPassword VARCHAR(255) NOT NULL,
     created TIMESTAMP,
+    autoPortForwarding BOOLEAN NOT NULL,
     deleted BOOLEAN NOT NULL DEFAULT FALSE,
     PRIMARY KEY (recorderId)
 );

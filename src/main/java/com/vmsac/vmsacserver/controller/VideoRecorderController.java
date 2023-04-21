@@ -41,8 +41,6 @@ public class VideoRecorderController {
     //create a recorder
     @PostMapping("/videorecorder")
     public ResponseEntity<?> createVideoRecorder(@RequestBody VideoRecorderDto newVideoRecorder) {
-//        return new ResponseEntity<>(videoRecorderService.save(newVideoRecorder.toCreateVideoRecorder(false))
-//                , HttpStatus.CREATED);
 
         Map<String, String> errors = videoRecorderService.isNotValidVideoRecorderCreation(
                 newVideoRecorder.getRecorderName(),
@@ -50,19 +48,22 @@ public class VideoRecorderController {
                 newVideoRecorder.getRecorderPublicIp(),
                 newVideoRecorder.getRecorderPortNumber(),
                 newVideoRecorder.getRecorderIWSPort(),
-                newVideoRecorder.getRecorderSerialNumber());
+                newVideoRecorder.isAutoPortForwarding());
         if (!errors.isEmpty()) {
             return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
         }
 
         VideoRecorder videoRecorder;
         try {
+            System.out.println("checkpoint 1");
             videoRecorder = videoRecorderService.save(newVideoRecorder.toCreateVideoRecorder(false));
+            System.out.println("checkpoint 2");
             if (videoRecorder == null){
                 return new ResponseEntity<>("error opening ports, please enable UPNP",
                         HttpStatus.BAD_REQUEST);
             }
         } catch(Exception e) {
+            System.out.println(e);
             return ResponseEntity.badRequest().build();
         }
 
@@ -84,9 +85,10 @@ public class VideoRecorderController {
 
         // Validations
         String newVideoRecorderName = editVideoRecorder.getRecorderName();
-        String newVideoRecorderSerialNumber = editVideoRecorder.getRecorderSerialNumber();
         String newVideoRecorderPrivateIp = editVideoRecorder.getRecorderPrivateIp();
         Integer newVideoRecorderPortNumber = editVideoRecorder.getRecorderPortNumber();
+        Integer newVideoIWSPortNumber = editVideoRecorder.getRecorderIWSPort();
+        String newVideoRecorderPublicIp = editVideoRecorder.getRecorderPublicIp();
 
         VideoRecorder videoRecorder = optionalVideoRecorder.get();
 
@@ -97,24 +99,25 @@ public class VideoRecorderController {
                 return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
             }
         }
-        if (!Objects.equals(editVideoRecorder.getRecorderSerialNumber(), videoRecorder.getRecorderSerialNumber())){
-            if(videoRecorderService.serialNumberInUse(newVideoRecorderSerialNumber)){
-                Map<String, String> errors = new HashMap<>();
-                errors.put("recorderSerialNumber", "Recorder Serial Number " + newVideoRecorderSerialNumber + " in use");
-                return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
-            }
-        }
+
         if (!Objects.equals(editVideoRecorder.getRecorderPrivateIp(), videoRecorder.getRecorderPrivateIp())){
-            if(videoRecorderService.ipAddressInUse(newVideoRecorderPrivateIp)){
+            if(videoRecorderService.ipAddressInUse(newVideoRecorderPrivateIp, newVideoRecorderPublicIp)){
                 Map<String, String> errors = new HashMap<>();
                 errors.put("recorderPrivateIp", "Recorder private IP Address " + newVideoRecorderPrivateIp + " in use");
                 return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
             }
         }
-        if (!Objects.equals(editVideoRecorder.getRecorderPortNumber(), videoRecorder.getRecorderPortNumber())){
-            if(videoRecorderService.portNumberInUse(newVideoRecorderPortNumber)){
+        if (!Objects.equals(editVideoRecorder.getRecorderIWSPort(), videoRecorder.getRecorderIWSPort())){
+            if(videoRecorderService.portNumberInUse(newVideoIWSPortNumber, newVideoRecorderPublicIp) && newVideoIWSPortNumber != null){
                 Map<String, String> errors = new HashMap<>();
-                errors.put("recorderPortNumber", "Recorder Port Number " + newVideoRecorderPortNumber + " in use");
+                errors.put("recorderIWSPortNumber", "Recorder IWS Port Number " + newVideoIWSPortNumber + " in use");
+                return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
+            }
+        }
+        if (!Objects.equals(editVideoRecorder.getRecorderPortNumber(), videoRecorder.getRecorderPortNumber())){
+            if(videoRecorderService.portNumberInUse(newVideoRecorderPortNumber, newVideoRecorderPublicIp) && newVideoRecorderPortNumber != null){
+                Map<String, String> errors = new HashMap<>();
+                errors.put("recorderPublicPortNumber", "Recorder Public Port Number " + newVideoRecorderPortNumber + " in use");
                 return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
             }
         }
