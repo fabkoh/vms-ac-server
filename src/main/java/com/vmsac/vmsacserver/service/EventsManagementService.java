@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class EventsManagementService {
@@ -51,6 +52,7 @@ public class EventsManagementService {
     }
 
     public List<Long> createInputEvents(List<InputEvent> dto, Long controllerId) throws NotFoundException {
+        System.out.println("createInputEvents being run");
         List<Long> inputEventsId = new ArrayList<>();
         for (InputEvent input : dto) {
             Long id = input.getInputEventId();
@@ -64,13 +66,14 @@ public class EventsManagementService {
     }
 
     public List<Long> createOutputActions(List<OutputEvent> dto, Long controllerId) throws NotFoundException {
+        System.out.println("createOutputActions being run");
         List<Long> outputActionsId = new ArrayList<>();
         for (OutputEvent output : dto) {
             Long id = output.getOutputEventId();
             if (id == null) {
                 outputActionsId.add(inOutEventService.createOutputEvent(output, controllerId).getOutputEventId());
             } else {
-            outputActionsId.add(id);
+                outputActionsId.add(id);
             }
         }
         return outputActionsId;
@@ -82,63 +85,117 @@ public class EventsManagementService {
 
         List<EventsManagement> resultEms = new ArrayList<>();
         //System.out.println("trigger sch bp 0");
+//        for (Long controllerId : controllerIds) {
+//            // create different input and output events for each eventsManagement
+//            // in case users want to modify input/output events
+//            List<Long> inputEventsId = createInputEvents(dto.getInputEvents(), controllerId);
+//            List<Long> outputActionsId = createOutputActions(dto.getOutputActions(), controllerId);
+//            //System.out.println("trigger sch bp 1");
+//            Optional<Controller> opController = controllerRepository.findByControllerIdEqualsAndDeletedFalse(controllerId.longValue());
+//            if (opController.isPresent()) {
+//                Controller c = opController.get();
+//                //System.out.println("trigger sch bp 2");
+//                EventsManagement em = eventsManagementRepository.save(new EventsManagement(null,
+//                        dto.getEventsManagementName(), false, inputEventsId,
+//                        outputActionsId, null, c, null, new ArrayList<>()));
+//
+//
+//                System.out.println("trigger sch bp 3");
+//
+//                List<Long> triggerIdList = new ArrayList<>();
+//                for (TriggerSchedules ts : dto.getTriggerSchedules()) {
+//
+//
+//                    TriggerSchedules newTs = triggerSchedulesRepository.save(new TriggerSchedules(
+//                            null, ts.getTriggerName(), ts.getRrule(), ts.getTimeStart(),
+//                            ts.getTimeEnd(), false, ts.getDtstart(), ts.getUntil(), ts.getCount(),
+//                            ts.getRepeatToggle(), ts.getRruleinterval(), ts.getByweekday(), ts.getBymonthday(),
+//                            ts.getBysetpos(), ts.getBymonth(), ts.getAllDay(), ts.getEndOfDay()));
+//
+//                    System.out.println(newTs);
+//                    triggerSchedulesRepository.save(newTs);
+//                    triggerIdList.add(newTs.getTriggerScheduleId());
+//                }
+//                System.out.println(triggerIdList);
+//                em.setTriggerSchedulesid(triggerIdList);
+//
+//                System.out.println("trigger sch bp 40");
+//                if (dto.getEventsManagementEmail() != null) {
+//                    EventsManagementEmailCreateDto eventManagementEmail = dto.getEventsManagementEmail();
+//                    EventsManagementNotification newEventManagementNotificationEmail = eventManagementEmail.toEventManagementNotification(false, em);
+//                    System.out.println("email error ");
+//                    eventsManagementNotificationService.save(newEventManagementNotificationEmail);
+//                }
+//
+//                if (dto.getEventsManagementSMS() != null) {
+//                    EventsManagementSMSCreateDto eventManagementSMS = dto.getEventsManagementSMS();
+//                    System.out.println(eventManagementSMS);
+//                    EventsManagementNotification newEventManagementNotificationSMS = eventManagementSMS.toEventManagementNotification(false, em);
+//                    System.out.println("SMS error ");
+//                    eventsManagementNotificationService.save(newEventManagementNotificationSMS);
+//                }
+//                System.out.println("em is " + em);
+//                resultEms.add(em);
+//                System.out.println("result ems are" + resultEms);
+//                //System.out.println("trigger sch bp 5");
+//                c.getEventsManagements().add(em);
+//                //System.out.println("trigger sch bp 6");
+//            }
+//            //System.out.println("trigger sch bp 7");
+//        }
         for (Long controllerId : controllerIds) {
             // create different input and output events for each eventsManagement
             // in case users want to modify input/output events
             List<Long> inputEventsId = createInputEvents(dto.getInputEvents(), controllerId);
             List<Long> outputActionsId = createOutputActions(dto.getOutputActions(), controllerId);
-            //System.out.println("trigger sch bp 1");
+
             Optional<Controller> opController = controllerRepository.findByControllerIdEqualsAndDeletedFalse(controllerId.longValue());
             if (opController.isPresent()) {
                 Controller c = opController.get();
-                //System.out.println("trigger sch bp 2");
                 EventsManagement em = eventsManagementRepository.save(new EventsManagement(null,
                         dto.getEventsManagementName(), false, inputEventsId,
-                        outputActionsId,null, c,null, new ArrayList<>()));
+                        outputActionsId, null, c, null, new ArrayList<>()));
 
-
-                System.out.println("trigger sch bp 3");
-                List<Long> triggerIdList = new ArrayList<>();
+                List<TriggerSchedules> triggerSchedulesList = new ArrayList<>();
                 for (TriggerSchedules ts : dto.getTriggerSchedules()) {
-
-
-                    TriggerSchedules newTs = triggerSchedulesRepository.save(new TriggerSchedules(
+                    TriggerSchedules newTs = new TriggerSchedules(
                             null, ts.getTriggerName(), ts.getRrule(), ts.getTimeStart(),
-                            ts.getTimeEnd(), false,ts.getDtstart(),ts.getUntil(),ts.getCount(),
-                            ts.getRepeatToggle(), ts.getRruleinterval(),ts.getByweekday(),ts.getBymonthday(),
-                            ts.getBysetpos(),ts.getBymonth(),ts.getAllDay(),ts.getEndOfDay()));
+                            ts.getTimeEnd(), false, ts.getDtstart(), ts.getUntil(), ts.getCount(),
+                            ts.getRepeatToggle(), ts.getRruleinterval(), ts.getByweekday(), ts.getBymonthday(),
+                            ts.getBysetpos(), ts.getBymonth(), ts.getAllDay(), ts.getEndOfDay());
 
-                    triggerSchedulesRepository.save(newTs);
-                    triggerIdList.add(newTs.getTriggerScheduleId());
+                    triggerSchedulesList.add(newTs);
                 }
+
+                List<TriggerSchedules> savedTriggerSchedules = triggerSchedulesRepository.saveAll(triggerSchedulesList);
+                List<Long> triggerIdList = savedTriggerSchedules.stream().map(TriggerSchedules::getTriggerScheduleId).collect(Collectors.toList());
                 em.setTriggerSchedulesid(triggerIdList);
 
-                //System.out.println("trigger sch bp 4");
                 if (dto.getEventsManagementEmail() != null) {
                     EventsManagementEmailCreateDto eventManagementEmail = dto.getEventsManagementEmail();
                     EventsManagementNotification newEventManagementNotificationEmail = eventManagementEmail.toEventManagementNotification(false, em);
-                    //System.out.println("email error ");
                     eventsManagementNotificationService.save(newEventManagementNotificationEmail);
                 }
 
                 if (dto.getEventsManagementSMS() != null) {
                     EventsManagementSMSCreateDto eventManagementSMS = dto.getEventsManagementSMS();
-                    System.out.println(eventManagementSMS);
                     EventsManagementNotification newEventManagementNotificationSMS = eventManagementSMS.toEventManagementNotification(false, em);
-                    //System.out.println("SMS error ");
                     eventsManagementNotificationService.save(newEventManagementNotificationSMS);
                 }
+
                 resultEms.add(em);
-                //System.out.println("trigger sch bp 5");
                 c.getEventsManagements().add(em);
-                //System.out.println("trigger sch bp 6");
             }
-            //System.out.println("trigger sch bp 7");
         }
 
+        eventsManagementRepository.saveAllAndFlush(resultEms);
+
+        System.out.println("entrance IDs are" + entranceIds);
         for (Long entranceId : entranceIds) {
             // create different input and output events for each eventsManagement
             // in case users want to modify input/output events
+            System.out.println("entrances are");
+            System.out.println(entranceId);
             List<AuthDevice> devices = entranceRepository.findByEntranceIdAndDeletedFalse(entranceId)
                     .get().getEntranceAuthDevices();
             Long controllerId = null;
@@ -152,18 +209,18 @@ public class EventsManagementService {
             //System.out.println("adding entrance,"+ opEntrance.isPresent());
             if (opEntrance.isPresent()) {
                 Entrance e = opEntrance.get();
-                //System.out.println("adding entrance,"+ e.getEntranceName());
+                System.out.println("adding entrance," + e.getEntranceName());
                 EventsManagement em = eventsManagementRepository.save(new EventsManagement(null,
                         dto.getEventsManagementName(), false, inputEventsId,
-                        outputActionsId, null,null, e, new ArrayList<>()));
+                        outputActionsId, null, null, e, new ArrayList<>()));
 
                 ArrayList<Long> triggerIdList = new ArrayList<>();
                 for (TriggerSchedules ts : dto.getTriggerSchedules()) {
                     TriggerSchedules newTs = triggerSchedulesRepository.save(new TriggerSchedules(
                             null, ts.getTriggerName(), ts.getRrule(), ts.getTimeStart(),
-                            ts.getTimeEnd(), false,ts.getDtstart(),ts.getUntil(),ts.getCount(),
-                            ts.getRepeatToggle(), ts.getRruleinterval(),ts.getByweekday(),ts.getBymonthday(),
-                            ts.getBysetpos(),ts.getBymonth(),ts.getAllDay(),ts.getEndOfDay()));
+                            ts.getTimeEnd(), false, ts.getDtstart(), ts.getUntil(), ts.getCount(),
+                            ts.getRepeatToggle(), ts.getRruleinterval(), ts.getByweekday(), ts.getBymonthday(),
+                            ts.getBysetpos(), ts.getBymonth(), ts.getAllDay(), ts.getEndOfDay()));
 
                     triggerSchedulesRepository.save(newTs);
                     triggerIdList.add(newTs.getTriggerScheduleId());
@@ -181,10 +238,17 @@ public class EventsManagementService {
                 }
                 resultEms.add(em);
                 e.getEventsManagements().add(em);
+                System.out.println(em);
+                System.out.println(resultEms);
             }
         }
-        System.out.println("trigger sch bp 5");
-        System.out.println(resultEms);
+        System.out.println("trigger sch bp 500");
+//        Throwable t = new Throwable();
+//        t.printStackTrace();
+
+//        problem code?
+//        System.out.println(resultEms);
+
         eventsManagementRepository.saveAllAndFlush(resultEms);
         return resultEms;
     }
