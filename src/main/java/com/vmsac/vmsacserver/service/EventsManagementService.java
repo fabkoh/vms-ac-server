@@ -84,65 +84,6 @@ public class EventsManagementService {
                                          List<Long> entranceIds) throws NotFoundException {
 
         List<EventsManagement> resultEms = new ArrayList<>();
-        //System.out.println("trigger sch bp 0");
-//        for (Long controllerId : controllerIds) {
-//            // create different input and output events for each eventsManagement
-//            // in case users want to modify input/output events
-//            List<Long> inputEventsId = createInputEvents(dto.getInputEvents(), controllerId);
-//            List<Long> outputActionsId = createOutputActions(dto.getOutputActions(), controllerId);
-//            //System.out.println("trigger sch bp 1");
-//            Optional<Controller> opController = controllerRepository.findByControllerIdEqualsAndDeletedFalse(controllerId.longValue());
-//            if (opController.isPresent()) {
-//                Controller c = opController.get();
-//                //System.out.println("trigger sch bp 2");
-//                EventsManagement em = eventsManagementRepository.save(new EventsManagement(null,
-//                        dto.getEventsManagementName(), false, inputEventsId,
-//                        outputActionsId, null, c, null, new ArrayList<>()));
-//
-//
-//                System.out.println("trigger sch bp 3");
-//
-//                List<Long> triggerIdList = new ArrayList<>();
-//                for (TriggerSchedules ts : dto.getTriggerSchedules()) {
-//
-//
-//                    TriggerSchedules newTs = triggerSchedulesRepository.save(new TriggerSchedules(
-//                            null, ts.getTriggerName(), ts.getRrule(), ts.getTimeStart(),
-//                            ts.getTimeEnd(), false, ts.getDtstart(), ts.getUntil(), ts.getCount(),
-//                            ts.getRepeatToggle(), ts.getRruleinterval(), ts.getByweekday(), ts.getBymonthday(),
-//                            ts.getBysetpos(), ts.getBymonth(), ts.getAllDay(), ts.getEndOfDay()));
-//
-//                    System.out.println(newTs);
-//                    triggerSchedulesRepository.save(newTs);
-//                    triggerIdList.add(newTs.getTriggerScheduleId());
-//                }
-//                System.out.println(triggerIdList);
-//                em.setTriggerSchedulesid(triggerIdList);
-//
-//                System.out.println("trigger sch bp 40");
-//                if (dto.getEventsManagementEmail() != null) {
-//                    EventsManagementEmailCreateDto eventManagementEmail = dto.getEventsManagementEmail();
-//                    EventsManagementNotification newEventManagementNotificationEmail = eventManagementEmail.toEventManagementNotification(false, em);
-//                    System.out.println("email error ");
-//                    eventsManagementNotificationService.save(newEventManagementNotificationEmail);
-//                }
-//
-//                if (dto.getEventsManagementSMS() != null) {
-//                    EventsManagementSMSCreateDto eventManagementSMS = dto.getEventsManagementSMS();
-//                    System.out.println(eventManagementSMS);
-//                    EventsManagementNotification newEventManagementNotificationSMS = eventManagementSMS.toEventManagementNotification(false, em);
-//                    System.out.println("SMS error ");
-//                    eventsManagementNotificationService.save(newEventManagementNotificationSMS);
-//                }
-//                System.out.println("em is " + em);
-//                resultEms.add(em);
-//                System.out.println("result ems are" + resultEms);
-//                //System.out.println("trigger sch bp 5");
-//                c.getEventsManagements().add(em);
-//                //System.out.println("trigger sch bp 6");
-//            }
-//            //System.out.println("trigger sch bp 7");
-//        }
         for (Long controllerId : controllerIds) {
             // create different input and output events for each eventsManagement
             // in case users want to modify input/output events
@@ -209,7 +150,7 @@ public class EventsManagementService {
             //System.out.println("adding entrance,"+ opEntrance.isPresent());
             if (opEntrance.isPresent()) {
                 Entrance e = opEntrance.get();
-                System.out.println("adding entrance," + e.getEntranceName());
+//                System.out.println("adding entrance," + e.getEntranceName());
                 EventsManagement em = eventsManagementRepository.save(new EventsManagement(null,
                         dto.getEventsManagementName(), false, inputEventsId,
                         outputActionsId, null, null, e, new ArrayList<>()));
@@ -243,11 +184,6 @@ public class EventsManagementService {
             }
         }
         System.out.println("trigger sch bp 500");
-//        Throwable t = new Throwable();
-//        t.printStackTrace();
-
-//        problem code?
-//        System.out.println(resultEms);
 
         eventsManagementRepository.saveAllAndFlush(resultEms);
         return resultEms;
