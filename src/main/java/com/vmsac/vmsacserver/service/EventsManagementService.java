@@ -190,12 +190,12 @@ public class EventsManagementService {
 
         eventsManagementRepository.saveAllAndFlush(resultEms);
 
-        System.out.println("entrance IDs are" + entranceIds);
+//        System.out.println("entrance IDs are" + entranceIds);
         for (Long entranceId : entranceIds) {
             // create different input and output events for each eventsManagement
             // in case users want to modify input/output events
-            System.out.println("entrances are");
-            System.out.println(entranceId);
+//            System.out.println("entrances are");
+//            System.out.println(entranceId);
             List<AuthDevice> devices = entranceRepository.findByEntranceIdAndDeletedFalse(entranceId)
                     .get().getEntranceAuthDevices();
             Long controllerId = null;
@@ -238,8 +238,8 @@ public class EventsManagementService {
                 }
                 resultEms.add(em);
                 e.getEventsManagements().add(em);
-                System.out.println(em);
-                System.out.println(resultEms);
+//                System.out.println(em);
+//                System.out.println(resultEms);
             }
         }
         System.out.println("trigger sch bp 500");
