@@ -147,6 +147,7 @@ public class EventsManagementController {
         System.out.println("checkpoint 3");
         //System.out.println(ems);
         return new ResponseEntity<>(ems.stream()
+                .filter(Objects::nonNull)
                 .map(em -> eventsManagementService.toDto(em))
                 .collect(Collectors.toList()), HttpStatus.OK);
     }
