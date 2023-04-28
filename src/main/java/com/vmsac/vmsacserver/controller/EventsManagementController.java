@@ -3,12 +3,7 @@ package com.vmsac.vmsacserver.controller;
 import com.vmsac.vmsacserver.model.*;
 import com.vmsac.vmsacserver.model.notification.EventsManagementNotification;
 import com.vmsac.vmsacserver.repository.*;
-import com.vmsac.vmsacserver.service.AuthDeviceService;
-import com.vmsac.vmsacserver.service.ControllerService;
-import com.vmsac.vmsacserver.service.EventsManagementNotificationService;
-import com.vmsac.vmsacserver.service.InOutEventService;
-import com.vmsac.vmsacserver.service.EventsManagementService;
-import com.vmsac.vmsacserver.service.TriggerSchedulesService;
+import com.vmsac.vmsacserver.service.*;
 import com.vmsac.vmsacserver.util.DateTimeParser;
 import com.vmsac.vmsacserver.util.FieldsModifier;
 import javassist.NotFoundException;
@@ -19,7 +14,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -125,7 +119,7 @@ public class EventsManagementController {
     public ResponseEntity<?> putOutputEvent(@RequestBody @Valid OutputEvent dto,
                                             @PathVariable Long id) {
         if (outputEventRepository.existsById(dto.getOutputEventId())) {
-            if(outputTypeRepository.existsById(dto.getEventActionOutputType().getEventActionOutputId()))
+            if (outputTypeRepository.existsById(dto.getEventActionOutputType().getEventActionOutputId()))
                 return new ResponseEntity<>(outputEventRepository.save(dto), HttpStatus.OK);
         }
         return ResponseEntity.notFound().build();
@@ -183,9 +177,9 @@ public class EventsManagementController {
     public ResponseEntity<?> getAllEventsMangementForEntrance(@PathVariable Long entranceId) {
         if (entranceRepo.existsByEntranceId(entranceId))
             return new ResponseEntity<>(entranceRepo.findByEntranceIdAndDeletedFalse(entranceId)
-                .get().getEventsManagements()
-                .stream().map(em -> eventsManagementService.toDto(em))
-                .collect(Collectors.toList()), HttpStatus.OK);
+                    .get().getEventsManagements()
+                    .stream().map(em -> eventsManagementService.toDto(em))
+                    .collect(Collectors.toList()), HttpStatus.OK);
 
         else return ResponseEntity.notFound().build();
     }
@@ -194,7 +188,7 @@ public class EventsManagementController {
     @GetMapping("eventsmanagement/controller/{controllerId}")
     public ResponseEntity<?> getAllEventsMangementForController(@PathVariable Long controllerId) {
         Optional<Controller> optionalController = controllerService.findById(controllerId);
-        if (optionalController.isEmpty()){
+        if (optionalController.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
@@ -203,8 +197,8 @@ public class EventsManagementController {
         // also get the events managements of entrances that are linked to this controller
         List<AuthDevice> authdevicelist = authDeviceService.findbyControllerId(controllerId);
 
-        authdevicelist.forEach(authdevice-> {
-            if (authdevice.getEntrance() != null){
+        authdevicelist.forEach(authdevice -> {
+            if (authdevice.getEntrance() != null) {
                 authdevice.getEntrance().getEventsManagements().forEach(em -> {
                     if (!eventManagements.contains(em)) eventManagements.add(em);
                 });
@@ -237,8 +231,8 @@ public class EventsManagementController {
 
     // check valid EventsManagement with valid GEN IN/OUT
     private void checkValidEm(EventsManagementCreateDto dto, Set<EventsManagement> errorEvMs,
-                              Map<String,List<EventsManagementDto>> errorList,
-                              List<Map<String,List<EventsManagementDto>>> returnErrorList,
+                              Map<String, List<EventsManagementDto>> errorList,
+                              List<Map<String, List<EventsManagementDto>>> returnErrorList,
                               List<Long> controllerIds, List<Long> entranceIds,
                               List<Long> thisControllerIds, List<Long> thisEntranceIds) {
         // check input events
@@ -256,11 +250,10 @@ public class EventsManagementController {
                                 errorEvMs.add(em);
                                 thisControllerIds.remove(id);
 
-                                if(errorList.containsKey(dto.getEventsManagementName())) {
+                                if (errorList.containsKey(dto.getEventsManagementName())) {
                                     //if key is used,add to value
                                     errorList.get(dto.getEventsManagementName()).add(eventsManagementService.toDto(em));
-                                }
-                                else { //adds key,value pair.
+                                } else { //adds key,value pair.
                                     List<EventsManagementDto> addToValue = new ArrayList<>();
                                     addToValue.add(eventsManagementService.toDto(em));
                                     errorList.put(dto.getEventsManagementName(), addToValue);
@@ -284,11 +277,10 @@ public class EventsManagementController {
                                 errorEvMs.add(em);
                                 thisEntranceIds.remove(id);
 
-                                if(errorList.containsKey(dto.getEventsManagementName())) {
+                                if (errorList.containsKey(dto.getEventsManagementName())) {
                                     //if key is used,add to value
                                     errorList.get(dto.getEventsManagementName()).add(eventsManagementService.toDto(em));
-                                }
-                                else { //adds key,value pair.
+                                } else { //adds key,value pair.
                                     List<EventsManagementDto> addToValue = new ArrayList<>();
                                     addToValue.add(eventsManagementService.toDto(em));
                                     errorList.put(dto.getEventsManagementName(), addToValue);
@@ -317,11 +309,10 @@ public class EventsManagementController {
                                 errorEvMs.add(em);
                                 thisControllerIds.remove(id);
 
-                                if(errorList.containsKey(dto.getEventsManagementName())) {
+                                if (errorList.containsKey(dto.getEventsManagementName())) {
                                     //if key is used,add to value
                                     errorList.get(dto.getEventsManagementName()).add(eventsManagementService.toDto(em));
-                                }
-                                else { //adds key,value pair.
+                                } else { //adds key,value pair.
                                     List<EventsManagementDto> addToValue = new ArrayList<>();
                                     addToValue.add(eventsManagementService.toDto(em));
                                     errorList.put(dto.getEventsManagementName(), addToValue);
@@ -347,11 +338,10 @@ public class EventsManagementController {
                                 errorEvMs.add(em);
                                 thisEntranceIds.remove(id);
 
-                                if(errorList.containsKey(dto.getEventsManagementName())) {
+                                if (errorList.containsKey(dto.getEventsManagementName())) {
                                     //if key is used,add to value
                                     errorList.get(dto.getEventsManagementName()).add(eventsManagementService.toDto(em));
-                                }
-                                else { //adds key,value pair.
+                                } else { //adds key,value pair.
                                     List<EventsManagementDto> addToValue = new ArrayList<>();
                                     addToValue.add(eventsManagementService.toDto(em));
                                     errorList.put(dto.getEventsManagementName(), addToValue);
@@ -389,8 +379,8 @@ public class EventsManagementController {
 
         List<EventsManagement> eventsManagements = new ArrayList<>();
         Set<EventsManagement> errorEvMs = new HashSet<>();
-        List<Map<String,List<EventsManagementDto>>> returnErrorList = new ArrayList<>();
-        Map<String,List<EventsManagementDto>> errorList = new HashMap<>();
+        List<Map<String, List<EventsManagementDto>>> returnErrorList = new ArrayList<>();
+        Map<String, List<EventsManagementDto>> errorList = new HashMap<>();
 
         for (EventsManagementCreateDto dto : dtos) {
 
@@ -402,43 +392,47 @@ public class EventsManagementController {
             eventsManagements.addAll(eventsManagementService.create(dto, thisControllerIds, thisEntranceIds));
         }
 
-        if(!errorList.isEmpty()){
+        if (!errorList.isEmpty()) {
             returnErrorList.add(errorList);
         }
 
         if (errorEvMs.isEmpty())
-            return new ResponseEntity<>(eventsManagements.stream().map(em -> {return eventsManagementService.toDto(em);})
+            return new ResponseEntity<>(eventsManagements.stream().map(em -> {
+                        return eventsManagementService.toDto(em);
+                    })
                     .collect(Collectors.toList()), HttpStatus.CREATED);
         else return new ResponseEntity<>(returnErrorList, HttpStatus.CONFLICT);
     }
 
     @PutMapping("eventsmanagement/add")
     public ResponseEntity<?> addEventsManagement(@RequestBody @Valid List<EventsManagementCreateDto> dtos,
-                                                    @RequestParam("controllerIds") List<Long> controllerIds,
-                                                    @RequestParam("entranceIds") List<Long> entranceIds) throws NotFoundException {
+                                                 @RequestParam("controllerIds") List<Long> controllerIds,
+                                                 @RequestParam("entranceIds") List<Long> entranceIds) throws NotFoundException {
 
         List<EventsManagement> eventsManagements = new ArrayList<>();
         Set<EventsManagement> errorEvMs = new HashSet<>();
-        List<Map<String,List<EventsManagementDto>>> returnErrorList = new ArrayList<>();
-        Map<String,List<EventsManagementDto>> errorList = new HashMap<>();
+        List<Map<String, List<EventsManagementDto>>> returnErrorList = new ArrayList<>();
+        Map<String, List<EventsManagementDto>> errorList = new HashMap<>();
 
         for (EventsManagementCreateDto dto : dtos) {
 
             List<Long> thisControllerIds = new ArrayList<>(controllerIds);
             List<Long> thisEntranceIds = new ArrayList<>(entranceIds);
-            //System.out.println("check valid starting");
+            System.out.println("check valid starting");
             checkValidEm(dto, errorEvMs, errorList, returnErrorList, controllerIds, entranceIds, thisControllerIds, thisEntranceIds);
-            //System.out.println("check add all starting");
+            System.out.println("check add all starting");
             eventsManagements.addAll(eventsManagementService.create(dto, thisControllerIds, thisEntranceIds));
-            //System.out.println("check add completed");
+            System.out.println("check add completed");
         }
 
-        if(!errorList.isEmpty()){
+        if (!errorList.isEmpty()) {
             returnErrorList.add(errorList);
         }
 
         if (errorEvMs.isEmpty())
-            return new ResponseEntity<>(eventsManagements.stream().map(em -> { return eventsManagementService.toDto(em);})
+            return new ResponseEntity<>(eventsManagements.stream().map(em -> {
+                        return eventsManagementService.toDto(em);
+                    })
                     .collect(Collectors.toList()), HttpStatus.CREATED);
         else return new ResponseEntity<>(returnErrorList, HttpStatus.CONFLICT);
     }
@@ -463,8 +457,7 @@ public class EventsManagementController {
                 opController.get().getEventsManagements().forEach(em -> {
                     eventsManagementService.deleteById(em.getEventsManagementId());
                 });
-            }
-            else return ResponseEntity.notFound().build();
+            } else return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok().build();
     }
@@ -493,14 +486,13 @@ public class EventsManagementController {
     @GetMapping("eventsmanagement/{emId}")
     public ResponseEntity<?> getIndividualEventsManagement(@PathVariable Long emId) {
         Optional<EventsManagement> eventsManagementFound = eventsManagementRepository.findByDeletedFalseAndEventsManagementId(emId);
-        if(eventsManagementFound.isEmpty()){
+        if (eventsManagementFound.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         EventsManagement found_ems = eventsManagementFound.get();
         return new ResponseEntity<>(
-                eventsManagementService.toDto(found_ems),HttpStatus.OK);
+                eventsManagementService.toDto(found_ems), HttpStatus.OK);
     }
-
 
 
 }

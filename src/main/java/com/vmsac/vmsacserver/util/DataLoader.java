@@ -2,6 +2,7 @@ package com.vmsac.vmsacserver.util;
 
 import com.vmsac.vmsacserver.controller.ControllerController;
 import com.vmsac.vmsacserver.model.AccessGroup;
+import com.vmsac.vmsacserver.model.Controller;
 import com.vmsac.vmsacserver.model.Entrance;
 import com.vmsac.vmsacserver.model.Person;
 import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoN;
@@ -31,8 +32,7 @@ public class DataLoader implements CommandLineRunner {
     private final ControllerController controllerController;
 
 
-
-    public DataLoader(AccessGroupRepository accessGroupRepository, EntranceRepository entranceRepository, PersonRepository personRepository, AccessGroupEntranceNtoNRepository accessGroupEntranceRepository, AccessGroupScheduleRepository accessGroupScheduleRepository, CredTypeRepository credTypeRepository, CredentialRepository credentialRepository, EntranceScheduleRepository entranceScheduleRepository,ControllerRepository controllerRepository,AuthDeviceRepository authDeviceRepository,ControllerController controllerController) {
+    public DataLoader(AccessGroupRepository accessGroupRepository, EntranceRepository entranceRepository, PersonRepository personRepository, AccessGroupEntranceNtoNRepository accessGroupEntranceRepository, AccessGroupScheduleRepository accessGroupScheduleRepository, CredTypeRepository credTypeRepository, CredentialRepository credentialRepository, EntranceScheduleRepository entranceScheduleRepository, ControllerRepository controllerRepository, AuthDeviceRepository authDeviceRepository, ControllerController controllerController) {
 
         this.accessGroupRepository = accessGroupRepository;
         this.entranceRepository = entranceRepository;
@@ -77,6 +77,24 @@ public class DataLoader implements CommandLineRunner {
                         .accessGroupName("Empty group")
                         .deleted(false)
                         .isActive(true)
+                        .build()
+        );
+
+        Controller controller1 = controllerRepository.save(
+                Controller.builder()
+                        .controllerName("controller1")
+                        .controllerIPStatic(Boolean.FALSE)
+                        .controllerIP("111")
+                        .pendingIP("111")
+                        .controllerMAC("111")
+                        .controllerSerialNo("111")
+                        .lastOnline(LocalDateTime.now())
+                        .lastSync(LocalDateTime.now())
+                        .created(LocalDateTime.now())
+                        .masterController(Boolean.FALSE)
+                        .pinAssignmentConfig("111")
+                        .settingsConfig("111")
+                        .deleted(Boolean.FALSE)
                         .build()
         );
 
@@ -192,7 +210,6 @@ public class DataLoader implements CommandLineRunner {
                         .deleted(false)
                         .build()
         );
-
 
 
         AccessGroupSchedule duneSideEntranceWeekdays = accessGroupScheduleRepository.save(
