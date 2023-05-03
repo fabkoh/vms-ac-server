@@ -14,7 +14,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class   EventService {
+public class EventService {
 
     @Autowired
     private EventRepository eventRepository;
@@ -46,7 +46,7 @@ public class   EventService {
     @Autowired
     private EventActionTypeRepository eventActionTypeRepository;
 
-    public Boolean createEvents(List<Event> newEvents){
+    public Boolean createEvents(List<Event> newEvents) {
         // iterate over the whole list
         // check if it exists in db
         // check if linked columns are valid
@@ -54,10 +54,10 @@ public class   EventService {
         Boolean success = true;
         System.out.println(newEvents);
 
-        try{
-            for (Event singleEvent : newEvents){
+        try {
+            for (Event singleEvent : newEvents) {
 
-                if (eventRepository.existsByEventTimeEqualsAndController_ControllerSerialNoEqualsAndEventActionType_EventActionTypeId(singleEvent.getEventTime(), singleEvent.getController().getControllerSerialNo(),singleEvent.getEventActionType().getEventActionTypeId())){
+                if (eventRepository.existsByEventTimeEqualsAndController_ControllerSerialNoEqualsAndEventActionType_EventActionTypeId(String.valueOf(singleEvent.getEventTime()), singleEvent.getController().getControllerSerialNo(), singleEvent.getEventActionType().getEventActionTypeId())) {
                     continue;
                 }
 
@@ -68,57 +68,53 @@ public class   EventService {
                 toSave.setDeleted(false);
 
                 System.out.println(singleEvent.getPerson());
-                if (singleEvent.getPerson() != null){
+                if (singleEvent.getPerson() != null) {
                     Optional<Person> optionalPerson = personService.findByIdInUse(singleEvent.getPerson().getPersonId());
-                    if (optionalPerson.isEmpty()){
+                    if (optionalPerson.isEmpty()) {
                         toSave.setPerson(null);
-                    }
-                    else{
+                    } else {
                         toSave.setPerson(optionalPerson.get());
-                    }}
-                else{
+                    }
+                } else {
                     toSave.setPerson(null);
                 }
 
                 System.out.println("3");
-                if (singleEvent.getEntrance() != null){
+                if (singleEvent.getEntrance() != null) {
                     Optional<Entrance> optionalEntrance = entranceService.findById(singleEvent.getEntrance().getEntranceId());
-                    if (optionalEntrance.isEmpty()){
+                    if (optionalEntrance.isEmpty()) {
                         toSave.setEntrance(null);
-                    }
-                    else{
+                    } else {
                         toSave.setEntrance(optionalEntrance.get());
-                    }}
-                else{
+                    }
+                } else {
                     toSave.setEntrance(null);
                 }
                 System.out.println("4");
-                if (singleEvent.getAccessGroup() != null){
+                if (singleEvent.getAccessGroup() != null) {
                     Optional<AccessGroup> optionalAccessGroup = accessGroupService.findById(singleEvent.getAccessGroup().getAccessGroupId());
-                    if (optionalAccessGroup.isEmpty()){
+                    if (optionalAccessGroup.isEmpty()) {
                         toSave.setAccessGroup(null);
-                    }
-                    else{
+                    } else {
                         toSave.setAccessGroup(optionalAccessGroup.get());
-                    }}
-                else{
+                    }
+                } else {
                     toSave.setAccessGroup(null);
                 }
 
                 toSave.setEventActionType(eventActionTypeRepository.getById(singleEvent.getEventActionType().getEventActionTypeId()));
 
                 Optional<Controller> optionalController = controllerService.findBySerialNo(singleEvent.getController().getControllerSerialNo());
-                if (optionalController.isEmpty()){
+                if (optionalController.isEmpty()) {
                     toSave.setController(null);
-                }
-                else{
+                } else {
                     toSave.setController(optionalController.get());
                 }
                 System.out.println("5");
                 eventRepository.save(toSave);
 
-            }}
-        catch (Exception e){
+            }
+        } catch (Exception e) {
             System.out.println(e);
             success = false;
         }
@@ -126,7 +122,7 @@ public class   EventService {
         return success;
     }
 
-    public List<Event> getEventsByTimeDesc(int pageNo, int pageSize){
+    public List<Event> getEventsByTimeDesc(int pageNo, int pageSize) {
         List<Event> allEvents = eventRepository.findByDeletedIsFalseOrderByEventTimeDesc(PageRequest.of(pageNo, pageSize));
         return allEvents;
     }
@@ -151,10 +147,18 @@ public class   EventService {
             List<Long> accessGroupIds = accessGroups.stream().map(AccessGroup::getAccessGroupId).collect(Collectors.toList());
 
             Timestamp startTimestamp = Objects.isNull(start) ? Timestamp.valueOf("1970-01-01 00:00:00") : Timestamp.valueOf(start);
-            Timestamp endTimestamp = Objects.isNull(end) ? Timestamp.valueOf("2050-01-01 00:00:00") : Timestamp.valueOf(end);
+            Timestamp endTimestamp = Objects.isNull(end) ? Timestamp.valueOf("2100-01-01 00:00:00") : Timestamp.valueOf(end);
 
-            result = eventRepository.findByQueryString(eventTypeIds, entranceIds, controllerIds, personIds, accessGroupIds,
-                    startTimestamp, endTimestamp, PageRequest.of(pageNo, pageSize));
+            System.out.println("start is " + startTimestamp.toLocalDateTime());
+            System.out.println("end is " + endTimestamp.toLocalDateTime());
+//            result = eventRepository.findByQueryString(eventTypeIds, entranceIds, controllerIds, personIds, accessGroupIds,
+//                    Timestamp.valueOf(startTimestamp.toLocalDateTime()),
+//                    Timestamp.valueOf(endTimestamp.toLocalDateTime()),
+//                    PageRequest.of(pageNo, pageSize));
+            result = eventRepository.findByQueryString2(eventTypeIds, entranceIds, controllerIds, personIds, accessGroupIds, startTimestamp, endTimestamp, PageRequest.of(pageNo, pageSize));
+//            result = eventRepository.findByQueryString(eventTypeIds, entranceIds, controllerIds, personIds, accessGroupIds, startTimestamp, endTimestamp, PageRequest.of(pageNo, pageSize));
+
+            System.out.println(result);
         } else
             result = getEventsByTimeDesc(pageNo, pageSize);
 
