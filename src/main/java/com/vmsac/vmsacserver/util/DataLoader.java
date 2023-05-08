@@ -120,23 +120,23 @@ public class DataLoader implements CommandLineRunner, Ordered {
                         .build()
         );
 
-        Controller controller1 = controllerRepository.save(
-                Controller.builder()
-                        .controllerName("controller1")
-                        .controllerIPStatic(Boolean.FALSE)
-                        .controllerIP("111")
-                        .pendingIP("111")
-                        .controllerMAC("111")
-                        .controllerSerialNo("111")
-                        .lastOnline(LocalDateTime.now())
-                        .lastSync(LocalDateTime.now())
-                        .created(LocalDateTime.now())
-                        .masterController(Boolean.FALSE)
-                        .pinAssignmentConfig("111")
-                        .settingsConfig("111")
-                        .deleted(Boolean.FALSE)
-                        .build()
-        );
+//        Controller controller1 = controllerRepository.save(
+//                Controller.builder()
+//                        .controllerName("controller1")
+//                        .controllerIPStatic(Boolean.FALSE)
+//                        .controllerIP("111")
+//                        .pendingIP("111")
+//                        .controllerMAC("111")
+//                        .controllerSerialNo("111")
+//                        .lastOnline(LocalDateTime.now())
+//                        .lastSync(LocalDateTime.now())
+//                        .created(LocalDateTime.now())
+//                        .masterController(Boolean.FALSE)
+//                        .pinAssignmentConfig("111")
+//                        .settingsConfig("111")
+//                        .deleted(Boolean.FALSE)
+//                        .build()
+//        );
 
         Person paulAtreides = personRepository.save(
                 Person.builder()
