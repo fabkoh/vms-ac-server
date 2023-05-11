@@ -4,8 +4,10 @@ import com.vmsac.vmsacserver.model.Event;
 import com.vmsac.vmsacserver.model.EventsManagement;
 import com.vmsac.vmsacserver.model.notification.EmailSettings;
 import com.vmsac.vmsacserver.model.notification.EventsManagementNotification;
+import com.vmsac.vmsacserver.model.notification.NotificationLogs;
 import com.vmsac.vmsacserver.repository.EmailSettingsRepository;
 import com.vmsac.vmsacserver.repository.EventRepository;
+import com.vmsac.vmsacserver.repository.NotificationLogsRepository;
 import com.vmsac.vmsacserver.service.EmailSettingNotificationService;
 import com.vmsac.vmsacserver.service.EventService;
 import com.vmsac.vmsacserver.util.IPaddressWhitelisting;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -30,6 +33,8 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api")
 public class EventController {
+    @Autowired
+    private NotificationLogsRepository notificationLogsRepository;
 
     @Autowired
     NotificationService notificationService;
@@ -108,6 +113,14 @@ public class EventController {
                     return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
                 }
             }
+//            add to notif logs
+            String statuscode = "200";
+            String error = "success";
+            LocalDateTime currentTime = LocalDateTime.now();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            String formattedTime = currentTime.format(formatter);
+            NotificationLogs notificationLogs = new NotificationLogs(statuscode, error, formattedTime, eventsManagementNotification1);
+            notificationLogsRepository.save(notificationLogs);
             return new ResponseEntity<>("SMTP email sent", HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

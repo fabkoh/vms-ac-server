@@ -35,4 +35,6 @@ public class NotificationLogs {
     @JoinColumn(name = "eventsmanagementnotificationid")
     private EventsManagementNotification eventsManagementNotification;
 
+    public NotificationLogs(String statuscode, String error, String formattedTime, EventsManagementNotification eventsManagementNotification1) {
+    }
 }
