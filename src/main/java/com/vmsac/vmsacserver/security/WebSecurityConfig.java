@@ -59,11 +59,13 @@ public class WebSecurityConfig {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .authorizeRequests().antMatchers("/api/auth/**").permitAll()
                 .antMatchers("/api/test/**").permitAll()
+//                .antMatchers("/api/events/eventsSMS").permitAll()
+//                .antMatchers("/api/events/eventsSMTP").permitAll()
                 .antMatchers("/h2-console/**").permitAll()
                 .antMatchers("/api/unicon/controller/**").permitAll()  // <-- add this line
                 .antMatchers("/api/unicon/events").permitAll()  // <-- add this line
-                .antMatchers("/api/events/eventsSMTP").permitAll()  // <-- add this line
-                .antMatchers("/api/events/eventsSMS").permitAll()  // <-- add this line
+                .antMatchers("/api/events/eventsSMTP/**").permitAll()  // <-- add this line
+                .antMatchers("/api/events/eventsSMS/**").permitAll()  // <-- add this line
                 .antMatchers("/swagger-ui/**").permitAll()
                 .antMatchers("/v3/api-docs/**").permitAll()
                 .antMatchers("/**")
