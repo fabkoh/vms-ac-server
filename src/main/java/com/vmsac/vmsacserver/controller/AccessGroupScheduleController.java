@@ -1,15 +1,15 @@
 package com.vmsac.vmsacserver.controller;
 
+import com.vmsac.vmsacserver.model.accessgroupschedule.AccessGroupSchedule;
 import com.vmsac.vmsacserver.model.accessgroupschedule.AccessGroupScheduleDto;
 import com.vmsac.vmsacserver.model.accessgroupschedule.CreateAccessGroupScheduleDto;
 import com.vmsac.vmsacserver.service.AccessGroupScheduleService;
-import com.vmsac.vmsacserver.util.UniconUpdater;
+import com.vmsac.vmsacserver.service.AccessGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,6 +20,9 @@ public class AccessGroupScheduleController {
 
     @Autowired
     AccessGroupScheduleService accessGroupScheduleService;
+
+    @Autowired
+    AccessGroupService accessGroupService;
 
 
     // returns access group schedules
@@ -84,4 +87,52 @@ public class AccessGroupScheduleController {
         return ResponseEntity.noContent().build();
     }
 
+    @PutMapping("/access-group-schedule/enable/{scheduleId}")
+    public ResponseEntity<?> enableAccessGroupSchedule(@PathVariable("scheduleId") Long scheduleId) {
+        Optional<AccessGroupSchedule> accessGroupScheduleOptional= accessGroupScheduleService.findById(scheduleId);
+        if (!accessGroupScheduleOptional.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+        AccessGroupSchedule accessGroupSchedule = accessGroupScheduleOptional.get();
+        accessGroupSchedule.setIsActive(true);
+        return ResponseEntity.ok(accessGroupScheduleService.save(accessGroupSchedule.toDto()));
+    }
+
+    @PutMapping("/access-group-schedule/disable/{scheduleId}")
+    public ResponseEntity<?> disableAccessGroupSchedule(@PathVariable("scheduleId") Long scheduleId) {
+        Optional<AccessGroupSchedule> accessGroupScheduleOptional= accessGroupScheduleService.findById(scheduleId);
+        if (!accessGroupScheduleOptional.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+        AccessGroupSchedule accessGroupSchedule = accessGroupScheduleOptional.get();
+        accessGroupSchedule.setIsActive(false);
+        return ResponseEntity.ok(accessGroupScheduleService.save(accessGroupSchedule.toDto()));
+    }
+
+    // get all current status
+    @GetMapping(path = "access-group-schedule/current")
+    public ResponseEntity<?> GetAllAccessGroupCurrentStatus() {
+        return new ResponseEntity<>(accessGroupScheduleService.GetAllAccessGroupCurrentStatus(),HttpStatus.OK);
+
+    }
+
+    @GetMapping(path = "access-group-schedule/current-entrance/{entranceId}")
+    public ResponseEntity<?> GetAllAccessGroupCurrentStatusForOneEntrance(@PathVariable Long entranceId) {
+        return new ResponseEntity<>(accessGroupScheduleService.GetAllAccessGroupCurrentStatusForOneEntrance(entranceId),HttpStatus.OK);
+    }
+
+    @GetMapping(path = "access-group-schedule/current-person/{personId}")
+    public ResponseEntity<?> GetAllAccessGroupCurrentStatusForOnePerson(@PathVariable Long personId) {
+        return new ResponseEntity<>(accessGroupScheduleService.GetAllAccessGroupCurrentStatusForOnePerson(personId),HttpStatus.OK);
+    }
+    // get single current status
+    @GetMapping(path = "access-group-schedule/current/{accessGroupId}")
+    public ResponseEntity<?> GetAccessGroupCurrentStatus( @PathVariable Long accessGroupId) {
+
+        if (accessGroupService.findById(accessGroupId).get() != null ) {
+            return new ResponseEntity<>(accessGroupScheduleService.GetAccessGroupCurrentStatus(accessGroupId), HttpStatus.OK);
+        }else{
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
 }

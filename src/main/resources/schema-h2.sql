@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS AccessGroups (
   accessGroupId SERIAL NOT NULL UNIQUE,
   accessGroupName VARCHAR(255) NOT NULL,
   accessGroupDesc TEXT,
+  isActive BOOLEAN NOT NULL,
   deleted BOOLEAN NOT NULL,
   PRIMARY KEY (accessGroupId)
 );
@@ -102,6 +103,7 @@ CREATE TABLE IF NOT EXISTS AccessGroupSchedule(
   timeStart VARCHAR(128) NOT NULL,
   timeEnd VARCHAR(128) NOT NULL,
   groupToEntranceId INT REFERENCES AccessGroupsEntranceNtoN (groupToEntranceId),
+  isActive BOOLEAN NOT NULL,
   deleted BOOLEAN NOT NULL,
   PRIMARY KEY (accessGroupScheduleId)
 );
@@ -114,6 +116,7 @@ CREATE TABLE IF NOT EXISTS EntranceSchedule(
   timeEnd VARCHAR(128) NOT NULL,
   entranceId INT REFERENCES Entrances (entranceId),
   deleted BOOLEAN NOT NULL,
+  isActive BOOLEAN NOT NULL,
   PRIMARY KEY (entranceScheduleId)
 );
 
@@ -173,6 +176,7 @@ CREATE TABLE IF NOT EXISTS AuthMethodSchedule(
   authDeviceId INT REFERENCES AuthDevice (authDeviceId),
   AuthMethodId INT REFERENCES AuthMethod (authMethodId),
   deleted BOOLEAN NOT NULL,
+  isActive BOOLEAN NOT NULL,
   PRIMARY KEY (authMethodScheduleId)
 );
 
@@ -235,38 +239,94 @@ CREATE TABLE IF NOT EXISTS OutputEvent(
     PRIMARY KEY (outputEventId)
 );
 
-CREATE TABLE IF NOT EXISTS EventsManagement(
-   eventsManagementId SERIAL NOT NULL UNIQUE ,
-   eventsManagementName VARCHAR(255) NOT NULL ,
-   deleted BOOLEAN NOT NULL ,
-   inputEventsId ARRAY  ,
-   outputActionsId ARRAY ,
-   entranceId INT REFERENCES Entrances(entranceId),
-   controllerId INT REFERENCES Controller(controllerId),
-   PRIMARY KEY (eventsManagementId)
-);
-
 CREATE TABLE IF NOT EXISTS TriggerSchedules(
    triggerScheduleId SERIAL NOT NULL UNIQUE ,
    triggerName VARCHAR(255) NOT NULL ,
    rrule VARCHAR(255) NOT NULL ,
    timeStart VARCHAR(128) NOT NULL ,
    timeEnd VARCHAR(128) NOT NULL ,
-   eventsManagementId INT REFERENCES EventsManagement(eventsManagementId),
    deleted BOOLEAN NOT NULL ,
+   dstart VARCHAR(255),
+   until VARCHAR(255),
+   count INT,
+   repeatToggle BOOLEAN,
+   rruleinterval INT,
+   byweekday ARRAY,
+   bymonthday ARRAY,
+   bysetpos ARRAY,
+   bymonth ARRAY,
+   allDay BOOLEAN,
+   endOfDay BOOLEAN,
    PRIMARY KEY (triggerScheduleId)
+);
+
+CREATE TABLE IF NOT EXISTS EventsManagement(
+   eventsManagementId SERIAL NOT NULL UNIQUE ,
+   eventsManagementName VARCHAR(255) NOT NULL ,
+   deleted BOOLEAN NOT NULL ,
+   inputEventsId ARRAY  ,
+   outputActionsId ARRAY ,
+   triggerSchedulesId ARRAY,
+   entranceId INT REFERENCES Entrances(entranceId),
+   controllerId INT REFERENCES Controller(controllerId),
+   PRIMARY KEY (eventsManagementId)
 );
 
 CREATE TABLE IF NOT EXISTS VideoRecorder(
     recorderId SERIAL NOT NULL UNIQUE,
     recorderName VARCHAR(255) NOT NULL,
-    recorderSerialNumber VARCHAR(255) NOT NULL,
-    recorderIpAddress VARCHAR(255) NOT NULL,
-    recorderPortNumber INT NOT NULL,
+    recorderSerialNumber VARCHAR(255),
+    recorderPublicIp VARCHAR(255),
+    recorderPrivateIp VARCHAR(255) NOT NULL,
+    recorderPortNumber INT,
+    recorderIWSPort INT,
     recorderUsername VARCHAR(255) NOT NULL,
     recorderPassword VARCHAR(255) NOT NULL,
     created TIMESTAMP,
+    autoPortForwarding BOOLEAN NOT NULL,
     deleted BOOLEAN NOT NULL DEFAULT FALSE,
     PRIMARY KEY (recorderId)
 );
 
+CREATE TABLE IF NOT EXISTS EmailSettings(
+    emailSettingsId SERIAL NOT NULL UNIQUE,
+    username VARCHAR(255) NOT NULL,
+    emailPassword VARCHAR(255) NOT NULL,
+    hostAddress VARCHAR(255) NOT NULL,
+    portNumber VARCHAR(255) NOT NULL,
+    enabled BOOLEAN NOT NULL DEFAULT TRUE,
+    custom BOOLEAN NOT NULL DEFAULT FALSE,
+    isTLS BOOLEAN NOT NULL DEFAULT FALSE,
+    email VARCHAR(255) NOT NULL,
+    recipent_User VARCHAR(255) ,
+    recipent_Email VARCHAR(255) ,
+    PRIMARY KEY (emailSettingsId)
+);
+
+CREATE TABLE IF NOT EXISTS SmsSettings(
+    smsSettingsId SERIAL NOT NULL UNIQUE,
+    smsAPI TEXT NOT NULL,
+    enabled BOOLEAN NOT NULL DEFAULT TRUE,
+     recipentsms VARCHAR(255),
+    PRIMARY KEY (smsSettingsId)
+);
+
+CREATE TABLE IF NOT EXISTS EventsManagementNotification(
+    eventsManagementNotificationId SERIAL NOT NULL UNIQUE,
+    eventsManagementNotificationType VARCHAR(255),
+    eventsManagementNotificationRecipients TEXT NOT NULL,
+    eventsManagementNotificationContent TEXT NOT NULL,
+    eventsManagementNotificationTitle VARCHAR(255),
+    deleted BOOLEAN NOT NULL DEFAULT FALSE,
+    eventsManagementId INT REFERENCES EventsManagement(eventsManagementId),
+    PRIMARY KEY (eventsManagementNotificationId)
+);
+
+CREATE TABLE IF NOT EXISTS NotificationLogs(
+    notificationLogsId SERIAL NOT NULL UNIQUE,
+    notificationLogsStatusCode INT NOT NULL,
+    notificationLogsError TEXT NOT NULL,
+    timeSent VARCHAR(255) NOT NULL,
+    eventsManagementNotificationId INT REFERENCES EventsManagementNotification(eventsManagementNotificationId),
+    PRIMARY KEY (notificationLogsId)
+);

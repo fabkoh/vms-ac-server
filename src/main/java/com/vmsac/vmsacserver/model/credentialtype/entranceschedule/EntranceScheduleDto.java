@@ -29,7 +29,9 @@ public class EntranceScheduleDto {
 
     private Long entranceId;
 
+    private boolean isActive;
+
     public EntranceSchedule toEntranceSchedule(boolean deleted){
-        return new EntranceSchedule(entranceScheduleId, entranceScheduleName, rrule, timeStart, timeEnd, entranceId, deleted);
+        return new EntranceSchedule(entranceScheduleId, entranceScheduleName, rrule, timeStart, timeEnd, entranceId, deleted, isActive);
     }
 }

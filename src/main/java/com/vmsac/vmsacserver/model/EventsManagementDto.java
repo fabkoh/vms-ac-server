@@ -3,6 +3,7 @@ package com.vmsac.vmsacserver.model;
 import com.vmsac.vmsacserver.model.*;
 import com.vmsac.vmsacserver.model.EventDto.EventControllerDto;
 import com.vmsac.vmsacserver.model.EventDto.EventEntranceDto;
+import com.vmsac.vmsacserver.model.notification.EventsManagementNotification;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -27,4 +28,6 @@ public class EventsManagementDto {
     private EventEntranceDto entrance;
 
     private EventControllerDto controller;
+
+    private List<EventsManagementNotification> eventsManagementNotification;
 }

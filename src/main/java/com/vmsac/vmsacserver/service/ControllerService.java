@@ -1,9 +1,5 @@
 package com.vmsac.vmsacserver.service;
 
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmsac.vmsacserver.model.*;
 import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoN;
@@ -28,6 +24,7 @@ import org.springframework.web.client.RestTemplate;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.net.InetAddress;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
@@ -79,6 +76,9 @@ public class ControllerService {
 
     @Autowired
     private GENConfigsRepository genRepo;
+
+    @Autowired
+    private TriggerSchedulesRepository triggerSchedulesRepository;
 
     @PersistenceContext
     EntityManager entityManager;
@@ -140,7 +140,6 @@ public class ControllerService {
             toSave.setMasterController(existingcontroller.getMasterController());
             toSave.setCreated(existingcontroller.getCreated());
             toSave.setLastSync(existingcontroller.getLastSync());
-
             return controllerRepository.save(toSave).touniconDto();
         }
         throw new RuntimeException("Controller Id clashes");
@@ -191,13 +190,22 @@ public class ControllerService {
     }
 
     public void shutdownunicon(String IPaddress) {
+
+        HttpComponentsClientHttpRequestFactory httpRequestFactory = new HttpComponentsClientHttpRequestFactory();
+        httpRequestFactory.setConnectionRequestTimeout(3000);
+        httpRequestFactory.setConnectTimeout(3000);
+        httpRequestFactory.setReadTimeout(3000);
+
+        System.out.println("---Shutting down unicon");
         RestTemplate restTemplate = new RestTemplate();
+        restTemplate.setRequestFactory(httpRequestFactory);
         String resourceUrl = "http://"+IPaddress+":5000/api/shutdown";
         HttpEntity<String> request = new HttpEntity<String>("");
 
         try{
             ResponseEntity<String> productCreateResponse =
                     restTemplate.exchange(resourceUrl, HttpMethod.POST, request, String.class);
+            System.out.println("--Finished shutting down");
         }
         catch(Exception e){
             return;
@@ -393,9 +401,9 @@ public class ControllerService {
                         .findFirst()
                         .get().getEntrance();
 
-                if (!(existingentrance == null)) {
+                if (!(existingentrance == null) && existingentrance.getIsActive() ) {
                     // find entrance-schedule object related to entrance
-                    List<EntranceSchedule> exisitngEntranceSchedules = entranceScheduleRepository.findAllByEntranceIdAndDeletedFalse(existingentrance.getEntranceId());
+                    List<EntranceSchedule> exisitngEntranceSchedules = entranceScheduleRepository.findByEntranceIdAndDeletedFalseAndIsActiveTrue(existingentrance.getEntranceId());
 
                     Map<String, Object> entrance = new HashMap();
                     entrance.put("Entrance", existingentrance.getEntranceId());
@@ -427,7 +435,7 @@ public class ControllerService {
                     Device1.put("Direction", exisitngDevice1.getAuthDeviceDirection().substring(3));
                     Device1.put("defaultAuthMethod", exisitngDevice1.getDefaultAuthMethod().getAuthMethodDesc());
                     try {
-                        Device1.put("AuthMethod", GetAuthMethodScheduleObjectWithTime(authMethodScheduleService.findByDeviceId(exisitngDevice1.getAuthDeviceId())));
+                        Device1.put("AuthMethod", GetAuthMethodScheduleObjectWithTime(authMethodScheduleService.findByDeviceIdAndIsActive(exisitngDevice1.getAuthDeviceId())));
                     } catch (Exception e) {
                         throw new Exception ("ERROR WITH AUTH METHOD SCHEDULE 1: " + e);
                     }
@@ -443,7 +451,7 @@ public class ControllerService {
                     Device2.put("Direction", exisitngDevice2.getAuthDeviceDirection().substring(3));
                     Device2.put("defaultAuthMethod", exisitngDevice2.getDefaultAuthMethod().getAuthMethodDesc());
                     try {
-                        Device2.put("AuthMethod", GetAuthMethodScheduleObjectWithTime(authMethodScheduleService.findByDeviceId(exisitngDevice2.getAuthDeviceId())));
+                        Device2.put("AuthMethod", GetAuthMethodScheduleObjectWithTime(authMethodScheduleService.findByDeviceIdAndIsActive(exisitngDevice2.getAuthDeviceId())));
                     } catch (Exception e) {
                         throw new Exception("ERROR WITH AUTH METHOD SCHEDULE 2: " + e);
                     }
@@ -460,9 +468,9 @@ public class ControllerService {
                     List<AccessGroupEntranceNtoN> listOfAccessGroupsNtoN = accessGroupEntranceNtoNRepository.findAllByEntranceEntranceIdAndDeletedFalse(existingentrance.getEntranceId());
 
                     for (AccessGroupEntranceNtoN accessGroupEntranceNtoN : listOfAccessGroupsNtoN) {
-
+                        if ( accessGroupEntranceNtoN.getAccessGroup().getIsActive()){
                         List<Person> ListofPersons = personService.findByAccGrpId((accessGroupEntranceNtoN.getAccessGroup().getAccessGroupId()), false);
-                        List<AccessGroupScheduleDto> ListofSchedule = accessGroupScheduleService.findAllByGroupToEntranceIdIn(Collections.singletonList(accessGroupEntranceNtoN.getGroupToEntranceId()));
+                        List<AccessGroupScheduleDto> ListofSchedule = accessGroupScheduleService.findAllByGroupToEntranceIdInAndIsActiveTrue(Collections.singletonList(accessGroupEntranceNtoN.getGroupToEntranceId()));
 
                         Map<Long, Object> oneAccessGroup = new HashMap();
                         Map<String, Object> personsAndSchedule = new HashMap();
@@ -510,7 +518,7 @@ public class ControllerService {
                         oneAccessGroup.put(accessGroupEntranceNtoN.getAccessGroup().getAccessGroupId(), personsAndSchedule);
 
                         accessGroups.add(oneAccessGroup);
-                    }
+                    }}
 
 
 //                for(User user : listOfUsers) {
@@ -576,7 +584,7 @@ public class ControllerService {
                     entranceIds.add(ad.getEntrance().getEntranceId());
             }
 
-            List<Entrance> entrances = entranceRepo.findByEntranceIdInAndDeletedFalse(entranceIds);
+            List<Entrance> entrances = entranceRepo.findByEntranceIdInAndDeletedFalseAndIsActiveTrue(entranceIds);
             entrances.forEach(ent -> toSend.addAll(ent.getEventsManagements()));
             AtomicBoolean genScheduleError = new AtomicBoolean(false);
             List<EventsManagementPiDto> controllerEms = toSend.stream()
@@ -584,7 +592,7 @@ public class ControllerService {
 
                                 Map<String, Object> schedules = new HashMap<>();
 
-                                for (TriggerSchedules ts : em.getTriggerSchedules())
+                                for (TriggerSchedules ts :triggerSchedulesRepository.findAllById(em.getTriggerSchedulesid()))
                                     try {
 
                                         schedules = getScheduleMap(ts.getRrule(),ts.getTimeStart(),
@@ -660,6 +668,36 @@ public class ControllerService {
             if (!(number >= 0 && number <= 255)) {
                 return true;
             }
+        }
+        return false;
+    }
+
+    public Boolean unlockEntrance(Entrance entrance) throws Exception{
+        HttpComponentsClientHttpRequestFactory httpRequestFactory = new HttpComponentsClientHttpRequestFactory();
+        httpRequestFactory.setConnectionRequestTimeout(3000);
+        httpRequestFactory.setConnectTimeout(3000);
+        httpRequestFactory.setReadTimeout(3000);
+
+        RestTemplate restTemplate = new RestTemplate(httpRequestFactory);
+
+        try{
+            Optional<Controller> existingController = controllerRepository.findByAuthDevices_Entrance_EntranceIdAndDeletedFalse(
+                    entrance.getEntranceId());
+
+            if (existingController.isEmpty()){
+                return false;
+            }
+
+            String resourceUrl = "http://"+ existingController.get().getControllerIP()+":5000/api/unlock/entrance/"+
+                    entrance.getEntranceId();
+
+            ResponseEntity<?> productCreateResponse =
+                    restTemplate.exchange(resourceUrl, HttpMethod.GET, null, String.class);
+            if (productCreateResponse.getStatusCodeValue() == 200) {
+                return true;
+            }
+        }catch (Exception e){
+            return false;
         }
         return false;
     }

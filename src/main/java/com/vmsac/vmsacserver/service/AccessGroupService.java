@@ -50,6 +50,24 @@ public class AccessGroupService {
         return accessGroupRepository.save(AccessGroupDto.toAccessGroup(false)).toDto();
     }
 
+    public AccessGroupDto activateAccessGroupWithId(Long accessGroupId) throws Exception{
+        Optional<AccessGroup> accessGroup = accessGroupRepository.findByAccessGroupIdAndDeleted(accessGroupId,false);
+        if (!accessGroup.isPresent()) throw new RuntimeException("Access Group does not exist");
+
+        AccessGroup toActivate = accessGroup.get();
+        toActivate.setIsActive(true);
+        return accessGroupRepository.save(toActivate).toDto();
+    }
+
+    public AccessGroupDto deactivateAccessGroupWithId(Long accessGroupId) throws Exception{
+        Optional<AccessGroup> accessGroup = accessGroupRepository.findByAccessGroupIdAndDeleted(accessGroupId,false);
+        if (!accessGroup.isPresent()) throw new RuntimeException("Access Group does not exist");
+
+        AccessGroup toActivate = accessGroup.get();
+        toActivate.setIsActive(false);
+        return accessGroupRepository.save(toActivate).toDto();
+    }
+
     //update access group
     public AccessGroup save(AccessGroupDto accessGroupDto){
         return accessGroupRepository.save(accessGroupDto.toAccessGroup(false));

@@ -2,6 +2,7 @@ package com.vmsac.vmsacserver.repository;
 
 import com.vmsac.vmsacserver.model.Person;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.Iterator;
 import java.util.List;
@@ -21,7 +22,7 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
 
     List<Person> findByAccessGroupAccessGroupIdAndDeleted(Long accessGroupId,Boolean deleted);
 
-    List<Person> findByPersonMobileNumber(String personMobileNumber);
+    Optional<Person> findByPersonMobileNumber(String personMobileNumber);
 
     List<Person> findByPersonEmail(String personEmail);
 
@@ -33,4 +34,8 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
     List<Person> findByPersonIdInAndDeleted(Iterable<Long> personId, Boolean deleted);
 
     List<Person> findAllByAccessGroupAccessGroupIdAndDeletedFalse(Long accessGroupId);
+
+    @Query(value = "select * from persons p where upper(:queryString) like upper(concat(personfirstname, '%')) " +
+            "or upper(:queryString) like upper(concat('%', personlastname)) and deleted = false", nativeQuery = true)
+    List<Person> findAllByQueryString(String queryString);
 }

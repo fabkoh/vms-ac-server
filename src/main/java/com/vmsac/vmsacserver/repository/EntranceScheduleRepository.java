@@ -16,9 +16,11 @@ public interface EntranceScheduleRepository extends JpaRepository<EntranceSchedu
 
     List<EntranceSchedule> findAllByEntranceIdAndDeletedFalse(Long entranceIds);
 
+    List<EntranceSchedule> findByEntranceScheduleIdAndDeletedFalseAndIsActiveTrue(Long entranceScheduleId);
+
+    List<EntranceSchedule> findByEntranceIdAndDeletedFalseAndIsActiveTrue(Long entranceId);
+
     List<EntranceSchedule> findAllByDeletedFalse();
-
-
 
 
 }

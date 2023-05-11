@@ -160,9 +160,17 @@ public class EventActionInOutLoader implements CommandLineRunner {
         );
 
         // 7
-        EventActionOutputType NOTIFICATION = outputTypeRepository.save(
+        EventActionOutputType NOTIFICATIONSMS = outputTypeRepository.save(
                 EventActionOutputType.builder()
-                        .eventActionOutputName("NOTIFICATION")
+                        .eventActionOutputName("NOTIFICATION (SMS)")
+                        .timerEnabled(false)
+                        .build()
+        );
+
+        //8
+        EventActionOutputType NOTIFICATIONEmail = outputTypeRepository.save(
+                EventActionOutputType.builder()
+                        .eventActionOutputName("NOTIFICATION (EMAIL)")
                         .timerEnabled(false)
                         .build()
         );

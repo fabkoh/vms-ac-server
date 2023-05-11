@@ -4,6 +4,8 @@ import com.vmsac.vmsacserver.model.accessgroupschedule.AccessGroupSchedule;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import javax.persistence.Access;
+
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,6 +14,9 @@ public interface AccessGroupScheduleRepository extends JpaRepository<AccessGroup
     Optional<AccessGroupSchedule> findByAccessGroupScheduleIdAndDeleted(Long accessGroupScheduleId, Boolean deleted);
 
     List<AccessGroupSchedule> findAllByGroupToEntranceIdInAndDeletedFalse(List<Long> groupToEntranceIds);
+
+    List<AccessGroupSchedule> findByGroupToEntranceIdInAndDeletedFalseAndIsActiveTrue(Collection<Long> groupToEntranceIds);
+
 
     Optional<AccessGroupSchedule> findByAccessGroupScheduleIdAndDeletedFalse(Long accessGroupScheduleId);
 

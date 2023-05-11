@@ -2,6 +2,9 @@ package com.vmsac.vmsacserver.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vladmihalcea.hibernate.type.array.ListArrayType;
+import com.vmsac.vmsacserver.model.EventDto.EventControllerDto;
+import com.vmsac.vmsacserver.model.EventDto.EventEntranceDto;
+import com.vmsac.vmsacserver.model.notification.EventsManagementNotification;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,7 +18,6 @@ import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
 import java.util.List;
 
 @NoArgsConstructor
@@ -58,6 +60,11 @@ public class EventsManagement {
     @NotEmpty
     private List<Long> outputActionsId;
 
+    @Type( type = "list-array" )
+    @Column(name = "triggerschedulesid")
+    private List<Long> triggerSchedulesid;
+
+
     @ManyToOne(cascade = CascadeType.REFRESH)
     @JoinColumn(name = "controllerid")
     @JsonIgnore
@@ -68,7 +75,25 @@ public class EventsManagement {
     @JsonIgnore
     private Entrance entrance;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "eventsManagement", cascade = CascadeType.ALL)
-    private List<TriggerSchedules> triggerSchedules;
+    private List<EventsManagementNotification> eventsManagementNotifications;
 
+
+
+    public EventsManagementDto toDto(List<InputEvent> inputevents,
+                                     List<OutputEvent> outputevents,
+                                     List<TriggerSchedules> triggerschedules,
+                                     EventEntranceDto entranceDto,
+                                     EventControllerDto controllerDto){
+        return new EventsManagementDto(
+                this.eventsManagementId,
+                this.eventsManagementName,
+                inputevents,
+                outputevents,
+                triggerschedules,
+                entranceDto,
+                controllerDto,
+                this.eventsManagementNotifications);
+    }
 }

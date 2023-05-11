@@ -1,12 +1,7 @@
 package com.vmsac.vmsacserver.model;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import com.fasterxml.jackson.annotation.ObjectIdGenerator;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.vmsac.vmsacserver.model.EventDto.EventAccessGroupDto;
-import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoN;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -38,7 +33,10 @@ public class AccessGroup {
     @Column(name = "deleted")
     private Boolean deleted;
 
-//    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class , property = "personId")
+    @Column(name = "isactive")
+    private Boolean isActive;
+
+    //@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class , property = "personId")
     @JsonIgnore
     @OneToMany(mappedBy = "accessGroup")
     private List<Person> persons;
@@ -50,13 +48,13 @@ public class AccessGroup {
     public AccessGroupDto toDto(){
         if (this.persons == null) {
             return new AccessGroupDto(this.accessGroupId, this.accessGroupName,
-                    this.accessGroupDesc,null);
+                    this.accessGroupDesc, this.isActive, null);
         }
         return new AccessGroupDto(this.accessGroupId, this.accessGroupName,
-                this.accessGroupDesc,this.persons.stream().map(Person::accDto).collect(Collectors.toList()));
+                this.accessGroupDesc, this.isActive, this.persons.stream().map(Person::accDto).collect(Collectors.toList()));
     }
     public AccessGroupOnlyDto toAccessGroupOnlyDto(){
-        return new AccessGroupOnlyDto(this.accessGroupId,this.accessGroupName,this.accessGroupDesc);
+        return new AccessGroupOnlyDto(this.accessGroupId,this.accessGroupName,this.accessGroupDesc, this.isActive);
     }
 
     @Override

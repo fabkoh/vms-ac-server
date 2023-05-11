@@ -1,23 +1,49 @@
 package com.vmsac.vmsacserver.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vmsac.vmsacserver.model.AccessGroup;
+import com.vmsac.vmsacserver.model.AccessGroupOnlyDto;
+import com.vmsac.vmsacserver.model.Person;
 import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoN;
+import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoNDto;
 import com.vmsac.vmsacserver.model.accessgroupschedule.AccessGroupSchedule;
 import com.vmsac.vmsacserver.model.accessgroupschedule.AccessGroupScheduleDto;
 import com.vmsac.vmsacserver.model.accessgroupschedule.CreateAccessGroupScheduleDto;
 import com.vmsac.vmsacserver.repository.AccessGroupEntranceNtoNRepository;
+import com.vmsac.vmsacserver.repository.AccessGroupRepository;
 import com.vmsac.vmsacserver.repository.AccessGroupScheduleRepository;
+import com.vmsac.vmsacserver.repository.PersonRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 public class AccessGroupScheduleService {
     @Autowired
+    AccessGroupRepository accessGroupRepository;
+
+    @Autowired
     AccessGroupScheduleRepository accessGroupScheduleRepository;
+
+    @Autowired
+    PersonRepository personRepository;
+    @Autowired
+    ControllerService controllerService;
+
+    @Autowired
+    private AccessGroupEntranceService accessGroupEntranceService;
 
     @Autowired
     AccessGroupEntranceNtoNRepository accessGroupEntranceRepository;
@@ -146,5 +172,113 @@ public class AccessGroupScheduleService {
                 .collect(Collectors.toList());
     }
 
+    public List<AccessGroupScheduleDto> findAllByGroupToEntranceIdInAndIsActiveTrue(List<Long> groupToEntranceIds) {
+        return accessGroupScheduleRepository.findByGroupToEntranceIdInAndDeletedFalseAndIsActiveTrue(groupToEntranceIds)
+                .stream()
+                .map(AccessGroupSchedule::toDto)
+                .collect(Collectors.toList());
+    }
+
+    public Map<Long, Boolean> GetAllAccessGroupCurrentStatus(){
+        List <AccessGroup> ListOfAccessGroups = accessGroupRepository.findByDeleted(false);
+        Map<Long, Boolean> Status = new HashMap();
+        if (ListOfAccessGroups != null){
+            for ( AccessGroup accessGroup  :  ListOfAccessGroups){
+                Status.put(accessGroup.getAccessGroupId(), GetAccessGroupCurrentStatus(accessGroup.getAccessGroupId()));
+            }
+        }
+        return Status;
+    }
+
+    public Boolean GetAllAccessGroupCurrentStatusForOnePerson(Long personId) {
+        Person person = personRepository.findByPersonIdAndDeleted(personId,false).get();
+        if(person != null) {
+            AccessGroup accessGroup = person.getAccessGroup();
+            return GetAccessGroupCurrentStatus(accessGroup.getAccessGroupId());
+        }
+        return false;
+    }
+
+    public Map<Long, Boolean> GetAllAccessGroupCurrentStatusForOneEntrance(Long entranceId){
+        Map<Long, Boolean> Status = new HashMap();
+        List<AccessGroup> ListOfAccessGroups = new ArrayList<>();
+        List <AccessGroupEntranceNtoNDto> ListOfAccessGroupEntranceNtoNDto = accessGroupEntranceService.findAllWhereEntranceId(entranceId);
+
+        for ( AccessGroupEntranceNtoNDto accessGroupEntranceNtoN  :  ListOfAccessGroupEntranceNtoNDto){
+            AccessGroupOnlyDto accessGroupOnlyDto = accessGroupEntranceNtoN.getAccessGroup();
+            AccessGroup accessGroup = accessGroupRepository.findByAccessGroupIdAndDeletedFalse(accessGroupOnlyDto.getAccessGroupId()).get();
+            if (accessGroup != null) {
+                ListOfAccessGroups.add(accessGroup);
+            }
+        }
+        for ( AccessGroup accessGroup  :  ListOfAccessGroups){
+            Status.put(accessGroup.getAccessGroupId(), GetAccessGroupCurrentStatus(accessGroup.getAccessGroupId()));
+        }
+        return Status;
+    }
+
+    // will return true if access group is currently being used in schedule and false otherwise
+    public Boolean GetAccessGroupCurrentStatus(Long accessGroupId){
+        AccessGroup existingAccessGroup = accessGroupRepository.findByAccessGroupIdAndDeletedFalse(accessGroupId).get();
+        if (existingAccessGroup != null){
+            Set<AccessGroupSchedule> accessGroupSchedules = new HashSet<>();
+            List<AccessGroupEntranceNtoN> ListOfAccessGroupEntranceNtoN =accessGroupEntranceRepository.findAllByAccessGroupAccessGroupIdAndDeletedFalse(existingAccessGroup.getAccessGroupId());
+            for ( AccessGroupEntranceNtoN accessGroupEntranceNtoN  :  ListOfAccessGroupEntranceNtoN){
+                List<AccessGroupSchedule> accessGroupSchedule = accessGroupScheduleRepository.findAllByGroupToEntranceIdAndDeletedFalse(accessGroupEntranceNtoN.getGroupToEntranceId());
+                for ( AccessGroupSchedule schedule  :  accessGroupSchedule){
+                    accessGroupSchedules.add(schedule);
+                }
+            }
+            List<AccessGroupSchedule> ListOfExistingAccessGroupSchedule = accessGroupSchedules.stream().collect(Collectors.toList());
+            List<AccessGroupScheduleDto> ListOfExistingAccessGroupScheduleDto = new ArrayList<>();
+            for (AccessGroupSchedule schedule : ListOfExistingAccessGroupSchedule) {
+                ListOfExistingAccessGroupScheduleDto.add(schedule.toDto());
+            }
+
+            try{
+                Map datetime = controllerService.GetAccessGroupScheduleObjectWithTime(ListOfExistingAccessGroupScheduleDto);
+                DateTimeFormatter datef = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                DateTimeFormatter timef = DateTimeFormatter.ofPattern("HH:mm:ss");
+                LocalDateTime now = LocalDateTime.now();
+//                System.out.println(datetime);
+//                System.out.println(datef.format(now) + " " + timef.format(now));
+//                System.out.println(datetime.containsKey(datef.format(now)));
+
+                if ( datetime.containsKey(datef.format(now)) ) {
+                    Object listOfTiming = datetime.get(datef.format(now));
+//                    System.out.println(listOfTiming);
+                    ObjectMapper listMapper = new ObjectMapper();
+                    List listTiming = listMapper.convertValue(listOfTiming, List.class);
+                    for ( Object eachTiming : listTiming){
+//                        System.out.println("HERE");
+//                        System.out.println(eachTiming);
+                        ObjectMapper oMapper = new ObjectMapper();
+                        Map<String, String> Sch = oMapper.convertValue(eachTiming, Map.class);
+//                        System.out.println("TIMING");
+                        String starttime = Sch.get("starttime");
+                        String endtime = Sch.get("endtime");
+
+                        LocalTime tEnd  = LocalTime.parse("23:59");
+                        LocalTime tStart  = LocalTime.parse(starttime);
+                        LocalTime tNow  = LocalTime.parse(timef.format(now));
+
+                        if (!endtime.equals("24:00")){
+                            tEnd  = LocalTime.parse(endtime);
+                        }
+
+                        if(tNow.compareTo(tStart)>=0 && tEnd.compareTo(tNow)>=0){
+                            return true;
+                        }
+                    }
+                }
+
+            } catch (Exception e){
+                System.out.println(e.toString());
+                return false;
+            }
+        }
+
+        return false;
+    }
 
 }

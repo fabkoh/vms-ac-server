@@ -2,6 +2,7 @@ package com.vmsac.vmsacserver.repository;
 
 import com.vmsac.vmsacserver.model.AccessGroup;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 
 import java.util.List;
@@ -19,5 +20,9 @@ public interface AccessGroupRepository extends JpaRepository<AccessGroup, Long> 
     List<AccessGroup> findByAccessGroupIdInAndDeletedFalse(Set<Long> accessGroupIds);
 
     Optional<AccessGroup> findByAccessGroupIdAndDeletedFalse(Long accessGroupId);
+
+    @Query(value = "select * from accessgroups where upper(accessgroupname) like upper(concat('%', :name, '%')) " +
+            "and deleted = false", nativeQuery = true)
+    List<AccessGroup> searchByAccessGroupName(String name);
 
 }

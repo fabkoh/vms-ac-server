@@ -3,13 +3,15 @@ package com.vmsac.vmsacserver.service;
 import com.vmsac.vmsacserver.model.*;
 import com.vmsac.vmsacserver.model.EventDto.EventControllerDto;
 import com.vmsac.vmsacserver.model.EventDto.EventEntranceDto;
+import com.vmsac.vmsacserver.model.notification.EventsManagementNotification;
 import com.vmsac.vmsacserver.repository.*;
 import javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,9 +39,20 @@ public class EventsManagementService {
     InOutEventService inOutEventService;
 
     @Autowired
+    EventsManagementNotificationService eventsManagementNotificationService;
+
+    @Autowired
     GENConfigsRepository genRepo;
 
+    @Autowired
+    EventsManagementNotificationRepository eventsManagementNotificationRepository;
+
+    public Optional<EventsManagement> getEventsManagementById(Long eventsManagementId) {
+        return eventsManagementRepository.findByDeletedFalseAndEventsManagementId(eventsManagementId);
+    }
+
     public List<Long> createInputEvents(List<InputEvent> dto, Long controllerId) throws NotFoundException {
+        System.out.println("createInputEvents being run");
         List<Long> inputEventsId = new ArrayList<>();
         for (InputEvent input : dto) {
             Long id = input.getInputEventId();
@@ -53,13 +66,14 @@ public class EventsManagementService {
     }
 
     public List<Long> createOutputActions(List<OutputEvent> dto, Long controllerId) throws NotFoundException {
+        System.out.println("createOutputActions being run");
         List<Long> outputActionsId = new ArrayList<>();
         for (OutputEvent output : dto) {
             Long id = output.getOutputEventId();
             if (id == null) {
                 outputActionsId.add(inOutEventService.createOutputEvent(output, controllerId).getOutputEventId());
             } else {
-            outputActionsId.add(id);
+                outputActionsId.add(id);
             }
         }
         return outputActionsId;
@@ -70,7 +84,6 @@ public class EventsManagementService {
                                          List<Long> entranceIds) throws NotFoundException {
 
         List<EventsManagement> resultEms = new ArrayList<>();
-
         for (Long controllerId : controllerIds) {
             // create different input and output events for each eventsManagement
             // in case users want to modify input/output events
@@ -82,23 +95,48 @@ public class EventsManagementService {
                 Controller c = opController.get();
                 EventsManagement em = eventsManagementRepository.save(new EventsManagement(null,
                         dto.getEventsManagementName(), false, inputEventsId,
-                        outputActionsId, c, null, new ArrayList<>()));
+                        outputActionsId, null, c, null, new ArrayList<>()));
 
+                List<TriggerSchedules> triggerSchedulesList = new ArrayList<>();
                 for (TriggerSchedules ts : dto.getTriggerSchedules()) {
-                    TriggerSchedules newTs = triggerSchedulesRepository.save(new TriggerSchedules(
+                    TriggerSchedules newTs = new TriggerSchedules(
                             null, ts.getTriggerName(), ts.getRrule(), ts.getTimeStart(),
-                            ts.getTimeEnd(), false, em));
+                            ts.getTimeEnd(), false, ts.getDtstart(), ts.getUntil(), ts.getCount(),
+                            ts.getRepeatToggle(), ts.getRruleinterval(), ts.getByweekday(), ts.getBymonthday(),
+                            ts.getBysetpos(), ts.getBymonth(), ts.getAllDay(), ts.getEndOfDay());
 
-                    em.getTriggerSchedules().add(newTs);
+                    triggerSchedulesList.add(newTs);
                 }
+
+                List<TriggerSchedules> savedTriggerSchedules = triggerSchedulesRepository.saveAll(triggerSchedulesList);
+                List<Long> triggerIdList = savedTriggerSchedules.stream().map(TriggerSchedules::getTriggerScheduleId).collect(Collectors.toList());
+                em.setTriggerSchedulesid(triggerIdList);
+
+                if (dto.getEventsManagementEmail() != null) {
+                    EventsManagementEmailCreateDto eventManagementEmail = dto.getEventsManagementEmail();
+                    EventsManagementNotification newEventManagementNotificationEmail = eventManagementEmail.toEventManagementNotification(false, em);
+                    eventsManagementNotificationService.save(newEventManagementNotificationEmail);
+                }
+
+                if (dto.getEventsManagementSMS() != null) {
+                    EventsManagementSMSCreateDto eventManagementSMS = dto.getEventsManagementSMS();
+                    EventsManagementNotification newEventManagementNotificationSMS = eventManagementSMS.toEventManagementNotification(false, em);
+                    eventsManagementNotificationService.save(newEventManagementNotificationSMS);
+                }
+
                 resultEms.add(em);
                 c.getEventsManagements().add(em);
             }
         }
 
+        eventsManagementRepository.saveAllAndFlush(resultEms);
+
+//        System.out.println("entrance IDs are" + entranceIds);
         for (Long entranceId : entranceIds) {
             // create different input and output events for each eventsManagement
             // in case users want to modify input/output events
+//            System.out.println("entrances are");
+//            System.out.println(entranceId);
             List<AuthDevice> devices = entranceRepository.findByEntranceIdAndDeletedFalse(entranceId)
                     .get().getEntranceAuthDevices();
             Long controllerId = null;
@@ -109,24 +147,45 @@ public class EventsManagementService {
             List<Long> outputActionsId = createOutputActions(dto.getOutputActions(), controllerId);
 
             Optional<Entrance> opEntrance = entranceRepository.findByEntranceIdAndDeletedFalse(entranceId);
+            //System.out.println("adding entrance,"+ opEntrance.isPresent());
             if (opEntrance.isPresent()) {
                 Entrance e = opEntrance.get();
+//                System.out.println("adding entrance," + e.getEntranceName());
                 EventsManagement em = eventsManagementRepository.save(new EventsManagement(null,
                         dto.getEventsManagementName(), false, inputEventsId,
-                        outputActionsId, null, e, new ArrayList<>()));
+                        outputActionsId, null, null, e, new ArrayList<>()));
 
+                ArrayList<Long> triggerIdList = new ArrayList<>();
                 for (TriggerSchedules ts : dto.getTriggerSchedules()) {
                     TriggerSchedules newTs = triggerSchedulesRepository.save(new TriggerSchedules(
                             null, ts.getTriggerName(), ts.getRrule(), ts.getTimeStart(),
-                            ts.getTimeEnd(), false, em));
+                            ts.getTimeEnd(), false, ts.getDtstart(), ts.getUntil(), ts.getCount(),
+                            ts.getRepeatToggle(), ts.getRruleinterval(), ts.getByweekday(), ts.getBymonthday(),
+                            ts.getBysetpos(), ts.getBymonth(), ts.getAllDay(), ts.getEndOfDay()));
 
-                    em.getTriggerSchedules().add(newTs);
+                    triggerSchedulesRepository.save(newTs);
+                    triggerIdList.add(newTs.getTriggerScheduleId());
+                }
+                em.setTriggerSchedulesid(triggerIdList);
+                if (dto.getEventsManagementEmail() != null) {
+                    EventsManagementEmailCreateDto eventManagementEmail = dto.getEventsManagementEmail();
+                    EventsManagementNotification newEventManagementNotificationEmail = eventManagementEmail.toEventManagementNotification(false, em);
+                    eventsManagementNotificationService.save(newEventManagementNotificationEmail);
+                }
+                if (dto.getEventsManagementSMS() != null) {
+                    EventsManagementSMSCreateDto eventManagementSMS = dto.getEventsManagementSMS();
+                    EventsManagementNotification newEventManagementNotificationSMS = eventManagementSMS.toEventManagementNotification(false, em);
+                    eventsManagementNotificationService.save(newEventManagementNotificationSMS);
                 }
                 resultEms.add(em);
                 e.getEventsManagements().add(em);
+//                System.out.println(em);
+//                System.out.println(resultEms);
             }
         }
+        System.out.println("trigger sch bp 500");
 
+        eventsManagementRepository.saveAllAndFlush(resultEms);
         return resultEms;
     }
 
@@ -180,7 +239,7 @@ public class EventsManagementService {
             em.setDeleted(true);
 
             // soft delete all the triggerSchedules
-            for (TriggerSchedules ts : em.getTriggerSchedules()) {
+            for (TriggerSchedules ts : triggerSchedulesRepository.findAllById(em.getTriggerSchedulesid())) {
                 ts.setDeleted(true);
                 triggerSchedulesRepository.save(ts);
             }
@@ -204,8 +263,9 @@ public class EventsManagementService {
         return new EventsManagementDto(em.getEventsManagementId(), em.getEventsManagementName(),
                 inputEventRepository.findAllById(em.getInputEventsId()),
                 outputEventRepository.findAllById(em.getOutputActionsId()),
-                em.getTriggerSchedules(),
+                triggerSchedulesRepository.findAllById(em.getTriggerSchedulesid()),
                 entrance,
-                controller);
+                controller,
+                em.getEventsManagementNotifications());
     }
 }

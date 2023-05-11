@@ -25,6 +25,8 @@ public class AuthMethodScheduleDto {
 
     private String timeEnd;
 
+    private Boolean isActive;
+
     private AuthMethodDto authMethod;
 
 }

@@ -11,7 +11,6 @@ import com.vmsac.vmsacserver.service.SendQrCodeLink;
 import com.vmsac.vmsacserver.util.HashQRId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,10 +19,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 
 import javax.validation.Valid;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import org.apache.commons.io.IOUtils;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -31,9 +27,7 @@ import java.nio.file.Paths;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -58,9 +52,9 @@ public class ScheduledVisitController{
     @Autowired
     private HashQRId hashQRId;
 
-    @Autowired
-    @Value("${dev.qrcode.image.path}")
-    String qrFilePath;
+//    @Autowired
+//    @Value("${dev.qrcode.image.path}")
+//    String qrFilePath;
 
     public ScheduledVisitController() {
 

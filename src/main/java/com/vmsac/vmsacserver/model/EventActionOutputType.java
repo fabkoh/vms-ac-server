@@ -34,4 +34,10 @@ public class EventActionOutputType {
 
     @Column(name = "eventactionoutputconfig")
     private String eventActionOutputConfig;
+
+    @Column(name = "recipents")
+    private String recipents;
+
+    @Column(name = "recipentsMessage")
+    private String recipentsMessage;
 }

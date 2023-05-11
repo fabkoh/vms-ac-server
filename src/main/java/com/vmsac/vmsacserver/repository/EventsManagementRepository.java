@@ -19,5 +19,7 @@ public interface EventsManagementRepository extends JpaRepository<EventsManageme
 
     List<EventsManagement> findByDeletedFalseAndController_ControllerIdOrderByEventsManagementNameAsc(Long controllerId);
 
+    Optional<EventsManagement> findByEventsManagementIdEqualsAndDeletedFalse(Long eventsManagementId);
+
 
 }

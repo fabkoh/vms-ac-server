@@ -36,8 +36,10 @@ public class InOutEventService {
                 if (controllerId != null) {
                     GENConfigs g = genRepo.getByController_ControllerIdAndPinName(controllerId,
                             type.getEventActionInputName().substring(7));
-                    g.setStatus("IN");
-                    genRepo.save(g);
+                    if (g != null) {
+                        g.setStatus("IN");
+                        genRepo.save(g);
+                    }
                 }
             }
             return inputEventRepository.save(new InputEvent(null,
@@ -55,13 +57,14 @@ public class InOutEventService {
                 if (controllerId != null) {
                     GENConfigs g = genRepo.getByController_ControllerIdAndPinName(controllerId,
                             type.getEventActionOutputName().substring(8));
-                    g.setStatus("OUT");
-                    genRepo.save(g);
+                    if (g != null) {
+                        g.setStatus("OUT");
+                        genRepo.save(g);
+                    }
                 }
             }
             return outputEventRepository.save(new OutputEvent(null,
                     dto.getTimerDuration(), type));
-        }
-        else throw new NotFoundException("Output type does not exist");
+        } else throw new NotFoundException("Output type does not exist");
     }
 }

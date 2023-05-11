@@ -1,15 +1,13 @@
 package com.vmsac.vmsacserver.util;
 
 import com.vmsac.vmsacserver.controller.ControllerController;
-import com.vmsac.vmsacserver.model.*;
+import com.vmsac.vmsacserver.model.AccessGroup;
+import com.vmsac.vmsacserver.model.Controller;
+import com.vmsac.vmsacserver.model.Entrance;
+import com.vmsac.vmsacserver.model.Person;
 import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoN;
 import com.vmsac.vmsacserver.model.accessgroupschedule.AccessGroupSchedule;
-
 import com.vmsac.vmsacserver.model.credentialtype.entranceschedule.EntranceSchedule;
-
-import com.vmsac.vmsacserver.model.credential.Credential;
-import com.vmsac.vmsacserver.model.credentialtype.CredentialType;
-
 import com.vmsac.vmsacserver.repository.*;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
@@ -34,8 +32,7 @@ public class DataLoader implements CommandLineRunner {
     private final ControllerController controllerController;
 
 
-
-    public DataLoader(AccessGroupRepository accessGroupRepository, EntranceRepository entranceRepository, PersonRepository personRepository, AccessGroupEntranceNtoNRepository accessGroupEntranceRepository, AccessGroupScheduleRepository accessGroupScheduleRepository, CredTypeRepository credTypeRepository, CredentialRepository credentialRepository, EntranceScheduleRepository entranceScheduleRepository,ControllerRepository controllerRepository,AuthDeviceRepository authDeviceRepository,ControllerController controllerController) {
+    public DataLoader(AccessGroupRepository accessGroupRepository, EntranceRepository entranceRepository, PersonRepository personRepository, AccessGroupEntranceNtoNRepository accessGroupEntranceRepository, AccessGroupScheduleRepository accessGroupScheduleRepository, CredTypeRepository credTypeRepository, CredentialRepository credentialRepository, EntranceScheduleRepository entranceScheduleRepository, ControllerRepository controllerRepository, AuthDeviceRepository authDeviceRepository, ControllerController controllerController) {
 
         this.accessGroupRepository = accessGroupRepository;
         this.entranceRepository = entranceRepository;
@@ -62,6 +59,7 @@ public class DataLoader implements CommandLineRunner {
                 AccessGroup.builder()
                         .accessGroupName("Dune")
                         .accessGroupDesc("the characters from dune")
+                        .isActive(true)
                         .deleted(false)
                         .build()
         );
@@ -70,6 +68,7 @@ public class DataLoader implements CommandLineRunner {
                 AccessGroup.builder()
                         .accessGroupName("Not dune")
                         .deleted(false)
+                        .isActive(true)
                         .build()
         );
 
@@ -77,6 +76,25 @@ public class DataLoader implements CommandLineRunner {
                 AccessGroup.builder()
                         .accessGroupName("Empty group")
                         .deleted(false)
+                        .isActive(true)
+                        .build()
+        );
+
+        Controller controller1 = controllerRepository.save(
+                Controller.builder()
+                        .controllerName("controller1")
+                        .controllerIPStatic(Boolean.FALSE)
+                        .controllerIP("111")
+                        .pendingIP("111")
+                        .controllerMAC("111")
+                        .controllerSerialNo("111")
+                        .lastOnline(LocalDateTime.now())
+                        .lastSync(LocalDateTime.now())
+                        .created(LocalDateTime.now())
+                        .masterController(Boolean.FALSE)
+                        .pinAssignmentConfig("111")
+                        .settingsConfig("111")
+                        .deleted(Boolean.FALSE)
                         .build()
         );
 
@@ -188,10 +206,10 @@ public class DataLoader implements CommandLineRunner {
                         .timeStart("00:00")
                         .timeEnd("23:59")
                         .groupToEntranceId(duneMainEntrance.getGroupToEntranceId())
+                        .isActive(true)
                         .deleted(false)
                         .build()
         );
-
 
 
         AccessGroupSchedule duneSideEntranceWeekdays = accessGroupScheduleRepository.save(
@@ -202,6 +220,7 @@ public class DataLoader implements CommandLineRunner {
                         .timeEnd("17:00")
                         .groupToEntranceId(duneSideEntrance.getGroupToEntranceId())
                         .deleted(false)
+                        .isActive(true)
                         .build()
         );
 
@@ -212,6 +231,7 @@ public class DataLoader implements CommandLineRunner {
                         .timeStart("12:00")
                         .timeEnd("17:00")
                         .groupToEntranceId(duneSideEntrance.getGroupToEntranceId())
+                        .isActive(true)
                         .deleted(false)
                         .build()
         );
@@ -223,6 +243,7 @@ public class DataLoader implements CommandLineRunner {
                         .timeStart("00:00")
                         .timeEnd("23:59")
                         .groupToEntranceId(notDuneMainEntrance.getGroupToEntranceId())
+                        .isActive(true)
                         .deleted(false)
                         .build()
         );
@@ -236,6 +257,7 @@ public class DataLoader implements CommandLineRunner {
                         .timeEnd("23:59")
                         .entranceId(mainEntrance.getEntranceId())
                         .deleted(false)
+                        .isActive(true)
                         .build()
         );
 
@@ -247,6 +269,7 @@ public class DataLoader implements CommandLineRunner {
                         .timeEnd("12:00")
                         .entranceId(mainEntrance.getEntranceId())
                         .deleted(false)
+                        .isActive(true)
                         .build()
         );
 
@@ -327,8 +350,6 @@ public class DataLoader implements CommandLineRunner {
 //                        .build()
 //        );
 
-        controllerController.createOrUpdateController(
-                new UniconControllerDto(null,"192.168.1.155",true,"495162159654","5e86805e2bafd54f66cc95c3")
-        );
+
     }
 }
