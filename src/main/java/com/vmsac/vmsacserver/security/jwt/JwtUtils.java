@@ -23,8 +23,11 @@ public class JwtUtils {
     // create your own fixed secret and place here
     private Key jwtSecret;
 
-    // jwt token expiry time - currently 15 mins
-    private Long jwtTokenDurationMs= Long.valueOf(900000);
+//    // jwt token expiry time - currently 15 mins
+//    private Long jwtTokenDurationMs= Long.valueOf(15 * 60 * 1000);
+
+    // jwt token expiry time - currently 20 secs
+    private Long jwtTokenDurationMs= Long.valueOf(1 * 20 * 1000);
 
     @PostConstruct
     public void init() {
@@ -50,15 +53,33 @@ public class JwtUtils {
     public String getEmailFromToken(String token) {
         return Jwts.parserBuilder().setSigningKey(jwtSecret).build().parseClaimsJws(token).getBody().getSubject();
     }
+//
+//    public void extendAccessTokenValidity(String token) {
+//        System.out.println("extended");
+//        Claims claims = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody();
+//        claims.setExpiration(new Date(System.currentTimeMillis() + jwtTokenDurationMs)); // extend by jwtTokenDurationMs
+//    }
 
-    public Map<String, String> validateJwtToken
-            (String authToken) {
+    public Map<String, String> validateJwtToken (String authToken) {
         Map<String, String> res = new HashMap<>();
         res.put("status", "false");
         try {
             Jwts.parserBuilder().setSigningKey(jwtSecret).build().parseClaimsJws(authToken);
             res.put("status", "true");
-        } catch (SignatureException e) {
+        }
+//        try {
+//            // Parse the token and get the email and roles
+//            Jws<Claims> parsedToken = Jwts.parserBuilder().setSigningKey(jwtSecret).build().parseClaimsJws(authToken);
+//            String email = parsedToken.getBody().getSubject();
+//            ArrayList role_names = (ArrayList) parsedToken.getBody().get("roles", ArrayList.class);
+//
+//            // Generate a new token with the same email and roles, but with an extended expiration time
+//            String extendedToken = generateTokenFromEmail(email, role_names);
+//
+//            res.put("status", "true");
+//            res.put("token", extendedToken); // Return the extended token in the response
+//        }
+        catch (SignatureException e) {
             logger.error("Invalid JWT signature: {}", e.getMessage());
             res.put("exception", "Invalid JWT signature");
         } catch (MalformedJwtException e) {
