@@ -363,9 +363,8 @@ CREATE TABLE IF NOT EXISTS user_roles (
   FOREIGN KEY (role_id) REFERENCES roles (id)
 );
 
---CREATE SEQUENCE hibernate_sequence;
 DROP SEQUENCE IF EXISTS hibernate_sequence;
-
+CREATE SEQUENCE hibernate_sequence;
 
 CREATE TABLE IF NOT EXISTS refreshtoken (
   id serial PRIMARY KEY,
