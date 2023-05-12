@@ -31,6 +31,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         try {
+            System.out.println("Checking validity");
             String jwt = parseJwt(request);
             if (jwt != null) {
                 Map<String, String> res = jwtUtils.validateJwtToken(jwt);
