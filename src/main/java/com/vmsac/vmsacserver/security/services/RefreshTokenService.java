@@ -16,7 +16,7 @@ import java.util.UUID;
 public class RefreshTokenService {
 
     // change the expiry time of refreshToken - currently 15mins
-    private Long refreshTokenDurationMs= Long.valueOf(1 * 10 * 1000);
+    private Long refreshTokenDurationMs= Long.valueOf(15 * 60 * 1000);
 
     @Autowired
     private RefreshTokenRepository refreshTokenRepository;
