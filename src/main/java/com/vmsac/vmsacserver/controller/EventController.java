@@ -4,8 +4,10 @@ import com.vmsac.vmsacserver.model.Event;
 import com.vmsac.vmsacserver.model.EventsManagement;
 import com.vmsac.vmsacserver.model.notification.EmailSettings;
 import com.vmsac.vmsacserver.model.notification.EventsManagementNotification;
+import com.vmsac.vmsacserver.model.notification.NotificationLogs;
 import com.vmsac.vmsacserver.repository.EmailSettingsRepository;
 import com.vmsac.vmsacserver.repository.EventRepository;
+import com.vmsac.vmsacserver.repository.NotificationLogsRepository;
 import com.vmsac.vmsacserver.service.EmailSettingNotificationService;
 import com.vmsac.vmsacserver.service.EventService;
 import com.vmsac.vmsacserver.util.IPaddressWhitelisting;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -30,6 +33,8 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api")
 public class EventController {
+    @Autowired
+    private NotificationLogsRepository notificationLogsRepository;
 
     @Autowired
     NotificationService notificationService;
@@ -105,12 +110,27 @@ public class EventController {
                         notificationService.sendSMTPSSLEmail(message, subject, recipents, emailSettings1);
                     }
                 } catch (Exception e) {
+                    addNotif(HttpStatus.BAD_REQUEST.value(), e.getMessage(), eventsManagementNotification1);
                     return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
                 }
             }
+//            add to notif logs
+            addNotif(Integer.valueOf("200"), "Success", eventsManagementNotification1);
             return new ResponseEntity<>("SMTP email sent", HttpStatus.OK);
         }
+
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
+    private void addNotif(int BAD_REQUEST, String e, EventsManagementNotification eventsManagementNotification1) {
+        Integer statuscode = BAD_REQUEST;
+        String error = e;
+        LocalDateTime currentTime = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String formattedTime = currentTime.format(formatter);
+        NotificationLogs notificationLogs = new NotificationLogs(statuscode, error, formattedTime, eventsManagementNotification1);
+        System.out.println(notificationLogs);
+        notificationLogsRepository.save(notificationLogs);
     }
 
     @PostMapping("events/eventsSMS")
@@ -131,9 +151,11 @@ public class EventController {
                 try {
                     notificationService.sendSMS(mobile, message, notificationService);
                 } catch (Exception e) {
+                    addNotif(HttpStatus.BAD_REQUEST.value(), e.getMessage(), eventsManagementNotification1);
                     return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
                 }
             }
+            addNotif(Integer.valueOf("200"), "Success", eventsManagementNotification1);
             return new ResponseEntity<>("SMS sent", HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

@@ -35,4 +35,23 @@ public class NotificationLogs {
     @JoinColumn(name = "eventsmanagementnotificationid")
     private EventsManagementNotification eventsManagementNotification;
 
+    @Override
+    public String toString() {
+        return "NotificationLogs{" +
+                "notificationLogsId=" + notificationLogsId +
+                ", notificationLogsStatusCode=" + notificationLogsStatusCode +
+                ", notificationLogsError='" + notificationLogsError + '\'' +
+                ", timeSent='" + timeSent + '\'' +
+                ", eventsManagementNotification=" + eventsManagementNotification +
+                '}';
+    }
+
+    public NotificationLogs(Integer notificationLogsStatusCode, String notificationLogsError, String timeSent, EventsManagementNotification eventsManagementNotification) {
+        this.notificationLogsStatusCode = notificationLogsStatusCode;
+        this.notificationLogsError = notificationLogsError;
+        this.timeSent = timeSent;
+        this.eventsManagementNotification = eventsManagementNotification;
+    }
+//    public NotificationLogs(Integer statuscode, String error, String formattedTime, EventsManagementNotification eventsManagementNotification1) {
+//    }
 }

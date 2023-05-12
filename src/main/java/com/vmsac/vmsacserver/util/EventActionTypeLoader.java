@@ -1,18 +1,22 @@
 package com.vmsac.vmsacserver.util;
 
-import com.vmsac.vmsacserver.model.AccessGroup;
 import com.vmsac.vmsacserver.model.EventActionType;
 import com.vmsac.vmsacserver.repository.EventActionTypeRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
 
 @Component
 @Profile({"dev", "devpostgres"})
-public class EventActionTypeLoader implements CommandLineRunner {
+
+public class EventActionTypeLoader implements CommandLineRunner, Ordered {
     private final EventActionTypeRepository eventActionTypeRepository;
 
-
+    @Override
+    public int getOrder() {
+        return 1; // Set the desired order value
+    }
 
     public EventActionTypeLoader(EventActionTypeRepository eventActionTypeRepository) {
         this.eventActionTypeRepository = eventActionTypeRepository;
@@ -24,6 +28,7 @@ public class EventActionTypeLoader implements CommandLineRunner {
     }
 
     private void loadData() {
+        System.out.println("creating eventActionTypes");
         EventActionType authenticated_scan = eventActionTypeRepository.save(
                 EventActionType.builder()
                         .eventActionTypeName("Authenticated Scans")
