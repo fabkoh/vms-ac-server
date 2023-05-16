@@ -83,7 +83,6 @@ public class VmsAcServerApplication {
             user1.setDeleted(false);
             user1.setMobile("123456789");
             userRepository.save(user1);
-
         }
     }
 
