@@ -14,5 +14,9 @@ public interface AuthMethodScheduleRepository extends JpaRepository<AuthMethodSc
 
     List<AuthMethodSchedule> findByAuthDevice_Controller_ControllerId(Long controllerId);
 
+    List<AuthMethodSchedule> findByIsActiveTrueAndDeletedFalseAndAuthDevice_AuthDeviceId(Long authDeviceId);
+
+
+
 
 }

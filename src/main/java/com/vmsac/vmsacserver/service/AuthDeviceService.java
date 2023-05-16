@@ -1,20 +1,15 @@
 package com.vmsac.vmsacserver.service;
 
-import com.fasterxml.jackson.databind.exc.InvalidTypeIdException;
 import com.vmsac.vmsacserver.model.*;
 import com.vmsac.vmsacserver.model.authmethod.AuthMethod;
 import com.vmsac.vmsacserver.model.authmethodschedule.AuthMethodSchedule;
 import com.vmsac.vmsacserver.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import javax.naming.ConfigurationException;
-import javax.naming.InvalidNameException;
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.*;

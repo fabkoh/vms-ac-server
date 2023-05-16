@@ -2,11 +2,9 @@ package com.vmsac.vmsacserver.controller;
 
 
 import com.vmsac.vmsacserver.model.authmethodschedule.AuthMethodSchedule;
-import com.vmsac.vmsacserver.model.authmethodschedule.AuthMethodScheduleDto;
 import com.vmsac.vmsacserver.model.authmethodschedule.CreateAuthMethodScheduleDto;
 import com.vmsac.vmsacserver.service.AuthDeviceService;
 import com.vmsac.vmsacserver.service.AuthMethodScheduleService;
-import com.vmsac.vmsacserver.util.UniconUpdater;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +22,25 @@ public class AuthMethodScheduleController {
     @Autowired
     AuthDeviceService authDeviceService;
 
+    @PutMapping("/authentication-schedule/enable/{scheduleId}")
+    public ResponseEntity<?> enableAuthMethodSchedule(@PathVariable("scheduleId") Long scheduleId) {
+        AuthMethodSchedule authMethodSchedule = authMethodScheduleService.findByScheduleIdAndDeletedFalse(scheduleId);
+        if (authMethodSchedule == null) {
+            return ResponseEntity.notFound().build();
+        }
+        authMethodSchedule.setIsActive(true);
+        return ResponseEntity.ok(authMethodScheduleService.save(authMethodSchedule));
+    }
+
+    @PutMapping("/authentication-schedule/disable/{scheduleId}")
+    public ResponseEntity<?> disableAuthMethodSchedule(@PathVariable("scheduleId") Long scheduleId) {
+        AuthMethodSchedule authMethodSchedule = authMethodScheduleService.findByScheduleIdAndDeletedFalse(scheduleId);
+        if (authMethodSchedule == null) {
+            return ResponseEntity.notFound().build();
+        }
+        authMethodSchedule.setIsActive(false);
+        return ResponseEntity.ok(authMethodScheduleService.save(authMethodSchedule));
+    }
 
     @GetMapping("/authentication-schedule/{authDeviceId}")
     public ResponseEntity<?> getAuthSched(@PathVariable("authDeviceId")Long authDeviceId){
@@ -43,6 +60,7 @@ public class AuthMethodScheduleController {
 //        List<AuthMethodScheduleDto> createdDtos;
 //        try{
         ;
+        System.out.println("DEBUG");
         return (authMethodScheduleService.addAll(CreateScheduleList,authDeviceIdList));
 //        }catch (Exception e){
 //            return ResponseEntity.badRequest().build();

@@ -26,6 +26,6 @@ public class CreateEntranceScheduleDto {
     private Long entranceId;
 
     public EntranceSchedule toEntranceSchedule(boolean deleted){
-        return new EntranceSchedule(null, entranceScheduleName, rrule, timeStart, timeEnd, entranceId, deleted);
+        return new EntranceSchedule(null, entranceScheduleName, rrule, timeStart, timeEnd, entranceId, deleted, true);
     }
 }

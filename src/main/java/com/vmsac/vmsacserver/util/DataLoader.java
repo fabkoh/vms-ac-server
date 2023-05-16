@@ -4,25 +4,26 @@ import com.vmsac.vmsacserver.controller.ControllerController;
 import com.vmsac.vmsacserver.model.*;
 import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoN;
 import com.vmsac.vmsacserver.model.accessgroupschedule.AccessGroupSchedule;
-
 import com.vmsac.vmsacserver.model.credentialtype.entranceschedule.EntranceSchedule;
-
-import com.vmsac.vmsacserver.model.credential.Credential;
-import com.vmsac.vmsacserver.model.credentialtype.CredentialType;
-
 import com.vmsac.vmsacserver.repository.*;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
 
+import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 
 @Profile({"dev", "devpostgres"})
+//@DependsOn("eventActionTypeLoader")
 @Component
-public class DataLoader implements CommandLineRunner {
+public class DataLoader implements CommandLineRunner, Ordered {
     private final AccessGroupRepository accessGroupRepository;
     private final EntranceRepository entranceRepository;
+    private final EventRepository eventRepository;
+    private final EventActionTypeRepository eventActionTypeRepository;
     private final PersonRepository personRepository;
     private final AccessGroupEntranceNtoNRepository accessGroupEntranceRepository;
     private final AccessGroupScheduleRepository accessGroupScheduleRepository;
@@ -33,12 +34,17 @@ public class DataLoader implements CommandLineRunner {
     private final AuthDeviceRepository authDeviceRepository;
     private final ControllerController controllerController;
 
+    @Override
+    public int getOrder() {
+        return 2; // Set the desired order value
+    }
 
-
-    public DataLoader(AccessGroupRepository accessGroupRepository, EntranceRepository entranceRepository, PersonRepository personRepository, AccessGroupEntranceNtoNRepository accessGroupEntranceRepository, AccessGroupScheduleRepository accessGroupScheduleRepository, CredTypeRepository credTypeRepository, CredentialRepository credentialRepository, EntranceScheduleRepository entranceScheduleRepository,ControllerRepository controllerRepository,AuthDeviceRepository authDeviceRepository,ControllerController controllerController) {
+    public DataLoader(AccessGroupRepository accessGroupRepository, EntranceRepository entranceRepository, EventRepository eventRepository, EventActionTypeRepository eventActionTypeRepository, PersonRepository personRepository, AccessGroupEntranceNtoNRepository accessGroupEntranceRepository, AccessGroupScheduleRepository accessGroupScheduleRepository, CredTypeRepository credTypeRepository, CredentialRepository credentialRepository, EntranceScheduleRepository entranceScheduleRepository, ControllerRepository controllerRepository, AuthDeviceRepository authDeviceRepository, ControllerController controllerController) {
 
         this.accessGroupRepository = accessGroupRepository;
         this.entranceRepository = entranceRepository;
+        this.eventRepository = eventRepository;
+        this.eventActionTypeRepository = eventActionTypeRepository;
         this.personRepository = personRepository;
         this.accessGroupEntranceRepository = accessGroupEntranceRepository;
         this.accessGroupScheduleRepository = accessGroupScheduleRepository;
@@ -57,7 +63,7 @@ public class DataLoader implements CommandLineRunner {
         loadData(); // uncomment to load data listed in loadData() below
     }
 
-    private void loadData() {
+    private void loadData() throws ParseException {
         AccessGroup dune = accessGroupRepository.save(
                 AccessGroup.builder()
                         .accessGroupName("Dune")
@@ -75,6 +81,37 @@ public class DataLoader implements CommandLineRunner {
                         .build()
         );
 
+        Optional<EventActionType> eventActionTypeOptional = eventActionTypeRepository.findById(1L);
+        EventActionType eventActionType = eventActionTypeOptional.orElse(null);
+
+
+        System.out.println("type is " + eventActionType);
+        Event event1 = eventRepository.save(
+                Event.builder()
+                        .eventTime("05-01-2023 00:00:00.0")
+                        .direction("2")
+                        .eventActionType(eventActionType)
+                        .deleted(false)
+                        .build()
+        );
+        Event event2 = eventRepository.save(
+                Event.builder()
+                        .eventTime("04-01-2023 00:00:00.0")
+                        .direction("2")
+                        .eventActionType(eventActionType)
+                        .deleted(false)
+                        .build()
+        );
+        Event event3 = eventRepository.save(
+                Event.builder()
+                        .eventTime("03-01-2023 00:00:00.0")
+                        .direction("2")
+                        .eventActionType(eventActionType)
+                        .deleted(false)
+                        .build()
+        );
+
+
         AccessGroup emptyGroup = accessGroupRepository.save(
                 AccessGroup.builder()
                         .accessGroupName("Empty group")
@@ -82,6 +119,24 @@ public class DataLoader implements CommandLineRunner {
                         .isActive(true)
                         .build()
         );
+
+//        Controller controller1 = controllerRepository.save(
+//                Controller.builder()
+//                        .controllerName("controller1")
+//                        .controllerIPStatic(Boolean.FALSE)
+//                        .controllerIP("111")
+//                        .pendingIP("111")
+//                        .controllerMAC("111")
+//                        .controllerSerialNo("111")
+//                        .lastOnline(LocalDateTime.now())
+//                        .lastSync(LocalDateTime.now())
+//                        .created(LocalDateTime.now())
+//                        .masterController(Boolean.FALSE)
+//                        .pinAssignmentConfig("111")
+//                        .settingsConfig("111")
+//                        .deleted(Boolean.FALSE)
+//                        .build()
+//        );
 
         Person paulAtreides = personRepository.save(
                 Person.builder()
@@ -191,10 +246,10 @@ public class DataLoader implements CommandLineRunner {
                         .timeStart("00:00")
                         .timeEnd("23:59")
                         .groupToEntranceId(duneMainEntrance.getGroupToEntranceId())
+                        .isActive(true)
                         .deleted(false)
                         .build()
         );
-
 
 
         AccessGroupSchedule duneSideEntranceWeekdays = accessGroupScheduleRepository.save(
@@ -205,6 +260,7 @@ public class DataLoader implements CommandLineRunner {
                         .timeEnd("17:00")
                         .groupToEntranceId(duneSideEntrance.getGroupToEntranceId())
                         .deleted(false)
+                        .isActive(true)
                         .build()
         );
 
@@ -215,6 +271,7 @@ public class DataLoader implements CommandLineRunner {
                         .timeStart("12:00")
                         .timeEnd("17:00")
                         .groupToEntranceId(duneSideEntrance.getGroupToEntranceId())
+                        .isActive(true)
                         .deleted(false)
                         .build()
         );
@@ -226,6 +283,7 @@ public class DataLoader implements CommandLineRunner {
                         .timeStart("00:00")
                         .timeEnd("23:59")
                         .groupToEntranceId(notDuneMainEntrance.getGroupToEntranceId())
+                        .isActive(true)
                         .deleted(false)
                         .build()
         );
@@ -239,6 +297,7 @@ public class DataLoader implements CommandLineRunner {
                         .timeEnd("23:59")
                         .entranceId(mainEntrance.getEntranceId())
                         .deleted(false)
+                        .isActive(true)
                         .build()
         );
 
@@ -250,6 +309,7 @@ public class DataLoader implements CommandLineRunner {
                         .timeEnd("12:00")
                         .entranceId(mainEntrance.getEntranceId())
                         .deleted(false)
+                        .isActive(true)
                         .build()
         );
 
@@ -330,8 +390,6 @@ public class DataLoader implements CommandLineRunner {
 //                        .build()
 //        );
 
-        controllerController.createOrUpdateController(
-                new UniconControllerDto(null,"192.168.1.155",true,"495162159654","5e86805e2bafd54f66cc95c3")
-        );
+
     }
 }

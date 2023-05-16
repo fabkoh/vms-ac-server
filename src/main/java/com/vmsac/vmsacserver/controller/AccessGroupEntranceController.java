@@ -2,7 +2,6 @@ package com.vmsac.vmsacserver.controller;
 
 import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoNDto;
 import com.vmsac.vmsacserver.service.AccessGroupEntranceService;
-import com.vmsac.vmsacserver.util.UniconUpdater;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

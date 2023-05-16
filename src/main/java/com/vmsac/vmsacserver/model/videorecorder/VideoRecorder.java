@@ -1,22 +1,14 @@
 package com.vmsac.vmsacserver.model.videorecorder;
 
-import java.time.LocalDateTime;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
-
-import org.springframework.data.annotation.CreatedDate;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+
+import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Builder
 @AllArgsConstructor
@@ -26,26 +18,38 @@ import lombok.NoArgsConstructor;
 @Table(name = "videorecorder")
 public class VideoRecorder {
 
-    public VideoRecorder(String recorderName, String recorderSerialNumber, String recorderIpAddress, Integer recorderPortNumber, String recorderUsername, String recorderPassword, Boolean deleted) {
+    public VideoRecorder(String recorderName, String recorderSerialNumber, String recorderPublicIp,
+                         String recorderPrivateIp, Integer recorderPortNumber, Integer recorderIWSPort,
+                         String recorderUsername, String recorderPassword,
+                         Boolean autoPortForwarding, Boolean deleted) {
         this.recorderName = recorderName;
         this.recorderSerialNumber = recorderSerialNumber;
-        this.recorderIpAddress = recorderIpAddress;
+        this.recorderPublicIp = recorderPublicIp;
+        this.recorderPrivateIp = recorderPrivateIp;
         this.recorderPortNumber = recorderPortNumber;
+        this.recorderIWSPort = recorderIWSPort;
         this.recorderUsername = recorderUsername;
         this.recorderPassword = recorderPassword;
         this.deleted = deleted;
         this.created = LocalDateTime.now();
+        this.autoPortForwarding = autoPortForwarding;
     }
 
-    public VideoRecorder(Long recorderId, String recorderName, String recorderSerialNumber, String recorderIpAddress, Integer recorderPortNumber, String recorderUsername, String recorderPassword, Boolean deleted) {
+    public VideoRecorder(Long recorderId, String recorderName, String recorderSerialNumber,
+                         String recorderPublicIp, String recorderPrivateIp, Integer recorderPortNumber,
+                         Integer recorderIWSPort, String recorderUsername, String recorderPassword,
+                         Boolean autoPortForwarding, Boolean deleted) {
         this.recorderId = recorderId;
         this.recorderName = recorderName;
         this.recorderSerialNumber = recorderSerialNumber;
-        this.recorderIpAddress = recorderIpAddress;
+        this.recorderPublicIp = recorderPublicIp;
+        this.recorderPrivateIp = recorderPrivateIp;
         this.recorderPortNumber = recorderPortNumber;
+        this.recorderIWSPort = recorderIWSPort;
         this.recorderUsername = recorderUsername;
         this.recorderPassword = recorderPassword;
         this.deleted = deleted;
+        this.autoPortForwarding = autoPortForwarding;
     }
 
     @Id
@@ -56,14 +60,20 @@ public class VideoRecorder {
     @Column( name ="recordername", nullable = false)
     private String recorderName;
 
-    @Column( name = "recorderserialnumber", nullable = false, unique = true)
+    @Column( name = "recorderserialnumber")
     private String recorderSerialNumber;
 
-    @Column( name = "recorderipaddress", nullable = false, unique = true)
-    private String recorderIpAddress;
+    @Column( name = "recorderpublicip", nullable = false, unique = true)
+    private String recorderPublicIp;
 
-    @Column( name = "recorderportnumber", nullable = false, unique = true)
+    @Column( name = "recorderprivateip", nullable = false, unique = true)
+    private String recorderPrivateIp;
+
+    @Column( name = "recorderportnumber")
     private Integer recorderPortNumber;
+
+    @Column( name = "recorderiwsport")
+    private Integer recorderIWSPort;
 
     @Column( name = "recorderusername", nullable = false)
     private String recorderUsername;
@@ -74,6 +84,9 @@ public class VideoRecorder {
     @CreatedDate
     @Column( name = "created", nullable = false, updatable = false)
     private LocalDateTime created;
+
+    @Column( name = "autoportforwarding", nullable = false)
+    private boolean autoPortForwarding;
 
     @JsonIgnore
     @Column( name = "deleted")

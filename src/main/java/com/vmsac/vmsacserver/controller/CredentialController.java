@@ -1,5 +1,6 @@
 package com.vmsac.vmsacserver.controller;
 
+import com.vmsac.vmsacserver.model.PersonDto;
 import com.vmsac.vmsacserver.model.credential.CreateCredentialDto;
 import com.vmsac.vmsacserver.model.credential.CredentialDto;
 import com.vmsac.vmsacserver.model.credential.EditCredentialDto;
@@ -22,11 +23,17 @@ public class CredentialController {
     private CredentialService credentialService;
 
     @GetMapping("/credentials")
-    public List<CredentialDto> findAll(@RequestParam(name="personid", required = false) Long personId, @RequestParam(name="creduid", required = false) String credUid) {
-        if (personId == null && credUid == null) return credentialService.findAllNotDeleted();
-        if (personId != null && credUid != null) return credentialService.findByCredUidAndPersonId(credUid, personId);
-        if (personId != null) return credentialService.findByPersonId(personId);
-        return credentialService.findByCredUid(credUid);
+    public List<CredentialDto> findAll(@RequestParam(name="personid", required = false) Long personId) {
+        if (personId == null) return credentialService.findAllNotDeleted();
+        return credentialService.findByPersonId(personId);
+    }
+
+    @GetMapping("/lostcredentials")
+    public ResponseEntity<?> findAll(@RequestParam(name="creduid") String credUid) {
+        PersonDto person = credentialService.findPersonWithCredUid(credUid);
+        if (person == null) {return ResponseEntity.notFound().build();}
+
+        return ResponseEntity.ok(person);
     }
 
     @PostMapping("/credential")
@@ -52,6 +59,7 @@ public class CredentialController {
 
     @PostMapping("/credential/check")
     public ResponseEntity<?> checkCredential(@RequestBody CreateCredentialDto createCred) {
+        System.out.println(createCred);
         if (createCred.getCredTypeId() != 4) {
             if (credentialService.uidInUse(createCred.getCredUid(), createCred.getCredId())) {
                 Map<Long, String> errors = new HashMap<>();

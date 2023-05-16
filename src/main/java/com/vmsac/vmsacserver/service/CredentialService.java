@@ -1,6 +1,7 @@
 package com.vmsac.vmsacserver.service;
 
 import com.vmsac.vmsacserver.model.Person;
+import com.vmsac.vmsacserver.model.PersonDto;
 import com.vmsac.vmsacserver.model.credential.CreateCredentialDto;
 import com.vmsac.vmsacserver.model.credential.Credential;
 import com.vmsac.vmsacserver.model.credential.CredentialDto;
@@ -83,7 +84,7 @@ public class CredentialService {
                 .collect(Collectors.toList());
     }
 
-    public List<CredentialDto> findByCredUid(String credUid) {
+    public List<CredentialDto> findByContainCredUid(String credUid) {
         return credentialRepository
                 .findByCredUidContainsAndDeletedFalse(credUid)
                 .stream()
@@ -91,12 +92,29 @@ public class CredentialService {
                 .collect(Collectors.toList());
     }
 
-    public List<CredentialDto> findByCredUidAndPersonId(String credUid, Long personId) {
+    public List<CredentialDto> findByContainCredUidAndPersonId(String credUid, Long personId) {
         return credentialRepository
                 .findByCredUidContainsAndDeletedFalseAndPerson_PersonId(credUid, personId)
                 .stream()
                 .map(Credential::toDto)
                 .collect(Collectors.toList());
+    }
+
+    public PersonDto findPersonWithCredUid(String credUid) {
+        List<Credential> credOptionals = credentialRepository.findByDeletedFalseAndCredUidAndCredType_CredTypeId(credUid, 1L);
+        if (credOptionals.isEmpty()) {
+            return null;
+        }
+        if (credOptionals.size() > 1) {
+            return null;
+        }
+        Credential cred = credOptionals.get(0);
+
+        // Only allow Card type credentials to be searched
+        if (cred.getCredType().getCredTypeId() != 1) {
+            return null;
+        }
+        return cred.getPerson().toDto();
     }
 
     public CredentialDto enableCredentialWithId(Long credentialId) throws Exception{

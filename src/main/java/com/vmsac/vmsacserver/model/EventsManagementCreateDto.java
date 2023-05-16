@@ -31,4 +31,8 @@ public class EventsManagementCreateDto {
     private List<Integer> controllerIds;
 
     private List<TriggerSchedules> triggerSchedules;
+
+    private EventsManagementEmailCreateDto eventsManagementEmail;
+
+    private EventsManagementSMSCreateDto eventsManagementSMS;
 }

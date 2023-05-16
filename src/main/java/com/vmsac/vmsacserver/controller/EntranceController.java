@@ -1,20 +1,17 @@
 package com.vmsac.vmsacserver.controller;
 
 import com.vmsac.vmsacserver.model.*;
-import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoN;
 import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoNDto;
 import com.vmsac.vmsacserver.service.AccessGroupEntranceService;
+import com.vmsac.vmsacserver.service.ControllerService;
 import com.vmsac.vmsacserver.service.EntranceService;
 import com.vmsac.vmsacserver.service.AccessGroupService;
-import com.vmsac.vmsacserver.util.UniconUpdater;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.persistence.Access;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -27,7 +24,8 @@ public class EntranceController {
     EntranceService entranceService;
     @Autowired
     AccessGroupEntranceService accessGroupEntranceService;
-
+    @Autowired
+    ControllerService controllerService;
 
     //returns all entrances
     @GetMapping("/entrances")
@@ -98,8 +96,8 @@ public class EntranceController {
         return ResponseEntity.ok(entranceDto);
     }
 
-    @PutMapping("/entrance/unlock/{entranceId}")
-    public ResponseEntity<?> disableEntrance(@PathVariable(name = "entranceId") Long entranceId) {
+    @PutMapping("/entrance/disable/{entranceId}")
+    public ResponseEntity<?> disableEntrance(@PathVariable("entranceId") Long entranceId) {
         EntranceDto entranceDto;
         try {
             entranceDto = entranceService.updateEntranceIsActiveWithId(false, entranceId);
@@ -108,6 +106,24 @@ public class EntranceController {
         }
 
         return ResponseEntity.ok(entranceDto);
+    }
+
+    @GetMapping("/entrance/unlock/{entranceId}")
+    public ResponseEntity<?> unlockEntrance(@PathVariable(name = "entranceId") Long entranceId) {
+        Optional<Entrance> entranceOptional = entranceService.findById(entranceId);
+        if (!entranceOptional.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+        try {
+            Entrance entrance = entranceOptional.get();
+            if (controllerService.unlockEntrance(entrance)){
+                return ResponseEntity.ok().build();
+            }
+            //TODO: CALL PI TO UNLOCK ENTRANCE
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.badRequest().build();
     }
 
     //Update name or description of entrance
@@ -169,5 +185,6 @@ public class EntranceController {
         }
 
     }
+
 
 }

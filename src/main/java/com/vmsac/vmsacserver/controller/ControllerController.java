@@ -2,27 +2,24 @@ package com.vmsac.vmsacserver.controller;
 
 import com.vmsac.vmsacserver.model.*;
 import com.vmsac.vmsacserver.model.authmethod.AuthMethod;
-import com.vmsac.vmsacserver.repository.AuthDeviceRepository;
 import com.vmsac.vmsacserver.repository.AuthMethodRepository;
 import com.vmsac.vmsacserver.repository.ControllerRepository;
 import com.vmsac.vmsacserver.repository.GENConfigsRepository;
 import com.vmsac.vmsacserver.service.AuthDeviceService;
 import com.vmsac.vmsacserver.service.ControllerService;
 import com.vmsac.vmsacserver.service.EntranceService;
-
 import com.vmsac.vmsacserver.util.UniconUpdater;
-import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import javax.validation.constraints.Null;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
@@ -86,7 +83,7 @@ public class ControllerController {
         return new ResponseEntity<>(errors, HttpStatus.NOT_FOUND);
     }
 
-
+    @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN') or hasRole('ROLE_TECH_ADMIN')")
     @PutMapping(path = "controller/{controllerId}")
     public ResponseEntity<?> UpdateController( @PathVariable Long controllerId,
             @Valid @RequestBody FrontendControllerDto newFrontendControllerDto) throws Exception {
@@ -199,15 +196,24 @@ public class ControllerController {
         return new ResponseEntity<>(errors, HttpStatus.NOT_FOUND);
     }
 
+    // @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN') or hasRole('ROLE_TECH_ADMIN')")
+    @PreAuthorize("permitAll()")
     @PostMapping(path = "unicon/controller")
     public ResponseEntity<?> createOrUpdateController(
-            @Valid @RequestBody UniconControllerDto newUniconControllerDto) {
+            @Valid @RequestBody UniconControllerDto newUniconControllerDto, HttpServletRequest request) {
         Optional<Controller> optionalController = controllerService.findBySerialNo(newUniconControllerDto.getControllerSerialNo());
 
         if (optionalController.isPresent()) {
             try {
-                return new ResponseEntity<>(controllerService.uniconControllerUpdate(newUniconControllerDto), HttpStatus.OK);
-            }//update
+                // check if current IP is incoming IP
+                String clientIpAddress = request.getRemoteAddr();
+                System.out.println(clientIpAddress);
+                if (clientIpAddress.equals(optionalController.get().getControllerIP())) {
+                    return new ResponseEntity<>(controllerService.uniconControllerUpdate(newUniconControllerDto), HttpStatus.OK);
+                    }else{
+                    return ResponseEntity.badRequest().build();
+                }
+                }//update
             catch(Exception e){
                 return ResponseEntity.badRequest().build();
             }
@@ -270,6 +276,7 @@ public class ControllerController {
         return new ResponseEntity<>(errors, HttpStatus.NOT_FOUND);
     }
 
+    @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN') or hasRole('ROLE_TECH_ADMIN')")
     @PutMapping(path = "authdevice/masterpinToTrue/{authdeviceId}")
     public ResponseEntity<?> UpdateAuthDeviceMasterpinToTrue( @PathVariable Long authdeviceId) {
         Optional<AuthDevice> optionalAuthDevice = authDeviceService.findbyId(authdeviceId);
@@ -297,6 +304,7 @@ public class ControllerController {
         return new ResponseEntity<>(errors, HttpStatus.NOT_FOUND);
     }
 
+    @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN') or hasRole('ROLE_TECH_ADMIN')")
     @PutMapping(path = "authdevice/masterpinToFalse/{authdeviceId}")
     public ResponseEntity<?> UpdateAuthDeviceMasterpinToFalse( @PathVariable Long authdeviceId) {
         Optional<AuthDevice> optionalAuthDevice = authDeviceService.findbyId(authdeviceId);
@@ -324,6 +332,7 @@ public class ControllerController {
         return new ResponseEntity<>(errors, HttpStatus.NOT_FOUND);
     }
 
+    @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN') or hasRole('ROLE_TECH_ADMIN')")
     @PutMapping(path = "authdevice/{authdeviceId}")
     public ResponseEntity<?> UpdateAuthDevice( @PathVariable Long authdeviceId,
                                                @Valid @RequestBody AuthDevice newAuthDevice) {
@@ -347,6 +356,7 @@ public class ControllerController {
         return new ResponseEntity<>(errors, HttpStatus.NOT_FOUND);
     }
 
+    @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN') or hasRole('ROLE_TECH_ADMIN')")
     @PutMapping(path = "/authdevice/entrance")
     public ResponseEntity<?> UpdateAuthDeviceEntrance(
             @RequestParam(name = "entranceid", required = false)
@@ -436,6 +446,7 @@ public class ControllerController {
         return new ResponseEntity<>(updated,HttpStatus.OK);
     }
 
+    @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN') or hasRole('ROLE_TECH_ADMIN')")
     @DeleteMapping("/authdevice/delete/{authdeviceid}")
     public ResponseEntity<?> deleteauthdevice(@PathVariable Long authdeviceid){
         try {
@@ -448,6 +459,7 @@ public class ControllerController {
         }
     }
 
+    @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN') or hasRole('ROLE_TECH_ADMIN')")
     @DeleteMapping("/authdevice/reset/{authdeviceid}")
     public ResponseEntity<?> resetauthdevice(@PathVariable Long authdeviceid){
         try {
@@ -460,6 +472,7 @@ public class ControllerController {
         }
     }
 
+    @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN') or hasRole('ROLE_TECH_ADMIN')")
     @DeleteMapping("/controller/delete/{controllerId}")
     public ResponseEntity<?> deleteControllerWithId(@PathVariable Long controllerId){
         Optional<Controller> optionalController = controllerService.findById(controllerId);
@@ -479,9 +492,13 @@ public class ControllerController {
         String IPaddress = existingcontroller.getControllerIP();
         //api call to get status
         try {
+            System.out.println("---Deleting controller...");
             controllerService.shutdownunicon(IPaddress);
+            System.out.println("--Finished shut down unicon");
             authDeviceService.deleteRelatedAuthDevices(controllerId);
+            System.out.println("--Finished delete auth devices");
             controllerService.deleteControllerWithId(controllerId);
+            System.out.println("--Finished delete controller from the db");
 
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
@@ -491,6 +508,7 @@ public class ControllerController {
         }
     }
 
+    @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN') or hasRole('ROLE_TECH_ADMIN')")
     @DeleteMapping("/controller/reset/{controllerId}")
     public ResponseEntity<?> resetControllerWithId(@PathVariable Long controllerId){
 
@@ -598,7 +616,7 @@ public class ControllerController {
             return new ResponseEntity<>(HttpStatus.REQUEST_TIMEOUT);
         }
     }
-
+    @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN') or hasRole('ROLE_TECH_ADMIN')")
     @PostMapping("/uniconUpdater")
     public ResponseEntity<?> testing() {
         Map<String, String> response = uniconUpdater.updateUnicons();
@@ -611,6 +629,7 @@ public class ControllerController {
         }
     }
 
+    @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN') or hasRole('ROLE_TECH_ADMIN')")
     @PutMapping("/controller/reset/config")
     public ResponseEntity<?> resetConfig(@RequestParam("controllerIds") List<Long> controllerIds) {
         for (Long controllerId : controllerIds) {

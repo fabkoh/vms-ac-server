@@ -28,8 +28,10 @@ public class AccessGroupScheduleDto {
 
     private Long groupToEntranceId;
 
+    private Boolean isActive;
+
     public AccessGroupSchedule toAccessGroupSchedule(boolean deleted){
-        return new AccessGroupSchedule(accessGroupScheduleId, accessGroupScheduleName, rrule, timeStart, timeEnd, groupToEntranceId, deleted);
+        return new AccessGroupSchedule(accessGroupScheduleId, accessGroupScheduleName, rrule, timeStart, timeEnd, groupToEntranceId, isActive, deleted);
     }
 
 }
