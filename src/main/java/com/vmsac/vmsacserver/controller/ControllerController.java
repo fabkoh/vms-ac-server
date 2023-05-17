@@ -85,20 +85,20 @@ public class ControllerController {
 
     @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN') or hasRole('ROLE_TECH_ADMIN')")
     @PutMapping(path = "controller/{controllerId}")
-    public ResponseEntity<?> UpdateController( @PathVariable Long controllerId,
-            @Valid @RequestBody FrontendControllerDto newFrontendControllerDto) throws Exception {
+    public ResponseEntity<?> UpdateController(@PathVariable Long controllerId,
+                                              @Valid @RequestBody FrontendControllerDto newFrontendControllerDto) throws Exception {
         Optional<Controller> optionalController = controllerService.findBySerialNo(newFrontendControllerDto.getControllerSerialNo());
 
         if (optionalController.isPresent() && optionalController.get().getControllerId() == controllerId) {
 
-            if (optionalController.get().getControllerIP().equals(newFrontendControllerDto.getControllerIP())){
+            if (optionalController.get().getControllerIP().equals(newFrontendControllerDto.getControllerIP())) {
                 return new ResponseEntity<>(controllerService.FrondEndControllerUpdate(newFrontendControllerDto), HttpStatus.OK);
             }
 
-            if (optionalController.get().getMasterController() == true){
+            if (optionalController.get().getMasterController() == true) {
                 Map<String, String> errors = new HashMap<>();
                 errors.put("controllerId", "Controller with Id " +
-                        controllerId + " with Serial No " + newFrontendControllerDto.getControllerSerialNo()+" is a Master Controller and cannot be edited.");
+                        controllerId + " with Serial No " + newFrontendControllerDto.getControllerSerialNo() + " is a Master Controller and cannot be edited.");
                 return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
             }
 
@@ -107,33 +107,31 @@ public class ControllerController {
             Optional<Controller> opCon = controllerRepository.findByControllerNameAndDeletedFalse(
                     newFrontendControllerDto.getControllerName());
 
-            if (opCon.isPresent() && !opCon.get().getControllerId().equals(newFrontendControllerDto.getControllerId())){
+            if (opCon.isPresent() && !opCon.get().getControllerId().equals(newFrontendControllerDto.getControllerId())) {
                 Map<String, String> errors = new HashMap<>();
-                errors.put("controllerNameError", "Controller with name " + newFrontendControllerDto.getControllerName()+" already exists.");
+                errors.put("controllerNameError", "Controller with name " + newFrontendControllerDto.getControllerName() + " already exists.");
                 return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
             }
 
-            if (newFrontendControllerDto.getControllerIPStatic() == false){
+            if (newFrontendControllerDto.getControllerIPStatic() == false) {
 
-                try{
-                    if (optionalController.get().getControllerIPStatic() == true){
+                try {
+                    if (optionalController.get().getControllerIPStatic() == true) {
                         controllerService.FrondEndControllerUpdate(newFrontendControllerDto);
                         if (controllerService.UpdateUniconIP(newFrontendControllerDto)) {
                             return new ResponseEntity<>(HttpStatus.OK);
                         }
 
                         Map<String, String> errors = new HashMap<>();
-                        errors.put("Error", "Unexpected error in updateunicon" );
+                        errors.put("Error", "Unexpected error in updateunicon");
                         return new ResponseEntity<>(errors, HttpStatus.GONE);
-                    }
-                    else{
+                    } else {
                         return new ResponseEntity<>(controllerService.FrondEndControllerUpdate(newFrontendControllerDto), HttpStatus.OK);
                     }
 
-                }
-                catch(Exception e){
+                } catch (Exception e) {
                     Map<String, String> errors = new HashMap<>();
-                    errors.put("Error", "CONTROLLER MIGHT BE LOST ! Fail to update Controller with ID "+ newFrontendControllerDto.getControllerId() );
+                    errors.put("Error", "CONTROLLER MIGHT BE LOST ! Fail to update Controller with ID " + newFrontendControllerDto.getControllerId());
                     return new ResponseEntity<>(errors, HttpStatus.GONE);
                 }
 
@@ -141,57 +139,56 @@ public class ControllerController {
             }
 
             if (optionalController.get().getPendingIP() != null &&
-                    Objects.equals(optionalController.get().getPendingIP(), newFrontendControllerDto.getControllerIP())){
+                    Objects.equals(optionalController.get().getPendingIP(), newFrontendControllerDto.getControllerIP())) {
                 Map<String, String> errors = new HashMap<>();
                 errors.put("controllerId", "Controller with Id " +
-                        controllerId + " with Serial No " + newFrontendControllerDto.getControllerSerialNo()+" has clashing pending and current IP ");
+                        controllerId + " with Serial No " + newFrontendControllerDto.getControllerSerialNo() + " has clashing pending and current IP ");
                 return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
             }
 
-            if (controllerService.isNotValidInet4Address(newFrontendControllerDto.getControllerIP())){
+            if (controllerService.isNotValidInet4Address(newFrontendControllerDto.getControllerIP())) {
                 Map<String, String> errors = new HashMap<>();
-                errors.put("Error", newFrontendControllerDto.getControllerIP() +" is not a valid IPv4 address");
+                errors.put("Error", newFrontendControllerDto.getControllerIP() + " is not a valid IPv4 address");
                 return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
             }
 
             // check if mastercontroller, return error if true
             // check if pendingIP != actualIP && pendingIP != null, return error
-            try{
-                if (!(newFrontendControllerDto.getControllerIP().equals(optionalController.get().getControllerIP())) && controllerService.IsIPavailable(newFrontendControllerDto.getControllerIP())){
+            try {
+                if (!(newFrontendControllerDto.getControllerIP().equals(optionalController.get().getControllerIP())) && controllerService.IsIPavailable(newFrontendControllerDto.getControllerIP())) {
                     // ping ip to see if taken ( return error if taken )
                     // update pending ip in db
 
-                    if (controllerService.UpdateUniconIP(newFrontendControllerDto)){
+                    if (controllerService.UpdateUniconIP(newFrontendControllerDto)) {
                         return new ResponseEntity<>(controllerService.FrondEndControllerUpdate(newFrontendControllerDto), HttpStatus.OK);
                     }
 
                     Map<String, String> errors = new HashMap<>();
-                    errors.put("Error", "CONTROLLER MIGHT BE LOST ! Fail to update Controller with ID "+ newFrontendControllerDto.getControllerId() );
+                    errors.put("Error", "CONTROLLER MIGHT BE LOST ! Fail to update Controller with ID " + newFrontendControllerDto.getControllerId());
                     return new ResponseEntity<>(errors, HttpStatus.GONE);
 
                 }
 
                 Map<String, String> errors = new HashMap<>();
-                errors.put("Error", newFrontendControllerDto.getControllerIP() +" is taken");
+                errors.put("Error", newFrontendControllerDto.getControllerIP() + " is taken");
                 return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
-            }
-            catch (Exception e){
+            } catch (Exception e) {
                 return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
             }
             //////////////////// check if ip address is in same subnet
 
             // send req to pi and wait for response
             // time out, start sending POST req for healthcheck to pi new address
-                // ( after a {certain time}, return error )
-                // replies within a {certain time},
-                    // update name and actual ip in db and return success
+            // ( after a {certain time}, return error )
+            // replies within a {certain time},
+            // update name and actual ip in db and return success
             // if pi replies, return error
 
             //return Response 200
         }
         Map<String, String> errors = new HashMap<>();
         errors.put("controllerId", "Controller with Id " +
-                controllerId + " with Serial No " + newFrontendControllerDto.getControllerSerialNo()+" does not exist");
+                controllerId + " with Serial No " + newFrontendControllerDto.getControllerSerialNo() + " does not exist");
 
         return new ResponseEntity<>(errors, HttpStatus.NOT_FOUND);
     }
@@ -210,11 +207,11 @@ public class ControllerController {
                 System.out.println(clientIpAddress);
                 if (clientIpAddress.equals(optionalController.get().getControllerIP())) {
                     return new ResponseEntity<>(controllerService.uniconControllerUpdate(newUniconControllerDto), HttpStatus.OK);
-                    }else{
+                } else {
                     return ResponseEntity.badRequest().build();
                 }
-                }//update
-            catch(Exception e){
+            }//update
+            catch (Exception e) {
                 return ResponseEntity.badRequest().build();
             }
             //return Response 200
@@ -226,9 +223,7 @@ public class ControllerController {
                 authDeviceService.createAuthDevices(created.toController());
                 controllerService.createGenConfigs(created.toController());
                 getControllerConnection(created.getControllerId());
-            }
-            catch(Exception e)
-            {
+            } catch (Exception e) {
                 return ResponseEntity.badRequest().build();
             }
 
@@ -238,9 +233,9 @@ public class ControllerController {
     }
 
     @GetMapping(path = "authdevice/{authdeviceId}")
-    public ResponseEntity<?> GetAuthDevice( @PathVariable Long authdeviceId) {
+    public ResponseEntity<?> GetAuthDevice(@PathVariable Long authdeviceId) {
 
-        if (authDeviceService.findbyId(authdeviceId).isPresent()){
+        if (authDeviceService.findbyId(authdeviceId).isPresent()) {
             return new ResponseEntity<>(authDeviceService.findbyId(authdeviceId), HttpStatus.OK);
         }
         Map<String, String> errors = new HashMap<>();
@@ -251,10 +246,10 @@ public class ControllerController {
     }
 
     @GetMapping(path = "authdevice/currentAuthMethod/{authdeviceId}")
-    public ResponseEntity<?> GetAuthDeviceCurrentAuthMethod( @PathVariable Long authdeviceId) {
+    public ResponseEntity<?> GetAuthDeviceCurrentAuthMethod(@PathVariable Long authdeviceId) {
 
-        if (authDeviceService.findbyId(authdeviceId).isPresent()){
-            return new ResponseEntity<>(authDeviceService.findCurrentAuthMethod(authdeviceId),HttpStatus.OK);
+        if (authDeviceService.findbyId(authdeviceId).isPresent()) {
+            return new ResponseEntity<>(authDeviceService.findCurrentAuthMethod(authdeviceId), HttpStatus.OK);
         }
         Map<String, String> errors = new HashMap<>();
         errors.put("authdeviceId", "Auth Device with Id " +
@@ -264,10 +259,10 @@ public class ControllerController {
     }
 
     @GetMapping(path = "controller/currentAuthMethod/{controllerId}")
-    public ResponseEntity<?> GetControllerCurrentAuthMethod( @PathVariable Long controllerId) {
+    public ResponseEntity<?> GetControllerCurrentAuthMethod(@PathVariable Long controllerId) {
 
-        if (controllerService.findById(controllerId).isPresent()){
-            return new ResponseEntity<>(authDeviceService.findControllerCurrentAuthMethod(controllerId),HttpStatus.OK);
+        if (controllerService.findById(controllerId).isPresent()) {
+            return new ResponseEntity<>(authDeviceService.findControllerCurrentAuthMethod(controllerId), HttpStatus.OK);
         }
         Map<String, String> errors = new HashMap<>();
         errors.put("controllerId", "Controller with Id " +
@@ -278,64 +273,62 @@ public class ControllerController {
 
     @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN') or hasRole('ROLE_TECH_ADMIN')")
     @PutMapping(path = "authdevice/masterpinToTrue/{authdeviceId}")
-    public ResponseEntity<?> UpdateAuthDeviceMasterpinToTrue( @PathVariable Long authdeviceId) {
+    public ResponseEntity<?> UpdateAuthDeviceMasterpinToTrue(@PathVariable Long authdeviceId) {
         Optional<AuthDevice> optionalAuthDevice = authDeviceService.findbyId(authdeviceId);
 
-        if (optionalAuthDevice.isPresent()){
+        if (optionalAuthDevice.isPresent()) {
             try {
-                if (!optionalAuthDevice.get().getMasterpin()){
-                    authDeviceService.UpdateAuthDeviceMasterpin(authdeviceId,true);
+                if (!optionalAuthDevice.get().getMasterpin()) {
+                    authDeviceService.UpdateAuthDeviceMasterpin(authdeviceId, true);
 
                     return new ResponseEntity<>(HttpStatus.OK);
-                }
-                else{
+                } else {
                     return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
                 }
             }//update
-            catch(Exception e){
+            catch (Exception e) {
                 return new ResponseEntity<>(e.toString(), HttpStatus.BAD_REQUEST);
             }
             //return Response 200
         }
         Map<String, String> errors = new HashMap<>();
         errors.put("authdeviceId", "Auth Device with Id " +
-                authdeviceId +" does not exist");
+                authdeviceId + " does not exist");
 
         return new ResponseEntity<>(errors, HttpStatus.NOT_FOUND);
     }
 
     @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN') or hasRole('ROLE_TECH_ADMIN')")
     @PutMapping(path = "authdevice/masterpinToFalse/{authdeviceId}")
-    public ResponseEntity<?> UpdateAuthDeviceMasterpinToFalse( @PathVariable Long authdeviceId) {
+    public ResponseEntity<?> UpdateAuthDeviceMasterpinToFalse(@PathVariable Long authdeviceId) {
         Optional<AuthDevice> optionalAuthDevice = authDeviceService.findbyId(authdeviceId);
 
-        if (optionalAuthDevice.isPresent()){
+        if (optionalAuthDevice.isPresent()) {
             try {
-                if (optionalAuthDevice.get().getMasterpin()){
-                    authDeviceService.UpdateAuthDeviceMasterpin(authdeviceId,false);
+                if (optionalAuthDevice.get().getMasterpin()) {
+                    authDeviceService.UpdateAuthDeviceMasterpin(authdeviceId, false);
 
                     return new ResponseEntity<>(HttpStatus.OK);
-                }
-                else{
+                } else {
                     return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
                 }
             }//update
-            catch(Exception e){
+            catch (Exception e) {
                 return new ResponseEntity<>(e.toString(), HttpStatus.BAD_REQUEST);
             }
             //return Response 200
         }
         Map<String, String> errors = new HashMap<>();
         errors.put("authdeviceId", "Auth Device with Id " +
-                authdeviceId +" does not exist");
+                authdeviceId + " does not exist");
 
         return new ResponseEntity<>(errors, HttpStatus.NOT_FOUND);
     }
 
     @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN') or hasRole('ROLE_TECH_ADMIN')")
     @PutMapping(path = "authdevice/{authdeviceId}")
-    public ResponseEntity<?> UpdateAuthDevice( @PathVariable Long authdeviceId,
-                                               @Valid @RequestBody AuthDevice newAuthDevice) {
+    public ResponseEntity<?> UpdateAuthDevice(@PathVariable Long authdeviceId,
+                                              @Valid @RequestBody AuthDevice newAuthDevice) {
         Optional<AuthDevice> optionalAuthDevice = authDeviceService.findbyId(newAuthDevice.getAuthDeviceId());
 
         if (optionalAuthDevice.isPresent() && optionalAuthDevice.get().getAuthDeviceId() == authdeviceId) {
@@ -344,14 +337,14 @@ public class ControllerController {
 
                 return new ResponseEntity<>(HttpStatus.OK);
             }//update
-            catch(Exception e){
+            catch (Exception e) {
                 return new ResponseEntity<>(e.toString(), HttpStatus.BAD_REQUEST);
             }
             //return Response 200
         }
         Map<String, String> errors = new HashMap<>();
         errors.put("authdeviceId", "Auth Device with Id " +
-                newAuthDevice.getAuthDeviceId() + " with direction " + newAuthDevice.getAuthDeviceDirection() +" does not exist");
+                newAuthDevice.getAuthDeviceId() + " with direction " + newAuthDevice.getAuthDeviceDirection() + " does not exist");
 
         return new ResponseEntity<>(errors, HttpStatus.NOT_FOUND);
     }
@@ -360,11 +353,11 @@ public class ControllerController {
     @PutMapping(path = "/authdevice/entrance")
     public ResponseEntity<?> UpdateAuthDeviceEntrance(
             @RequestParam(name = "entranceid", required = false)
-                    Long entranceid,@Valid @RequestBody List<AuthDevice> newAuthDevices) throws Exception {
+            Long entranceid, @Valid @RequestBody List<AuthDevice> newAuthDevices) throws Exception {
 
-        if (newAuthDevices.size() != 2){
+        if (newAuthDevices.size() != 2) {
             Map<String, String> errors = new HashMap<>();
-            errors.put("Error", "Requires a pair of auth device ids" );
+            errors.put("Error", "Requires a pair of auth device ids");
             return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
         }
 
@@ -373,62 +366,60 @@ public class ControllerController {
             AuthDevice authDevice1 = authDeviceService.findbyId(newAuthDevices.get(0).getAuthDeviceId()).get();
             AuthDevice authDevice2 = authDeviceService.findbyId(newAuthDevices.get(1).getAuthDeviceId()).get();
 
-            if (entranceid!=null){
-                if (entranceService.findById(entranceid).isEmpty()){
+            if (entranceid != null) {
+                if (entranceService.findById(entranceid).isEmpty()) {
                     Map<String, String> errors = new HashMap<>();
-                    errors.put("Error", "EntranceId "+entranceid+" does not exist" );
+                    errors.put("Error", "EntranceId " + entranceid + " does not exist");
                     return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
                 }
 
                 // compare database entrance id
-                if (entranceService.findById(entranceid).get().getUsed() == true){
-                    if (!(authDevice1.getEntrance().getEntranceId().equals(entranceid))){
+                if (entranceService.findById(entranceid).get().getUsed() == true) {
+                    if (!(authDevice1.getEntrance().getEntranceId().equals(entranceid))) {
                         Map<String, String> errors = new HashMap<>();
-                        errors.put("Error", "EntranceId "+entranceid+" is being used" );
+                        errors.put("Error", "EntranceId " + entranceid + " is being used");
                         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
                     }
                 }
-           }
+            }
 
             if (authDevice1.getController().getControllerId() !=
-                    authDevice2.getController().getControllerId()){
+                    authDevice2.getController().getControllerId()) {
                 Map<String, String> errors = new HashMap<>();
-                errors.put("Error", "Auth Devices must belong to the same controller" );
+                errors.put("Error", "Auth Devices must belong to the same controller");
                 return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
             }
 
-            if  (!(authDevice1.getAuthDeviceDirection().substring(0,2))
-                    .equals(authDevice2.getAuthDeviceDirection().substring(0,2))){
+            if (!(authDevice1.getAuthDeviceDirection().substring(0, 2))
+                    .equals(authDevice2.getAuthDeviceDirection().substring(0, 2))) {
 
                 Map<String, String> errors = new HashMap<>();
-                errors.put("Error", "Auth Devices must exist in pairs" );
+                errors.put("Error", "Auth Devices must exist in pairs");
                 return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
             }
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             Map<String, String> errors = new HashMap<>();
-            errors.put("Error", "Auth Devices do not exist" );
+            errors.put("Error", "Auth Devices do not exist");
             return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
         }
 
-        List <AuthDevice> updated = new ArrayList<>();
+        List<AuthDevice> updated = new ArrayList<>();
 
-        for (int i=0; i<2; i++)
-        {
-            try{
+        for (int i = 0; i < 2; i++) {
+            try {
 
                 AuthDevice newSingleAuthDevice = newAuthDevices.get(i);
                 AuthDevice authdevice = authDeviceService.findbyId(newSingleAuthDevice.getAuthDeviceId()).get();
 
                 if (authdevice.getEntrance() != null) {
-                    entranceService.setEntranceUsed(authdevice.getEntrance(),false);
+                    entranceService.setEntranceUsed(authdevice.getEntrance(), false);
                     authDeviceService.AuthDeviceEntranceUpdate(authdevice, null);
                 }
 
                 if (entranceid != null) {
                     try {
                         updated.add(authDeviceService.AuthDeviceEntranceUpdate(authdevice, entranceService.findById(entranceid).get()));
-                        entranceService.setEntranceUsed(entranceService.findById(entranceid).get(),true);
+                        entranceService.setEntranceUsed(entranceService.findById(entranceid).get(), true);
                     } catch (IllegalArgumentException e) {
                         String[] msg = e.getMessage().split(" ");
                         return new ResponseEntity<>("Cannot assign this entrance to this auth device because of" +
@@ -436,19 +427,17 @@ public class ControllerController {
                                 " " + msg[0] + " or this Entrance's " + msg[1] + ".", HttpStatus.BAD_REQUEST);
                     }
                 }
-            }
-
-            catch(Exception e) {
+            } catch (Exception e) {
                 return new ResponseEntity<>(e.toString(), HttpStatus.BAD_REQUEST);
-                }
+            }
         }
-            //return Response 200
-        return new ResponseEntity<>(updated,HttpStatus.OK);
+        //return Response 200
+        return new ResponseEntity<>(updated, HttpStatus.OK);
     }
 
     @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN') or hasRole('ROLE_TECH_ADMIN')")
     @DeleteMapping("/authdevice/delete/{authdeviceid}")
-    public ResponseEntity<?> deleteauthdevice(@PathVariable Long authdeviceid){
+    public ResponseEntity<?> deleteauthdevice(@PathVariable Long authdeviceid) {
         try {
             //System.out.println(controllerService.findById(controllerId).get());
             authDeviceService.deleteAuthDevice(authdeviceid);
@@ -461,12 +450,12 @@ public class ControllerController {
 
     @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN') or hasRole('ROLE_TECH_ADMIN')")
     @DeleteMapping("/authdevice/reset/{authdeviceid}")
-    public ResponseEntity<?> resetauthdevice(@PathVariable Long authdeviceid){
+    public ResponseEntity<?> resetauthdevice(@PathVariable Long authdeviceid) {
         try {
             //System.out.println(controllerService.findById(controllerId).get());
             authDeviceService.resetAuthDevice(authdeviceid);
 
-            return new ResponseEntity<>( HttpStatus.OK);
+            return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.toString(), HttpStatus.NOT_FOUND);
         }
@@ -474,17 +463,17 @@ public class ControllerController {
 
     @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN') or hasRole('ROLE_TECH_ADMIN')")
     @DeleteMapping("/controller/delete/{controllerId}")
-    public ResponseEntity<?> deleteControllerWithId(@PathVariable Long controllerId){
+    public ResponseEntity<?> deleteControllerWithId(@PathVariable Long controllerId) {
         Optional<Controller> optionalController = controllerService.findById(controllerId);
 
-        if (optionalController.isEmpty()){
+        if (optionalController.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        if (optionalController.get().getMasterController() == true){
+        if (optionalController.get().getMasterController() == true) {
             Map<String, String> errors = new HashMap<>();
             errors.put("controllerId", "Controller with Id " +
-                    controllerId + " with Serial No " + optionalController.get().getControllerSerialNo()+" is a Master Controller and cannot be edited.");
+                    controllerId + " with Serial No " + optionalController.get().getControllerSerialNo() + " is a Master Controller and cannot be edited.");
             return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
         }
 
@@ -502,26 +491,25 @@ public class ControllerController {
 
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
-        }
-        catch(Exception e){
+        } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.REQUEST_TIMEOUT);
         }
     }
 
     @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN') or hasRole('ROLE_TECH_ADMIN')")
     @DeleteMapping("/controller/reset/{controllerId}")
-    public ResponseEntity<?> resetControllerWithId(@PathVariable Long controllerId){
+    public ResponseEntity<?> resetControllerWithId(@PathVariable Long controllerId) {
 
         Optional<Controller> optionalController = controllerService.findById(controllerId);
 
-        if (optionalController.isEmpty()){
+        if (optionalController.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        if (optionalController.get().getMasterController() == true){
+        if (optionalController.get().getMasterController() == true) {
             Map<String, String> errors = new HashMap<>();
             errors.put("controllerId", "Controller with Id " +
-                    controllerId + " with Serial No " + optionalController.get().getControllerSerialNo()+" is a Master Controller and cannot be edited.");
+                    controllerId + " with Serial No " + optionalController.get().getControllerSerialNo() + " is a Master Controller and cannot be edited.");
             return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
         }
 
@@ -532,20 +520,20 @@ public class ControllerController {
             authDeviceService.deleteRelatedAuthDevices(controllerId);
             controllerService.deleteControllerWithId(controllerId);
 
-            if (!controllerService.backToDefault(IPaddress)){
+            if (!controllerService.backToDefault(IPaddress)) {
                 Map<String, String> errors = new HashMap<>();
                 errors.put("controllerId", "Controller with Id " +
-                        controllerId + " with Serial No " + optionalController.get().getControllerSerialNo()+" unable to reset.");
+                        controllerId + " with Serial No " + optionalController.get().getControllerSerialNo() + " unable to reset.");
                 return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
             }
 
 //            controllerService.triggerHealthcheck(IPaddress);
 
 
+            System.out.println("controller reset" + controllerId);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
-        }
-        catch(Exception e){
+        } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.REQUEST_TIMEOUT);
         }
     }
@@ -566,7 +554,7 @@ public class ControllerController {
 
         Optional<Controller> optionalController = controllerService.findById(controllerId);
 
-        if (optionalController.isEmpty()){
+        if (optionalController.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         Controller existingcontroller = optionalController.get();
@@ -576,32 +564,27 @@ public class ControllerController {
             ControllerConnection connection = controllerService.getControllerConnectionUnicon(IPaddress);
             if (connection == null) {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
-            else {
+            } else {
                 existingcontroller.setLastOnline(LocalDateTime.now(ZoneId.of("GMT+08:00")));
                 existingcontroller.getAuthDevices().forEach((existingauthDevice -> {
 
                     String direction = existingauthDevice.getAuthDeviceDirection();
-                    if ( existingauthDevice.getAuthDeviceDirection().equals("E1_IN") && connection.getE1_IN())
-                    {
+                    if (existingauthDevice.getAuthDeviceDirection().equals("E1_IN") && connection.getE1_IN()) {
                         existingauthDevice.setLastOnline(LocalDateTime.now(ZoneId.of("GMT+08:00")));
                         authDeviceService.save(existingauthDevice);
                     }
 
-                    if ( existingauthDevice.getAuthDeviceDirection().equals("E1_OUT") && connection.getE1_OUT())
-                    {
+                    if (existingauthDevice.getAuthDeviceDirection().equals("E1_OUT") && connection.getE1_OUT()) {
                         existingauthDevice.setLastOnline(LocalDateTime.now(ZoneId.of("GMT+08:00")));
                         authDeviceService.save(existingauthDevice);
                     }
 
-                    if ( existingauthDevice.getAuthDeviceDirection().equals("E2_IN") && connection.getE2_IN())
-                    {
+                    if (existingauthDevice.getAuthDeviceDirection().equals("E2_IN") && connection.getE2_IN()) {
                         existingauthDevice.setLastOnline(LocalDateTime.now(ZoneId.of("GMT+08:00")));
                         authDeviceService.save(existingauthDevice);
                     }
 
-                    if ( existingauthDevice.getAuthDeviceDirection().equals("E2_OUT") && connection.getE2_OUT())
-                    {
+                    if (existingauthDevice.getAuthDeviceDirection().equals("E2_OUT") && connection.getE2_OUT()) {
                         existingauthDevice.setLastOnline(LocalDateTime.now(ZoneId.of("GMT+08:00")));
                         authDeviceService.save(existingauthDevice);
                     }
@@ -611,20 +594,19 @@ public class ControllerController {
 
                 return new ResponseEntity<>(connection, HttpStatus.OK);
             }
-        }
-        catch(Exception e){
+        } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.REQUEST_TIMEOUT);
         }
     }
+
     @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN') or hasRole('ROLE_TECH_ADMIN')")
     @PostMapping("/uniconUpdater")
     public ResponseEntity<?> testing() {
         Map<String, String> response = uniconUpdater.updateUnicons();
         System.out.println(response);
-        if (response.isEmpty()){
+        if (response.isEmpty()) {
             return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        else{
+        } else {
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
     }
@@ -641,6 +623,7 @@ public class ControllerController {
         }
         return ResponseEntity.ok().build();
     }
+
 
 }
 

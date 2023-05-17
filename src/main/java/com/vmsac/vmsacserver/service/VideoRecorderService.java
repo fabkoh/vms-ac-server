@@ -22,7 +22,7 @@ public class VideoRecorderService {
         return videoRecorderRepository.findByDeletedIsFalseOrderByCreatedDesc();
     }
 
-    public Optional<VideoRecorder> findByIdNotDeleted(Long Id){
+    public Optional<VideoRecorder> findByIdNotDeleted(Long Id) {
         return videoRecorderRepository.findByRecorderIdEqualsAndDeletedIsFalse(Id);
     }
 
@@ -30,44 +30,44 @@ public class VideoRecorderService {
         return videoRecorderRepository.findByRecorderSerialNumberEqualsAndDeletedIsFalse(serialNumber);
     }
 
-    public VideoRecorder save(VideoRecorder videoRecorder){
+    public VideoRecorder save(VideoRecorder videoRecorder) {
         //boolean upnp = videoRecorder
         //if (videoRecorder) get enable UPNP
-            if (videoRecorder.isAutoPortForwarding()) {
-                System.out.println("checkpoint 6");
-                System.out.println(videoRecorder.getRecorderPortNumber());
-                String publicIP = videoRecorder.getRecorderPublicIp();
-                int portNumber = 8085;
-                int IWSNumber = 7681;
-                if (videoRecorder.getRecorderPortNumber() == null) {
-                    portNumber = findFirstAvailablePort(publicIP, 8085);
-                } else {
-                    portNumber = videoRecorder.getRecorderPortNumber();
-                }
-                if (videoRecorder.getRecorderIWSPort() == null) {
-                    IWSNumber = findFirstAvailablePort(publicIP, 7681);
-                } else {
-                    IWSNumber = videoRecorder.getRecorderIWSPort();
-                }
-//            try {
-//                openUPNPports(videoRecorder.getRecorderPrivateIp(),
-//                        80, portNumber);
-//                openUPNPports(videoRecorder.getRecorderPrivateIp(),
-//                        7681, IWSNumber);
-//            } catch (Exception e){
-//                return null;
-//            }
-                videoRecorder.setRecorderPortNumber(portNumber);
-                videoRecorder.setRecorderIWSPort(IWSNumber);
+        if (videoRecorder.isAutoPortForwarding()) {
+            System.out.println("checkpoint 6");
+            System.out.println(videoRecorder.getRecorderPortNumber());
+            String publicIP = videoRecorder.getRecorderPublicIp();
+            int portNumber = 8085;
+            int IWSNumber = 7681;
+            if (videoRecorder.getRecorderPortNumber() == null) {
+                portNumber = findFirstAvailablePort(publicIP, 8085);
+            } else {
+                portNumber = videoRecorder.getRecorderPortNumber();
             }
-            return videoRecorderRepository.save(videoRecorder);
+            if (videoRecorder.getRecorderIWSPort() == null) {
+                IWSNumber = findFirstAvailablePort(publicIP, 7681);
+            } else {
+                IWSNumber = videoRecorder.getRecorderIWSPort();
+            }
+            try {
+                openUPNPports(videoRecorder.getRecorderPrivateIp(),
+                        80, portNumber);
+                openUPNPports(videoRecorder.getRecorderPrivateIp(),
+                        7681, IWSNumber);
+            } catch (Exception e) {
+                return null;
+            }
+            videoRecorder.setRecorderPortNumber(portNumber);
+            videoRecorder.setRecorderIWSPort(IWSNumber);
+        }
+        return videoRecorderRepository.save(videoRecorder);
 
     }
 
-    public void delete(Long id) throws Exception{
+    public void delete(Long id) throws Exception {
         VideoRecorder deleted = videoRecorderRepository.findByRecorderIdEqualsAndDeletedIsFalse(id)
-                .orElseThrow(() -> new RuntimeException("Recorder with id "+ id + " does not exist"));
-        if (!(deleteUPNPports(deleted.getRecorderIWSPort()) && deleteUPNPports(deleted.getRecorderPortNumber()))){
+                .orElseThrow(() -> new RuntimeException("Recorder with id " + id + " does not exist"));
+        if (!(deleteUPNPports(deleted.getRecorderIWSPort()) && deleteUPNPports(deleted.getRecorderPortNumber()))) {
             throw new Exception("Unable to disable UPNP");
         }
         deleted.setDeleted(true);
@@ -75,19 +75,19 @@ public class VideoRecorderService {
         videoRecorderRepository.save(deleted);
     }
 
-    public Boolean nameInUse(String name){
+    public Boolean nameInUse(String name) {
         return videoRecorderRepository.existsByRecorderNameEqualsAndDeletedIsFalse(name);
     }
 
-    public Boolean serialNumberInUse(String serialNumber){
+    public Boolean serialNumberInUse(String serialNumber) {
         return videoRecorderRepository.existsByRecorderSerialNumberEqualsAndDeletedIsFalse(serialNumber);
     }
 
-    public Boolean ipAddressInUse(String ipAddress, String publicIp){
+    public Boolean ipAddressInUse(String ipAddress, String publicIp) {
         return videoRecorderRepository.existsByRecorderPrivateIpAndDeletedAndRecorderPublicIp(ipAddress, false, publicIp);
     }
 
-    public Boolean portNumberInUse(Integer portNumber, String publicIp){
+    public Boolean portNumberInUse(Integer portNumber, String publicIp) {
         return videoRecorderRepository.existsByRecorderPortNumberAndDeletedAndRecorderPublicIp(portNumber, false, publicIp);
     }
 
@@ -96,7 +96,7 @@ public class VideoRecorderService {
     }
 
     public Map<String, String> isNotValidVideoRecorderCreation(String name, String privateIP,
-            String publicIP, Integer portNumber, Integer recorderIWSPort, Boolean enableUPNP) {
+                                                               String publicIP, Integer portNumber, Integer recorderIWSPort, Boolean enableUPNP) {
         Map<String, String> errors = new HashMap<>();
         if (videoRecorderRepository.existsByRecorderNameEqualsAndDeletedIsFalse(name)) {
             errors.put("recorderName", "Recorder name " + name + " in use");
@@ -114,17 +114,17 @@ public class VideoRecorderService {
             errors.put("recorderIWSPort", "Recorder IWS port " + recorderIWSPort + " in use");
         }
 
-        if (enableUPNP && (!checkIfPortAvailable(publicIP,recorderIWSPort))) {
+        if (enableUPNP && (!checkIfPortAvailable(publicIP, recorderIWSPort))) {
             errors.put("recorderIWSPort", "Recorder IWS port " + recorderIWSPort + " in use");
         }
 
-        if (enableUPNP && (!checkIfPortAvailable(publicIP,portNumber))) {
+        if (enableUPNP && (!checkIfPortAvailable(publicIP, portNumber))) {
             errors.put("recorderIWSPort", "Recorder port number " + portNumber + " in use");
         }
         return errors;
     }
 
-    public Boolean openUPNPports(String privateIp, Integer internalPort,Integer publicPort){
+    public Boolean openUPNPports(String privateIp, Integer internalPort, Integer publicPort) {
         String s;
         Process p;
         try {
@@ -132,22 +132,25 @@ public class VideoRecorderService {
                     " " + publicPort + " tcp";
             System.out.println(command);
             p = Runtime.getRuntime().exec(command);
+            System.out.println("create upnp" + p);
             BufferedReader br = new BufferedReader(
                     new InputStreamReader(p.getInputStream()));
             while ((s = br.readLine()) != null)
                 System.out.println("line: " + s);
             p.waitFor();
-            System.out.println ("exit: " + p.exitValue());
+            System.out.println("exit: " + p.exitValue());
             p.destroy();
-        } catch (Exception e) { return false;}
+        } catch (Exception e) {
+            return false;
+        }
         return true;
     }
 
-    public Boolean deleteUPNPports(Integer port){
+    public Boolean deleteUPNPports(Integer port) {
         String s;
         Process p;
         try {
-            String command ="upnpc -d " + port + " tcp";
+            String command = "upnpc -d " + port + " tcp";
             System.out.println(command);
             p = Runtime.getRuntime().exec(command);
             BufferedReader br = new BufferedReader(
@@ -155,13 +158,15 @@ public class VideoRecorderService {
             while ((s = br.readLine()) != null)
                 System.out.println("line: " + s);
             p.waitFor();
-            System.out.println ("exit: " + p.exitValue());
+            System.out.println("exit: " + p.exitValue());
             p.destroy();
-        } catch (Exception e) { return false;}
+        } catch (Exception e) {
+            return false;
+        }
         return true;
     }
 
-    public Boolean checkIfPortAvailable(String publicIp, Integer port){
+    public Boolean checkIfPortAvailable(String publicIp, Integer port) {
         if (port == null) {
             return true;
         }
@@ -171,7 +176,7 @@ public class VideoRecorderService {
         String formattedPort = String.format("%04d", port);
         System.out.println("checkpoint 5");
         try {
-            String command ="telnet " + publicIp + " " + formattedPort;
+            String command = "telnet " + publicIp + " " + formattedPort;
             System.out.println(command);
             p = Runtime.getRuntime().exec(command);
             BufferedReader br = new BufferedReader(
@@ -179,9 +184,11 @@ public class VideoRecorderService {
             while ((s = br.readLine()) != null)
                 System.out.println("line: " + s);
             p.waitFor();
-            System.out.println ("exit: " + p.exitValue());
+            System.out.println("exit: " + p.exitValue());
             p.destroy();
-        } catch (Exception e) { return false;}
+        } catch (Exception e) {
+            return false;
+        }
         return true;
     }
 
