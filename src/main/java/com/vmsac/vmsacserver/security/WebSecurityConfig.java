@@ -72,8 +72,10 @@ public class WebSecurityConfig {
                 .access("hasIpAddress('127.0.0.1') or hasIpAddress('::1') or isAuthenticated()")
                 .anyRequest().authenticated();
 
+        //
         http.authenticationProvider(authenticationProvider());
 
+        // Changing default filter
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
