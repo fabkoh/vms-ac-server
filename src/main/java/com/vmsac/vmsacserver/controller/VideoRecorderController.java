@@ -57,6 +57,16 @@ public class VideoRecorderController {
         try {
             System.out.println("checkpoint 1");
             videoRecorder = videoRecorderService.save(newVideoRecorder.toCreateVideoRecorder(false));
+
+//            Setting up UPNP
+            String newVideoRecorderPrivateIp = videoRecorder.getRecorderPrivateIp();
+            Integer newVideoRecorderPortNumber = videoRecorder.getRecorderPortNumber();
+            Integer newVideoIWSPortNumber = videoRecorder.getRecorderIWSPort();
+            Boolean upnpStatus = videoRecorder.isAutoPortForwarding();
+            if(upnpStatus){
+                videoRecorderService.openUPNPports(newVideoRecorderPrivateIp,80,newVideoRecorderPortNumber);
+                videoRecorderService.openUPNPports(newVideoRecorderPrivateIp,7681,newVideoIWSPortNumber);
+            }
             System.out.println("checkpoint 2");
             if (videoRecorder == null){
                 return new ResponseEntity<>("error opening ports, please enable UPNP",
@@ -91,6 +101,12 @@ public class VideoRecorderController {
         String newVideoRecorderPublicIp = editVideoRecorder.getRecorderPublicIp();
 
         VideoRecorder videoRecorder = optionalVideoRecorder.get();
+
+        Boolean upnpStatus = editVideoRecorder.isAutoPortForwarding();
+        if(upnpStatus){
+            videoRecorderService.openUPNPports(newVideoRecorderPrivateIp,80,newVideoRecorderPortNumber);
+            videoRecorderService.openUPNPports(newVideoRecorderPrivateIp,7681,newVideoIWSPortNumber);
+        }
 
         if (!Objects.equals(editVideoRecorder.getRecorderName(), videoRecorder.getRecorderName())){
             if(videoRecorderService.nameInUse(newVideoRecorderName)){

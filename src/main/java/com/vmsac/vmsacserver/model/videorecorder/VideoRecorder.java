@@ -78,6 +78,14 @@ public class VideoRecorder {
     @Column( name = "recorderusername", nullable = false)
     private String recorderUsername;
 
+    public boolean isAutoPortForwarding() {
+        return autoPortForwarding;
+    }
+
+    public void setAutoPortForwarding(boolean autoPortForwarding) {
+        this.autoPortForwarding = autoPortForwarding;
+    }
+
     @Column( name = "recorderpassword", nullable = false)
     private String recorderPassword;
 

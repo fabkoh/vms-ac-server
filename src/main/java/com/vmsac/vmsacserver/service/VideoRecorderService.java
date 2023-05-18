@@ -30,6 +30,7 @@ public class VideoRecorderService {
         return videoRecorderRepository.findByRecorderSerialNumberEqualsAndDeletedIsFalse(serialNumber);
     }
 
+
     public VideoRecorder save(VideoRecorder videoRecorder) {
         //boolean upnp = videoRecorder
         //if (videoRecorder) get enable UPNP
@@ -132,7 +133,11 @@ public class VideoRecorderService {
                     " " + publicPort + " tcp";
             System.out.println(command);
             p = Runtime.getRuntime().exec(command);
-            System.out.println("create upnp" + p);
+            if (p != null) {
+                System.out.println("Process created: " + p);
+            } else {
+                System.out.println("Failed to create process.");
+            }
             BufferedReader br = new BufferedReader(
                     new InputStreamReader(p.getInputStream()));
             while ((s = br.readLine()) != null)
