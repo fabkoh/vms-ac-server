@@ -20,15 +20,15 @@ public class VideoRecorderController {
 
     //returns all video recorders that are not deleted
     @GetMapping("/videorecorders")
-    public List<VideoRecorder> getVideoRecorders(){
+    public List<VideoRecorder> getVideoRecorders() {
         return videoRecorderService.findAllNotDeleted();
     }
 
     //returns details of an entrance
     @GetMapping("/videorecorder/{id}")
-    public ResponseEntity<?> getVideoRecorder(@PathVariable("id") Long id){
+    public ResponseEntity<?> getVideoRecorder(@PathVariable("id") Long id) {
         Optional<VideoRecorder> optionalVideoRecorder = videoRecorderService.findByIdNotDeleted(id);
-        if(optionalVideoRecorder.isPresent()){
+        if (optionalVideoRecorder.isPresent()) {
             VideoRecorder videoRecorder = optionalVideoRecorder.get();
             return ResponseEntity.ok(videoRecorder);
         }
@@ -62,17 +62,17 @@ public class VideoRecorderController {
             String newVideoRecorderPrivateIp = videoRecorder.getRecorderPrivateIp();
             Integer newVideoRecorderPortNumber = videoRecorder.getRecorderPortNumber();
             Integer newVideoIWSPortNumber = videoRecorder.getRecorderIWSPort();
-            Boolean upnpStatus = videoRecorder.isAutoPortForwarding();
-            if(upnpStatus){
-                videoRecorderService.openUPNPports(newVideoRecorderPrivateIp,80,newVideoRecorderPortNumber);
-                videoRecorderService.openUPNPports(newVideoRecorderPrivateIp,7681,newVideoIWSPortNumber);
+            Boolean upnpStatus = videoRecorder.getAutoPortForwarding();
+            if (upnpStatus) {
+                videoRecorderService.openUPNPports(newVideoRecorderPrivateIp, 80, newVideoRecorderPortNumber);
+                videoRecorderService.openUPNPports(newVideoRecorderPrivateIp, 7681, newVideoIWSPortNumber);
             }
             System.out.println("checkpoint 2");
-            if (videoRecorder == null){
+            if (videoRecorder == null) {
                 return new ResponseEntity<>("error opening ports, please enable UPNP",
                         HttpStatus.BAD_REQUEST);
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             System.out.println(e);
             return ResponseEntity.badRequest().build();
         }
@@ -82,11 +82,11 @@ public class VideoRecorderController {
 
     //Update name or description of recorder
     @PutMapping("/videorecorder")
-    public ResponseEntity<?> updateVideoRecorder(@RequestBody VideoRecorderDto editVideoRecorder){
+    public ResponseEntity<?> updateVideoRecorder(@RequestBody VideoRecorderDto editVideoRecorder) {
         Long tempid = editVideoRecorder.getRecorderId();
         Optional<VideoRecorder> optionalVideoRecorder = videoRecorderService.findByIdNotDeleted(tempid);
 
-        if(optionalVideoRecorder.isEmpty()){
+        if (optionalVideoRecorder.isEmpty()) {
             Map<String, String> errors = new HashMap<>();
             errors.put("recorderId", "Recorder with ID " +
                     tempid + " does not exist");
@@ -103,35 +103,35 @@ public class VideoRecorderController {
         VideoRecorder videoRecorder = optionalVideoRecorder.get();
 
         Boolean upnpStatus = editVideoRecorder.isAutoPortForwarding();
-        if(upnpStatus){
-            videoRecorderService.openUPNPports(newVideoRecorderPrivateIp,80,newVideoRecorderPortNumber);
-            videoRecorderService.openUPNPports(newVideoRecorderPrivateIp,7681,newVideoIWSPortNumber);
+        if (upnpStatus) {
+            videoRecorderService.openUPNPports(newVideoRecorderPrivateIp, 80, newVideoRecorderPortNumber);
+            videoRecorderService.openUPNPports(newVideoRecorderPrivateIp, 7681, newVideoIWSPortNumber);
         }
 
-        if (!Objects.equals(editVideoRecorder.getRecorderName(), videoRecorder.getRecorderName())){
-            if(videoRecorderService.nameInUse(newVideoRecorderName)){
+        if (!Objects.equals(editVideoRecorder.getRecorderName(), videoRecorder.getRecorderName())) {
+            if (videoRecorderService.nameInUse(newVideoRecorderName)) {
                 Map<String, String> errors = new HashMap<>();
                 errors.put("recorderName", "Recorder Name " + newVideoRecorderName + " in use");
                 return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
             }
         }
 
-        if (!Objects.equals(editVideoRecorder.getRecorderPrivateIp(), videoRecorder.getRecorderPrivateIp())){
-            if(videoRecorderService.ipAddressInUse(newVideoRecorderPrivateIp, newVideoRecorderPublicIp)){
+        if (!Objects.equals(editVideoRecorder.getRecorderPrivateIp(), videoRecorder.getRecorderPrivateIp())) {
+            if (videoRecorderService.ipAddressInUse(newVideoRecorderPrivateIp, newVideoRecorderPublicIp)) {
                 Map<String, String> errors = new HashMap<>();
                 errors.put("recorderPrivateIp", "Recorder private IP Address " + newVideoRecorderPrivateIp + " in use");
                 return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
             }
         }
-        if (!Objects.equals(editVideoRecorder.getRecorderIWSPort(), videoRecorder.getRecorderIWSPort())){
-            if(videoRecorderService.portNumberInUse(newVideoIWSPortNumber, newVideoRecorderPublicIp) && newVideoIWSPortNumber != null){
+        if (!Objects.equals(editVideoRecorder.getRecorderIWSPort(), videoRecorder.getRecorderIWSPort())) {
+            if (videoRecorderService.portNumberInUse(newVideoIWSPortNumber, newVideoRecorderPublicIp) && newVideoIWSPortNumber != null) {
                 Map<String, String> errors = new HashMap<>();
                 errors.put("recorderIWSPortNumber", "Recorder IWS Port Number " + newVideoIWSPortNumber + " in use");
                 return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
             }
         }
-        if (!Objects.equals(editVideoRecorder.getRecorderPortNumber(), videoRecorder.getRecorderPortNumber())){
-            if(videoRecorderService.portNumberInUse(newVideoRecorderPortNumber, newVideoRecorderPublicIp) && newVideoRecorderPortNumber != null){
+        if (!Objects.equals(editVideoRecorder.getRecorderPortNumber(), videoRecorder.getRecorderPortNumber())) {
+            if (videoRecorderService.portNumberInUse(newVideoRecorderPortNumber, newVideoRecorderPublicIp) && newVideoRecorderPortNumber != null) {
                 Map<String, String> errors = new HashMap<>();
                 errors.put("recorderPublicPortNumber", "Recorder Public Port Number " + newVideoRecorderPortNumber + " in use");
                 return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
@@ -139,12 +139,12 @@ public class VideoRecorderController {
         }
         VideoRecorder updatedVideoRecorder = videoRecorderService.save(editVideoRecorder.toUpdateVideoRecorder(false));
 
-        return new ResponseEntity<>(updatedVideoRecorder,HttpStatus.OK);
+        return new ResponseEntity<>(updatedVideoRecorder, HttpStatus.OK);
     }
 
     //set delete = true.
     @DeleteMapping("/videorecorder/{id}")
-    public ResponseEntity<?> deleteVideoRecorder(@PathVariable("id")Long id){
+    public ResponseEntity<?> deleteVideoRecorder(@PathVariable("id") Long id) {
         try {
             videoRecorderService.delete(id);
             return new ResponseEntity<>(HttpStatus.OK);
@@ -155,17 +155,17 @@ public class VideoRecorderController {
 
     // testing
     @GetMapping("/videorecorder/testing")
-    public ResponseEntity<?> testing(){
+    public ResponseEntity<?> testing() {
         try {
             String privateIp = "192.168.1.172";
             String publicIp = "118.201.255.164";
-            videoRecorderService.openUPNPports(privateIp,80,8085);
-            videoRecorderService.openUPNPports(privateIp,7681,7681);
+            videoRecorderService.openUPNPports(privateIp, 80, 8085);
+            videoRecorderService.openUPNPports(privateIp, 7681, 7681);
             videoRecorderService.deleteUPNPports(8085);
             videoRecorderService.deleteUPNPports(7681);
-            videoRecorderService.checkIfPortAvailable(publicIp,8085);
-            videoRecorderService.checkIfPortAvailable(publicIp,8084);
-            videoRecorderService.checkIfPortAvailable(publicIp,8083);
+            videoRecorderService.checkIfPortAvailable(publicIp, 8085);
+            videoRecorderService.checkIfPortAvailable(publicIp, 8084);
+            videoRecorderService.checkIfPortAvailable(publicIp, 8083);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.toString(), HttpStatus.NOT_FOUND);

@@ -34,7 +34,7 @@ public class VideoRecorderService {
     public VideoRecorder save(VideoRecorder videoRecorder) {
         //boolean upnp = videoRecorder
         //if (videoRecorder) get enable UPNP
-        if (videoRecorder.isAutoPortForwarding()) {
+        if (videoRecorder.getAutoPortForwarding()) {
             System.out.println("checkpoint 6");
             System.out.println(videoRecorder.getRecorderPortNumber());
             String publicIP = videoRecorder.getRecorderPublicIp();
@@ -66,10 +66,13 @@ public class VideoRecorderService {
     }
 
     public void delete(Long id) throws Exception {
+
         VideoRecorder deleted = videoRecorderRepository.findByRecorderIdEqualsAndDeletedIsFalse(id)
                 .orElseThrow(() -> new RuntimeException("Recorder with id " + id + " does not exist"));
-        if (!(deleteUPNPports(deleted.getRecorderIWSPort()) && deleteUPNPports(deleted.getRecorderPortNumber()))) {
-            throw new Exception("Unable to disable UPNP");
+        if (deleted.getAutoPortForwarding()) {
+            if (!(deleteUPNPports(deleted.getRecorderIWSPort()) && deleteUPNPports(deleted.getRecorderPortNumber()))) {
+                throw new Exception("Unable to disable UPNP");
+            }
         }
         deleted.setDeleted(true);
 

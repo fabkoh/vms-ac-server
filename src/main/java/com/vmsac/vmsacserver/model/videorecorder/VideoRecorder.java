@@ -57,28 +57,28 @@ public class VideoRecorder {
     @Column(name = "recorderid", columnDefinition = "serial", nullable = false, unique = true)
     private Long recorderId;
 
-    @Column( name ="recordername", nullable = false)
+    @Column(name = "recordername", nullable = false)
     private String recorderName;
 
-    @Column( name = "recorderserialnumber")
+    @Column(name = "recorderserialnumber")
     private String recorderSerialNumber;
 
-    @Column( name = "recorderpublicip", nullable = false, unique = true)
+    @Column(name = "recorderpublicip", nullable = false, unique = true)
     private String recorderPublicIp;
 
-    @Column( name = "recorderprivateip", nullable = false, unique = true)
+    @Column(name = "recorderprivateip", nullable = false, unique = true)
     private String recorderPrivateIp;
 
-    @Column( name = "recorderportnumber")
+    @Column(name = "recorderportnumber")
     private Integer recorderPortNumber;
 
-    @Column( name = "recorderiwsport")
+    @Column(name = "recorderiwsport")
     private Integer recorderIWSPort;
 
-    @Column( name = "recorderusername", nullable = false)
+    @Column(name = "recorderusername", nullable = false)
     private String recorderUsername;
 
-    public boolean isAutoPortForwarding() {
+    public boolean getAutoPortForwarding() {
         return autoPortForwarding;
     }
 
@@ -86,17 +86,17 @@ public class VideoRecorder {
         this.autoPortForwarding = autoPortForwarding;
     }
 
-    @Column( name = "recorderpassword", nullable = false)
+    @Column(name = "recorderpassword", nullable = false)
     private String recorderPassword;
 
     @CreatedDate
-    @Column( name = "created", nullable = false, updatable = false)
+    @Column(name = "created", nullable = false, updatable = false)
     private LocalDateTime created;
 
-    @Column( name = "autoportforwarding", nullable = false)
+    @Column(name = "autoportforwarding", nullable = false)
     private boolean autoPortForwarding;
 
     @JsonIgnore
-    @Column( name = "deleted")
+    @Column(name = "deleted")
     private Boolean deleted;
 }
