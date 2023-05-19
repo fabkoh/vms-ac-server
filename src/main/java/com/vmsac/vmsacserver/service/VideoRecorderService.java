@@ -187,6 +187,7 @@ public class VideoRecorderService {
             String command = "telnet " + publicIp + " " + formattedPort;
             System.out.println(command);
             p = Runtime.getRuntime().exec(command);
+            System.out.println(p);
             BufferedReader br = new BufferedReader(
                     new InputStreamReader(p.getInputStream()));
             while ((s = br.readLine()) != null)
