@@ -70,7 +70,7 @@ public class NotificationLoader implements CommandLineRunner {
                 .deleted(false)
                 .created(LocalDateTime.now())
                 .build());
-    
+
 
         videoRecorderRepository.save(VideoRecorder.builder()
                 .recorderIWSPort(7681)
@@ -78,7 +78,7 @@ public class NotificationLoader implements CommandLineRunner {
                 .recorderPassword("ISSNVRTest01")
                 .recorderPortNumber(8085)
                 .recorderPrivateIp("192.168.1.172")
-                .recorderPublicIp("121.7.45.188")
+                .recorderPublicIp("121.7.45.8")
                 .recorderSerialNumber("DS-7616NI-I21620210923CCRRG74241239WCVU")
                 .recorderUsername("admin")
                 .autoPortForwarding(false)
