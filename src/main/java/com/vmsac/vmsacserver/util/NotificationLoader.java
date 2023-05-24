@@ -41,10 +41,10 @@ public class NotificationLoader implements CommandLineRunner {
                 .build());
 
         emailSettingsRepository.save(EmailSettings.builder()
-                .username("Zephan Wong Kai En")
-                .email("zephan.wong@isssecurity.sg")
-                .emailPassword("avdfhveswyonpuwq")
-                .hostAddress("smtp.gmail.com")
+                .username("Etlas")
+                .email("notifications@etlas.sg")
+                .emailPassword("yOw6$teqE")
+                .hostAddress("smtp.zoho.com")
                 .portNumber("587")
                 .enabled(true)
                 .custom(true)
@@ -86,6 +86,4 @@ public class NotificationLoader implements CommandLineRunner {
                 .created(LocalDateTime.now())
                 .build());
     }
-
-
 }
