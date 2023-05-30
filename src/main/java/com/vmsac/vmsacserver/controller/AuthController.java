@@ -290,6 +290,7 @@ public class AuthController {
     @PostMapping("/refreshtoken")
     public ResponseEntity<?> refreshtoken(@Valid @RequestBody TokenRefreshRequest request) {
         String requestRefreshToken = request.getRefreshToken();
+        System.out.println("REFRESHING TOKEN HERE");
         try {
             return refreshTokenService.findByToken(requestRefreshToken)
                     .map(refreshTokenService::verifyExpiration)
@@ -340,4 +341,19 @@ public class AuthController {
 
     }
 
+    @PostMapping("/refreshTokenChecker")
+    public ResponseEntity<?> refreshTokenChecker(@Valid @RequestBody TokenRefreshRequest request) {
+        String requestRefreshToken = request.getRefreshToken();
+
+        try {
+            refreshTokenService.findByToken(requestRefreshToken)
+                    .map(refreshTokenService::checkExpiration);
+            System.out.println("Refresh token still valid.");
+            return ResponseEntity.ok(new MessageResponse("Refresh token still valid."));
+        } catch (TokenRefreshException e) {
+            // Should not be able to go to catch block once JWT token is expired
+            System.out.println("Refresh token not valid.");
+            return new ResponseEntity<>("Refresh token not valid", HttpStatus.NOT_FOUND);
+        }
+    }
 }

@@ -1,5 +1,6 @@
 package com.vmsac.vmsacserver.security.services;
 
+import com.sun.xml.bind.v2.runtime.output.SAXOutput;
 import com.vmsac.vmsacserver.exception.TokenRefreshException;
 import com.vmsac.vmsacserver.model.RefreshToken;
 import com.vmsac.vmsacserver.repository.RefreshTokenRepository;
@@ -16,7 +17,7 @@ import java.util.UUID;
 public class RefreshTokenService {
 
     // change the expiry time of refreshToken - currently 15mins
-    private Long refreshTokenDurationMs= Long.valueOf(15 * 60 * 1000);
+    private Long refreshTokenDurationMs= Long.valueOf( 15 * 60 * 1000);
 
     @Autowired
     private RefreshTokenRepository refreshTokenRepository;
@@ -36,16 +37,28 @@ public class RefreshTokenService {
         refreshToken.setToken(UUID.randomUUID().toString());
 
         refreshToken = refreshTokenRepository.save(refreshToken);
+        System.out.println("Time: " + refreshTokenDurationMs);
         return refreshToken;
     }
 
+    // Extends expiry if token is still valid
     public RefreshToken verifyExpiration(RefreshToken token) {
         if (token.getExpiryDate().compareTo(Instant.now()) < 0) {
             refreshTokenRepository.delete(token);
             throw new TokenRefreshException(token.getToken(), "Refresh token was expired. Please make a new signin request");
         }
         token.setExpiryDate(Instant.now().plusMillis(refreshTokenDurationMs));
+        System.out.println(token.getExpiryDate() + "eXPIRY ");
         refreshTokenRepository.save(token);
+        return token;
+    }
+
+    public RefreshToken checkExpiration(RefreshToken token) {
+        if (token.getExpiryDate().compareTo(Instant.now()) < 0) {
+            refreshTokenRepository.delete(token);
+            throw new TokenRefreshException(token.getToken(), "Refresh token was expired. Please make a new signin request");
+        }
+        
         return token;
     }
 

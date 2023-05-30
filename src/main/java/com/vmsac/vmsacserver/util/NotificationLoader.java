@@ -34,17 +34,17 @@ public class NotificationLoader implements CommandLineRunner {
         if (smsSettingsRepository.findAll().isEmpty()) loadData();
     }
 
-    private void loadData(){
+    private void loadData() {
         smsSettingsRepository.save(SmsSettings.builder()
                 .smsAPI("isssecurity")
                 .enabled(true)
                 .build());
 
         emailSettingsRepository.save(EmailSettings.builder()
-                .username("Zephan Wong Kai En")
-                .email("zephan.wong@isssecurity.sg")
-                .emailPassword("avdfhveswyonpuwq")
-                .hostAddress("smtp.gmail.com")
+                .username("Etlas")
+                .email("notifications@etlas.sg")
+                .emailPassword("yOw6$teqE")
+                .hostAddress("smtp.zoho.com")
                 .portNumber("587")
                 .enabled(true)
                 .custom(true)
@@ -63,15 +63,27 @@ public class NotificationLoader implements CommandLineRunner {
                 .recorderPassword("ISSNVRTest01")
                 .recorderPortNumber(8085)
                 .recorderPrivateIp("192.168.1.172")
-                .recorderPublicIp("118.201.255.164")
+                .recorderPublicIp("121.7.45.188")
                 .recorderSerialNumber("DS-7616NI-I21620210923CCRRG74241239WCVU")
                 .recorderUsername("admin")
-                .autoPortForwarding(true)
+                .autoPortForwarding(false)
+                .deleted(false)
+                .created(LocalDateTime.now())
+                .build());
+
+
+        videoRecorderRepository.save(VideoRecorder.builder()
+                .recorderIWSPort(7681)
+                .recorderName("testing2")
+                .recorderPassword("ISSNVRTest01")
+                .recorderPortNumber(8085)
+                .recorderPrivateIp("192.168.1.172")
+                .recorderPublicIp("121.7.45.8")
+                .recorderSerialNumber("DS-7616NI-I21620210923CCRRG74241239WCVU")
+                .recorderUsername("admin")
+                .autoPortForwarding(false)
                 .deleted(false)
                 .created(LocalDateTime.now())
                 .build());
     }
-
-
-
 }

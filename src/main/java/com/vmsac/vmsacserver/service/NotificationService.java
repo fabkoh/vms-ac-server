@@ -9,13 +9,11 @@ import com.vmsac.vmsacserver.repository.EventsManagementNotificationRepository;
 import com.vmsac.vmsacserver.repository.NotificationLogsRepository;
 import com.vmsac.vmsacserver.repository.SmsSettingsRepository;
 import com.vmsac.vmsacserver.util.mapper.EmailUtil;
-
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.TrustAllStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
@@ -24,12 +22,9 @@ import org.springframework.web.client.RestTemplate;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.util.List;
-import java.util.Properties;
-import javax.mail.*;
-import javax.net.ssl.SSLContext;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -80,10 +75,9 @@ public class NotificationService {
 
     }
 
-    public void sendSMTPTLSEmail( String text, String emailSubject, String recipentEmail, EmailSettings emailSettings) throws Exception {
+    public void sendSMTPTLSEmail(String text, String emailSubject, String recipentEmail, EmailSettings emailSettings) throws Exception {
         // at this point this should only be called when we want to use custom, so no need to check isCustom
 //        check if email settings is enabled
-
 
 
         emailUtil.TLSEmail(recipentEmail, emailSubject, text,
@@ -145,12 +139,12 @@ public class NotificationService {
 
     public EmailSettings emailBackToDefault() {
         EmailSettings currentEmailSettings = emailSettingsRepository.findAll().get(0);
-        currentEmailSettings.setUsername("DefaultName");
-        currentEmailSettings.setEmailPassword("DefaultPassword");
-        currentEmailSettings.setEmail("DefaultEmail");
-        currentEmailSettings.setHostAddress("DefaultHostAddress");
-        currentEmailSettings.setPortNumber("DefaultPortNumber");
-        currentEmailSettings.setIsTLS(false);
+        currentEmailSettings.setUsername("Etlas");
+        currentEmailSettings.setEmailPassword("yOw6$teqE");
+        currentEmailSettings.setEmail("notifications@etlas.sg");
+        currentEmailSettings.setHostAddress("smtp.zoho.com");
+        currentEmailSettings.setPortNumber("587");
+        currentEmailSettings.setIsTLS(true);
         currentEmailSettings.setCustom(false);
         return emailSettingsRepository.save(currentEmailSettings);
     }
@@ -227,7 +221,6 @@ public class NotificationService {
         System.out.println(responseBody);
         return responseBody;
     }
-
 
 
 }
