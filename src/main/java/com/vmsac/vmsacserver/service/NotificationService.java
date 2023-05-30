@@ -165,7 +165,9 @@ public class NotificationService {
             List<EventsManagementNotification> notifications = eventsManagementNotificationRepository.searchByEventsManagementNameOrTypeOrRecipients(queryString, queryString, queryString);
             List<Long> notificationsIds = notifications.stream().map(EventsManagementNotification::getEventsManagementNotificationId).collect(Collectors.toList());
             Timestamp startTimestamp = Objects.isNull(start) ? Timestamp.valueOf("1970-01-01 00:00:00") : Timestamp.valueOf(start);
-            Timestamp endTimestamp = Objects.isNull(end) ? Timestamp.valueOf("2050-01-01 00:00:00") : Timestamp.valueOf(end);
+            Timestamp endTimestamp = Objects.isNull(end) ? Timestamp.valueOf("2100-01-01 00:00:00") : Timestamp.valueOf(end);
+            System.out.println("start is " + startTimestamp);
+            System.out.println("end is " + endTimestamp);
             if (notificationsIds == null || notificationsIds.size() == 0) {
                 result = notificationLogsRepository.findByTime(startTimestamp, endTimestamp, PageRequest.of(pageNo, pageSize));
             } else {
@@ -175,6 +177,7 @@ public class NotificationService {
         } else
             result = getEventsByTimeDesc(pageNo, pageSize);
 
+        System.out.println("results is "+ result);
         return result;
     }
 

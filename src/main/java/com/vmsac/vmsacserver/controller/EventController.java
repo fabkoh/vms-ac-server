@@ -123,10 +123,11 @@ public class EventController {
     }
 
     private void addNotif(int BAD_REQUEST, String e, EventsManagementNotification eventsManagementNotification1) {
+        System.out.println("ADD NOTIF TRIGGERED");
         Integer statuscode = BAD_REQUEST;
         String error = e;
         LocalDateTime currentTime = LocalDateTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss");
         String formattedTime = currentTime.format(formatter);
         NotificationLogs notificationLogs = new NotificationLogs(statuscode, error, formattedTime, eventsManagementNotification1);
         System.out.println(notificationLogs);
