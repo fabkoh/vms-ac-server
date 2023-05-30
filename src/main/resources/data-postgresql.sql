@@ -102,7 +102,7 @@ INSERT INTO EventActionType VALUES ('13','Valid PIN used', false) ON CONFLICT DO
 INSERT INTO EventActionType VALUES ('14','Invalid PIN used', false) ON CONFLICT DO NOTHING;
 
 INSERT INTO smssettings (smsSettingsId, smsapi, enabled) VALUES (1, 'isssecurity', true) ON CONFLICT DO NOTHING;
-INSERT INTO emailsettings (emailSettingsId, username, email, emailpassword, hostaddress, portnumber, enabled, custom, istls) VALUES (1, 'Zephan Wong Kai En', 'zephan.wong@isssecurity.sg', 'avdfhveswyonpuwq', 'smtp.gmail.com', '587', true, true, true) ON CONFLICT DO NOTHING;
+INSERT INTO emailsettings (emailSettingsId, username, email, emailpassword, hostaddress, portnumber, enabled, custom, istls) VALUES (1, 'Etlas', 'notifications@etlas.sg', 'yOw6$teqE', 'smtp.zoho.com', '587', true, true, true) ON CONFLICT DO NOTHING;
 INSERT INTO videorecorder (recorderId, recorderiwsport, recordername, recorderpassword, recorderportnumber, recorderprivateip, recorderpublicip, recorderserialnumber, recorderusername, deleted, created, autoportforwarding) VALUES(1,'7681', 'testing', 'ISSNVRTest01', '8085','192.168.1.172','118.201.255.164','DS-7616NI-I21620210923CCRRG74241239WCVU','admin',false,'2023-03-16 11:26:39.641753', false) ON CONFLICT DO NOTHING;
 
 --Clear refesh tokens when BE starts so no login error

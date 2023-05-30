@@ -1,14 +1,11 @@
 package com.vmsac.vmsacserver.controller;
 
-import com.vmsac.vmsacserver.model.EventsManagement;
-import com.vmsac.vmsacserver.model.notification.*;
+import com.vmsac.vmsacserver.model.notification.EmailSettings;
+import com.vmsac.vmsacserver.model.notification.SmsSettings;
 import com.vmsac.vmsacserver.repository.NotificationLogsRepository;
 import com.vmsac.vmsacserver.service.EventsManagementNotificationService;
 import com.vmsac.vmsacserver.service.EventsManagementService;
 import com.vmsac.vmsacserver.service.NotificationService;
-
-import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -17,21 +14,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
-
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.time.Duration;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import reactor.core.publisher.Mono;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -146,10 +135,10 @@ public class NotificationController {
     public ResponseEntity<?> testEmail(@RequestBody @Valid EmailSettings newChanges) {
         System.out.println(newChanges);
 
-        if (!newChanges.getCustom()) {
-            // always return ok when using default email
-            return new ResponseEntity<>("Default settings are used", HttpStatus.OK);
-        }
+//        if (!newChanges.getCustom()) {
+//            // always return ok when using default email
+//            return new ResponseEntity<>("Default settings are used", HttpStatus.OK);
+//        }
         try {
 
             if (newChanges.getIsTLS()) {
@@ -164,7 +153,7 @@ public class NotificationController {
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>("SMTP email is valid and ready to go", HttpStatus.OK);
+        return new ResponseEntity<>("SMTP test email sent", HttpStatus.OK);
     }
 
 
