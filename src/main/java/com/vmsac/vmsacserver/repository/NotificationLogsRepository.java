@@ -16,8 +16,8 @@ public interface NotificationLogsRepository extends JpaRepository<NotificationLo
 
     @Query(value = "select * from notificationlogs n where " +
             "eventsmanagementnotificationid IN :notificationIds " +
-            "or to_timestamp(timesent, 'mm-dd-yyyy HH24:MI:SS') between :start and :end " +
-            "order by timesent desc", nativeQuery = true)
+            "n WHERE TO_TIMESTAMP(n.timesent, 'MM-DD-YYYY HH24:MI:SS') BETWEEN :start AND :end" +
+            "order by n.timesent desc", nativeQuery = true)
     List<NotificationLogs> findByQueryString(List<Long> notificationIds, Timestamp start, Timestamp end, Pageable pageable);
 
     @Query(value = "select * from notificationlogs n where " +

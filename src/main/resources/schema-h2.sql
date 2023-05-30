@@ -327,6 +327,8 @@ CREATE TABLE IF NOT EXISTS NotificationLogs(
     notificationLogsStatusCode INT NOT NULL,
     notificationLogsError TEXT NOT NULL,
     timeSent VARCHAR(255) NOT NULL,
+    notificationType TEXT NOT NULL,
+    notificationRecipents VARCHAR(255),
     eventsManagementNotificationId INT REFERENCES EventsManagementNotification(eventsManagementNotificationId),
     PRIMARY KEY (notificationLogsId)
 );

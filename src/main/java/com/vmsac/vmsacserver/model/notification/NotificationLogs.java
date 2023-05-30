@@ -1,7 +1,5 @@
 package com.vmsac.vmsacserver.model.notification;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.vmsac.vmsacserver.model.Entrance;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -35,6 +33,22 @@ public class NotificationLogs {
     @JoinColumn(name = "eventsmanagementnotificationid")
     private EventsManagementNotification eventsManagementNotification;
 
+    @Column(name = "notificationType")
+    private String notificationType;
+
+    @Column(name = "notificationRecipents")
+    private String notificationRecipents;
+
+    public NotificationLogs(Integer notificationLogsStatusCode, String notificationLogsError, String timeSent, EventsManagementNotification eventsManagementNotification, String notificationType, String notificationRecipents) {
+        this.notificationLogsId = notificationLogsId;
+        this.notificationLogsStatusCode = notificationLogsStatusCode;
+        this.notificationLogsError = notificationLogsError;
+        this.timeSent = timeSent;
+        this.eventsManagementNotification = eventsManagementNotification;
+        this.notificationType = notificationType;
+        this.notificationRecipents = notificationRecipents;
+    }
+
     @Override
     public String toString() {
         return "NotificationLogs{" +
@@ -43,15 +57,27 @@ public class NotificationLogs {
                 ", notificationLogsError='" + notificationLogsError + '\'' +
                 ", timeSent='" + timeSent + '\'' +
                 ", eventsManagementNotification=" + eventsManagementNotification +
+                ", notificationType='" + notificationType + '\'' +
+                ", notificationRecipents='" + notificationRecipents + '\'' +
                 '}';
     }
-
-    public NotificationLogs(Integer notificationLogsStatusCode, String notificationLogsError, String timeSent, EventsManagementNotification eventsManagementNotification) {
-        this.notificationLogsStatusCode = notificationLogsStatusCode;
-        this.notificationLogsError = notificationLogsError;
-        this.timeSent = timeSent;
-        this.eventsManagementNotification = eventsManagementNotification;
-    }
+//    @Override
+//    public String toString() {
+//        return "NotificationLogs{" +
+//                "notificationLogsId=" + notificationLogsId +
+//                ", notificationLogsStatusCode=" + notificationLogsStatusCode +
+//                ", notificationLogsError='" + notificationLogsError + '\'' +
+//                ", timeSent='" + timeSent + '\'' +
+//                ", eventsManagementNotification=" + eventsManagementNotification +
+//                '}';
+//    }
+//
+//    public NotificationLogs(Integer notificationLogsStatusCode, String notificationLogsError, String timeSent, EventsManagementNotification eventsManagementNotification) {
+//        this.notificationLogsStatusCode = notificationLogsStatusCode;
+//        this.notificationLogsError = notificationLogsError;
+//        this.timeSent = timeSent;
+//        this.eventsManagementNotification = eventsManagementNotification;
+//    }
 //    public NotificationLogs(Integer statuscode, String error, String formattedTime, EventsManagementNotification eventsManagementNotification1) {
 //    }
 }
