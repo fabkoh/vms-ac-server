@@ -51,11 +51,17 @@ public class NotificationLoader implements CommandLineRunner {
                 .isTLS(true)
                 .build());
 
-        notificationLogsRepository.save(NotificationLogs.builder()
-                .notificationLogsStatusCode(400)
-                .notificationLogsError("TestingError")
-                .timeSent("10-22-2022 03:50:39")
-                .build());
+//        notificationLogsRepository.save(NotificationLogs.builder()
+//                .notificationLogsStatusCode(400)
+//                .notificationLogsError("TestingError1")
+//                .timeSent("10-22-2022 03:50:39")
+//                .build());
+//
+//        notificationLogsRepository.save(NotificationLogs.builder()
+//                .notificationLogsStatusCode(300)
+//                .notificationLogsError("TestingError2")
+//                .timeSent("05-22-2023 03:50:39")
+//                .build());
 
         videoRecorderRepository.save(VideoRecorder.builder()
                 .recorderIWSPort(7681)
