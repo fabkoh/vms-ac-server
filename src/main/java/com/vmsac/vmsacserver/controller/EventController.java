@@ -100,6 +100,7 @@ public class EventController {
             String emails = eventsManagementNotification1.getEventsManagementNotificationRecipients();
             String subject = eventsManagementNotification1.getEventsManagementNotificationTitle();
             String[] emailArray = emails.split(",");
+            String notificationType = "email";
             List<String> emailList = Arrays.asList(emailArray);
             for (String recipents : emailList) {
                 System.out.println(recipents);
@@ -110,26 +111,26 @@ public class EventController {
                         notificationService.sendSMTPSSLEmail(message, subject, recipents, emailSettings1);
                     }
                 } catch (Exception e) {
-                    addNotif(HttpStatus.BAD_REQUEST.value(), e.getMessage(), eventsManagementNotification1);
+                    addNotif(HttpStatus.BAD_REQUEST.value(), e.getMessage(), eventsManagementNotification1, notificationType, emails);
                     return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
                 }
             }
 //            add to notif logs
-            addNotif(Integer.valueOf("200"), "Success", eventsManagementNotification1);
+            addNotif(Integer.valueOf("200"), "Success", eventsManagementNotification1, notificationType, emails);
             return new ResponseEntity<>("SMTP email sent", HttpStatus.OK);
         }
 
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-    private void addNotif(int BAD_REQUEST, String e, EventsManagementNotification eventsManagementNotification1) {
+    private void addNotif(int BAD_REQUEST, String e, EventsManagementNotification eventsManagementNotification1, String notificationType, String notificationRecipents) {
         System.out.println("ADD NOTIF TRIGGERED");
         Integer statuscode = BAD_REQUEST;
         String error = e;
         LocalDateTime currentTime = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss");
         String formattedTime = currentTime.format(formatter);
-        NotificationLogs notificationLogs = new NotificationLogs(statuscode, error, formattedTime, eventsManagementNotification1);
+        NotificationLogs notificationLogs = new NotificationLogs(statuscode, error, formattedTime, eventsManagementNotification1, notificationType, notificationRecipents);
         System.out.println(notificationLogs);
         notificationLogsRepository.save(notificationLogs);
     }
@@ -146,17 +147,18 @@ public class EventController {
             String mobiles = eventsManagementNotification1.getEventsManagementNotificationRecipients();
             String[] mobileArray = mobiles.split(",");
             List<String> mobileList = Arrays.asList(mobileArray);
+            String notificationType = "SMS";
             for (String mobile : mobileList) {
                 System.out.println(mobile);
                 System.out.println(message);
                 try {
                     notificationService.sendSMS(mobile, message, notificationService);
                 } catch (Exception e) {
-                    addNotif(HttpStatus.BAD_REQUEST.value(), e.getMessage(), eventsManagementNotification1);
+                    addNotif(HttpStatus.BAD_REQUEST.value(), e.getMessage(), eventsManagementNotification1, notificationType, mobiles);
                     return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
                 }
             }
-            addNotif(Integer.valueOf("200"), "Success", eventsManagementNotification1);
+            addNotif(Integer.valueOf("200"), "Success", eventsManagementNotification1, notificationType, mobiles);
             return new ResponseEntity<>("SMS sent", HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
