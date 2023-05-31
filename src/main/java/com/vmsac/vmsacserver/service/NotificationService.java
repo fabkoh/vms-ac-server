@@ -164,6 +164,14 @@ public class NotificationService {
         if ((queryString != null && !queryString.equals("")) || !Objects.isNull(start) || !Objects.isNull(end)) {
             List<EventsManagementNotification> notifications = eventsManagementNotificationRepository.searchByEventsManagementNameOrTypeOrRecipients(queryString, queryString, queryString);
             List<Long> notificationsIds = notifications.stream().map(EventsManagementNotification::getEventsManagementNotificationId).collect(Collectors.toList());
+
+            List<NotificationLogs> notifications2 = notificationLogsRepository.searchByNotificationType(queryString);
+            List<String> notificationsTypes = notifications2.stream().map(NotificationLogs::getNotificationType).collect(Collectors.toList());
+
+            List<NotificationLogs> notifications3 = notificationLogsRepository.searchByNotificationRecipients(queryString);
+            List<String> notificationsRecipents = notifications3.stream().map(NotificationLogs::getNotificationRecipients).collect(Collectors.toList());
+
+
             Timestamp startTimestamp = Objects.isNull(start) ? Timestamp.valueOf("1970-01-01 00:00:00") : Timestamp.valueOf(start);
             Timestamp endTimestamp = Objects.isNull(end) ? Timestamp.valueOf("2100-01-01 00:00:00") : Timestamp.valueOf(end);
             System.out.println("start is " + startTimestamp);
@@ -171,8 +179,10 @@ public class NotificationService {
             if (notificationsIds == null || notificationsIds.size() == 0) {
                 result = notificationLogsRepository.findByTime(startTimestamp, endTimestamp, PageRequest.of(pageNo, pageSize));
             } else {
-                result = notificationLogsRepository.findByQueryString(notificationsIds,
-                        startTimestamp, endTimestamp, PageRequest.of(pageNo, pageSize));
+            result = notificationLogsRepository.findByQueryString(notificationsIds,notificationsTypes,notificationsRecipents,
+                        startTimestamp, endTimestamp
+//                    ,PageRequest.of(pageNo, pageSize)
+            );
             }
         } else
             result = getEventsByTimeDesc(pageNo, pageSize);
