@@ -624,6 +624,24 @@ public class ControllerController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/piProperty/{controllerId}")
+    public ResponseEntity<?> getControllerPiProperty(@PathVariable Long controllerId) throws Exception {
+        // Get controller using controllerId
+        Optional<Controller> optionalController = controllerService.findById(controllerId);
+
+        if (optionalController.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        Controller existingcontroller = optionalController.get();
+
+        //api call to get piProperty
+        try {
+            return controllerService.getPiPropertyFromController(existingcontroller);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.REQUEST_TIMEOUT);
+        }
+    }
 
 }
 
