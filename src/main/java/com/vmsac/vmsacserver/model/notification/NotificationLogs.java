@@ -33,20 +33,20 @@ public class NotificationLogs {
     @JoinColumn(name = "eventsmanagementnotificationid")
     private EventsManagementNotification eventsManagementNotification;
 
-    @Column(name = "notificationType")
+    @Column(name = "notificationtype")
     private String notificationType;
 
-    @Column(name = "notificationRecipents")
-    private String notificationRecipents;
+    @Column(name = "notificationrecipients ")
+    private String notificationRecipients;
 
-    public NotificationLogs(Integer notificationLogsStatusCode, String notificationLogsError, String timeSent, EventsManagementNotification eventsManagementNotification, String notificationType, String notificationRecipents) {
+    public NotificationLogs(Integer notificationLogsStatusCode, String notificationLogsError, String timeSent, EventsManagementNotification eventsManagementNotification, String notificationType, String notificationRecipients) {
         this.notificationLogsId = notificationLogsId;
         this.notificationLogsStatusCode = notificationLogsStatusCode;
         this.notificationLogsError = notificationLogsError;
         this.timeSent = timeSent;
         this.eventsManagementNotification = eventsManagementNotification;
         this.notificationType = notificationType;
-        this.notificationRecipents = notificationRecipents;
+        this.notificationRecipients = notificationRecipients;
     }
 
     @Override
@@ -58,7 +58,7 @@ public class NotificationLogs {
                 ", timeSent='" + timeSent + '\'' +
                 ", eventsManagementNotification=" + eventsManagementNotification +
                 ", notificationType='" + notificationType + '\'' +
-                ", notificationRecipents='" + notificationRecipents + '\'' +
+                ", notificationRecipents='" + notificationRecipients + '\'' +
                 '}';
     }
 //    @Override
