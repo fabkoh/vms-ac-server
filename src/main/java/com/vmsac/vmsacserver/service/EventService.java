@@ -7,7 +7,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -206,4 +208,21 @@ public class EventService {
 //        return mappingJacksonValue;
 //    }
 
+    // eventActionTypeId = 3 is UnAuthenticated Scans
+    // 6 is Door opened without authorisation
+    public List<Event> getUnauthenticatedScansIn24hrs() {
+        Instant twentyFourHoursAgo = Instant.now().minus(24, ChronoUnit.HOURS);
+        Timestamp startTimestamp = Timestamp.from(twentyFourHoursAgo);
+        Timestamp endTimestamp = Timestamp.from(Instant.now());
+
+        return eventRepository.findEventIn24hrs(startTimestamp, endTimestamp, 3L);
+    }
+
+    public List<Event> getUnauthorisedDoorOpenEventsIn24hrs() {
+        Instant twentyFourHoursAgo = Instant.now().minus(24, ChronoUnit.HOURS);
+        Timestamp startTimestamp = Timestamp.from(twentyFourHoursAgo);
+        Timestamp endTimestamp = Timestamp.from(Instant.now());
+
+        return eventRepository.findEventIn24hrs(startTimestamp, endTimestamp, 6L);
+    }
 }

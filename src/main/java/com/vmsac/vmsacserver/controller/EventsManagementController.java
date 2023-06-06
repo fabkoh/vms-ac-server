@@ -493,8 +493,6 @@ public class EventsManagementController {
         return new ResponseEntity<>(
                 eventsManagementService.toDto(found_ems), HttpStatus.OK);
     }
-
-
 }
 
 
