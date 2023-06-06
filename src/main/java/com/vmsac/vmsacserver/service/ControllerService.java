@@ -990,7 +990,7 @@ public class ControllerService {
             HttpEntity<String> request = new HttpEntity<String>("");
             return restTemplate.exchange(resourceUrl, HttpMethod.GET, request, String.class);
         }
-        catch(Exception e){
+        catch(Exception e) {
             throw new Exception("An error occurred");
         }
     }

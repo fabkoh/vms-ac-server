@@ -624,7 +624,7 @@ public class ControllerController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/piProperty/{controllerId}")
+    @GetMapping("/controller/piProperty/{controllerId}")
     public ResponseEntity<?> getControllerPiProperty(@PathVariable Long controllerId) throws Exception {
         // Get controller using controllerId
         Optional<Controller> optionalController = controllerService.findById(controllerId);
