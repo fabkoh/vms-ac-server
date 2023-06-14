@@ -123,14 +123,14 @@ public class EventController {
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-    private void addNotif(int BAD_REQUEST, String e, EventsManagementNotification eventsManagementNotification1, String notificationType, String notificationRecipents) {
+    private void addNotif(int statuscode1, String e, EventsManagementNotification eventsManagementNotification1, String notificationType, String notificationRecipients) {
         System.out.println("ADD NOTIF TRIGGERED");
-        Integer statuscode = BAD_REQUEST;
+        Integer statuscode = statuscode1;
         String error = e;
         LocalDateTime currentTime = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss");
         String formattedTime = currentTime.format(formatter);
-        NotificationLogs notificationLogs = new NotificationLogs(statuscode, error, formattedTime, eventsManagementNotification1, notificationType, notificationRecipents);
+        NotificationLogs notificationLogs = new NotificationLogs(statuscode, error, formattedTime, eventsManagementNotification1, notificationType, notificationRecipients);
         System.out.println(notificationLogs);
         notificationLogsRepository.save(notificationLogs);
     }
@@ -162,5 +162,15 @@ public class EventController {
             return new ResponseEntity<>("SMS sent", HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
+    @GetMapping("events/unauthenticated")
+    public ResponseEntity<?> getUnauthenticatedScanEvents() {
+        return new ResponseEntity<>(eventService.getUnauthenticatedScansIn24hrs(), HttpStatus.OK);
+    }
+
+    @GetMapping("events/unauthorised")
+    public ResponseEntity<?> getUnauthorisedDoorOpenEvents() {
+        return new ResponseEntity<>(eventService.getUnauthorisedDoorOpenEventsIn24hrs(), HttpStatus.OK);
     }
 }
