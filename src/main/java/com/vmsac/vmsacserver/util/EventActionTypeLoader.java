@@ -122,6 +122,18 @@ public class EventActionTypeLoader implements CommandLineRunner, Ordered {
                         .build()
         );
 
+        EventActionType Invalid_PIN_used = eventActionTypeRepository.save(
+                EventActionType.builder()
+                        .eventActionTypeName("Invalid PIN used")
+                        .isTimerEnabled(false)
+                        .build()
+        );
 
+        EventActionType Fire = eventActionTypeRepository.save(
+                EventActionType.builder()
+                        .eventActionTypeName("Fire")
+                        .isTimerEnabled(false)
+                        .build()
+        );
     }
 }
