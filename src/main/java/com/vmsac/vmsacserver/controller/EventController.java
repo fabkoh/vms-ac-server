@@ -163,4 +163,14 @@ public class EventController {
         }
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
+
+    @GetMapping("events/unauthenticated")
+    public ResponseEntity<?> getUnauthenticatedScanEvents() {
+        return new ResponseEntity<>(eventService.getUnauthenticatedScansIn24hrs(), HttpStatus.OK);
+    }
+
+    @GetMapping("events/unauthorised")
+    public ResponseEntity<?> getUnauthorisedDoorOpenEvents() {
+        return new ResponseEntity<>(eventService.getUnauthorisedDoorOpenEventsIn24hrs(), HttpStatus.OK);
+    }
 }

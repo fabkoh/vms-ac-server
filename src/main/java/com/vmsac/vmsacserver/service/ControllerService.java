@@ -981,4 +981,17 @@ public class ControllerService {
             genRepo.save(g);
         }
     }
+
+    public ResponseEntity<?> getPiPropertyFromController(Controller controller) throws Exception {
+        System.out.println("GETTING PIPROPERTY FROM CONTROLLER IP " + controller.getControllerIP());
+        try {
+            String resourceUrl = "http://" + controller.getControllerIP() + ":5000/api/piProperty";
+            RestTemplate restTemplate = new RestTemplate();
+            HttpEntity<String> request = new HttpEntity<String>("");
+            return restTemplate.exchange(resourceUrl, HttpMethod.GET, request, String.class);
+        }
+        catch(Exception e) {
+            throw new Exception("An error occurred");
+        }
+    }
 }
