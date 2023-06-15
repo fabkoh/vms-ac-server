@@ -225,4 +225,12 @@ public class EventService {
 
         return eventRepository.findEventIn24hrs(startTimestamp, endTimestamp, 6L);
     }
+
+    public List<Event> getFireAlarmsIn24hrs() {
+        Instant twentyFourHoursAgo = Instant.now().minus(24, ChronoUnit.HOURS);
+        Timestamp startTimestamp = Timestamp.from(twentyFourHoursAgo);
+        Timestamp endTimestamp = Timestamp.from(Instant.now());
+
+        return eventRepository.findEventIn24hrs(startTimestamp, endTimestamp, 15L);
+    }
 }
