@@ -100,6 +100,7 @@ INSERT INTO EventActionType VALUES ('11','GEN_IN_2 detected', false) ON CONFLICT
 INSERT INTO EventActionType VALUES ('12','GEN_IN_3 detected', false) ON CONFLICT DO NOTHING;
 INSERT INTO EventActionType VALUES ('13','Valid PIN used', false) ON CONFLICT DO NOTHING;
 INSERT INTO EventActionType VALUES ('14','Invalid PIN used', false) ON CONFLICT DO NOTHING;
+INSERT INTO EventActionType VALUES ('15','Fire', false) ON CONFLICT DO NOTHING;
 
 INSERT INTO smssettings (smsSettingsId, smsapi, enabled) VALUES (1, 'isssecurity', true) ON CONFLICT DO NOTHING;
 INSERT INTO emailsettings (emailSettingsId, username, email, emailpassword, hostaddress, portnumber, enabled, custom, istls) VALUES (1, 'Etlas', 'notifications@etlas.sg', 'yOw6$teqE', 'smtp.zoho.com', '587', true, true, true) ON CONFLICT DO NOTHING;

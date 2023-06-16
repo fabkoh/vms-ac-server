@@ -81,13 +81,13 @@ public class JwtUtils {
 //        }
         catch (SignatureException e) {
             logger.error("Invalid JWT signature: {}", e.getMessage());
-            res.put("exception", "Invalid JWT signature");
+            res.put("exception", "Incorrect email or password");
         } catch (MalformedJwtException e) {
             logger.error("Invalid JWT token: {}", e.getMessage());
-            res.put("exception", "Invalid JWT token");
+            res.put("exception", "Incorrect email or password");
         } catch (ExpiredJwtException e) {
             logger.error("JWT token is expired: {}", e.getMessage());
-            res.put("exception", "JWT token is expired");
+            res.put("exception", "User session has expired, please log in again");
         } catch (UnsupportedJwtException e) {
             logger.error("JWT token is unsupported: {}", e.getMessage());
             res.put("exception", "JWT token is unsupported");

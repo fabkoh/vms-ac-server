@@ -173,4 +173,9 @@ public class EventController {
     public ResponseEntity<?> getUnauthorisedDoorOpenEvents() {
         return new ResponseEntity<>(eventService.getUnauthorisedDoorOpenEventsIn24hrs(), HttpStatus.OK);
     }
+
+    @GetMapping("events/fire")
+    public ResponseEntity<?> getFireEvents() {
+        return new ResponseEntity<>(eventService.getFireAlarmsIn24hrs(), HttpStatus.OK);
+    }
 }
