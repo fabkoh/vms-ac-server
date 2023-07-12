@@ -24,10 +24,7 @@ public class JwtUtils {
     private Key jwtSecret;
 
 //    // jwt token expiry time - currently 15 mins
-//    private Long jwtTokenDurationMs= Long.valueOf(15 * 60 * 1000);
-
-    // jwt token expiry time - currently 20 secs
-    private Long jwtTokenDurationMs= Long.valueOf(1 * 20 * 1000);
+    private Long jwtTokenDurationMs= Long.valueOf(15 * 60 * 1000);
 
     @PostConstruct
     public void init() {
