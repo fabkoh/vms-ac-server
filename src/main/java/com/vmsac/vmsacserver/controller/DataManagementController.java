@@ -1,5 +1,4 @@
 package com.vmsac.vmsacserver.controller;
-
 import com.vmsac.vmsacserver.service.BackupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
@@ -8,9 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.concurrent.CompletableFuture;
 
-import java.io.File;
-import java.io.FileInputStream;
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api")
@@ -22,7 +20,7 @@ public class DataManagementController {
     @GetMapping("/backup")
     public ResponseEntity<?> createBackup() {
         try {
-            InputStreamResource resource = backupService.createBackup();
+            InputStreamResource resource = backupService.createBackup().get();
             return ResponseEntity.ok()
                     .contentType(MediaType.APPLICATION_OCTET_STREAM)
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"backup.sql\"")
