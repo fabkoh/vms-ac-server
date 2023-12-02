@@ -41,10 +41,13 @@ public class UniconUpdater {
 
                 controllerService.sendEntranceNameRelationship(controller.getControllerId());
                 System.out.println("EntranceName Done");
+                Thread.sleep(1000);
                 controllerService.generate(controller.getControllerId());
                 System.out.println("Generate Done");
+                Thread.sleep(1000);
                 controllerService.sendEventsManagementToController(controller);
                 System.out.println("sendEventsManagementToController Done");
+                Thread.sleep(1000);
 
                 controller.setLastSync(LocalDateTime.now(ZoneId.of("GMT+08:00")));
             }

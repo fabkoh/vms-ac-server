@@ -265,9 +265,9 @@ public class ControllerService {
     public ControllerConnection getControllerConnectionUnicon(String IPaddress) throws Exception {
 
             HttpComponentsClientHttpRequestFactory httpRequestFactory = new HttpComponentsClientHttpRequestFactory();
-            httpRequestFactory.setConnectionRequestTimeout(3000);
-            httpRequestFactory.setConnectTimeout(3000);
-            httpRequestFactory.setReadTimeout(3000);
+            httpRequestFactory.setConnectionRequestTimeout(5000);
+            httpRequestFactory.setConnectTimeout(5000);
+            httpRequestFactory.setReadTimeout(5000);
 
             RestTemplate restTemplate = new RestTemplate(httpRequestFactory);
 
