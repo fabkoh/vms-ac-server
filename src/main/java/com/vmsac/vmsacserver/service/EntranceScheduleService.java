@@ -115,7 +115,7 @@ public class EntranceScheduleService {
 //            System.out.println(entranceId);
 //            System.out.println(ListOfExistingEntranceSch);
             try {
-                Map datetime = controllerService.GetEntranceScheduleObjectWithTime(ListOfExistingEntranceSch);
+                Map datetime = controllerService.getEntranceScheduleObjectWithTime(ListOfExistingEntranceSch);
                 DateTimeFormatter datef = DateTimeFormatter.ofPattern("yyyy-MM-dd");
                 DateTimeFormatter timef = DateTimeFormatter.ofPattern("HH:mm:ss");
                 LocalDateTime now = LocalDateTime.now();
