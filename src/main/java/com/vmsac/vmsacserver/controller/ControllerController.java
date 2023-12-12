@@ -539,7 +539,7 @@ public class ControllerController {
     }
 
 
-    @GetMapping("/availableEntrances")
+        @GetMapping("/availableEntrances")
     public List<Entrance> getAvailableEntrances() {
         return entranceService.getAvailableEntrances();
     }

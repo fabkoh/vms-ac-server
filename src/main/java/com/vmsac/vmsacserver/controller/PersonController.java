@@ -113,8 +113,10 @@ public class PersonController {
                     HttpStatus.CREATED);
         }
 
+
         // check if phone number is empty
-        if (newPersonDto.getPersonMobileNumber().equals("+") || newPersonDto.getPersonMobileNumber().equals("+65")) {
+        String mobileNumber = newPersonDto.getPersonMobileNumber();
+        if (mobileNumber == null || mobileNumber.equals("+") || mobileNumber.equals("+65")) {
             newPersonDto.setPersonMobileNumber("");
         }
 
