@@ -28,7 +28,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 
@@ -455,11 +454,10 @@ public class ControllerService {
         // Refactor the code to handle IN and OUT devices in a loop or a separate method
         // Here's an example with a loop:
         for (String direction : Arrays.asList("IN", "OUT")) {
-            String key = direction.equals("IN") ? "E1_IN" : "E2_OUT";
             AuthDevice device = authDeviceRepository.findByEntrance_EntranceIdIsAndAuthDeviceDirectionContains(entrance.getEntranceId(), direction);
             if (device != null) {
                 Map<String, Object> deviceDetails = getDeviceDetails(device);
-                authDevices.put(key, deviceDetails);
+                authDevices.put(direction, deviceDetails);
             }
         }
 
@@ -761,68 +759,122 @@ public class ControllerService {
         }
     }
 
-
-    public ResponseEntity<?> sendEventsManagementToController(Controller controller) throws Exception {
-        System.out.println("SENDING EVENTMANAGEMENT TO CONTROLLER IP "+ controller.getControllerIP().toString());
-        List<EventsManagement> toSend = controller.getEventsManagements();
-        try {
-            Set<Long> entranceIds = new HashSet<>();
-            for (AuthDevice ad : controller.getAuthDevices()) {
-                if (ad.getEntrance() != null)
-                    entranceIds.add(ad.getEntrance().getEntranceId());
-            }
-
-            List<Entrance> entrances = entranceRepo.findByEntranceIdInAndDeletedFalseAndIsActiveTrue(entranceIds);
-            entrances.forEach(ent -> toSend.addAll(ent.getEventsManagements()));
-            AtomicBoolean genScheduleError = new AtomicBoolean(false);
-            List<EventsManagementPiDto> controllerEms = toSend.stream()
-                    .map(em -> {
-
-                                Map<String, Object> schedules = new HashMap<>();
-
-                                for (TriggerSchedules ts :triggerSchedulesRepository.findAllById(em.getTriggerSchedulesid()))
-                                    try {
-
-                                        schedules = getScheduleMap(ts.getRrule(),ts.getTimeStart(),
-                                                ts.getTimeEnd(),  schedules);
-                                    } catch (Exception e) {
-                                        genScheduleError.set(true);
-                                    }
-
-                                return new EventsManagementPiDto(
-                                        em.getEventsManagementId(), em.getEventsManagementName(),
-                                        inputEventRepo.findAllById(em.getInputEventsId()),
-                                        outputEventRepo.findAllById(em.getOutputActionsId()),
-                                        schedules,
-                                        em.getEntrance() == null ? null : EventsManagementPiDto.getEntranceId(em),
-                                        em.getController() == null ? null : EventsManagementPiDto.getControllerId(em)
-                                );
-                            }
-                    ).collect(Collectors.toList());
-
-            if (genScheduleError.get()) {
-                throw new Exception("Schedule generation error");
-            }
-
-            String resourceUrl = "http://" + controller.getControllerIP() + ":5000/api/eventActionTriggers";
-            RestTemplate restTemplate = new RestTemplate();
-            HttpEntity<List> request = new HttpEntity<>(controllerEms);
-            ResponseEntity<String> response = restTemplate.exchange(resourceUrl, HttpMethod.POST, request, String.class);
-
-            if (response.getStatusCodeValue() == 204){
-//                ObjectMapper mapper = new ObjectMapper();
-//                ControllerConnection connection = mapper.readValue(response.getBody(), ControllerConnection.class);
-                return ResponseEntity.ok().build();
-            }
-            else{
-                throw new Exception("API call fail");
-            }
-            //        System.out.println(productCreateResponse.getStatusCode());
-        }
-        catch(Exception e){
-            throw new Exception("An error occurred");
-        }
+    public HttpStatus sendEventsManagementToController(Long controllerId) throws Exception {
+        Controller controller = controllerRepository.getById(controllerId);
+        String resourceUrl = getResourceURL(controllerId, "eventActionTriggers");
+        List<EventsManagementPiDto> eventsManagementData = createEventsManagementData(controller);
+        return sendPostRequest(resourceUrl, eventsManagementData);
     }
+
+    private List<EventsManagementPiDto> createEventsManagementData(Controller controller) throws Exception {
+        List<EventsManagement> eventsManagements = getEventsManagementsForController(controller);
+        List<EventsManagementPiDto> controllerEms = new ArrayList<>();
+
+        for (EventsManagement em : eventsManagements) {
+            EventsManagementPiDto emDto = convertToEventsManagementPiDto(em);
+            controllerEms.add(emDto);
+        }
+
+        return controllerEms;
+    }
+
+    private List<EventsManagement> getEventsManagementsForController(Controller controller) {
+        List<EventsManagement> eventsManagements = new ArrayList<>(controller.getEventsManagements());
+        Set<Long> entranceIds = controller.getAuthDevices().stream()
+                .map(AuthDevice::getEntrance)
+                .filter(Objects::nonNull)
+                .map(Entrance::getEntranceId)
+                .collect(Collectors.toSet());
+
+        List<Entrance> entrances = entranceRepo.findByEntranceIdInAndDeletedFalseAndIsActiveTrue(entranceIds);
+        entrances.forEach(entrance -> eventsManagements.addAll(entrance.getEventsManagements()));
+
+        return eventsManagements;
+    }
+
+    private EventsManagementPiDto convertToEventsManagementPiDto(EventsManagement em) throws Exception {
+        Map<String, Object> schedules = generateSchedulesForEventManagement(em);
+        // Constructing the DTO with all necessary data
+        return new EventsManagementPiDto(
+                em.getEventsManagementId(),
+                em.getEventsManagementName(),
+                inputEventRepo.findAllById(em.getInputEventsId()),
+                outputEventRepo.findAllById(em.getOutputActionsId()),
+                schedules,
+                em.getEntrance() != null ? EventsManagementPiDto.getEntranceId(em) : null,
+                em.getController() != null ? EventsManagementPiDto.getControllerId(em) : null
+        );
+    }
+
+    private Map<String, Object> generateSchedulesForEventManagement(EventsManagement em) throws Exception {
+        Map<String, Object> schedules = new HashMap<>();
+        for (TriggerSchedules ts : triggerSchedulesRepository.findAllById(em.getTriggerSchedulesid())) {
+            schedules = getScheduleMap(ts.getRrule(), ts.getTimeStart(), ts.getTimeEnd(), schedules);
+        }
+        return schedules;
+    }
+
+//    public ResponseEntity<?> sendEventsManagementToController(Controller controller) throws Exception {
+//        System.out.println("SENDING EVENTMANAGEMENT TO CONTROLLER IP "+ controller.getControllerIP().toString());
+//        List<EventsManagement> toSend = controller.getEventsManagements();
+//        try {
+//            Set<Long> entranceIds = new HashSet<>();
+//            for (AuthDevice ad : controller.getAuthDevices()) {
+//                if (ad.getEntrance() != null)
+//                    entranceIds.add(ad.getEntrance().getEntranceId());
+//            }
+//
+//            List<Entrance> entrances = entranceRepo.findByEntranceIdInAndDeletedFalseAndIsActiveTrue(entranceIds);
+//            entrances.forEach(ent -> toSend.addAll(ent.getEventsManagements()));
+//            AtomicBoolean genScheduleError = new AtomicBoolean(false);
+//            List<EventsManagementPiDto> controllerEms = toSend.stream()
+//                    .map(em -> {
+//
+//                                Map<String, Object> schedules = new HashMap<>();
+//
+//                                for (TriggerSchedules ts :triggerSchedulesRepository.findAllById(em.getTriggerSchedulesid()))
+//                                    try {
+//
+//                                        schedules = getScheduleMap(ts.getRrule(),ts.getTimeStart(),
+//                                                ts.getTimeEnd(),  schedules);
+//                                    } catch (Exception e) {
+//                                        genScheduleError.set(true);
+//                                    }
+//
+//                                return new EventsManagementPiDto(
+//                                        em.getEventsManagementId(), em.getEventsManagementName(),
+//                                        inputEventRepo.findAllById(em.getInputEventsId()),
+//                                        outputEventRepo.findAllById(em.getOutputActionsId()),
+//                                        schedules,
+//                                        em.getEntrance() == null ? null : EventsManagementPiDto.getEntranceId(em),
+//                                        em.getController() == null ? null : EventsManagementPiDto.getControllerId(em)
+//                                );
+//                            }
+//                    ).collect(Collectors.toList());
+//
+//            if (genScheduleError.get()) {
+//                throw new Exception("Schedule generation error");
+//            }
+//
+//            String resourceUrl = "http://" + controller.getControllerIP() + ":5000/api/eventActionTriggers";
+//            RestTemplate restTemplate = new RestTemplate();
+//            HttpEntity<List> request = new HttpEntity<>(controllerEms);
+//            ResponseEntity<String> response = restTemplate.exchange(resourceUrl, HttpMethod.POST, request, String.class);
+//
+//            if (response.getStatusCodeValue() == 204){
+////                ObjectMapper mapper = new ObjectMapper();
+////                ControllerConnection connection = mapper.readValue(response.getBody(), ControllerConnection.class);
+//                return ResponseEntity.ok().build();
+//            }
+//            else{
+//                throw new Exception("API call fail");
+//            }
+//            //        System.out.println(productCreateResponse.getStatusCode());
+//        }
+//        catch(Exception e){
+//            throw new Exception("An error occurred");
+//        }
+//    }
 
     public void save(Controller existingcontroller) {
         controllerRepository.save(existingcontroller);
