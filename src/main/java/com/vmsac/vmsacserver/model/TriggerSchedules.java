@@ -96,4 +96,8 @@ public class TriggerSchedules {
     @Column(name = "endofday")
     private Boolean endOfDay;
 
+    @Override
+    public String toString() {
+        return "TriggerSchedulesToString";
+    }
 }

@@ -96,4 +96,9 @@ public class EventsManagement {
                 controllerDto,
                 this.eventsManagementNotifications);
     }
+
+    @Override
+    public String toString() {
+        return "EventsManagementToString";
+    }
 }

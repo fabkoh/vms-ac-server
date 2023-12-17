@@ -45,7 +45,7 @@ public class UniconUpdater {
                 controllerService.generate(controller.getControllerId());
                 System.out.println("Generate Done");
                 Thread.sleep(1000);
-                controllerService.sendEventsManagementToController(controller);
+                controllerService.sendEventsManagementToController(controller.getControllerId());
                 System.out.println("sendEventsManagementToController Done");
                 Thread.sleep(1000);
 
