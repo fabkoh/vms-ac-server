@@ -118,13 +118,6 @@ public class VideoRecorderService {
             errors.put("recorderIWSPort", "Recorder IWS port " + recorderIWSPort + " in use");
         }
 
-        if (enableUPNP && (!checkIfPortAvailable(publicIP, recorderIWSPort))) {
-            errors.put("recorderIWSPort", "Recorder IWS port " + recorderIWSPort + " in use");
-        }
-
-        if (enableUPNP && (!checkIfPortAvailable(publicIP, portNumber))) {
-            errors.put("recorderIWSPort", "Recorder port number " + portNumber + " in use");
-        }
         return errors;
     }
 
