@@ -283,7 +283,6 @@ CREATE TABLE IF NOT EXISTS VideoRecorder(
     recorderUsername VARCHAR(255) NOT NULL,
     recorderPassword VARCHAR(255) NOT NULL,
     created TIMESTAMP,
-    autoPortForwarding BOOLEAN NOT NULL,
     deleted BOOLEAN NOT NULL DEFAULT FALSE,
     PRIMARY KEY (recorderId)
 );

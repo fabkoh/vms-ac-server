@@ -35,21 +35,18 @@ public class VideoRecorderDto implements Serializable {
     @NotBlank(message = "Recorder password must not be blank")
     private String recorderPassword;
 
-    @Column( name = "autoportforwarding", nullable = false)
-    private boolean autoPortForwarding;
-
     private final LocalDateTime created;
 
     private Boolean deleted;
 
     public VideoRecorder toCreateVideoRecorder(Boolean deleted) {
         return new VideoRecorder(recorderName, recorderSerialNumber, recorderPublicIp, recorderPrivateIp,
-                recorderPortNumber, recorderIWSPort, recorderUsername, recorderPassword, autoPortForwarding,deleted);
+                recorderPortNumber, recorderIWSPort, recorderUsername, recorderPassword, deleted);
     }
 
     public VideoRecorder toUpdateVideoRecorder(Boolean deleted) {
         return new VideoRecorder(recorderId, recorderName, recorderSerialNumber,
                 recorderPublicIp, recorderPrivateIp, recorderPortNumber, recorderIWSPort,
-                recorderUsername, recorderPassword, autoPortForwarding, deleted);
+                recorderUsername, recorderPassword, deleted);
     }
 }
