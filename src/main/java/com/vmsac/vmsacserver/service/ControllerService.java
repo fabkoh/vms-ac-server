@@ -23,12 +23,14 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
+
 
 
 @Service
@@ -38,7 +40,7 @@ public class ControllerService {
     String pinAssignment = "{'E1_IN_D0': '14'}";
     String settingsConfig = "testsettings";
 
-
+    private final ObjectMapper objectMapper = new ObjectMapper();
     private final RestTemplate restTemplate;
 
     public ControllerService() {
@@ -333,15 +335,33 @@ public class ControllerService {
     private HttpStatus sendPostRequest(String url, Map<String, Object> body) throws Exception {
         HttpEntity<Map> request = new HttpEntity<>(body);
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, request, String.class);
-        handleResponse(response);
-        return HttpStatus.OK;
+        if (isJsonValid(response.getBody())) {
+            handleResponse(response);
+            return HttpStatus.OK;
+        } else {
+            throw new Exception("Invalid JSON format in response");
+        }
     }
 
     private HttpStatus sendPostRequest(String url, List<?> body) throws Exception {
         HttpEntity<List<?>> request = new HttpEntity<>(body);
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, request, String.class);
-        handleResponse(response);
-        return HttpStatus.OK;
+        if (isJsonValid(response.getBody())) {
+            handleResponse(response);
+            return HttpStatus.OK;
+        } else {
+            throw new Exception("Invalid JSON format in response");
+        }
+    }
+
+    private boolean isJsonValid(String jsonInString) {
+        try {
+            System.out.println(jsonInString);
+            objectMapper.readTree(jsonInString);
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
     }
 
     private void handleResponse(ResponseEntity<String> response) throws Exception {
