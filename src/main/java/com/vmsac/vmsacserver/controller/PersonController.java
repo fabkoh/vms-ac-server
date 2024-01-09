@@ -4,14 +4,16 @@ package com.vmsac.vmsacserver.controller;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.exceptions.CsvValidationException;
-import com.vmsac.vmsacserver.model.*;
-
+import com.vmsac.vmsacserver.model.AccessGroup;
+import com.vmsac.vmsacserver.model.CreatePersonDto;
+import com.vmsac.vmsacserver.model.Person;
+import com.vmsac.vmsacserver.model.PersonDto;
 import com.vmsac.vmsacserver.model.credential.CreateCredentialDto;
 import com.vmsac.vmsacserver.model.credential.CredentialDto;
 import com.vmsac.vmsacserver.service.AccessGroupService;
 import com.vmsac.vmsacserver.service.CredentialService;
-import com.vmsac.vmsacserver.util.CsvToJson;
 import com.vmsac.vmsacserver.service.PersonService;
+import com.vmsac.vmsacserver.util.CsvToJson;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,23 +23,19 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.supercsv.io.CsvListReader;
+import org.supercsv.prefs.CsvPreference;
 
 import javax.validation.Valid;
-
-import java.time.LocalDateTime;
-import java.util.*;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.supercsv.io.CsvListReader;
-import org.supercsv.prefs.CsvPreference;
-
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -132,7 +130,9 @@ public class PersonController {
             @Valid @RequestBody PersonDto updatePersonDto) {
 
         // check if phone number is empty
-        if (updatePersonDto.getPersonMobileNumber().equals("+") || updatePersonDto.getPersonMobileNumber().equals("+65")) {
+        if (updatePersonDto.getPersonMobileNumber() == null ||
+                updatePersonDto.getPersonMobileNumber().equals("+") ||
+                updatePersonDto.getPersonMobileNumber().equals("+65")) {
             updatePersonDto.setPersonMobileNumber("");
         }
 

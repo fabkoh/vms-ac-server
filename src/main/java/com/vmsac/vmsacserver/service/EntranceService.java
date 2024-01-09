@@ -1,6 +1,9 @@
 package com.vmsac.vmsacserver.service;
 
-import com.vmsac.vmsacserver.model.*;
+import com.vmsac.vmsacserver.model.AuthDevice;
+import com.vmsac.vmsacserver.model.CreateEntranceDto;
+import com.vmsac.vmsacserver.model.Entrance;
+import com.vmsac.vmsacserver.model.EntranceDto;
 import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoN;
 import com.vmsac.vmsacserver.repository.AccessGroupEntranceNtoNRepository;
 import com.vmsac.vmsacserver.repository.AccessGroupRepository;
@@ -8,6 +11,7 @@ import com.vmsac.vmsacserver.repository.EntranceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -38,6 +42,7 @@ public class EntranceService {
     public List<EntranceDto> findAllEntrances(){
         return entranceRepository.findByDeleted(false).stream()
                 .map(Entrance::toDto)
+                .sorted(Comparator.comparing(EntranceDto::getEntranceId)) // Add this line to sort by ID
                 .collect(Collectors.toList());
     }
     public Boolean nameInUse(String name){
