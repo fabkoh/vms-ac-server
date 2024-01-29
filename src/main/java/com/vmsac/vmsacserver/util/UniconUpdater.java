@@ -52,6 +52,7 @@ public class UniconUpdater {
                 controller.setLastSync(LocalDateTime.now(ZoneId.of("GMT+08:00")));
             }
             catch(Exception e){
+                System.out.println(e);
                 errors.put(controller.getControllerName(), controller.getControllerSerialNo());
             }
 

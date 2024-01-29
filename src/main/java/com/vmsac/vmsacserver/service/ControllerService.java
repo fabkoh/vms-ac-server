@@ -335,8 +335,8 @@ public class ControllerService {
     private HttpStatus sendPostRequest(String url, Map<String, Object> body) throws Exception {
         HttpEntity<Map> request = new HttpEntity<>(body);
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, request, String.class);
-        if (isJsonValid(response.getBody())) {
-            handleResponse(response);
+        if (response.getStatusCode().value() == 200) {
+//            handleResponse(response);
             return HttpStatus.OK;
         } else {
             throw new Exception("Invalid JSON format in response");
@@ -346,8 +346,8 @@ public class ControllerService {
     private HttpStatus sendPostRequest(String url, List<?> body) throws Exception {
         HttpEntity<List<?>> request = new HttpEntity<>(body);
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, request, String.class);
-        if (isJsonValid(response.getBody())) {
-            handleResponse(response);
+        if (response.getStatusCode().value() == 200) {
+//            handleResponse(response);
             return HttpStatus.OK;
         } else {
             throw new Exception("Invalid JSON format in response");
