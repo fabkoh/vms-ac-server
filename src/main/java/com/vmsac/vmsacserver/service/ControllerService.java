@@ -416,6 +416,7 @@ public class ControllerService {
         Controller controller = controllerRepository.getById(controllerId);
         String resourceUrl = getResourceURL(controllerId, "credOccur");
         List<Object> rulesSet = createRulesSetForController(controller);
+        System.out.println("rulesSet " + rulesSet);
         return sendPostRequest(resourceUrl, rulesSet);
     }
 
@@ -423,6 +424,7 @@ public class ControllerService {
         List<Object> rulesSet = new ArrayList<>();
         for (int i = 1; i <= 2; i++) {
             Map<String, Object> entranceData = processEntrance(controller, "E" + i + "_IN");
+            System.out.println("entranceData " + entranceData);
             if (entranceData != null) {
                 rulesSet.add(entranceData);
             }
@@ -641,29 +643,6 @@ public class ControllerService {
 
     // add to existing schedule and return
     public Map getScheduleMap(String rawrrule, String starttime, String endtime, Map combinedSchedule) throws Exception {
-        // add to existing schedule and return {
-        //    //            "2022-07-15":[
-        //    //                {
-        //    //                    "endtime":"23:59",
-        //    //                    "starttime":"00:00"
-        //    //                },
-        //    //                {
-        //    //                    "endtime":"12:00",
-        //    //                    "starttime":"11:59"
-        //    //                }
-        //    //            ],
-        //    //            "2023-05-30":[
-        //    //                {
-        //    //                    "endtime":"23:57",
-        //    //                    "starttime":"22:56"
-        //    //                },
-        //    //                {
-        //    //                    "endtime":"11:56",
-        //    //                    "starttime":"11:55"
-        //    //                }
-        //    //            ]
-        //    //        }
-
         // iterate through a list of objects ( schedules ), call GetScheduleMap and keep adding to the combined schedule
         // can refer to GetEntranceScheduleObjectWithTime for reference
 
@@ -674,17 +653,17 @@ public class ControllerService {
         Integer month = Integer.parseInt(startdatetime.substring(4,6));
         Integer day = Integer.parseInt(startdatetime.substring(6,8));
 
-        if (LocalDate.now().getYear() > year){
-            year = LocalDate.now().getYear();
-        }
-
-        if (LocalDate.now().getMonthValue() > month){
-            month = LocalDate.now().getMonthValue();
-        }
-
-        if (LocalDate.now().getDayOfMonth() > day){
-            day = LocalDate.now().getDayOfMonth();
-        }
+//        if (LocalDate.now().getYear() > year){
+//            year = LocalDate.now().getYear();
+//        }
+//
+//        if (LocalDate.now().getMonthValue() > month){
+//            month = LocalDate.now().getMonthValue();
+//        }
+//
+//        if (LocalDate.now().getDayOfMonth() > day){
+//            day = LocalDate.now().getDayOfMonth();
+//        }
 
         //count, dont exceed one year
         //count, exceed one year
