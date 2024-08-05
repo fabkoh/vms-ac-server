@@ -1,12 +1,13 @@
 package com.vmsac.vmsacserver.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.vmsac.vmsacserver.model.EventDto.EventEntranceDto;
-import com.vmsac.vmsacserver.model.EventDto.EventPersonDto;
 import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoN;
-import lombok.*;
+import com.vmsac.vmsacserver.repository.AccessGroupEntranceNtoNRepository;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.List;
@@ -81,5 +82,11 @@ public class Entrance {
         if (!entranceAuthDevices.isEmpty())
             return entranceAuthDevices.get(0).getController();
         else return null;
+    }
+
+    @JsonIgnore
+    public List<AccessGroupEntranceNtoN> getAssignedAccessGroup(AccessGroupEntranceNtoNRepository repo) {
+        List<AccessGroupEntranceNtoN> accessGroups = repo.findAllByEntranceEntranceIdAndDeletedFalse(this.entranceId);
+        return accessGroups;
     }
 }

@@ -1,13 +1,17 @@
 package com.vmsac.vmsacserver.model.accessgroupentrance;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vmsac.vmsacserver.model.AccessGroup;
 import com.vmsac.vmsacserver.model.Entrance;
+import com.vmsac.vmsacserver.model.Person;
+import com.vmsac.vmsacserver.repository.PersonRepository;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -37,6 +41,10 @@ public class AccessGroupEntranceNtoN {
         return new AccessGroupEntranceNtoNDto(groupToEntranceId, entrance.toEntranceOnlyDto(), accessGroup.toAccessGroupOnlyDto());
     }
 
-
+    @JsonIgnore
+    public List<Person> getAssignedPersons(PersonRepository repo) {
+        List<Person> persons = repo.findAllByAccessGroupAccessGroupIdAndDeletedFalse(this.accessGroup.getAccessGroupId());
+        return persons;
+    }
 
 }
