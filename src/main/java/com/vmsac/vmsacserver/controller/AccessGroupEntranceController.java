@@ -15,6 +15,7 @@ import java.util.Objects;
 @RequestMapping("/api")
 public class AccessGroupEntranceController {
 
+
     @Autowired
     private AccessGroupEntranceService accessGroupEntranceService;
 
