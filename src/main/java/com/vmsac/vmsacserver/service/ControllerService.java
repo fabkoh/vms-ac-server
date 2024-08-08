@@ -425,12 +425,14 @@ public class ControllerService {
         jsonDocument.put("Entrances", entrances);
         jsonDocument.put("CredentialLookup", credentialLookup);
         return jsonDocument;
+
     }
 
     private List<Object> createEntrancesList(Controller controller) throws Exception {
         List<Object> entrancesList = new ArrayList<>();
         for (int i = 1; i <= 2; i++) {
             Map<String, Object> entranceData = processEntrance(controller, "E" + i + "_IN");
+            System.out.println("entranceData " + entranceData);
             if (entranceData != null) {
                 entrancesList.add(entranceData);
             }
