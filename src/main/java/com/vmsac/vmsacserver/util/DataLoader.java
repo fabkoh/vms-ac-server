@@ -5,6 +5,8 @@ import com.vmsac.vmsacserver.model.*;
 import com.vmsac.vmsacserver.model.accessgroupentrance.AccessGroupEntranceNtoN;
 import com.vmsac.vmsacserver.model.accessgroupschedule.AccessGroupSchedule;
 import com.vmsac.vmsacserver.model.credentialtype.entranceschedule.EntranceSchedule;
+import com.vmsac.vmsacserver.model.credentialtype.CredentialType;
+import com.vmsac.vmsacserver.model.credential.Credential;
 import com.vmsac.vmsacserver.repository.*;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
@@ -314,81 +316,81 @@ public class DataLoader implements CommandLineRunner, Ordered {
         );
 
 //        see authmethodloader for cred type init
-//        CredentialType cardType = credTypeRepository.save(
-//                CredentialType.builder()
-//                        .credTypeName("Card")
-//                        .credTypeDesc("RFID card")
-//                        .deleted(false)
-//                        .build()
-//        );
-//
-//        CredentialType pinType = credTypeRepository.save(
-//                CredentialType.builder()
-//                        .credTypeName("Pin")
-//                        .credTypeDesc("digit pin")
-//                        .deleted(false)
-//                        .build()
-//        );
-//
-//        Credential paulCard = credentialRepository.save(
-//                Credential.builder()
-//                        .credUid("123400")
-//                        .credTTL(LocalDateTime.now())
-//                        .isValid(true)
-//                        .isPerm(true)
-//                        .credType(cardType)
-//                        .person(paulAtreides)
-//                        .deleted(false)
-//                        .build()
-//        );
-//
-//        Credential paulPin = credentialRepository.save(
-//                Credential.builder()
-//                        .credUid("1234")
-//                        .credTTL(LocalDateTime.of(2022, 12, 31, 23, 59))
-//                        .isValid(true)
-//                        .isPerm(false)
-//                        .credType(pinType)
-//                        .person(paulAtreides)
-//                        .deleted(false)
-//                        .build()
-//        );
-//
-//        Credential paulExpiredCard = credentialRepository.save(
-//                Credential.builder()
-//                        .credUid("123401")
-//                        .credTTL(LocalDateTime.now())
-//                        .isValid(true)
-//                        .isPerm(false)
-//                        .credType(cardType)
-//                        .person(paulAtreides)
-//                        .deleted(false)
-//                        .build()
-//        );
-//
-//        Credential paulInvalidCard = credentialRepository.save(
-//                Credential.builder()
-//                        .credUid("123402")
-//                        .credTTL(LocalDateTime.now())
-//                        .isValid(false)
-//                        .isPerm(false)
-//                        .credType(cardType)
-//                        .person(paulAtreides)
-//                        .deleted(false)
-//                        .build()
-//        );
-//
-//        Credential letoCard = credentialRepository.save(
-//                Credential.builder()
-//                        .credUid("4321")
-//                        .credTTL(LocalDateTime.now())
-//                        .isValid(true)
-//                        .isPerm(true)
-//                        .credType(cardType)
-//                        .person(letoAtreides)
-//                        .deleted(false)
-//                        .build()
-//        );
+        CredentialType cardType = credTypeRepository.save(
+                CredentialType.builder()
+                        .credTypeName("Card")
+                        .credTypeDesc("RFID card")
+                        .deleted(false)
+                        .build()
+        );
+
+        CredentialType pinType = credTypeRepository.save(
+                CredentialType.builder()
+                        .credTypeName("Pin")
+                        .credTypeDesc("digit pin")
+                        .deleted(false)
+                        .build()
+        );
+
+        Credential paulCard = credentialRepository.save(
+                Credential.builder()
+                        .credUid("123400")
+                        .credTTL(LocalDateTime.now())
+                        .isValid(true)
+                        .isPerm(true)
+                        .credType(cardType)
+                        .person(paulAtreides)
+                        .deleted(false)
+                        .build()
+        );
+
+        Credential paulPin = credentialRepository.save(
+                Credential.builder()
+                        .credUid("1234")
+                        .credTTL(LocalDateTime.of(2022, 12, 31, 23, 59))
+                        .isValid(true)
+                        .isPerm(false)
+                        .credType(pinType)
+                        .person(paulAtreides)
+                        .deleted(false)
+                        .build()
+        );
+
+        Credential paulExpiredCard = credentialRepository.save(
+                Credential.builder()
+                        .credUid("123401")
+                        .credTTL(LocalDateTime.now())
+                        .isValid(true)
+                        .isPerm(false)
+                        .credType(cardType)
+                        .person(paulAtreides)
+                        .deleted(false)
+                        .build()
+        );
+
+        Credential paulInvalidCard = credentialRepository.save(
+                Credential.builder()
+                        .credUid("123402")
+                        .credTTL(LocalDateTime.now())
+                        .isValid(false)
+                        .isPerm(false)
+                        .credType(cardType)
+                        .person(paulAtreides)
+                        .deleted(false)
+                        .build()
+        );
+
+        Credential letoCard = credentialRepository.save(
+                Credential.builder()
+                        .credUid("4321")
+                        .credTTL(LocalDateTime.now())
+                        .isValid(true)
+                        .isPerm(true)
+                        .credType(cardType)
+                        .person(letoAtreides)
+                        .deleted(false)
+                        .build()
+        );
 
 
     }
