@@ -54,7 +54,7 @@ public class VmsAcServerApplication {
             System.setFirstName("System");
             System.setLastName("Admin");
             System.setEmail("ISSAdmin@isssecurity.sg");
-            System.setPassword(encoder.encode("ISSAdmin"));
+            System.setPassword(encoder.encode("I$s4dm!n"));
             System.setRoles(system);
             System.setDeleted(false);
             System.setMobile("12345678");
@@ -66,7 +66,7 @@ public class VmsAcServerApplication {
             techUser.setFirstName("Tech");
             techUser.setLastName("Admin");
             techUser.setEmail("TechUser@isssecurity.sg");
-            techUser.setPassword(encoder.encode("ISSAdmin"));
+            techUser.setPassword(encoder.encode("I$sT3ch"));
             techUser.setRoles(tech);
             techUser.setDeleted(false);
             techUser.setMobile("1234567");
@@ -78,7 +78,7 @@ public class VmsAcServerApplication {
             user1.setFirstName("user1");
             user1.setLastName("Admin");
             user1.setEmail("User@isssecurity.sg");
-            user1.setPassword(encoder.encode("ISSAdmin"));
+            user1.setPassword(encoder.encode("ISSU53r"));
             user1.setRoles(user);
             user1.setDeleted(false);
             user1.setMobile("123456789");
