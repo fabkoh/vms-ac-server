@@ -125,7 +125,9 @@ public class EventService {
     }
 
     public List<Event> getEventsByTimeDesc(int pageNo, int pageSize) {
-        List<Event> allEvents = eventRepository.findByDeletedIsFalseOrderByEventTimeDesc(PageRequest.of(pageNo, pageSize));
+        // eventTime is stored as a string; sorting by the raw string breaks around month/year boundaries.
+        // Use timestamp conversion ordering so newest events actually appear first (e.g. after 31 Dec 2025).
+        List<Event> allEvents = eventRepository.findByDeletedIsFalseOrderByEventTimeAsTimestampDesc(PageRequest.of(pageNo, pageSize));
         return allEvents;
     }
 
