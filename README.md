@@ -55,6 +55,31 @@ mvn compile
 
 ---
 
+## Running Tests
+
+Tests use an in-memory **H2 database** (no external DB needed). The `test` Spring profile is
+activated automatically.
+
+**Run all tests:**
+```bash
+./mvnw test
+```
+
+**Run a single test class:**
+```bash
+./mvnw test -Dtest=ClassName
+```
+
+Examples:
+```bash
+./mvnw test -Dtest=CredentialServiceTest
+./mvnw test -Dtest=ControllerDeleteIntegrationTest
+```
+
+Test sources are in `src/test/java/com/vmsac/vmsacserver/`.
+
+---
+
 ## Running in Development (H2 in-memory DB)
 
 No external database needed — uses an embedded H2 database.
