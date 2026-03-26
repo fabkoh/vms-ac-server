@@ -19,6 +19,7 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.File;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -95,6 +96,30 @@ public class NotificationService {
         emailUtil.SSLEmail(recipentEmail, emailSubject, text,
                 emailSettings);
 
+    }
+
+    public void sendSMTPTLSEmailWithAttachment(
+            String text,
+            String emailSubject,
+            String recipentEmail,
+            EmailSettings emailSettings,
+            File attachment,
+            String attachmentFileName)
+            throws Exception {
+        emailUtil.TLSEmailWithAttachment(
+                recipentEmail, emailSubject, text, emailSettings, attachment, attachmentFileName);
+    }
+
+    public void sendSMTPSSLEmailWithAttachment(
+            String text,
+            String emailSubject,
+            String recipentEmail,
+            EmailSettings emailSettings,
+            File attachment,
+            String attachmentFileName)
+            throws Exception {
+        emailUtil.SSLEmailWithAttachment(
+                recipentEmail, emailSubject, text, emailSettings, attachment, attachmentFileName);
     }
 
     public Boolean changeEmailEnablement() {
