@@ -21,8 +21,9 @@ public class ScheduledVisit {
     @Column(name="scheduledvisitid")
     private Long scheduledVisitId;
 
-    @Column(name="idnumber")
-    private String idNumber;
+    /** Visitor document id (FK to {@link Visitor#idNumber}); column {@code visitoridnumber}. */
+    @Column(name = "visitoridnumber")
+    private String visitorIdNumber;
 
     @Column(name="startdateofvisit")
     private LocalDate startDateOfVisit;
@@ -43,7 +44,7 @@ public class ScheduledVisit {
     private Long raisedBy;
 
     @ManyToOne()
-    @JoinColumn(name="idnumber", insertable=false, updatable=false)
+    @JoinColumn(name = "visitoridnumber", referencedColumnName = "idnumber", insertable = false, updatable = false)
     @JsonBackReference
     private Visitor visitor;
 }
