@@ -1,16 +1,11 @@
 package com.vmsac.vmsacserver.controller;
 
 import com.google.zxing.WriterException;
-import com.vmsac.vmsacserver.model.Visitor;
 import com.vmsac.vmsacserver.model.ScheduledVisit;
 import com.vmsac.vmsacserver.repository.ScheduledVisitRepository;
-import com.vmsac.vmsacserver.repository.VisitorRepository;
-import com.vmsac.vmsacserver.service.QrCodeGenerator;
 import com.vmsac.vmsacserver.service.RetrieveQrId;
-import com.vmsac.vmsacserver.service.SendQrCodeLink;
-import com.vmsac.vmsacserver.util.HashQRId;
+import com.vmsac.vmsacserver.service.ScheduledVisitRegistrationService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -38,19 +33,10 @@ public class ScheduledVisitController{
     private ScheduledVisitRepository scheduledVisitRepository;
 
     @Autowired
-    private VisitorRepository visitorRepository;
-
-    @Autowired
     private RetrieveQrId retrieveQrId;
 
     @Autowired
-    private QrCodeGenerator qrCodeGenerator;
-
-    @Autowired
-    private SendQrCodeLink sendQrCodeLink;
-
-    @Autowired
-    private HashQRId hashQRId;
+    private ScheduledVisitRegistrationService scheduledVisitRegistrationService;
 
 //    @Autowired
 //    @Value("${dev.qrcode.image.path}")
@@ -109,15 +95,20 @@ public class ScheduledVisitController{
 
     }
 
+    /**
+     * Registers a scheduled visit, optional Pi door pass: when {@code accessGroupId} is set, creates a
+     * {@link com.vmsac.vmsacserver.model.Person} + Card credential with {@code credUid} = {@link ScheduledVisit#getScheduledVisitId()} as string.
+     * Sync {@code credOccur} to controllers after this so the Pi can resolve the credential.
+     *
+     * @param accessGroupId optional; when present, must reference an existing AccessGroup for the visitor pass
+     */
     @PostMapping(path = "/register-scheduled-visit", consumes = "application/json")
-    private ResponseEntity<ScheduledVisit> createScheduledVisit(@Valid @RequestBody ScheduledVisit scheduledVisit) throws URISyntaxException, IOException, WriterException {
-        ScheduledVisit registeredVisit = scheduledVisitRepository.save(scheduledVisit);
-        String qrCodeId = Long.toString(registeredVisit.getScheduledVisitId());
-        registeredVisit.setQrCodeId(hashQRId.getMd5(qrCodeId));
-        scheduledVisitRepository.save(registeredVisit);
-        qrCodeGenerator.setUpQrParams(registeredVisit);
-        Visitor registeredVisitor = visitorRepository.findByIdNumber(registeredVisit.getIdNumber());
-        sendQrCodeLink.sendQrCodeLink(registeredVisit, registeredVisitor);
+    private ResponseEntity<ScheduledVisit> createScheduledVisit(
+            @Valid @RequestBody ScheduledVisit scheduledVisit,
+            @RequestParam(required = false) Long accessGroupId
+
+    ) throws URISyntaxException, IOException, WriterException, Exception {
+        ScheduledVisit registeredVisit = scheduledVisitRegistrationService.register(scheduledVisit, accessGroupId);
         return ResponseEntity.created(new URI("/api/register-scheduled-visit" + registeredVisit.getScheduledVisitId())).body(registeredVisit);
     }
 
