@@ -1,9 +1,6 @@
 package com.vmsac.vmsacserver.service;
 
-import com.fasterxml.jackson.databind.util.JSONPObject;
 import com.vmsac.vmsacserver.model.ScheduledVisit;
-import com.vmsac.vmsacserver.repository.ScheduledVisitRepository;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.awt.Color;
@@ -21,7 +18,6 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @NoArgsConstructor
@@ -29,9 +25,15 @@ import org.springframework.stereotype.Service;
 @Service
 public class QrCodeGenerator {
 
+    /**
+     * Writes the QR image file under {@code ./qrCodes/{qrCodeId}.jpg} where {@code qrCodeId} is the stored
+     * opaque token (md5). The <strong>bitmap payload</strong> is {@code scheduledVisitId} as decimal digits so
+     * door QR readers report the same string as {@code credUid} on the provisioned Card credential.
+     */
     public void setUpQrParams(ScheduledVisit scheduledVisit) throws IOException, WriterException {
-        String qrCodeText = scheduledVisit.getQrCodeId();
-        String filePath = "./qrCodes/" + qrCodeText + ".jpg";
+        String fileKey = scheduledVisit.getQrCodeId();
+        String qrCodeText = String.valueOf(scheduledVisit.getScheduledVisitId());
+        String filePath = "./qrCodes/" + fileKey + ".jpg";
         int size = 200;
         String fileType = "jpeg";
         File qrFile = new File(filePath);
