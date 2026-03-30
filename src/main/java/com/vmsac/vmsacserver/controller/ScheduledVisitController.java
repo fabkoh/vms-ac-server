@@ -2,6 +2,7 @@ package com.vmsac.vmsacserver.controller;
 
 import com.google.zxing.WriterException;
 import com.vmsac.vmsacserver.model.ScheduledVisit;
+import com.vmsac.vmsacserver.model.dto.ScheduledVisitResponseDto;
 import com.vmsac.vmsacserver.repository.ScheduledVisitRepository;
 import com.vmsac.vmsacserver.service.QrCodeGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.core.io.Resource;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 // TODO: restrict CORS origins
 @CrossOrigin(origins = "*")
@@ -29,8 +31,10 @@ public class ScheduledVisitController {
     private QrCodeGenerator qrCodeGenerator;
 
     @GetMapping("/scheduled-visits")
-    List<ScheduledVisit> getScheduledVisits() {
-        return scheduledVisitRepository.findAll();
+    List<ScheduledVisitResponseDto> getScheduledVisits() {
+        return scheduledVisitRepository.findAll().stream()
+                .map(ScheduledVisitResponseDto::from)
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/visit-by-qrcodeid/{qrid}")
