@@ -1,7 +1,5 @@
 package com.vmsac.vmsacserver.model.credential;
 
-import com.vmsac.vmsacserver.model.Person;
-import com.vmsac.vmsacserver.model.credentialtype.CredentialType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

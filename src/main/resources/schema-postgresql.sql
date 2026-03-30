@@ -80,7 +80,6 @@ CREATE TABLE IF NOT EXISTS Credentials (
   isPrem BOOLEAN NOT NULL,
   credTypeId INT REFERENCES CredentialType (credTypeId),
   personId INT REFERENCES Persons (personId),
-  scheduledVisitId INT References ScheduledVisit (scheduledVisitId),
   deleted BOOLEAN NOT NULL,
   PRIMARY KEY (credId)
 );
