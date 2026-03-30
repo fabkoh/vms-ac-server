@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Date;
 import java.util.List;
 
 @CrossOrigin(origins = "*")
@@ -29,23 +28,20 @@ public class VisitorController {
     }
 
     @GetMapping(path = "/visits-by/{idnumber}")
-    private ResponseEntity<List> getScheduledVisitByOther(
-            @PathVariable("idnumber") String idNumber){
+    private ResponseEntity<List<ScheduledVisit>> getScheduledVisitByOther(
+            @PathVariable("idnumber") String idNumber) {
 
-        Visitor scheduledVisits;
-        scheduledVisits = visitorRepository.findByIdNumber(idNumber);
-        List<ScheduledVisit> visitsByVisitor;
-        visitsByVisitor = scheduledVisits.getVisitorScheduledVisits();
-
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(visitsByVisitor);
+        return visitorRepository.findByVisitorUidWithScheduledVisits(idNumber)
+                .map(v -> ResponseEntity
+                        .status(HttpStatus.OK)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(v.getVisitorScheduledVisits()))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
     @PostMapping(path = "/register-new-visitor", consumes = "application/json")
     ResponseEntity<Visitor> createVisitor(@Valid @RequestBody Visitor newVisitor) throws URISyntaxException {
         Visitor visitor = visitorRepository.save(newVisitor);
-        return ResponseEntity.created(new URI("/api/register-new-visitor" + visitor.getIdNumber())).body(visitor);
+        return ResponseEntity.created(new URI("/api/register-new-visitor/" + visitor.getVisitorId())).body(visitor);
     }
 }
