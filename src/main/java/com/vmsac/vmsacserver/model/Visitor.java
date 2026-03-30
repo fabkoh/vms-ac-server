@@ -51,5 +51,10 @@ public class Visitor {
 
     @OneToMany(mappedBy = "visitor", fetch = FetchType.LAZY)
     @JsonIgnore
-    private List<ScheduledVisit> visitorScheduledVisits;
+    private List<ScheduledVisit> scheduledVisits;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "personid")
+    @JsonIgnore
+    private Person person;
 }
