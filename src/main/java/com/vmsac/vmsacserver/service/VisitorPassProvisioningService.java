@@ -9,6 +9,7 @@ import com.vmsac.vmsacserver.model.credentialtype.CredentialType;
 import com.vmsac.vmsacserver.repository.AccessGroupRepository;
 import com.vmsac.vmsacserver.repository.CredTypeRepository;
 import com.vmsac.vmsacserver.repository.PersonRepository;
+import com.vmsac.vmsacserver.repository.VisitorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,6 +37,9 @@ public class VisitorPassProvisioningService {
 
     @Autowired
     private CredentialService credentialService;
+
+    @Autowired
+    private VisitorRepository visitorRepository;
 
     public void provisionVisitorPass(ScheduledVisit scheduledVisit, Visitor visitor, Long accessGroupId) throws Exception {
         if (accessGroupId == null) {
@@ -65,8 +69,10 @@ public class VisitorPassProvisioningService {
                 .deleted(false)
                 .accessGroup(accessGroup)
                 .build();
- 
+
         person = personRepository.save(person);
+        visitor.setPerson(person);
+        visitorRepository.save(visitor);
 
         String credUid = String.valueOf(scheduledVisit.getScheduledVisitId());
         LocalDateTime credTTL = resolveCredTtl(scheduledVisit);
@@ -83,11 +89,8 @@ public class VisitorPassProvisioningService {
     }
 
     private static LocalDateTime resolveCredTtl(ScheduledVisit scheduledVisit) {
-        if (scheduledVisit.getEndDateOfVisit() != null) {
-            return scheduledVisit.getEndDateOfVisit().atTime(LocalTime.of(23, 59, 59));
-        }
-        if (scheduledVisit.getStartDateOfVisit() != null) {
-            return scheduledVisit.getStartDateOfVisit().atTime(LocalTime.of(23, 59, 59));
+        if (scheduledVisit.getVisitDate() != null) {
+            return scheduledVisit.getVisitDate().atTime(LocalTime.of(23, 59, 59));
         }
         return LocalDateTime.now().plusDays(1);
     }

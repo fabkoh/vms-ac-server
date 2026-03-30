@@ -2,8 +2,9 @@ package com.vmsac.vmsacserver.service;
 
 import com.vmsac.vmsacserver.model.AccessGroup;
 import com.vmsac.vmsacserver.model.ScheduledVisit;
+
 import com.vmsac.vmsacserver.model.Visitor;
-import com.vmsac.vmsacserver.model.dto.VisitorRegistrationDto;
+import com.vmsac.vmsacserver.model.dto.ScheduleVisitDto;
 import com.vmsac.vmsacserver.repository.AccessGroupRepository;
 import com.vmsac.vmsacserver.repository.ScheduledVisitRepository;
 import com.vmsac.vmsacserver.repository.VisitorRepository;
@@ -39,33 +40,36 @@ public class VisitorService {
         return visitorRepository.findByVisitorUid(visitorUid);
     }
 
-    public void registerVisit(VisitorRegistrationDto dto) throws Exception {
-        Visitor incoming = dto.getVisitor();
+    public Visitor registerVisitor(Visitor visitor) {
+        return visitorRepository.findByVisitorUid(visitor.getVisitorUid())
+                .orElseGet(() -> visitorRepository.save(visitor));
+    }
 
-        Visitor savedVisitor = visitorRepository
-                .findByVisitorUid(incoming.getVisitorUid())
-                .orElseGet(() -> visitorRepository.save(incoming));
+    public void scheduleVisit(ScheduleVisitDto dto) throws Exception {
+        Visitor visitor = visitorRepository.findByVisitorUid(dto.getVisitorUid())
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Visitor not found for UID: " + dto.getVisitorUid()));
 
         AccessGroup visitorGroup = accessGroupRepository
                 .findByAccessGroupNameAndDeleted(VISITOR_ACCESS_GROUP, false)
-                .orElseGet(() -> accessGroupRepository.save(AccessGroup.builder()
-                        .accessGroupName(VISITOR_ACCESS_GROUP)
-                        .accessGroupDesc("Visitors who self-registered for access")
-                        .deleted(false)
-                        .isActive(true)
-                        .build()));
+                .orElseThrow(() -> new IllegalStateException("Visitor Access Group not found — ensure it is seeded in data.sql"));
 
         ScheduledVisit visit = new ScheduledVisit();
-        visit.setVisitor(savedVisitor);
+        visit.setVisitor(visitor);
         visit.setQrCodeId(UUID.randomUUID().toString());
-        visit.setStartDateOfVisit(dto.getStartDateOfVisit());
-        visit.setEndDateOfVisit(dto.getEndDateOfVisit());
+        visit.setVisitDate(dto.getVisitDate());
         visit.setPurpose(dto.getPurpose());
         visit.setValid(true);
         visit.setOneTimeUse(false);
         ScheduledVisit savedVisit = scheduledVisitRepository.save(visit);
 
-        visitorPassProvisioningService.provisionVisitorPass(savedVisit, savedVisitor, visitorGroup.getAccessGroupId());
-        sendQrCodeLink.sendQrCodeLink(savedVisit, savedVisitor);
+        visitorPassProvisioningService.provisionVisitorPass(savedVisit, visitor, visitorGroup.getAccessGroupId());
+
+        try {
+            sendQrCodeLink.sendQrCodeLink(savedVisit, visitor);
+        } catch (Exception e) {
+            // Email failure should not roll back a valid visit registration
+            System.err.println("Failed to send QR code email: " + e.getMessage());
+        }
     }
 }

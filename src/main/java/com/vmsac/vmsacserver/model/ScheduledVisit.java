@@ -1,50 +1,45 @@
 package com.vmsac.vmsacserver.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDate;
-import java.util.Date;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @Data
-@Table(name="scheduledvisit")
+@Table(name = "scheduledvisit")
 public class ScheduledVisit {
 
     @Id
-    @GeneratedValue (strategy = GenerationType.IDENTITY)
-    @Column(name="scheduledvisitid")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "scheduledvisitid")
     private Long scheduledVisitId;
 
-    /** Visitor document id (FK to {@link Visitor#idNumber}); column {@code visitoridnumber}. */
-    @Column(name = "visitoridnumber")
-    private String visitorIdNumber;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "visitorid")
+    @JsonIgnore
+    private Visitor visitor;
 
-    @Column(name="startdateofvisit")
-    private LocalDate startDateOfVisit;
+    @Column(name = "purpose")
+    private String purpose;
 
-    @Column(name="enddateofvisit")
-    private LocalDate endDateOfVisit;
+    @Column(name = "visitdate")
+    private LocalDate visitDate;
 
-    @Column(name="qrcodeid")
+    @Column(name = "qrcodeid")
     private String qrCodeId;
 
-    @Column(name="valid")
+    @Column(name = "valid")
     private boolean valid;
 
-    @Column(name="onetimeuse")
+    @Column(name = "onetimeuse")
     private boolean oneTimeUse;
 
-    @Column(name="raisedby")
+    @Column(name = "raisedby")
     private Long raisedBy;
-
-    @ManyToOne()
-    @JoinColumn(name = "visitoridnumber", referencedColumnName = "idnumber", insertable = false, updatable = false)
-    @JsonBackReference
-    private Visitor visitor;
 }

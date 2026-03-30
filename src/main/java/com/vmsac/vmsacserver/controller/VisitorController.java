@@ -2,7 +2,7 @@ package com.vmsac.vmsacserver.controller;
 
 import com.vmsac.vmsacserver.model.ScheduledVisit;
 import com.vmsac.vmsacserver.model.Visitor;
-import com.vmsac.vmsacserver.model.dto.VisitorRegistrationDto;
+import com.vmsac.vmsacserver.model.dto.ScheduleVisitDto;
 import com.vmsac.vmsacserver.repository.VisitorRepository;
 import com.vmsac.vmsacserver.service.VisitorService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,8 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
 
@@ -45,13 +43,7 @@ public class VisitorController {
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
-    @PostMapping(path = "/register-new-visitor", consumes = "application/json")
-    ResponseEntity<Visitor> createVisitor(@Valid @RequestBody Visitor newVisitor) throws URISyntaxException {
-        Visitor visitor = visitorRepository.save(newVisitor);
-        return ResponseEntity.created(new URI("/api/register-new-visitor/" + visitor.getVisitorId())).body(visitor);
-    }
-
-    // Permitted without auth — see WebSecurityConfig
+    // Step 1a — Permitted without auth, see WebSecurityConfig
     @GetMapping("/visitor/check")
     ResponseEntity<Visitor> checkVisitor(@RequestParam String visitorUid) {
         return visitorService.findByVisitorUid(visitorUid)
@@ -59,16 +51,25 @@ public class VisitorController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // Permitted without auth — see WebSecurityConfig
+    // Step 1b — Permitted without auth, see WebSecurityConfig
     @PostMapping("/visitor/register")
-    ResponseEntity<?> registerVisitor(@Valid @RequestBody VisitorRegistrationDto dto) {
+    ResponseEntity<Visitor> registerVisitor(@Valid @RequestBody Visitor visitor) {
+        return ResponseEntity.ok(visitorService.registerVisitor(visitor));
+    }
+
+    // Step 2 — Permitted without auth, see WebSecurityConfig
+    @PostMapping("/visitor/schedule")
+    ResponseEntity<?> scheduleVisit(@Valid @RequestBody ScheduleVisitDto dto) {
         try {
-            visitorService.registerVisit(dto);
+            visitorService.scheduleVisit(dto);
             return ResponseEntity.ok(Collections.singletonMap(
-                    "message", "Registration successful. QR code sent to email."));
-        } catch (Exception e) {
+                    "message", "Visit scheduled. QR code sent to email."));
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    Collections.singletonMap("message", e.getMessage() != null ? e.getMessage() : "Registration failed"));
+                    Collections.singletonMap("message", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    Collections.singletonMap("message", "Scheduling failed"));
         }
     }
 }
