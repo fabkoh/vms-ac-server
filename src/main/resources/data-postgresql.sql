@@ -3,6 +3,8 @@ INSERT INTO credentialType VALUES ('1','Card','RFID Card',false) ON CONFLICT DO 
 INSERT INTO credentialType VALUES ('2','Face','Face Recognition',false)ON CONFLICT DO NOTHING;
 INSERT INTO credentialType VALUES ('3','Fingerprint','Fingerprint scanner',false)ON CONFLICT DO NOTHING;
 INSERT INTO credentialType VALUES ('4','Pin','Digit Pin',false)ON CONFLICT DO NOTHING;
+INSERT INTO credentialtype VALUES (5, 'QR', 'QR visitor self-registration', false) ON CONFLICT DO NOTHING;
+
 
 INSERT INTO AuthMethod VALUES ('1','Card','AND',null,false) ON CONFLICT DO NOTHING;
 INSERT INTO AuthMethod VALUES ('2','Face','AND',null,false) ON CONFLICT DO NOTHING;
