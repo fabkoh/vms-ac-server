@@ -8,11 +8,8 @@ import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.List;
 
 @NoArgsConstructor
@@ -23,25 +20,19 @@ public class RetrieveQrId {
     @Autowired
     private VisitorRepository visitorRepository;
 
-    public String getQrIdFromOther(String idNumber, LocalDate startDateOfVisit){
-
-        String qrCodeId;
-        Visitor visitorScheduledVisits;
-        List<ScheduledVisit> visitsByVisitor;
-
+    public String getQrIdFromOther(String idNumber, LocalDate startDateOfVisit) {
         DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-        visitorScheduledVisits = visitorRepository.findByIdNumber(idNumber);
-        visitsByVisitor = visitorScheduledVisits.getVisitorScheduledVisits();
-        System.out.println("Date retrieved after conversion:" + startDateOfVisit.format(dateFormat));
-
-        for (ScheduledVisit scheduledVisit : visitsByVisitor){
-            System.out.println("Date in for loop:" + scheduledVisit.getStartDateOfVisit());
-            System.out.println("Date in for loop after conversion:" + scheduledVisit.getStartDateOfVisit().format(dateFormat));
-            System.out.println("Date in for loop variable:" + startDateOfVisit);
-            System.out.println("Date in for loop variable after conversion:" + startDateOfVisit.format(dateFormat));
-            LocalDate tempDate = scheduledVisit.getStartDateOfVisit();
-            if(scheduledVisit.getStartDateOfVisit().format(dateFormat).equals(startDateOfVisit.format(dateFormat))){
+        Visitor visitor = visitorRepository.findByVisitorUid(idNumber).orElse(null);
+        if (visitor == null) {
+            return null;
+        }
+        List<ScheduledVisit> scheduledVisits = visitor.getScheduledVisits();
+        if (scheduledVisits == null) {
+            return null;
+        }
+        for (ScheduledVisit scheduledVisit : scheduledVisits) {
+            if (scheduledVisit.getVisitDate().format(dateFormat).equals(startDateOfVisit.format(dateFormat))) {
                 return scheduledVisit.getQrCodeId();
             }
         }

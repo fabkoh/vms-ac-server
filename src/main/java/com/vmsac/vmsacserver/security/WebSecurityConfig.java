@@ -58,6 +58,7 @@ public class WebSecurityConfig {
                 .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .authorizeRequests().antMatchers("/api/auth/**").permitAll()
+                .antMatchers("/api/visitor/check", "/api/visitor/register", "/api/visitor/schedule").permitAll()
                 .antMatchers("/api/test/**").permitAll()
 //                .antMatchers("/api/events/eventsSMS").permitAll()
 //                .antMatchers("/api/events/eventsSMTP").permitAll()
