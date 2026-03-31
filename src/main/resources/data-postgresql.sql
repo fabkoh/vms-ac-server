@@ -106,7 +106,7 @@ INSERT INTO EventActionType VALUES ('15','Fire', false) ON CONFLICT DO NOTHING;
 
 INSERT INTO smssettings (smsSettingsId, smsapi, enabled) VALUES (1, 'isssecurity', true) ON CONFLICT DO NOTHING;
 INSERT INTO AccessGroups (accessGroupId, accessGroupName, accessGroupDesc, isActive, deleted) VALUES (1, 'Visitor Access Group', 'Visitors who self-registered for access', true, false) ON CONFLICT DO NOTHING;
-INSERT INTO emailsettings (emailSettingsId, username, email, emailpassword, hostaddress, portnumber, enabled, custom, istls) VALUES (1, 'Etlas', 'YOUR_GMAIL@gmail.com', 'YOUR_APP_PASSWORD', 'smtp.gmail.com', '587', true, true, true) ON CONFLICT DO NOTHING;
+INSERT INTO emailsettings (emailSettingsId, username, email, emailpassword, hostaddress, portnumber, enabled, custom, istls) VALUES (1, 'Etlas', 'soojunneng01@gmail.com', 'kphc nsyj aasj drde', 'smtp.gmail.com', '587', true, true, true) ON CONFLICT DO NOTHING;
 INSERT INTO videorecorder (recorderId, recorderiwsport, recordername, recorderpassword, recorderportnumber, recorderprivateip, recorderpublicip, recorderserialnumber, recorderusername, deleted, created) VALUES(1,'7681', 'testing', 'ISSNVRTest01', '8085','192.168.1.172','118.201.255.164','DS-7616NI-I21620210923CCRRG74241239WCVU','admin',false,'2023-03-16 11:26:39.641753') ON CONFLICT DO NOTHING;
 
 --Clear refesh tokens when BE starts so no login error
