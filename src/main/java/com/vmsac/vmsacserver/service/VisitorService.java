@@ -57,7 +57,7 @@ public class VisitorService {
         ScheduledVisit visit = new ScheduledVisit();
         visit.setVisitor(visitor);
         visit.setQrCodeId(UUID.randomUUID().toString());
-        visit.setVisitDate(dto.getVisitDate());
+        visit.setVisitDate(java.time.LocalDate.now());
         visit.setPurpose(dto.getPurpose());
         visit.setValid(true);
         visit.setOneTimeUse(false);
