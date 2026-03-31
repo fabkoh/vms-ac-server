@@ -9,7 +9,8 @@ CREATE TABLE IF NOT EXISTS Visitor (
     lastName      VARCHAR(255) NOT NULL,
     emailAdd      VARCHAR(255) NOT NULL,
     mobileNumber  VARCHAR(255),
-    company       VARCHAR(255)
+    company       VARCHAR(255),
+    personId      BIGINT
 );
 
 CREATE TABLE IF NOT EXISTS AccessGroups (

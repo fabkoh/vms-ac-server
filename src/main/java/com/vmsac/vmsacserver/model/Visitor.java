@@ -53,8 +53,8 @@ public class Visitor {
     @JsonIgnore
     private List<ScheduledVisit> scheduledVisits;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "personid")
+    @OneToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "personid", nullable = true)
     @JsonIgnore
     private Person person;
 }
