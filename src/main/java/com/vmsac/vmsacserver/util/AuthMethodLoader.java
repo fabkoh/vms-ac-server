@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-@Profile({"dev", "devpostgres"})
+@Profile({"dev"})
 public class AuthMethodLoader implements CommandLineRunner {
     private final AuthMethodRepository authMethodRepository;
     private final AuthMethodCredentialTypeNtoNRepository authMethodCredentialTypeNtoNRepository;

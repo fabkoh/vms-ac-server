@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
-@Profile({"dev", "devpostgres"})
+@Profile({"dev"})
 //@DependsOn("eventActionTypeLoader")
 @Component
 public class DataLoader implements CommandLineRunner, Ordered {

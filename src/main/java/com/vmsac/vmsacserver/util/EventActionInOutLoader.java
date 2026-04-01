@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 @Component
-@Profile({"dev", "devpostgres"})
+@Profile({"dev"})
 public class EventActionInOutLoader implements CommandLineRunner {
 
     private final EventActionInputTypeRepository inputTypeRepository;

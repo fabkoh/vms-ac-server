@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 
 @Component
-@Profile({"dev", "devpostgres"})
+@Profile({"dev"})
 public class NotificationLoader implements CommandLineRunner {
 
     private final NotificationLogsRepository notificationLogsRepository;
