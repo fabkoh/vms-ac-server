@@ -239,7 +239,7 @@ public class DataLoader implements CommandLineRunner, Ordered {
         );
 
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("uuuuMMdd");
-        String rruleDtstart = "DTSTART:" + dtf.format(LocalDateTime.now()) + "T000000Z\nRRULE:";
+        String rruleDtstart = "DTSTART:" + dtf.format(LocalDateTime.now()) + "T000000\nRRULE:";
 
         AccessGroupSchedule duneMainEntranceDefault = accessGroupScheduleRepository.save(
                 AccessGroupSchedule.builder()
