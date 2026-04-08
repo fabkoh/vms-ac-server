@@ -74,7 +74,7 @@ public class VisitorPassProvisioningService {
         visitor.setPerson(person);
         visitorRepository.save(visitor);
 
-        String credUid = String.valueOf(scheduledVisit.getScheduledVisitId());
+        String credUid = "0" + scheduledVisit.getScheduledVisitId();
         LocalDateTime credTTL = resolveCredTtl(scheduledVisit);
 
         CreateCredentialDto dto = new CreateCredentialDto();
