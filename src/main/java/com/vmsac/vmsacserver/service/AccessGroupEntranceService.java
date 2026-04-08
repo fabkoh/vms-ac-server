@@ -184,9 +184,9 @@ public class AccessGroupEntranceService {
     }
 
     // returns the default string (24 / 7)
-    // format: "DTSTART:{yyyymmdd}T000000\nRRULE:FREQ=DAILY;INTERVAL=1;WKST=MO"
+    // format: "DTSTART:{yyyymmdd}T000000Z\nRRULE:FREQ=DAILY;INTERVAL=1;WKST=MO"
     private String getDefaultRrule() {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("uuuuMMdd");
-        return "DTSTART:" + dtf.format(LocalDateTime.now()) + "T000000\nRRULE:FREQ=DAILY;INTERVAL=1;WKST=MO";
+        return "DTSTART:" + dtf.format(LocalDateTime.now()) + "T000000Z\nRRULE:FREQ=DAILY;INTERVAL=1;WKST=MO";
     }
 }
