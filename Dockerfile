@@ -5,7 +5,7 @@ RUN mvn dependency:go-offline -B
 COPY src ./src
 RUN mvn -B -DskipTests clean package
 
-FROM openjdk:11-jre-slim
+FROM eclipse-temurin:11-jre-jammy
 WORKDIR /app
 COPY --from=build /app/target/vms-ac-backend-0.0.1-SNAPSHOT.jar app.jar
 EXPOSE 8080
