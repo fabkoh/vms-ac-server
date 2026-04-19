@@ -10,7 +10,6 @@ import com.vmsac.vmsacserver.model.credential.Credential;
 import com.vmsac.vmsacserver.model.videorecorder.VideoRecorder;
 import com.vmsac.vmsacserver.repository.*;
 
-import java.time.LocalDate;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.Ordered;
@@ -39,15 +38,13 @@ public class DataLoader implements CommandLineRunner, Ordered {
     private final AuthDeviceRepository authDeviceRepository;
     private final ControllerController controllerController;
     private final VideoRecorderRepository videoRecorderRepository;
-    private final VisitorRepository visitorRepository;
-    private final ScheduledVisitRepository scheduledVisitRepository;
 
     @Override
     public int getOrder() {
         return 2; // Set the desired order value
     }
 
-    public DataLoader(AccessGroupRepository accessGroupRepository, EntranceRepository entranceRepository, EventRepository eventRepository, EventActionTypeRepository eventActionTypeRepository, PersonRepository personRepository, AccessGroupEntranceNtoNRepository accessGroupEntranceRepository, AccessGroupScheduleRepository accessGroupScheduleRepository, CredTypeRepository credTypeRepository, CredentialRepository credentialRepository, EntranceScheduleRepository entranceScheduleRepository, ControllerRepository controllerRepository, AuthDeviceRepository authDeviceRepository, ControllerController controllerController, VideoRecorderRepository videoRecorderRepository, VisitorRepository visitorRepository, ScheduledVisitRepository scheduledVisitRepository) {
+    public DataLoader(AccessGroupRepository accessGroupRepository, EntranceRepository entranceRepository, EventRepository eventRepository, EventActionTypeRepository eventActionTypeRepository, PersonRepository personRepository, AccessGroupEntranceNtoNRepository accessGroupEntranceRepository, AccessGroupScheduleRepository accessGroupScheduleRepository, CredTypeRepository credTypeRepository, CredentialRepository credentialRepository, EntranceScheduleRepository entranceScheduleRepository, ControllerRepository controllerRepository, AuthDeviceRepository authDeviceRepository, ControllerController controllerController, VideoRecorderRepository videoRecorderRepository) {
 
         this.accessGroupRepository = accessGroupRepository;
         this.entranceRepository = entranceRepository;
@@ -65,8 +62,6 @@ public class DataLoader implements CommandLineRunner, Ordered {
         this.authDeviceRepository = authDeviceRepository;
         this.controllerController = controllerController;
         this.videoRecorderRepository = videoRecorderRepository;
-        this.visitorRepository = visitorRepository;
-        this.scheduledVisitRepository = scheduledVisitRepository;
     }
 
     @Override
@@ -495,37 +490,5 @@ public class DataLoader implements CommandLineRunner, Ordered {
                 "203.0.113.11", "192.168.1.201",
                 8000, 80, "admin", "admin123", Boolean.FALSE));
 
-        // ── Visitors ─────────────────────────────────────────────────────────
-        Visitor aliceVisitor = visitorRepository.save(new Visitor(
-                null, "V001", "Alice", "Wong",
-                "alice.wong@example.com", "+65 9111 2222", "Acme Corp",
-                null, null));
-
-        Visitor bobVisitor = visitorRepository.save(new Visitor(
-                null, "V002", "Bob", "Tan",
-                "bob.tan@example.com", "+65 9333 4444", "GlobalTech Pte Ltd",
-                null, null));
-
-        Visitor carolVisitor = visitorRepository.save(new Visitor(
-                null, "V003", "Carol", "Lim",
-                "carol.lim@example.com", "+65 9555 6666", "NovaSystems",
-                null, null));
-
-        // ── Scheduled Visits ──────────────────────────────────────────────────
-        scheduledVisitRepository.save(new ScheduledVisit(
-                null, aliceVisitor, "Product demo meeting",
-                LocalDate.now(), "QR-V001-001", true, false, 1L));
-
-        scheduledVisitRepository.save(new ScheduledVisit(
-                null, bobVisitor, "IT equipment delivery",
-                LocalDate.now(), "QR-V002-001", true, true, 1L));
-
-        scheduledVisitRepository.save(new ScheduledVisit(
-                null, carolVisitor, "Contract signing",
-                LocalDate.now().plusDays(1), "QR-V003-001", true, false, 1L));
-
-        scheduledVisitRepository.save(new ScheduledVisit(
-                null, aliceVisitor, "Follow-up meeting",
-                LocalDate.now().plusDays(3), "QR-V001-002", true, false, 1L));
     }
 }
