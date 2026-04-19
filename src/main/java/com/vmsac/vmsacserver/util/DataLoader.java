@@ -7,7 +7,10 @@ import com.vmsac.vmsacserver.model.accessgroupschedule.AccessGroupSchedule;
 import com.vmsac.vmsacserver.model.credentialtype.entranceschedule.EntranceSchedule;
 import com.vmsac.vmsacserver.model.credentialtype.CredentialType;
 import com.vmsac.vmsacserver.model.credential.Credential;
+import com.vmsac.vmsacserver.model.videorecorder.VideoRecorder;
 import com.vmsac.vmsacserver.repository.*;
+
+import java.time.LocalDate;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.Ordered;
@@ -18,7 +21,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
-@Profile({"dev"})
+@Profile({"dev", "demo"})
 //@DependsOn("eventActionTypeLoader")
 @Component
 public class DataLoader implements CommandLineRunner, Ordered {
@@ -35,13 +38,16 @@ public class DataLoader implements CommandLineRunner, Ordered {
     private final ControllerRepository controllerRepository;
     private final AuthDeviceRepository authDeviceRepository;
     private final ControllerController controllerController;
+    private final VideoRecorderRepository videoRecorderRepository;
+    private final VisitorRepository visitorRepository;
+    private final ScheduledVisitRepository scheduledVisitRepository;
 
     @Override
     public int getOrder() {
         return 2; // Set the desired order value
     }
 
-    public DataLoader(AccessGroupRepository accessGroupRepository, EntranceRepository entranceRepository, EventRepository eventRepository, EventActionTypeRepository eventActionTypeRepository, PersonRepository personRepository, AccessGroupEntranceNtoNRepository accessGroupEntranceRepository, AccessGroupScheduleRepository accessGroupScheduleRepository, CredTypeRepository credTypeRepository, CredentialRepository credentialRepository, EntranceScheduleRepository entranceScheduleRepository, ControllerRepository controllerRepository, AuthDeviceRepository authDeviceRepository, ControllerController controllerController) {
+    public DataLoader(AccessGroupRepository accessGroupRepository, EntranceRepository entranceRepository, EventRepository eventRepository, EventActionTypeRepository eventActionTypeRepository, PersonRepository personRepository, AccessGroupEntranceNtoNRepository accessGroupEntranceRepository, AccessGroupScheduleRepository accessGroupScheduleRepository, CredTypeRepository credTypeRepository, CredentialRepository credentialRepository, EntranceScheduleRepository entranceScheduleRepository, ControllerRepository controllerRepository, AuthDeviceRepository authDeviceRepository, ControllerController controllerController, VideoRecorderRepository videoRecorderRepository, VisitorRepository visitorRepository, ScheduledVisitRepository scheduledVisitRepository) {
 
         this.accessGroupRepository = accessGroupRepository;
         this.entranceRepository = entranceRepository;
@@ -58,6 +64,9 @@ public class DataLoader implements CommandLineRunner, Ordered {
         this.controllerRepository = controllerRepository;
         this.authDeviceRepository = authDeviceRepository;
         this.controllerController = controllerController;
+        this.videoRecorderRepository = videoRecorderRepository;
+        this.visitorRepository = visitorRepository;
+        this.scheduledVisitRepository = scheduledVisitRepository;
     }
 
     @Override
@@ -83,35 +92,11 @@ public class DataLoader implements CommandLineRunner, Ordered {
                         .build()
         );
 
-        Optional<EventActionType> eventActionTypeOptional = eventActionTypeRepository.findById(1L);
-        EventActionType eventActionType = eventActionTypeOptional.orElse(null);
-
-
-        System.out.println("type is " + eventActionType);
-        Event event1 = eventRepository.save(
-                Event.builder()
-                        .eventTime("05-01-2023 00:00:00.0")
-                        .direction("2")
-                        .eventActionType(eventActionType)
-                        .deleted(false)
-                        .build()
-        );
-        Event event2 = eventRepository.save(
-                Event.builder()
-                        .eventTime("04-01-2023 00:00:00.0")
-                        .direction("2")
-                        .eventActionType(eventActionType)
-                        .deleted(false)
-                        .build()
-        );
-        Event event3 = eventRepository.save(
-                Event.builder()
-                        .eventTime("03-01-2023 00:00:00.0")
-                        .direction("2")
-                        .eventActionType(eventActionType)
-                        .deleted(false)
-                        .build()
-        );
+        EventActionType typeAuthenticated  = eventActionTypeRepository.findById(1L).orElse(null);
+        EventActionType typeUnauthenticated = eventActionTypeRepository.findById(3L).orElse(null);
+        EventActionType typeDoorOpened     = eventActionTypeRepository.findById(4L).orElse(null);
+        EventActionType typeValidPin       = eventActionTypeRepository.findById(13L).orElse(null);
+        EventActionType typeInvalidPin     = eventActionTypeRepository.findById(14L).orElse(null);
 
 
         AccessGroup emptyGroup = accessGroupRepository.save(
@@ -244,7 +229,7 @@ public class DataLoader implements CommandLineRunner, Ordered {
         AccessGroupSchedule duneMainEntranceDefault = accessGroupScheduleRepository.save(
                 AccessGroupSchedule.builder()
                         .accessGroupScheduleName("Default Schedule")
-                        .rrule(rruleDtstart + "FREQ=WEEKLY;UNTIL=20240905T091600Z;INTERVAL=1;WKST=MO")
+                        .rrule(rruleDtstart + "FREQ=DAILY;INTERVAL=1;WKST=MO")
                         .timeStart("00:00")
                         .timeEnd("23:59")
                         .groupToEntranceId(duneMainEntrance.getGroupToEntranceId())
@@ -392,6 +377,155 @@ public class DataLoader implements CommandLineRunner, Ordered {
                         .build()
         );
 
+        // ── Controllers ──────────────────────────────────────────────────────
+        Controller blockA = controllerRepository.save(
+                Controller.builder()
+                        .controllerName("Block A Controller")
+                        .controllerIPStatic(Boolean.TRUE)
+                        .controllerIP("192.168.1.100")
+                        .pendingIP("192.168.1.100")
+                        .controllerMAC("DC:A6:32:AA:BB:01")
+                        .controllerSerialNo("100000001a2b3c4d")
+                        .lastOnline(LocalDateTime.now())
+                        .lastSync(LocalDateTime.now())
+                        .created(LocalDateTime.now())
+                        .masterController(Boolean.TRUE)
+                        .deleted(Boolean.FALSE)
+                        .build()
+        );
 
+        Controller blockB = controllerRepository.save(
+                Controller.builder()
+                        .controllerName("Block B Controller")
+                        .controllerIPStatic(Boolean.FALSE)
+                        .controllerIP("192.168.1.101")
+                        .pendingIP("192.168.1.101")
+                        .controllerMAC("DC:A6:32:AA:BB:02")
+                        .controllerSerialNo("100000002a2b3c4d")
+                        .lastOnline(LocalDateTime.now().minusHours(2))
+                        .lastSync(LocalDateTime.now().minusHours(2))
+                        .created(LocalDateTime.now())
+                        .masterController(Boolean.FALSE)
+                        .deleted(Boolean.FALSE)
+                        .build()
+        );
+
+        // ── Auth Devices ──────────────────────────────────────────────────────
+        authDeviceRepository.save(
+                AuthDevice.builder()
+                        .authDeviceName("Block A – Main IN Reader")
+                        .authDeviceDirection("E1_IN")
+                        .masterpin(false)
+                        .controller(blockA)
+                        .entrance(mainEntrance)
+                        .lastOnline(LocalDateTime.now())
+                        .build()
+        );
+        authDeviceRepository.save(
+                AuthDevice.builder()
+                        .authDeviceName("Block A – Main OUT Reader")
+                        .authDeviceDirection("E1_OUT")
+                        .masterpin(false)
+                        .controller(blockA)
+                        .entrance(mainEntrance)
+                        .lastOnline(LocalDateTime.now())
+                        .build()
+        );
+        authDeviceRepository.save(
+                AuthDevice.builder()
+                        .authDeviceName("Block B – Side IN Reader")
+                        .authDeviceDirection("E1_IN")
+                        .masterpin(false)
+                        .controller(blockB)
+                        .entrance(sideEntrance)
+                        .lastOnline(LocalDateTime.now().minusHours(2))
+                        .build()
+        );
+
+        // ── Events (log entries with full context) ────────────────────────────
+        eventRepository.save(Event.builder()
+                .eventTime("04-16-2026 08:55:00.0").direction("IN")
+                .eventActionType(typeAuthenticated).person(paulAtreides)
+                .entrance(mainEntrance).accessGroup(dune).controller(blockA)
+                .deleted(false).build());
+        eventRepository.save(Event.builder()
+                .eventTime("04-16-2026 09:10:00.0").direction("IN")
+                .eventActionType(typeValidPin).person(letoAtreides)
+                .entrance(mainEntrance).accessGroup(dune).controller(blockA)
+                .deleted(false).build());
+        eventRepository.save(Event.builder()
+                .eventTime("04-16-2026 09:22:00.0").direction("IN")
+                .eventActionType(typeAuthenticated).person(johnSmith)
+                .entrance(mainEntrance).accessGroup(notDune).controller(blockA)
+                .deleted(false).build());
+        eventRepository.save(Event.builder()
+                .eventTime("04-16-2026 10:05:00.0").direction("IN")
+                .eventActionType(typeUnauthenticated)
+                .entrance(sideEntrance).controller(blockB)
+                .deleted(false).build());
+        eventRepository.save(Event.builder()
+                .eventTime("04-16-2026 12:30:00.0").direction("OUT")
+                .eventActionType(typeAuthenticated).person(paulAtreides)
+                .entrance(mainEntrance).accessGroup(dune).controller(blockA)
+                .deleted(false).build());
+        eventRepository.save(Event.builder()
+                .eventTime("04-16-2026 13:45:00.0").direction("IN")
+                .eventActionType(typeInvalidPin)
+                .entrance(mainEntrance).controller(blockA)
+                .deleted(false).build());
+        eventRepository.save(Event.builder()
+                .eventTime("04-16-2026 14:00:00.0").direction("IN")
+                .eventActionType(typeDoorOpened).person(letoAtreides)
+                .entrance(sideEntrance).accessGroup(dune).controller(blockB)
+                .deleted(false).build());
+        eventRepository.save(Event.builder()
+                .eventTime("04-16-2026 17:30:00.0").direction("OUT")
+                .eventActionType(typeAuthenticated).person(johnSmith)
+                .entrance(mainEntrance).accessGroup(notDune).controller(blockA)
+                .deleted(false).build());
+
+        // ── Video Recorders ───────────────────────────────────────────────────
+        videoRecorderRepository.save(new VideoRecorder(
+                "Lobby NVR", "NVR-SN-001",
+                "203.0.113.10", "192.168.1.200",
+                8000, 80, "admin", "admin123", Boolean.FALSE));
+
+        videoRecorderRepository.save(new VideoRecorder(
+                "Carpark NVR", "NVR-SN-002",
+                "203.0.113.11", "192.168.1.201",
+                8000, 80, "admin", "admin123", Boolean.FALSE));
+
+        // ── Visitors ─────────────────────────────────────────────────────────
+        Visitor aliceVisitor = visitorRepository.save(new Visitor(
+                null, "V001", "Alice", "Wong",
+                "alice.wong@example.com", "+65 9111 2222", "Acme Corp",
+                null, null));
+
+        Visitor bobVisitor = visitorRepository.save(new Visitor(
+                null, "V002", "Bob", "Tan",
+                "bob.tan@example.com", "+65 9333 4444", "GlobalTech Pte Ltd",
+                null, null));
+
+        Visitor carolVisitor = visitorRepository.save(new Visitor(
+                null, "V003", "Carol", "Lim",
+                "carol.lim@example.com", "+65 9555 6666", "NovaSystems",
+                null, null));
+
+        // ── Scheduled Visits ──────────────────────────────────────────────────
+        scheduledVisitRepository.save(new ScheduledVisit(
+                null, aliceVisitor, "Product demo meeting",
+                LocalDate.now(), "QR-V001-001", true, false, 1L));
+
+        scheduledVisitRepository.save(new ScheduledVisit(
+                null, bobVisitor, "IT equipment delivery",
+                LocalDate.now(), "QR-V002-001", true, true, 1L));
+
+        scheduledVisitRepository.save(new ScheduledVisit(
+                null, carolVisitor, "Contract signing",
+                LocalDate.now().plusDays(1), "QR-V003-001", true, false, 1L));
+
+        scheduledVisitRepository.save(new ScheduledVisit(
+                null, aliceVisitor, "Follow-up meeting",
+                LocalDate.now().plusDays(3), "QR-V001-002", true, false, 1L));
     }
 }

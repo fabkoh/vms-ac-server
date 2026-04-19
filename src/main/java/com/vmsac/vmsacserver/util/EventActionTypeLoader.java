@@ -8,7 +8,7 @@ import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
 
 @Component
-@Profile({"dev"})
+@Profile({"dev", "demo"})
 
 public class EventActionTypeLoader implements CommandLineRunner, Ordered {
     private final EventActionTypeRepository eventActionTypeRepository;

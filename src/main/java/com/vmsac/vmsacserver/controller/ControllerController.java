@@ -10,6 +10,7 @@ import com.vmsac.vmsacserver.service.ControllerService;
 import com.vmsac.vmsacserver.service.EntranceService;
 import com.vmsac.vmsacserver.util.UniconUpdater;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -54,6 +55,9 @@ public class ControllerController {
 
     @Autowired
     private GENConfigsRepository genRepo;
+
+    @Value("${demo.mode:false}")
+    private boolean demoMode;
 
     @GetMapping("/controllers")
     public List<Controller> getcontrollers() {
@@ -552,6 +556,12 @@ public class ControllerController {
     @GetMapping("/controllerConnection/{controllerId}")
     public ResponseEntity<?> getControllerConnection(@PathVariable Long controllerId) throws Exception {
 
+        if (demoMode) {
+            return new ResponseEntity<>(
+                ControllerConnection.builder().E1_IN(true).E1_OUT(true).E2_IN(true).E2_OUT(true).build(),
+                HttpStatus.OK);
+        }
+
         Optional<Controller> optionalController = controllerService.findById(controllerId);
 
         if (optionalController.isEmpty()) {
@@ -602,6 +612,9 @@ public class ControllerController {
     @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN') or hasRole('ROLE_TECH_ADMIN')")
     @PostMapping("/uniconUpdater")
     public ResponseEntity<?> testing() {
+        if (demoMode) {
+            return new ResponseEntity<>(Map.of(), HttpStatus.OK);
+        }
         Map<String, String> response = uniconUpdater.updateUnicons();
         System.out.println(response);
         if (response.isEmpty()) {
